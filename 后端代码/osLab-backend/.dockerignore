@@ -1,0 +1,16 @@
+.git
+.github
+.idea
+.DS_Store
+*.iml
+*.log
+target/
+students.xlsx
+doc/
+img/
+sql/
+.env
+.env.*
+*.pem
+*.key
+application-*.local.yml

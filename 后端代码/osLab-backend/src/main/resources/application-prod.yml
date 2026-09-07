@@ -1,0 +1,62 @@
+# 线上配置文件
+# @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+# @from <a href="https://yupi.icu">编程导航知识星球</a>
+server:
+  address: ${SERVER_ADDRESS:0.0.0.0}
+  port: ${SERVER_PORT:8121}
+# Do not put credentials or a wildcard origin in this file.
+ai:
+  ark:
+    api-key: ${AI_ARK_API_KEY:}
+    base-url: ${AI_ARK_BASE_URL:https://ark.cn-beijing.volces.com/api/v3}
+    model: ${AI_ARK_MODEL:deepseek-v3-250324}
+cors:
+  # Comma-separated exact origins, for example: https://platform.example.edu.cn
+  # Leave empty to disable browser cross-origin access.
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+codesandbox:
+  # Production must use the isolated internal service, never a demo sandbox.
+  type: ${CODESANDBOX_TYPE:remote}
+  remote:
+    url: ${CODESANDBOX_REMOTE_URL:}
+    auth-secret: ${CODESANDBOX_REMOTE_AUTH_SECRET:}
+    timeout-ms: ${CODESANDBOX_REMOTE_TIMEOUT_MS:30000}
+spring:
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # SPRING_DATASOURCE_* is the deployment contract. MYSQL_* fallbacks retain compatibility
+    # with the current compose service names until it is migrated to SPRING_DATASOURCE_*.
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:oslab_db}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai}
+    username: ${SPRING_DATASOURCE_USERNAME:${MYSQL_USER:root}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${MYSQL_PASSWORD:}}
+  # Redis 配置
+  redis:
+    database: ${SPRING_REDIS_DATABASE:${REDIS_DATABASE:1}}
+    host: ${SPRING_REDIS_HOST:${REDIS_HOST:redis}}
+    port: ${SPRING_REDIS_PORT:${REDIS_PORT:6379}}
+    timeout: ${SPRING_REDIS_TIMEOUT:5s}
+    password: ${SPRING_REDIS_PASSWORD:${REDIS_PASSWORD:}}
+  # Elasticsearch 配置
+  elasticsearch:
+    # The post search and sync services require Elasticsearch. Compose must provide this service.
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://elasticsearch:9200}
+    username: ${SPRING_ELASTICSEARCH_USERNAME:}
+    password: ${SPRING_ELASTICSEARCH_PASSWORD:}
+  neo4j:
+    uri: ${SPRING_NEO4J_URI:${NEO4J_URI:bolt://neo4j:7687}}
+    authentication:
+      username: ${SPRING_NEO4J_AUTHENTICATION_USERNAME:${NEO4J_USER:neo4j}}
+      password: ${SPRING_NEO4J_AUTHENTICATION_PASSWORD:${NEO4J_PASSWORD:}}
+mybatis-plus:
+  configuration:
+    # 生产环境关闭日志
+    log-impl: ''
+# 接口文档配置
+knife4j:
+  # Keep API documentation closed by default in the production profile.
+  enable: ${KNIFE4J_ENABLE:false}
+  basic:
+    enable: ${KNIFE4J_BASIC_ENABLE:false}
+    username: ${KNIFE4J_BASIC_USERNAME:}
+    password: ${KNIFE4J_BASIC_PASSWORD:}

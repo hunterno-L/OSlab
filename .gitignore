@@ -1,0 +1,32 @@
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.idea/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+deploy/.env
+
+# Dependencies and generated build output
+**/node_modules/
+**/dist/
+**/target/
+**/build/
+**/__pycache__/
+*.py[cod]
+
+# Local databases, downloads, and test/runtime artifacts
+tmp/
+
+# Logs and local reports
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Generated local IDE/tool metadata
+.github/
+
