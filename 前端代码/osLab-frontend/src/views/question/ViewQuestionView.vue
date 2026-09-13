@@ -55,7 +55,7 @@
         </a-tabs>
       </a-col>
       <a-col :md="12" :xs="24">
-        <!--        <a-form :model="form" layout="inline">
+        <a-form :model="form" layout="inline">
           <a-form-item
             field="language"
             label="编程语言"
@@ -66,13 +66,13 @@
               :style="{ width: '320px' }"
               placeholder="选择编程语言"
             >
-              <a-option>java</a-option>
-              <a-option>cpp</a-option>
-              <a-option>go</a-option>
-              <a-option>html</a-option>
+              <a-option value="c">C</a-option>
+              <a-option value="cpp">C++</a-option>
+              <a-option value="java">Java</a-option>
+              <a-option value="go">Go</a-option>
             </a-select>
           </a-form-item>
-        </a-form>-->
+        </a-form>
         <a-tabs>
           <a-tab-pane key="operate" title="工作台"></a-tab-pane>
         </a-tabs>

@@ -15,6 +15,8 @@ import com.yupi.springbootinit.model.enums.UserRoleEnum;
 import com.yupi.springbootinit.model.vo.LoginUserVO;
 import com.yupi.springbootinit.model.vo.UserVO;
 import com.yupi.springbootinit.service.UserService;
+import com.yupi.springbootinit.utils.RateLimiter;
+import org.springframework.dao.DuplicateKeyException;
 import com.yupi.springbootinit.utils.SqlUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public static final String SALT = "yupi";
 
     private static final BCryptPasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
+
+    /**
+     * 登录失败锁定：同一账号 15 分钟窗口内最多失败 5 次，超出后拒绝登录尝试。
+     */
+    private final RateLimiter loginFailureLimiter = new RateLimiter(5, 15 * 60 * 1000L);
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -75,9 +82,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             User user = new User();
             user.setUserAccount(userAccount);
             user.setUserPassword(encryptPassword);
-            boolean saveResult = this.save(user);
-            if (!saveResult) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
+            try {
+                boolean saveResult = this.save(user);
+                if (!saveResult) {
+                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
+                }
+            } catch (DuplicateKeyException e) {
+                // 并发窗口内重复注册，由唯一索引兜底
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
             }
             return user.getId();
         }
@@ -94,6 +106,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
+        // 登录失败锁定：同一账号在窗口内失败次数超限后直接拒绝，防止暴力破解
+        String loginLockKey = "login:" + userAccount;
+        if (!loginFailureLimiter.tryAcquire(loginLockKey)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "登录失败次数过多，请稍后再试");
+        }
         // 登录必须兼容历史账号。账号和密码长度仅在注册时约束；否则旧账号会在
         // 密码校验之前被拒绝，永远无法触发 MD5 到 BCrypt 的自动迁移。
         // 2. 按账号查找，再按当前哈希算法校验密码
@@ -107,6 +124,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (UserRoleEnum.BAN.getValue().equals(user.getUserRole())) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "该用户已被封，禁止登录");
         }
+        // 登录成功，清除失败计数
+        loginFailureLimiter.reset(loginLockKey);
         // 旧账号的 MD5 密码在首次成功登录后自动迁移为 BCrypt。
         if (!isBcryptPassword(user.getUserPassword())) {
             User passwordUpgrade = new User();
@@ -294,7 +313,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         queryWrapper.eq(StringUtils.isNotBlank(userRole), "userRole", userRole);
         queryWrapper.like(StringUtils.isNotBlank(userProfile), "userProfile", userProfile);
         queryWrapper.like(StringUtils.isNotBlank(userName), "userName", userName);
-        queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+        queryWrapper.orderBy(SqlUtils.validSortField(sortField), CommonConstant.SORT_ORDER_ASC.equals(sortOrder),
                 sortField);
         return queryWrapper;
     }

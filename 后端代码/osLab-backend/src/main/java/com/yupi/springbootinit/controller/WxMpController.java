@@ -1,5 +1,7 @@
 package com.yupi.springbootinit.controller;
 
+import com.yupi.springbootinit.annotation.AuthCheck;
+import com.yupi.springbootinit.constant.UserConstant;
 import com.yupi.springbootinit.wxmp.WxMpConstant;
 import java.io.IOException;
 import java.util.Arrays;
@@ -50,6 +52,7 @@ public class WxMpController {
         String timestamp = request.getParameter("timestamp");
         if (!wxMpService.checkSignature(timestamp, nonce, signature)) {
             response.getWriter().println("非法请求");
+            return;
         }
         // 加密类型
         String encryptType = StringUtils.isBlank(request.getParameter("encrypt_type")) ? "raw"
@@ -96,6 +99,7 @@ public class WxMpController {
      * @throws WxErrorException
      */
     @GetMapping("/setMenu")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public String setMenu() throws WxErrorException {
         log.info("setMenu");
         WxMenu wxMenu = new WxMenu();

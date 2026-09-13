@@ -104,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watchEffect } from "vue";
+import { onMounted, onUnmounted, ref, watchEffect } from "vue";
 import {
   Page_QuestionSubmitVO_,
   Question,
@@ -157,6 +157,32 @@ const loadData = async () => {
   } else {
     message.error("加载失败，" + res.message);
   }
+  // 刷新后重放当前筛选条件
+  applyFilter();
+};
+
+/**
+ * 自动轮询：当存在等待中/判题中的提交时，每 3 秒刷新一次；全部完成即停止。
+ */
+let pollTimer: number | null = null;
+const hasPending = () =>
+  dataList.value.some((item) => item.status === 0 || item.status === 1);
+const stopPolling = () => {
+  if (pollTimer) {
+    window.clearInterval(pollTimer);
+    pollTimer = null;
+  }
+};
+const startPolling = () => {
+  if (pollTimer) {
+    return;
+  }
+  pollTimer = window.setInterval(async () => {
+    await loadData();
+    if (!hasPending()) {
+      stopPolling();
+    }
+  }, 3000);
 };
 
 /**
@@ -171,7 +197,9 @@ watchEffect(() => {
  */
 onMounted(() => {
   loadData();
+  startPolling();
 });
+onUnmounted(stopPolling);
 
 const columns = [
   // {
@@ -229,10 +257,9 @@ const toQuestionPage = (question: Question) => {
 };
 
 /**
- * 确认搜索，重新加载数据
+ * 对当前数据应用筛选条件
  */
-const doSubmit = () => {
-  console.log("状态是：", typeof filterParams.value.status);
+const applyFilter = () => {
   // 对 dataList 进行筛选
   filterDataList.value = dataList.value.filter((item) => {
     // 根据题目名称筛选
@@ -266,6 +293,15 @@ const doSubmit = () => {
     }
     return true;
   });
+};
+/**
+ * 确认搜索，重新加载数据并开始轮询
+ */
+const doSubmit = () => {
+  applyFilter();
+  if (hasPending()) {
+    startPolling();
+  }
 };
 const resetForm = () => {
   filterParams.value = {

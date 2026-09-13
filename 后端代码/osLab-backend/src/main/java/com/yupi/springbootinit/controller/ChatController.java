@@ -7,7 +7,9 @@ import com.volcengine.ark.runtime.service.ArkService;
 import com.yupi.springbootinit.common.BaseResponse;
 import com.yupi.springbootinit.common.ErrorCode;
 import com.yupi.springbootinit.common.ResultUtils;
+import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.service.UserService;
+import com.yupi.springbootinit.utils.RateLimiter;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -34,6 +36,11 @@ public class ChatController {
     @Resource
     private UserService userService;
 
+    /**
+     * AI 问答限流：同一用户 1 分钟窗口内最多 10 次，防止消耗 API 费用。
+     */
+    private final RateLimiter chatLimiter = new RateLimiter(10, 60 * 1000L);
+
     public ChatController(@Value("${ai.ark.api-key:}") String apiKey,
                           @Value("${ai.ark.base-url:https://ark.cn-beijing.volces.com/api/v3}") String baseUrl,
                           @Value("${ai.ark.model:deepseek-v3-250324}") String model) {
@@ -45,7 +52,10 @@ public class ChatController {
 
     @PostMapping("/ask")
     public BaseResponse<String> askQuestion(@RequestBody String userQuestion, HttpServletRequest request) {
-        userService.getLoginUser(request);
+        User loginUser = userService.getLoginUser(request);
+        if (!chatLimiter.tryAcquire("chat:" + loginUser.getId())) {
+            return ResultUtils.error(ErrorCode.FORBIDDEN_ERROR, "提问过于频繁，请稍后再试");
+        }
         if (service == null) {
             return ResultUtils.error(ErrorCode.API_REQUEST_ERROR, "AI 助手尚未配置，请联系管理员");
         }

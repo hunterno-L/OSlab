@@ -21,6 +21,7 @@ import com.yupi.springbootinit.service.QuestionService;
 import com.yupi.springbootinit.service.QuestionSubmitService;
 import com.yupi.springbootinit.mapper.QuestionSubmitMapper;
 import com.yupi.springbootinit.service.UserService;
+import com.yupi.springbootinit.utils.RateLimiter;
 import com.yupi.springbootinit.utils.SqlUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -51,6 +52,11 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     private JudgeService judgeService;
 
     /**
+     * 提交限流：同一用户 1 分钟窗口内最多提交 3 次，防止连点刷判题。
+     */
+    private final RateLimiter submitLimiter = new RateLimiter(3, 60 * 1000L);
+
+    /**
      * 提交题目
      *
      * @param questionSubmitAddRequest
@@ -64,6 +70,10 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         QuestionSubmitLanguageEnum languageEnum = QuestionSubmitLanguageEnum.getEnumByValue(language);
         if (languageEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "编程语言错误");
+        }
+        // 提交限流：同一用户窗口内超过次数则拒绝，防止刷判题资源
+        if (!submitLimiter.tryAcquire("submit:" + loginUser.getId())) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "提交过于频繁，请稍后再试");
         }
         long questionId = questionSubmitAddRequest.getQuestionId();
         // 判断实体是否存在，根据类别获取实体
@@ -128,7 +138,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         queryWrapper.eq(ObjectUtils.isNotEmpty(questionId), "questionId", questionId);
         queryWrapper.eq(QuestionSubmitStatusEnum.getEnumByValue(status) != null, "status", status);
         queryWrapper.eq("isDelete", false);
-        queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+        queryWrapper.orderBy(SqlUtils.validSortField(sortField), CommonConstant.SORT_ORDER_ASC.equals(sortOrder),
                 sortField);
         return queryWrapper;
     }

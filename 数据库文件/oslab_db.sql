@@ -298,7 +298,8 @@ CREATE TABLE `user` (
   `updateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `isDelete` tinyint NOT NULL DEFAULT '0' COMMENT '是否删除',
   PRIMARY KEY (`id`),
-  KEY `idx_unionId` (`unionId`)
+  KEY `idx_unionId` (`unionId`),
+  UNIQUE KEY `uk_userAccount` (`userAccount`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1925830382679498755 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户';
 
 -- ----------------------------
@@ -317,8 +318,6 @@ INSERT INTO `user` VALUES ('1925422357430927362', 'liuxiaotian', '0f1d79d54b79df
 INSERT INTO `user` VALUES ('1925422357430927363', 'liuxiaoli', '3fe4d221b1a272b6ecbd232ca965630d', null, null, '刘小丽', null, null, 'user', '2025-05-22 13:23:57', '2025-05-22 13:23:57', '0');
 INSERT INTO `user` VALUES ('1925422357430927364', 'wangxiaomei', '38486b11f585930f03358483854a041d', null, null, '王小美', null, null, 'user', '2025-05-22 13:23:57', '2025-05-22 13:23:57', '0');
 INSERT INTO `user` VALUES ('1925422357430927365', 'lixiaoqiang', '7cf6c2fddb4a995f132f6d450d55ee66', null, null, '李小强', null, null, 'user', '2025-05-22 13:23:57', '2025-05-22 13:23:57', '0');
-INSERT INTO `user` VALUES ('1925827136351117313', 'wangxiaohua', '948db86be7bda144bf02583dcfdb693d', null, null, '王小花', null, null, 'user', '2025-05-23 16:12:24', '2025-05-23 16:12:24', '0');
-INSERT INTO `user` VALUES ('1925830382490755073', 'lixiaomei', 'ebd516850427a0fc301bf4f2c5aee5ba', null, null, '李小美', null, null, 'user', '2025-05-23 16:25:18', '2025-05-23 16:25:18', '0');
 INSERT INTO `user` VALUES ('1925830382520115202', 'tangxiaoshuai', '8b7d26a7c7e864c7406077b1bca6acbc', null, null, '唐小帅', null, null, 'user', '2025-05-23 16:25:18', '2025-05-23 16:25:18', '0');
 INSERT INTO `user` VALUES ('1925830382541086722', 'bixiaoming', '67ba3d91c00107899158d55e6ca6aed8', null, null, '毕小明', null, null, 'user', '2025-05-23 16:25:18', '2025-05-23 16:25:18', '0');
 INSERT INTO `user` VALUES ('1925830382557863938', 'yuanxiaotian', '174886cb94c4e86bf9edc073d93e29b5', null, null, '袁小甜', null, null, 'user', '2025-05-23 16:25:18', '2025-05-23 16:25:18', '0');
@@ -329,4 +328,3 @@ INSERT INTO `user` VALUES ('1925830382616584193', 'xiaxiaotian', 'f8d54427f5b0e3
 INSERT INTO `user` VALUES ('1925830382633361410', 'xiaxiaomei', 'eb3955e5fb4b5db4bb7d8d146da92fbe', null, null, '夏小美', null, null, 'user', '2025-05-23 16:25:18', '2025-05-23 16:25:18', '0');
 INSERT INTO `user` VALUES ('1925830382641750018', 'songxiaoshuai', '65398d0bc02e8c2bc8c1b8df55896d0c', null, null, '宋小帅', null, null, 'user', '2025-05-23 16:25:18', '2025-05-23 16:25:18', '0');
 INSERT INTO `user` VALUES ('1925830382666915841', 'xiaoxiaoming', 'c83649abc23b9a95d9fec676d10abe23', null, null, '肖小明', null, null, 'user', '2025-05-23 16:25:18', '2025-05-23 16:25:18', '0');
-INSERT INTO `user` VALUES ('1925830382679498754', 'lixiaoqiang', '342d88d5ab0996991293e9a4f5170fc1', null, null, '李小强', null, null, 'user', '2025-05-23 16:25:18', '2025-05-23 16:25:18', '0');

@@ -58,11 +58,11 @@ public class QuestionController {
      * @return
      */
     @PostMapping("/add")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Long> addQuestion(@RequestBody QuestionAddRequest questionAddRequest, HttpServletRequest request) {
         if (questionAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        System.out.println("添加题目："+questionAddRequest.getOriginalCode());
         Question question = new Question();
         BeanUtils.copyProperties(questionAddRequest, question);
         List<String> tags = questionAddRequest.getTags();
@@ -352,8 +352,11 @@ public class QuestionController {
     public BaseResponse<QuestionSubmitVO> getQuestionSubmitById(long id, HttpServletRequest request)
     {
         QuestionSubmit questionSubmit = questionSubmitService.getById(id);
+        if (questionSubmit == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
         final User loginUser = userService.getLoginUser(request);
-        return ResultUtils.success(questionSubmitService.getQuestionSubmitVO(questionSubmit,loginUser));
+        return ResultUtils.success(questionSubmitService.getQuestionSubmitVO(questionSubmit, loginUser));
 
     }
     @GetMapping("/questionSets")

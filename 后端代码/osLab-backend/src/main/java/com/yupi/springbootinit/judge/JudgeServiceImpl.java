@@ -68,11 +68,18 @@ public class JudgeServiceImpl implements JudgeService {
         if (question == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "题目不存在");
         }
-        if (!QuestionSubmitStatusEnum.WAITING.getValue().equals(questionSubmit.getStatus())) {
+        // 原子地抢占判题权：仅当状态仍为 WAITING 时更新为 RUNNING，
+        // 防止同一提交被并发触发导致重复判题与 acceptedNum 重复计数
+        QuestionSubmit statusClaim = new QuestionSubmit();
+        statusClaim.setId(questionSubmitId);
+        statusClaim.setStatus(QuestionSubmitStatusEnum.RUNNING.getValue());
+        boolean claimed = questionSubmitService.update(statusClaim,
+                new UpdateWrapper<QuestionSubmit>()
+                        .eq("id", questionSubmitId)
+                        .eq("status", QuestionSubmitStatusEnum.WAITING.getValue()));
+        if (!claimed) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "该提交已进入判题流程");
         }
-
-        updateSubmission(questionSubmitId, QuestionSubmitStatusEnum.RUNNING.getValue(), null);
         try {
             List<JudgeCase> judgeCases = JSONUtil.toList(question.getJudgeCase(), JudgeCase.class);
             if (CollectionUtils.isEmpty(judgeCases)) {

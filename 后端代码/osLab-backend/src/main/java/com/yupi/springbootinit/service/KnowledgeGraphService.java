@@ -1,5 +1,9 @@
 package com.yupi.springbootinit.service;
 
+import com.yupi.springbootinit.common.ErrorCode;
+import com.yupi.springbootinit.exception.BusinessException;
+import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 import com.yupi.springbootinit.constant.RelationType;
 import com.yupi.springbootinit.model.dto.knowledgegraph.*;
 import com.yupi.springbootinit.model.entity.EntityNode;
@@ -237,11 +241,30 @@ public class KnowledgeGraphService {
         return knowledgeGraphRepository.findAll();
     }
     /**
-     * 执行用户的 Cypher 语句（不返回结果，只执行）
+     * 只读 Cypher 前缀白名单（忽略大小写与行首空白）。
+     */
+    private static final Pattern READ_ONLY_CYPHER_PREFIX = Pattern.compile(
+            "^\\\\s*(?i)(MATCH|OPTIONAL\\\\s+MATCH|RETURN|WITH|UNWIND)\\\\b");
+
+    /**
+     * 写操作关键字黑名单：命中即拒绝。
+     */
+    private static final Pattern WRITE_CYPHER_KEYWORDS = Pattern.compile(
+            "(?i)\\\\b(CREATE|MERGE|DELETE|DETACH|SET|REMOVE|DROP|LOAD|CALL|FOREACH)\\\\b");
+
+    /**
+     * 执行用户的 Cypher 语句（不返回结果，只执行）。
+     * <p>安全限制：仅允许只读查询，禁止任何写操作（CREATE/MERGE/DELETE 等），
+     * 防止管理员误操作或账号被盗时整图被删。
      */
     @Transactional
     public void executeCypher(CypherRequest cypherRequest) {
-        neo4jClient.query(cypherRequest.getQuery()).run();
+        String query = cypherRequest.getQuery();
+        if (StringUtils.isBlank(query) || !READ_ONLY_CYPHER_PREFIX.matcher(query).find()
+                || WRITE_CYPHER_KEYWORDS.matcher(query).find()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "仅允许执行只读查询（如 MATCH / RETURN），禁止删除或修改操作");
+        }
+        neo4jClient.query(query).run();
     }
 
     public void deleteNode(DeleteNodeRequest deleteNodeRequest) {
@@ -260,6 +283,9 @@ public class KnowledgeGraphService {
             knowledgeGraphRepository.createDependentRelationByName(addRelationRequest.getFromName() ,addRelationRequest.getToName());
         } else if (addRelationRequest.getRelationType().equals("实现")) {
             knowledgeGraphRepository.createImplementsRelationByName(addRelationRequest.getFromName() ,addRelationRequest.getToName());
+        } else {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,
+                    "不支持的关系类型：" + addRelationRequest.getRelationType());
         }
     }
 }

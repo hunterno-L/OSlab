@@ -20,6 +20,7 @@ import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.model.vo.LoginUserVO;
 import com.yupi.springbootinit.model.vo.UserVO;
 import com.yupi.springbootinit.service.UserService;
+import com.yupi.springbootinit.utils.RateLimiter;
 
 import java.util.List;
 import javax.annotation.Resource;
@@ -53,6 +54,11 @@ public class UserController {
     @Resource
     private UserService userService;
 
+    /**
+     * 注册限流：同一 IP 1 小时窗口内最多注册 10 个账号，防止脚本批量刷号。
+     */
+    private final RateLimiter registerLimiter = new RateLimiter(10, 60 * 60 * 1000L);
+
     @Resource
     private WxOpenConfig wxOpenConfig;
 
@@ -65,7 +71,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/register")
-    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
+    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest, HttpServletRequest request) {
         if (userRegisterRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -73,7 +79,12 @@ public class UserController {
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+        // 注册限流：按客户端 IP 防止批量刷号
+        String clientIp = request.getRemoteAddr();
+        if (!registerLimiter.tryAcquire("register:" + clientIp)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "注册过于频繁，请稍后再试");
         }
         long result = userService.userRegister(userAccount, userPassword, checkPassword);
         return ResultUtils.success(result);
@@ -243,9 +254,13 @@ public class UserController {
      * @return
      */
     @GetMapping("/get/vo")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<UserVO> getUserVOById(long id, HttpServletRequest request) {
-        BaseResponse<User> response = getUserById(id, request);
-        User user = response.getData();
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = userService.getById(id);
+        ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR);
         return ResultUtils.success(userService.getUserVO(user));
     }
 
@@ -276,6 +291,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/list/page/vo")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest,
             HttpServletRequest request) {
         if (userQueryRequest == null) {
