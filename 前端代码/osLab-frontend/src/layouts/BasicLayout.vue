@@ -19,12 +19,14 @@
 }
 
 #basicLayout .header {
+  background: #ffffff;
   margin-bottom: 16px;
   box-shadow: #eee 1px 1px 5px;
 }
 
 #basicLayout .content {
-  background: linear-gradient(to bottom, #e0f7fa, #0079c1);
+  /* 视觉基准：暖白/浅灰工作台画布（design/frontend-concepts/2026-09-28） */
+  background: #f5f7fa;
   margin-bottom: 16px;
   padding: 20px;
 }

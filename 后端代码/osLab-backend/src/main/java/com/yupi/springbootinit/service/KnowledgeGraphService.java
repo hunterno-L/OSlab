@@ -23,11 +23,42 @@ public class KnowledgeGraphService {
     private KnowledgeGraphRepository knowledgeGraphRepository;
     @Autowired
     private Neo4jClient neo4jClient;
+    @Autowired
+    private org.neo4j.driver.Driver driver;
     public EntityNode saveKnowledgeGraphNode(EntityNode node) {
         return knowledgeGraphRepository.save(node);
     }
     public EntityNode saveKnowledgeGraphNode(NodeDTO node) {
         return knowledgeGraphRepository.save(convertToEntity(node));
+    }
+    /** 按真实名称定位节点，仅更新 chapter，保留名称、描述、类型和全部关系。 */
+    public void updateNodeChapter(UpdateNodeChapterRequest request) {
+        if (request == null || StringUtils.isBlank(request.getNodeName())
+                || StringUtils.isBlank(request.getChapter())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "节点名称和所属章节不能为空");
+        }
+        String nodeName = request.getNodeName().trim();
+        String chapter = request.getChapter().trim();
+        if (nodeName.length() > 200 || chapter.length() > 100) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "节点名称或章节过长");
+        }
+        try (org.neo4j.driver.Session session = driver.session()) {
+            session.writeTransaction(transaction -> {
+                org.neo4j.driver.Result result = transaction.run(
+                        "MATCH (n:Entity {name: $nodeName}) WITH collect(n) AS nodes "
+                                + "FOREACH (n IN CASE WHEN size(nodes) = 1 THEN nodes ELSE [] END "
+                                + "| SET n.chapter = $chapter) RETURN size(nodes) AS matched",
+                        Map.of("nodeName", nodeName, "chapter", chapter));
+                long matched = result.single().get("matched").asLong();
+                if (matched == 0) {
+                    throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "知识节点不存在：" + nodeName);
+                }
+                if (matched > 1) {
+                    throw new BusinessException(ErrorCode.OPERATION_ERROR, "节点名称重复，无法确定所属节点");
+                }
+                return null;
+            });
+        }
     }
     public EntityNode findById(Long id) {
         return knowledgeGraphRepository.findById(id).orElse(null);
@@ -65,6 +96,82 @@ public class KnowledgeGraphService {
             return null;
         }
     }
+    /**
+     * 一次性图谱快照（Phase 1 契约 §5）：单条 Cypher 返回全部节点与关系，
+     * 保留孤立节点、边按 (起点,类型,终点) 去重、方向按存储方向，节点 chapter 缺省"未分类"。
+     * 替代旧 getAllKnowledgeGraph 的"节点数 × 关系类型数"N+1 查询。
+     */
+    public GraphDataDTO getGraphSnapshot() {
+        GraphDataDTO graphData = new GraphDataDTO();
+        Map<String, NodeDTO> nodeMap = new LinkedHashMap<>();
+        List<LinkDTO> links = new ArrayList<>();
+        Set<String> linkKeys = new HashSet<>();
+        try (org.neo4j.driver.Session session = driver.session()) {
+            org.neo4j.driver.Result result = session.run(
+                    "MATCH (n:Entity) OPTIONAL MATCH (n)-[r]->(m:Entity) "
+                            + "RETURN id(n) AS nid, n AS n, id(m) AS mid, r AS r");
+            while (result.hasNext()) {
+                org.neo4j.driver.Record record = result.next();
+                String id = String.valueOf(record.get("nid").asLong());
+                org.neo4j.driver.types.Node n = record.get("n").asNode();
+                NodeDTO node = nodeMap.computeIfAbsent(id, k -> toNodeDTO(id, n));
+                if (node.getChapter() == null || node.getChapter().isBlank()) {
+                    node.setChapter("未分类");
+                }
+                if (!record.get("r").isNull()) {
+                    org.neo4j.driver.types.Relationship r = record.get("r").asRelationship();
+                    String mid = String.valueOf(record.get("mid").asLong());
+                    String key = id + "|" + r.type() + "|" + mid;
+                    if (linkKeys.add(key)) {
+                        LinkDTO link = new LinkDTO();
+                        link.setSource(id);
+                        link.setTarget(mid);
+                        link.setRelationType(r.type());
+                        link.setValue(r.type());
+                        links.add(link);
+                    }
+                }
+            }
+        }
+        Map<String, Integer> chapterSummary = new LinkedHashMap<>();
+        for (NodeDTO node : nodeMap.values()) {
+            chapterSummary.merge(node.getChapter(), 1, Integer::sum);
+        }
+        List<CategoryDTO> categories = nodeMap.values().stream()
+                .map(NodeDTO::getCategory)
+                .filter(Objects::nonNull)
+                .distinct()
+                .map(CategoryDTO::new)
+                .collect(Collectors.toList());
+        graphData.setNodes(new ArrayList<>(nodeMap.values()));
+        graphData.setLinks(links);
+        graphData.setCategories(categories);
+        graphData.setTotalNodes(nodeMap.size());
+        graphData.setTotalLinks(links.size());
+        graphData.setChapterSummary(chapterSummary);
+        return graphData;
+    }
+
+    /** 快照节点映射：id 与旧 createNodeDTO 一致（内部 id 字符串），章节缺省"未分类"。 */
+    private NodeDTO toNodeDTO(String id, org.neo4j.driver.types.Node n) {
+        NodeDTO node = new NodeDTO();
+        node.setId(id);
+        node.setName(n.get("name").asString(null));
+        node.setCategory(n.get("label").asString(null));
+        node.setDescription(n.get("description").asString(null));
+        String chapter = n.get("chapter").asString(null);
+        node.setChapter(chapter == null || chapter.isBlank() ? "未分类" : chapter);
+        return node;
+    }
+
+    /** 测试与诊断辅助：执行只读计数查询。 */
+    public long countByQuery(String cypher) {
+        try (org.neo4j.driver.Session session = driver.session()) {
+            org.neo4j.driver.Result result = session.run(cypher);
+            return result.single().get(0).asLong();
+        }
+    }
+
     public GraphDataDTO convertToEChartsFormat(List<KnowledgeGraphNode> knowledgeGraphNodes) {
         GraphDataDTO graphData = new GraphDataDTO();
         List<LinkDTO> links = new ArrayList<>();
@@ -142,6 +249,8 @@ public class KnowledgeGraphService {
         node.setName(entity.getName());
         node.setCategory(entity.getLabel());
         node.setDescription(entity.getDescription());
+        String chapter = entity.getChapter();
+        node.setChapter(chapter == null || chapter.isBlank() ? "未分类" : chapter);
         return node;
     }
     public EntityNode convertToEntity(NodeDTO nodeDTO)
@@ -149,6 +258,7 @@ public class KnowledgeGraphService {
         EntityNode entityNode =new EntityNode();
         entityNode.setName(nodeDTO.getName());
         entityNode.setLabel(nodeDTO.getCategory());
+        entityNode.setChapter(StringUtils.isBlank(nodeDTO.getChapter()) ? "未分类" : nodeDTO.getChapter().trim());
         entityNode.setDescription(nodeDTO.getDescription());
         return entityNode;
     }

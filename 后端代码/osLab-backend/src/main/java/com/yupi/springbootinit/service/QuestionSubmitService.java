@@ -42,6 +42,15 @@ public interface QuestionSubmitService extends IService<QuestionSubmit> {
     QuestionSubmitVO getQuestionSubmitVO(QuestionSubmit questionSubmit, User loginUser);
 
     /**
+     * 获取提交详情（本人约束：学生仅能查询自己的提交详情，管理员不受限）
+     *
+     * @param id        提交 id
+     * @param loginUser 当前登录用户
+     * @return 提交详情（含判题信息）
+     */
+    QuestionSubmitVO getQuestionSubmitDetail(long id, User loginUser);
+
+    /**
      * 分页获取题目封装
      *
      * @param questionSubmitPage

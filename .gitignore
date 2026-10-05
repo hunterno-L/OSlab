@@ -30,3 +30,6 @@ pnpm-debug.log*
 # Generated local IDE/tool metadata
 .github/
 
+
+# Superpowers SDD working scratch (ledgers/briefs/review packages)
+.superpowers/

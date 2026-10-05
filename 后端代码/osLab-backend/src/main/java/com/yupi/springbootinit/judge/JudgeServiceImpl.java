@@ -17,6 +17,7 @@ import com.yupi.springbootinit.model.entity.Question;
 import com.yupi.springbootinit.model.entity.QuestionSubmit;
 import com.yupi.springbootinit.model.enums.JudgeInfoMessageEnum;
 import com.yupi.springbootinit.model.enums.QuestionSubmitStatusEnum;
+import com.yupi.springbootinit.service.LearningEventService;
 import com.yupi.springbootinit.service.QuestionService;
 import com.yupi.springbootinit.service.QuestionSubmitService;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +49,9 @@ public class JudgeServiceImpl implements JudgeService {
 
     @Resource
     private QuestionSubmitService questionSubmitService;
+
+    @Resource
+    private LearningEventService learningEventService;
 
     @Resource
     private JudgeManager judgeManager;
@@ -126,6 +130,9 @@ public class JudgeServiceImpl implements JudgeService {
                 }
             }
             updateSubmission(questionSubmitId, QuestionSubmitStatusEnum.SUCCEED.getValue(), judgeInfo);
+            // WP2：判题终态写入学习事件（幂等；系统故障不计学生知识失误）
+            learningEventService.recordJudgeEvents(questionSubmitId,
+                    QuestionSubmitStatusEnum.SUCCEED.getValue(), judgeInfo.getMessage());
             return questionSubmitService.getById(questionSubmitId);
         } catch (Exception e) {
             log.error("judge infrastructure failed for submissionId={}", questionSubmitId, e);
@@ -134,6 +141,8 @@ public class JudgeServiceImpl implements JudgeService {
             judgeInfo.setTime(0L);
             judgeInfo.setMemory(0L);
             updateSubmission(questionSubmitId, QuestionSubmitStatusEnum.FAILED.getValue(), judgeInfo);
+            learningEventService.recordJudgeEvents(questionSubmitId,
+                    QuestionSubmitStatusEnum.FAILED.getValue(), JudgeInfoMessageEnum.SYSTEM_ERROR.getValue());
             return questionSubmitService.getById(questionSubmitId);
         }
     }

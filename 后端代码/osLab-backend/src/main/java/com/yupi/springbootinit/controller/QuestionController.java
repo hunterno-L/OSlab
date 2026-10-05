@@ -351,12 +351,12 @@ public class QuestionController {
     @GetMapping("/question_submit/get")
     public BaseResponse<QuestionSubmitVO> getQuestionSubmitById(long id, HttpServletRequest request)
     {
-        QuestionSubmit questionSubmit = questionSubmitService.getById(id);
-        if (questionSubmit == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         final User loginUser = userService.getLoginUser(request);
-        return ResultUtils.success(questionSubmitService.getQuestionSubmitVO(questionSubmit, loginUser));
+        // 本人详情约束：学生只能查询自己的提交详情（Phase 5 §9）
+        return ResultUtils.success(questionSubmitService.getQuestionSubmitDetail(id, loginUser));
 
     }
     @GetMapping("/questionSets")

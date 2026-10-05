@@ -15,4 +15,9 @@ public class EntityNode {
     private String name;
     private String description;
     private String label;
+    /**
+     * 所属章节（课程维度，区别于 label 表示的概念/算法/功能分类）。
+     * 历史节点可能无该属性，读取时缺省为"未分类"。
+     */
+    private String chapter;
 }

@@ -1,121 +1,206 @@
 <template>
-  <h2 style="margin-bottom: 16px; text-align: center">用户注册</h2>
-  <div class="form-container">
-    <a-form
-      ref="formRef"
-      :rules="rules"
-      :model="form"
-      :style="{ width: '600px' }"
-      @submit="handleSubmit"
-    >
-      <a-form-item field="userAccount" label="用户名" validate-trigger="blur">
-        <a-input v-model="form.userAccount" placeholder="请输入用户名" />
-      </a-form-item>
-      <a-form-item field="userPassword" label="密码" validate-trigger="blur">
-        <a-input-password
-          v-model="form.userPassword"
-          placeholder="请输入密码"
+  <div
+    id="os-auth-panel"
+    class="os-auth-panel"
+    role="tabpanel"
+    aria-labelledby="os-register-tab"
+  >
+    <h2>创建你的学习账号</h2>
+    <p class="os-form-subtitle">从一个知识点开始，记录你的每次进步。</p>
+    <form autocomplete="on" novalidate @submit.prevent="handleSubmit">
+      <label class="os-field">
+        <span class="os-field-label">账号</span>
+        <input
+          id="oslab-account-input"
+          v-model="account"
+          name="userAccount"
+          type="text"
+          autocomplete="username"
+          placeholder="输入账号"
         />
-      </a-form-item>
-      <a-form-item
-        field="checkPassword"
-        label="确认密码"
-        validate-trigger="blur"
-      >
-        <a-input-password
-          v-model="form.checkPassword"
-          placeholder="请确认密码"
-        />
-      </a-form-item>
-      <div style="display: flex; flex-direction: column; align-items: center">
-        <a-form-item>
-          <a-button html-type="submit" type="primary" style="width: 100%"
-            >提交</a-button
+      </label>
+      <label class="os-field">
+        <span class="os-field-label">密码</span>
+        <span class="os-input-wrap">
+          <input
+            id="oslab-password-input"
+            v-model="password"
+            class="os-password"
+            name="userPassword"
+            :type="showPassword ? 'text' : 'password'"
+            autocomplete="new-password"
+            placeholder="输入密码"
+          />
+          <button
+            type="button"
+            class="os-eye"
+            :aria-label="showPassword ? '隐藏密码' : '显示密码'"
+            @click="showPassword = !showPassword"
           >
-        </a-form-item>
-        <a-form-item>
-          <a-button
-            @click="$refs.formRef.resetFields()"
-            type="outline"
-            style="width: 100%"
-            >重置
-          </a-button>
-        </a-form-item>
+            <svg
+              v-if="showPassword"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"
+              />
+              <path
+                d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
+              />
+              <line x1="2" y1="2" x2="22" y2="22" />
+            </svg>
+            <svg
+              v-else
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        </span>
+      </label>
+      <!-- 确认密码字段：挂载后高度展开（280ms） -->
+      <div class="os-confirm-row" :class="{ 'is-expanded': expanded }">
+        <div class="os-confirm-inner">
+          <label class="os-field">
+            <span class="os-field-label">确认密码</span>
+            <input
+              id="oslab-check-input"
+              v-model="checkPassword"
+              name="checkPassword"
+              type="password"
+              autocomplete="new-password"
+              placeholder="再次输入密码"
+            />
+          </label>
+        </div>
       </div>
-    </a-form>
+      <div class="os-form-extra">
+        <span class="os-register-hint">账号至少 4 位，密码至少 8 位。</span>
+      </div>
+      <button type="submit" class="os-submit" :disabled="loading">
+        <span>{{ loading ? "正在创建" : "创建账号" }}</span>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M5 12h14" />
+          <path d="m13 6 6 6-6 6" />
+        </svg>
+      </button>
+      <p v-show="error" class="os-error" role="alert">{{ error }}</p>
+    </form>
+    <p class="os-account-note">账号用于保存你的练习、实验与学习记录。</p>
   </div>
 </template>
 
-<script>
-import { reactive } from "vue";
-import { UserControllerService } from "../../../generated";
+<script setup lang="ts">
+import { inject, onMounted, ref, watch } from "vue";
+import type { Ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import message from "@arco-design/web-vue/es/message";
-import { useRouter } from "vue-router";
-import { useStore } from "vuex";
+import { UserControllerService } from "../../../generated";
 
-export default {
-  setup() {
-    const router = useRouter();
-    const handleSubmit = async ({ values, errors }) => {
-      console.log("values:", values, "\nerrors:", errors);
-      const res = await UserControllerService.userRegisterUsingPost(form);
-      // 登录成功，跳转到主页
-      if (res.code === 0) {
-        router.push({ path: "/user/login" });
-      } else {
-        message.error("登陆失败，" + res.message);
-      }
-    };
+const route = useRoute();
+const router = useRouter();
 
-    const form = reactive({
-      userAccount: "",
-      userPassword: "",
-      checkPassword: "",
+// 与登录页签共享的账号输入（由 UserLayout 提供）
+const sharedAccount = inject<Ref<string>>("oslabSharedAccount", ref(""));
+const account = ref(sharedAccount.value);
+watch(account, (value) => {
+  sharedAccount.value = value;
+});
+// 提交进行中：通知布局禁用页签切换
+const authBusy = inject<Ref<boolean>>("oslabAuthBusy", ref(false));
+const advanceFlow = inject<() => void>("oslabAdvanceFlow", () => {
+  /* 独立渲染时无知识流可推进 */
+});
+
+const password = ref("");
+const checkPassword = ref("");
+const showPassword = ref(false);
+const loading = ref(false);
+const error = ref("");
+const expanded = ref(false);
+
+onMounted(() => {
+  // 等待初始样式生效后展开确认密码字段
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      expanded.value = true;
     });
+  });
+});
 
-    const rules = {
-      userAccount: [
-        {
-          required: true,
-          message: "name is required",
-        },
-      ],
-      userPassword: [
-        {
-          required: true,
-          message: "password is required",
-        },
-      ],
-      checkPassword: [
-        {
-          required: true,
-          message: "password is required",
-        },
-        {
-          validator: (value, cb) => {
-            if (value !== form.userPassword) {
-              cb("two passwords do not match");
-            } else {
-              cb();
-            }
-          },
-        },
-      ],
-    };
-
-    return {
-      form,
-      rules,
-      handleSubmit,
-    };
-  },
+/**
+ * 提交表单：沿用现有注册服务，保留账号/密码/确认密码校验
+ */
+const handleSubmit = async () => {
+  if (loading.value) {
+    return;
+  }
+  error.value = "";
+  if (!account.value || account.value.length < 4) {
+    error.value = "账号至少 4 位";
+    document.getElementById("oslab-account-input")?.focus();
+    return;
+  }
+  if (!password.value || password.value.length < 8) {
+    error.value = "密码至少 8 位";
+    document.getElementById("oslab-password-input")?.focus();
+    return;
+  }
+  if (password.value !== checkPassword.value) {
+    error.value = "两次输入的密码不一致";
+    (
+      document.getElementById("oslab-check-input") as HTMLInputElement | null
+    )?.focus();
+    return;
+  }
+  loading.value = true;
+  authBusy.value = true;
+  try {
+    const res = await UserControllerService.userRegisterUsingPost({
+      userAccount: account.value,
+      userPassword: password.value,
+      checkPassword: checkPassword.value,
+    });
+    if (res.code === 0) {
+      // 注册成功：知识流推进一小段后回到登录，账号通过共享状态保留
+      advanceFlow();
+      message.success("注册成功，请登录");
+      await new Promise((resolve) => setTimeout(resolve, 160));
+      const query: Record<string, string> = {};
+      const redirect = route.query.redirect;
+      if (typeof redirect === "string" && redirect) {
+        query.redirect = redirect;
+      }
+      await router.push({ path: "/user/login", query });
+      return;
+    }
+    error.value = `注册失败：${res.message || "请检查填写内容"}`;
+  } catch {
+    error.value = "注册请求未完成，请检查网络连接后重试";
+  } finally {
+    loading.value = false;
+    authBusy.value = false;
+  }
 };
 </script>
-
-<style scoped>
-.form-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-</style>

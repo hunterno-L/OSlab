@@ -1,162 +1,294 @@
 import { RouteRecordRaw } from "vue-router";
+import store from "@/store";
 import UserLayout from "@/layouts/UserLayout.vue";
-import UserLoginView from "@/views/user/UserLoginView.vue";
-import UserRegisterView from "@/views/user/UserRegisterView.vue";
-import HomeView from "@/views/ExampleView.vue";
-import AdminView from "@/views/AdminView.vue";
-import NoAuthView from "@/views/NoAuthView.vue";
 import ACCESS_ENUM from "@/access/accessEnum";
-import AddQuestionView from "@/views/question/AddQuestionView.vue";
-import ManageQuestionView from "@/views/question/ManageQuestionView.vue";
-import QuestionsView from "@/views/question/QuestionsView.vue";
-import ViewQuestionView from "@/views/question/ViewQuestionView.vue";
-import QuestionSubmitView from "@/views/question/QuestionSubmitView.vue";
-import UserCenterView from "@/views/user/UserCenterView.vue";
-import ChapterQuestionView from "@/views/question/ChapterQuestionView.vue";
-import KnowledgeGraphView from "@/views/knowledgeGraph/KnowledgeGraphView.vue";
+import { ROLE_HOME } from "@/navigation/appNavigation";
+import LearningLayout from "@/layouts/LearningLayout.vue";
+import TeachingLayout from "@/layouts/TeachingLayout.vue";
 
+const UserLoginView = () => import("@/views/user/UserLoginView.vue");
+const UserRegisterView = () => import("@/views/user/UserRegisterView.vue");
+const NoAuthView = () => import("@/views/NoAuthView.vue");
+const ManageQuestionView = () =>
+  import("@/views/question/ManageQuestionView.vue");
+const QuestionsView = () => import("@/views/question/QuestionsView.vue");
+const ViewQuestionView = () => import("@/views/question/ViewQuestionView.vue");
+const LearningRecordsView = () =>
+  import("@/views/learning/LearningRecordsView.vue");
+const UserCenterView = () => import("@/views/user/UserCenterView.vue");
+const KnowledgeGraphView = () =>
+  import("@/views/knowledgeGraph/KnowledgeGraphView.vue");
+const LearningQuestionsView = () =>
+  import("@/views/learning/LearningQuestionsView.vue");
+const ManageLearningQuestionsView = () =>
+  import("@/views/learning/ManageLearningQuestionsView.vue");
+const SimulationView = () => import("@/views/learning/SimulationView.vue");
+const TeacherDashboardView = () =>
+  import("@/views/learning/TeacherDashboardView.vue");
+const ResourcesView = () => import("@/views/ResourcesView.vue");
+const NodeLearningWorkspaceView = () =>
+  import("@/views/learning/NodeLearningWorkspaceView.vue");
+const AssessmentRunView = () =>
+  import("@/views/learning/AssessmentRunView.vue");
+const HomeView = () => import("@/views/HomeView.vue");
+const StudentProfileView = () => import("@/views/user/StudentProfileView.vue");
+
+/**
+ * Phase 1 路由重构：嵌套布局壳 + 规范路径 + 旧路径兼容重定向（保留 query/params）。
+ * navKey 用于顶栏选中态；学习与教学分别使用独立布局壳。
+ */
 export const routes: Array<RouteRecordRaw> = [
   {
     path: "/user",
     name: "用户",
     component: UserLayout,
     children: [
-      {
-        path: "/user/login",
-        name: "用户登录",
-        component: UserLoginView,
-      },
-      {
-        path: "/user/register",
-        name: "用户注册",
-        component: UserRegisterView,
-      },
+      { path: "/user/login", name: "用户登录", component: UserLoginView },
+      { path: "/user/register", name: "用户注册", component: UserRegisterView },
     ],
-    meta: {
-      hideInMenu: true,
-    },
+    meta: { hideInMenu: true },
   },
   {
     path: "/",
-    name: "知识图谱",
-    component: KnowledgeGraphView,
+    name: "学习工作区",
+    component: LearningLayout,
+    meta: { hideInMenu: true },
+    children: [
+      {
+        path: "",
+        name: "角色首页",
+        redirect: () => {
+          const role = store.state.user.loginUser?.userRole;
+          return ROLE_HOME[role] || "/user/login";
+        },
+        meta: { hideInMenu: true },
+      },
+      {
+        path: "/home",
+        name: "首页",
+        component: HomeView,
+        meta: { access: ACCESS_ENUM.USER, navKey: "home" },
+      },
+      {
+        path: "/assessments",
+        name: "知识测评",
+        component: LearningQuestionsView,
+        meta: {
+          access: ACCESS_ENUM.USER,
+          navKey: "assessments",
+          // 题目练习不渲染课程侧栏，章节/知识点目录在页面内容区
+          hideSidebar: true,
+        },
+      },
+      {
+        path: "/assessments/run/:runId",
+        name: "单题测评",
+        component: AssessmentRunView,
+        meta: {
+          access: ACCESS_ENUM.USER,
+          navKey: "assessments",
+          hideInMenu: true,
+          hideSidebar: true,
+        },
+      },
+      {
+        path: "/graph",
+        name: "知识图谱",
+        component: KnowledgeGraphView,
+        meta: {
+          access: ACCESS_ENUM.USER,
+          navKey: "graph",
+          // log3 收尾 A：图谱画布是页面主工作区，使用 wide 内容宽度（1760px）
+          contentWidth: "wide",
+        },
+      },
+      {
+        path: "/knowledge/node/:nodeName",
+        name: "节点学习工作台",
+        component: NodeLearningWorkspaceView,
+        meta: { access: ACCESS_ENUM.USER, navKey: "graph", hideInMenu: true },
+      },
+      {
+        path: "/experiments",
+        name: "编程实验",
+        component: QuestionsView,
+        meta: {
+          access: ACCESS_ENUM.USER,
+          navKey: "experiments",
+          // log3 收尾 A：实验中心同样两侧留白过大，先就位 wide 宽度机制
+          //（阶段 3 再做页内重排）
+          contentWidth: "wide",
+        },
+      },
+      {
+        path: "/experiments/code/:id",
+        name: "编程实验工作区",
+        component: ViewQuestionView,
+        props: true,
+        meta: {
+          access: ACCESS_ENUM.USER,
+          navKey: "experiments",
+          hideInMenu: true,
+          // log3 收尾 A：实验工作区同样放宽（阶段 3 重排，宽度机制先行）
+          contentWidth: "wide",
+        },
+      },
+      {
+        path: "/experiments/simulation",
+        name: "交互模拟",
+        component: SimulationView,
+        meta: { access: ACCESS_ENUM.USER, navKey: "experiments" },
+      },
+      {
+        path: "/records",
+        name: "学习记录",
+        component: LearningRecordsView,
+        meta: { access: ACCESS_ENUM.USER, navKey: "records" },
+      },
+      {
+        path: "/resources",
+        name: "学习资源",
+        component: ResourcesView,
+        meta: { access: ACCESS_ENUM.USER, navKey: "resources" },
+      },
+      {
+        path: "/account",
+        name: "学生信息",
+        component: StudentProfileView,
+        meta: { access: ACCESS_ENUM.USER, hideInMenu: true },
+      },
+    ],
+  },
+  {
+    path: "/teaching",
+    name: "教学管理工作区",
+    component: TeachingLayout,
+    meta: { hideInMenu: true },
+    children: [
+      {
+        path: "/teaching/overview",
+        name: "班级分析",
+        component: TeacherDashboardView,
+        meta: { access: ACCESS_ENUM.ADMIN, navKey: "teaching" },
+      },
+      {
+        path: "/teaching/knowledge",
+        name: "知识维护",
+        component: KnowledgeGraphView,
+        meta: { access: ACCESS_ENUM.ADMIN, navKey: "teaching" },
+      },
+      {
+        path: "/teaching/assessments",
+        name: "测评管理",
+        component: ManageLearningQuestionsView,
+        meta: { access: ACCESS_ENUM.ADMIN, navKey: "teaching" },
+      },
+      {
+        path: "/teaching/experiments",
+        name: "实验管理",
+        component: ManageQuestionView,
+        meta: { access: ACCESS_ENUM.ADMIN, navKey: "teaching" },
+      },
+      {
+        path: "/teaching/users",
+        name: "用户管理",
+        component: UserCenterView,
+        meta: { access: ACCESS_ENUM.ADMIN, navKey: "teaching" },
+      },
+    ],
+  },
+  // ---- 旧路径兼容重定向（保留 query；/view 保留 params）----
+  {
+    path: "/learn",
+    redirect: (to) => ({ path: "/experiments", query: to.query }),
+    meta: { hideInMenu: true },
   },
   {
     path: "/question",
-    name: "浏览题目",
-    component: ChapterQuestionView,
+    redirect: (to) => ({ path: "/experiments", query: to.query }),
+    meta: { hideInMenu: true },
   },
-  /*{
-    path: "/chapter",
-    name: "浏览题目2",
-    component: QuestionsView,
-  },*/
+  {
+    path: "/learning/questions",
+    redirect: (to) => ({ path: "/assessments", query: to.query }),
+    meta: { hideInMenu: true },
+  },
+  {
+    path: "/learning/simulation",
+    redirect: (to) => ({ path: "/experiments/simulation", query: to.query }),
+    meta: { hideInMenu: true },
+  },
   {
     path: "/all_question",
-    name: "浏览全部题目",
-    component: QuestionsView,
-    meta: {
-      access: ACCESS_ENUM.ADMIN,
-      hideInMenu: true,
-    },
-  },
-  {
-    path: "/question_submit",
-    name: "浏览题目提交",
-    component: QuestionSubmitView,
-    meta: {
-      access: ACCESS_ENUM.USER,
-    },
+    redirect: (to) => ({ path: "/experiments", query: to.query }),
+    meta: { hideInMenu: true },
   },
   {
     path: "/view/question/:id",
-    name: "在线做题",
-    component: ViewQuestionView,
-    props: true,
-    meta: {
-      access: ACCESS_ENUM.USER,
-      hideInMenu: true,
-    },
+    redirect: (to) => ({
+      path: `/experiments/code/${to.params.id}`,
+      query: to.query,
+      hash: to.hash,
+    }),
+    meta: { hideInMenu: true },
   },
   {
-    path: "/add/question",
-    name: "创建题目",
-    component: AddQuestionView,
-    meta: {
-      access: ACCESS_ENUM.ADMIN,
-    },
+    path: "/question_submit",
+    redirect: (to) => ({
+      path: "/records",
+      query: { ...to.query, eventType: "JUDGE" },
+    }),
+    meta: { hideInMenu: true },
   },
   {
-    path: "/update/question",
-    name: "更新题目",
-    component: AddQuestionView,
-    meta: {
-      access: ACCESS_ENUM.ADMIN,
-      hideInMenu: true,
-    },
+    path: "/learn/resources",
+    redirect: (to) => ({ path: "/resources", query: to.query }),
+    meta: { hideInMenu: true },
   },
   {
-    path: "/manage/question/",
-    name: "管理题目",
-    component: ManageQuestionView,
-    meta: {
-      access: ACCESS_ENUM.ADMIN,
-    },
+    path: "/profile",
+    redirect: (to) => ({ path: "/account", query: to.query }),
+    meta: { hideInMenu: true },
+  },
+  {
+    path: "/learning/manage",
+    redirect: () => ({ path: "/teaching/assessments" }),
+    meta: { hideInMenu: true },
+  },
+  {
+    path: "/learning/teacher",
+    redirect: () => ({ path: "/teaching/overview" }),
+    meta: { hideInMenu: true },
   },
   {
     path: "/center",
-    name: "管理用户",
-    component: UserCenterView,
-    meta: {
-      access: ACCESS_ENUM.ADMIN,
-    },
+    redirect: () => ({ path: "/teaching/users" }),
+    meta: { hideInMenu: true },
   },
-  /*{
+  {
+    path: "/manage/question",
+    redirect: () => ({ path: "/teaching/experiments" }),
+    meta: { hideInMenu: true },
+  },
+  {
+    path: "/add/question",
+    redirect: () => ({ path: "/teaching/experiments" }),
+    meta: { hideInMenu: true },
+  },
+  {
     path: "/knowledgeGraph",
-    name: "知识图谱",
-    component: KnowledgeGraphView,
-    meta: {
-      hideInMenu: true,
-    },
-  },*/
-
-  // {
-  //   path: "/",
-  //   name: "主页",
-  //   component: QuestionsView,
-  // },
-  //
-  // {
-  //   path: "/hide",
-  //   name: "隐藏页面",
-  //   component: HomeView,
-  //   meta: {
-  //     hideInMenu: true,
-  //   },
-  // },
+    redirect: () => ({ path: "/graph" }),
+    meta: { hideInMenu: true },
+  },
+  {
+    path: "/knowledge-graph",
+    redirect: () => ({ path: "/graph" }),
+    meta: { hideInMenu: true },
+  },
   {
     path: "/noAuth",
     name: "无权限",
     component: NoAuthView,
-    meta: {
-      hideInMenu: true,
-    },
+    meta: { hideInMenu: true },
   },
-  // {
-  //   path: "/admin",
-  //   name: "管理员可见",
-  //   component: AdminView,
-  //   meta: {
-  //     access: ACCESS_ENUM.ADMIN,
-  //   },
-  // },
-  // {
-  //   path: "/about",
-  //   name: "关于我的",
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: () =>
-  //     import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
-  // },
 ];

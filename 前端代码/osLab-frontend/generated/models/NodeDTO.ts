@@ -4,6 +4,7 @@
 /* eslint-disable */
 export type NodeDTO = {
     category?: string;
+    chapter?: string;
     description?: string;
     id?: string;
     name?: string;

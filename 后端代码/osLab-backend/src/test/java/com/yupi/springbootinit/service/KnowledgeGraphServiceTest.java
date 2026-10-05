@@ -9,7 +9,9 @@ import org.neo4j.driver.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
@@ -71,5 +73,59 @@ class KnowledgeGraphServiceTest {
             System.out.println(node.getName());
         }
         assertNotNull(allEntityNode);
+    }
+
+    // ============ Phase 1：图谱快照契约（§5） ============
+
+    @Test
+    void snapshot_includesAllNodes() {
+        Long dbNodes = knowledgeGraphService.countByQuery("MATCH (n:Entity) RETURN count(n) AS c");
+        GraphDataDTO snapshot = knowledgeGraphService.getGraphSnapshot();
+        assertEquals(dbNodes, snapshot.getNodes().size(),
+                "快照节点数必须与 Neo4j 节点总数一致（孤立节点不得丢失）");
+    }
+
+    @Test
+    void snapshot_includesOrphanNodes() {
+        Long orphans = knowledgeGraphService.countByQuery(
+                "MATCH (n:Entity) WHERE NOT (n)--() RETURN count(n) AS c");
+        assertTrue(orphans >= 1, "测试数据应至少存在 1 个孤立节点");
+        GraphDataDTO snapshot = knowledgeGraphService.getGraphSnapshot();
+        Set<String> linkedIds = new HashSet<>();
+        snapshot.getLinks().forEach(l -> {
+            linkedIds.add(String.valueOf(l.getSource()));
+            linkedIds.add(String.valueOf(l.getTarget()));
+        });
+        long orphansInSnapshot = snapshot.getNodes().stream()
+                .filter(n -> !linkedIds.contains(n.getId()))
+                .count();
+        assertEquals(orphans, orphansInSnapshot, "所有孤立节点必须出现在快照 nodes 中");
+    }
+
+    @Test
+    void snapshot_linksDedupedAndDirectionStable() {
+        Long distinctTriples = knowledgeGraphService.countByQuery(
+                "MATCH (a:Entity)-[r]->(b:Entity) WITH id(a) AS a, id(b) AS b, type(r) AS t RETURN count(*) AS c");
+        GraphDataDTO snapshot = knowledgeGraphService.getGraphSnapshot();
+        assertEquals(distinctTriples, snapshot.getLinks().size(),
+                "快照边数必须等于 Neo4j 去重后的三元组数量（方向按存储方向）");
+    }
+
+    @Test
+    void snapshot_chapterDefaultsToUncategorized() {
+        GraphDataDTO snapshot = knowledgeGraphService.getGraphSnapshot();
+        assertFalse(snapshot.getNodes().isEmpty());
+        for (var node : snapshot.getNodes()) {
+            assertNotNull(node.getChapter(), "节点 chapter 不得为 null: " + node.getName());
+            assertFalse(node.getChapter().isBlank(), "节点 chapter 不得为空: " + node.getName());
+        }
+    }
+
+    @Test
+    void snapshot_reportsTotals() {
+        GraphDataDTO snapshot = knowledgeGraphService.getGraphSnapshot();
+        assertEquals(snapshot.getNodes().size(), snapshot.getTotalNodes());
+        assertEquals(snapshot.getLinks().size(), snapshot.getTotalLinks());
+        assertNotNull(snapshot.getChapterSummary());
     }
 }

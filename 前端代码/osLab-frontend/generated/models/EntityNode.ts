@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type EntityNode = {
+    chapter?: string;
     description?: string;
     id?: number;
     identity?: string;

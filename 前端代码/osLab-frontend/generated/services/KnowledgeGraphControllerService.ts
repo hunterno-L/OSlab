@@ -14,6 +14,21 @@ import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class KnowledgeGraphControllerService {
+    /** Update only the selected node's course chapter. */
+    public static updateNodeChapterUsingPost(
+        request: { nodeName: string; chapter: string },
+    ): CancelablePromise<BaseResponse_string_> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/knowledge_graph/updateChapter',
+            body: request,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
     /**
      * addKnowledgeGraphNode
      * @param nodeDto nodeDTO

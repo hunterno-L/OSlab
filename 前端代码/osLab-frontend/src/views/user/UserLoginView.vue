@@ -1,76 +1,199 @@
 <template>
-  <div id="userLoginView">
-    <h2 style="margin-bottom: 16px; text-align: center">用户登录</h2>
-    <a-form
-      style="max-width: 480px; margin: 0 auto"
-      label-align="left"
-      auto-label-width
-      :model="form"
-      @submit="handleSubmit"
-    >
-      <a-form-item field="userAccount" label="账号">
-        <a-input v-model="form.userAccount" placeholder="请输入账号" />
-      </a-form-item>
-      <a-form-item field="userPassword" label="密码">
-        <a-input-password
-          v-model="form.userPassword"
-          placeholder="请输入密码"
+  <div
+    id="os-auth-panel"
+    class="os-auth-panel"
+    role="tabpanel"
+    aria-labelledby="os-login-tab"
+  >
+    <h2>继续你的学习</h2>
+    <p class="os-form-subtitle">登录 OSLab，接着探索你的知识路径。</p>
+    <form autocomplete="on" novalidate @submit.prevent="handleSubmit">
+      <label class="os-field">
+        <span class="os-field-label">账号</span>
+        <input
+          id="oslab-account-input"
+          v-model="account"
+          name="userAccount"
+          type="text"
+          autocomplete="username"
+          placeholder="输入账号"
         />
-      </a-form-item>
-      <div style="display: flex; flex-direction: column; align-items: center">
-        <a-form-item style="width: 100%">
-          <a-button type="primary" html-type="submit" style="width: 100%"
-            >登录</a-button
+      </label>
+      <label class="os-field">
+        <span class="os-field-label">密码</span>
+        <span class="os-input-wrap">
+          <input
+            id="oslab-password-input"
+            v-model="password"
+            class="os-password"
+            name="userPassword"
+            :type="showPassword ? 'text' : 'password'"
+            autocomplete="current-password"
+            placeholder="输入密码"
+          />
+          <button
+            type="button"
+            class="os-eye"
+            :aria-label="showPassword ? '隐藏密码' : '显示密码'"
+            @click="showPassword = !showPassword"
           >
-        </a-form-item>
-        <a-form-item style="width: 100%">
-          <a-button @click="goToTargetPage" type="outline" style="width: 100%"
-            >注册</a-button
-          >
-        </a-form-item>
+            <svg
+              v-if="showPassword"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"
+              />
+              <path
+                d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
+              />
+              <line x1="2" y1="2" x2="22" y2="22" />
+            </svg>
+            <svg
+              v-else
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        </span>
+      </label>
+      <div class="os-form-extra">
+        <label class="os-remember">
+          <input v-model="rememberAccount" type="checkbox" />
+          记住账号
+        </label>
       </div>
-    </a-form>
+      <button type="submit" class="os-submit" :disabled="loading">
+        <span>{{ loading ? "正在登录" : "登录" }}</span>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M5 12h14" />
+          <path d="m13 6 6 6-6 6" />
+        </svg>
+      </button>
+      <p v-show="error" class="os-error" role="alert">{{ error }}</p>
+    </form>
+    <p class="os-account-note">账号用于保存你的练习、实验与学习记录。</p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive } from "vue";
-import { UserControllerService, UserLoginRequest } from "../../../generated";
-import message from "@arco-design/web-vue/es/message";
-import { useRouter } from "vue-router";
+import { inject, onMounted, ref, watch } from "vue";
+import type { Ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { UserControllerService } from "../../../generated";
+import { ROLE_HOME } from "@/navigation/appNavigation";
+import ACCESS_ENUM from "@/access/accessEnum";
 
-/**
- * 表单信息
- */
-const form = reactive({
-  userAccount: "",
-  userPassword: "",
-} as UserLoginRequest);
+const REMEMBER_KEY = "oslab:remember-account";
 
+const route = useRoute();
 const router = useRouter();
 const store = useStore();
 
+// 与注册页签共享的账号输入（由 UserLayout 提供）
+const sharedAccount = inject<Ref<string>>("oslabSharedAccount", ref(""));
+const account = ref(sharedAccount.value);
+watch(account, (value) => {
+  sharedAccount.value = value;
+});
+// 提交进行中：通知布局禁用页签切换
+const authBusy = inject<Ref<boolean>>("oslabAuthBusy", ref(false));
+const advanceFlow = inject<() => void>("oslabAdvanceFlow", () => {
+  /* 独立渲染时无知识流可推进 */
+});
+
+const password = ref("");
+const showPassword = ref(false);
+const rememberAccount = ref(false);
+const loading = ref(false);
+const error = ref("");
+
+onMounted(() => {
+  const saved = localStorage.getItem(REMEMBER_KEY);
+  if (saved && !account.value) {
+    account.value = saved;
+    rememberAccount.value = true;
+  }
+});
+
 /**
- * 提交表单
- * @param data
+ * 仅接受站内目标路径，无目标时使用当前角色默认入口。
+ */
+function resolveRedirect(raw: unknown): string {
+  if (typeof raw === "string" && raw.startsWith("/") && !raw.startsWith("//")) {
+    return raw;
+  }
+  const role = store.state.user.loginUser?.userRole;
+  return ROLE_HOME[role] || ROLE_HOME[ACCESS_ENUM.USER];
+}
+
+/**
+ * 提交表单：沿用现有登录服务与状态逻辑
  */
 const handleSubmit = async () => {
+  if (loading.value) {
+    return;
+  }
+  error.value = "";
+  if (!account.value || !password.value) {
+    error.value = "请输入账号和密码";
+    if (!account.value) {
+      document.getElementById("oslab-account-input")?.focus();
+    } else {
+      document.getElementById("oslab-password-input")?.focus();
+    }
+    return;
+  }
+  loading.value = true;
+  authBusy.value = true;
   try {
-    const res = await UserControllerService.userLoginUsingPost(form);
-    // 登录成功，跳转到主页
+    const res = await UserControllerService.userLoginUsingPost({
+      userAccount: account.value,
+      userPassword: password.value,
+    });
     if (res.code === 0 && res.data) {
+      if (rememberAccount.value) {
+        localStorage.setItem(REMEMBER_KEY, account.value);
+      } else {
+        localStorage.removeItem(REMEMBER_KEY);
+      }
       await store.dispatch("user/getLoginUser");
       localStorage.setItem("userId", String(res.data.id));
-      await router.replace({ path: "/" });
+      // 成功后让知识流向前推进一小段再切换路由（总额外延迟 ≤200ms）
+      advanceFlow();
+      await new Promise((resolve) => setTimeout(resolve, 160));
+      await router.replace(resolveRedirect(route.query.redirect));
       return;
     }
-    message.error(`登录失败：${res.message || "请检查账号和密码"}`);
+    error.value = `登录失败：${res.message || "请检查账号和密码"}`;
   } catch {
-    message.error("登录请求未完成，请检查网络连接后重试");
+    error.value = "登录请求未完成，请检查网络连接后重试";
+  } finally {
+    loading.value = false;
+    authBusy.value = false;
   }
-};
-const goToTargetPage = () => {
-  router.push({ path: "/user/register" }); // 根据路由名称进行跳转
 };
 </script>

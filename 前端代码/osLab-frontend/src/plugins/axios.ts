@@ -31,7 +31,10 @@ axios.interceptors.response.use(
         if (res.code === NOT_LOGIN_CODE) {
           // 未登录：提示并跳转登录页（保留回跳地址；登录/注册页自身不跳转，避免死循环）
           const path = window.location.pathname;
-          if (!path.startsWith("/user/login") && !path.startsWith("/user/register")) {
+          if (
+            !path.startsWith("/user/login") &&
+            !path.startsWith("/user/register")
+          ) {
             Message.warning("请先登录");
             const redirect = encodeURIComponent(
               window.location.pathname + window.location.search
@@ -51,7 +54,10 @@ axios.interceptors.response.use(
       if (status === 401) {
         // HTTP 401：会话过期或未认证
         const path = window.location.pathname;
-        if (!path.startsWith("/user/login") && !path.startsWith("/user/register")) {
+        if (
+          !path.startsWith("/user/login") &&
+          !path.startsWith("/user/register")
+        ) {
           Message.warning("登录已过期，请重新登录");
           window.location.href = "/user/login";
         }

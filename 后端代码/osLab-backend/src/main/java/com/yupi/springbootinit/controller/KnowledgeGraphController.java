@@ -42,8 +42,8 @@ public class KnowledgeGraphController {
     @GetMapping("/getAll")
     public BaseResponse<GraphDataDTO> getAllKnowledgeGraphData()
     {
-        List<KnowledgeGraphNode> allKnowledgeGraph = knowledgeGraphService.getAllKnowledgeGraph();
-        GraphDataDTO graphDataDTO=knowledgeGraphService.convertToEChartsFormat(allKnowledgeGraph);
+        // Phase 1：全量接口改用一次性快照（保留孤立节点、边去重、含 chapter/统计）
+        GraphDataDTO graphDataDTO = knowledgeGraphService.getGraphSnapshot();
         return ResultUtils.success(graphDataDTO);
     }
     @GetMapping("/getNames")
@@ -65,6 +65,12 @@ public class KnowledgeGraphController {
     {
         EntityNode entityNode = knowledgeGraphService.saveKnowledgeGraphNode(nodeDTO);
         return ResultUtils.success(entityNode);
+    }
+    @PostMapping("/updateChapter")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<String> updateNodeChapter(@RequestBody UpdateNodeChapterRequest request) {
+        knowledgeGraphService.updateNodeChapter(request);
+        return ResultUtils.success("章节已更新");
     }
     @PostMapping("/delete")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)

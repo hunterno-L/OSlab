@@ -13,14 +13,14 @@
       >
         <!-- 机器人头像（左侧） -->
         <div v-if="message.sender === 'bot'" class="avatar bot-avatar">
-          <RobotOutlined />
+          <IconRobot />
         </div>
 
         <div class="bubble">{{ message.text }}</div>
 
         <!-- 用户头像（右侧） -->
         <div v-if="message.sender === 'user'" class="avatar user-avatar">
-          <UserOutlined />
+          <IconUser />
         </div>
       </div>
     </div>
@@ -39,12 +39,12 @@
 
 <script>
 import { ChatControllerService } from "../../generated";
-import { RobotOutlined, UserOutlined } from "@ant-design/icons-vue";
+import { IconRobot, IconUser } from "@arco-design/web-vue/es/icon";
 
 export default {
   components: {
-    RobotOutlined,
-    UserOutlined,
+    IconRobot,
+    IconUser,
   },
   data: function () {
     return {

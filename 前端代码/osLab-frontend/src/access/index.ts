@@ -6,10 +6,14 @@ import checkAccess from "@/access/checkAccess";
 router.beforeEach(async (to, from, next) => {
   console.log("登陆用户信息", store.state.user.loginUser);
   let loginUser = store.state.user.loginUser;
-  // // 如果之前没登陆过，自动登录
+  // 如果之前没登陆过，自动登录。后端不可达时不得让导航失败（否则所有页面
+  // 都会渲染成空白 router-view）；按未登录处理，由页面自身的登录跳转兜底。
   if (!loginUser || !loginUser.userRole) {
-    // 加 await 是为了等用户登录成功之后，再执行后续的代码
-    await store.dispatch("user/getLoginUser");
+    try {
+      await store.dispatch("user/getLoginUser");
+    } catch (e) {
+      console.warn("[access] 获取登录态失败，按未登录处理", e);
+    }
     loginUser = store.state.user.loginUser;
   }
   const needAccess = (to.meta?.access as string) ?? ACCESS_ENUM.NOT_LOGIN;

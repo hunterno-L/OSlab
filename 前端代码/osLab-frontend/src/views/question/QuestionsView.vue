@@ -1,75 +1,168 @@
 <template>
-  <div id="questionsView">
-    <a-form :model="searchParams" layout="inline">
-      <a-form-item field="title" label="名称" style="min-width: 240px">
-        <a-input v-model="searchParams.title" placeholder="请输入名称" />
-      </a-form-item>
-      <a-form-item field="tags" label="标签" style="min-width: 240px">
-        <a-input-tag v-model="searchParams.tags" placeholder="请输入标签" />
-      </a-form-item>
-      <a-form-item>
-        <a-button type="primary" @click="doSubmit">提交</a-button>
-      </a-form-item>
-    </a-form>
-    <a-divider />
-    <a-table
-      :ref="tableRef"
-      :columns="columns"
-      :data="dataList"
-      :pagination="{
-        showTotal: true,
-        pageSize: searchParams.pageSize,
-        current: searchParams.current,
-        total,
-      }"
-      @page-change="onPageChange"
-    >
-      <template #tags="{ record }">
-        <a-space wrap>
-          <a-tag v-for="(tag, index) of record.tags" :key="index" color="green"
-            >{{ tag }}
-          </a-tag>
-        </a-space>
-      </template>
-      <template #acceptedRate="{ record }">
-        {{
-          `${
-            record.submitNum ? record.acceptedNum / record.submitNum : "0"
-          }% (${record.acceptedNum}/${record.submitNum})`
-        }}
-      </template>
-      <template #createTime="{ record }">
-        {{ moment(record.createTime).format("YYYY-MM-DD") }}
-      </template>
-      <template #optional="{ record }">
-        <a-space>
-          <a-button type="primary" @click="toQuestionPage(record)">
-            做题
-          </a-button>
-        </a-space>
-      </template>
-    </a-table>
+  <div class="experiments-catalog">
+    <div class="page-intro">
+      <div>
+        <div class="eyebrow">EXPERIMENTS</div>
+        <h1>实验中心</h1>
+      </div>
+      <div class="intro-metric">
+        <strong>{{ total }}</strong>
+        <span>{{ selectedChapter ? "本章实验" : "当前结果" }}</span>
+      </div>
+    </div>
+
+    <a-alert v-if="nodeFilter" class="context-alert">
+      当前节点：<b>{{ nodeFilter }}</b>
+      <a-button type="text" size="small" @click="clearNodeFilter"
+        >清除节点筛选</a-button
+      >
+    </a-alert>
+
+    <div class="experiment-grid">
+      <aside class="chapter-nav">
+        <div class="chapter-nav-title">章节目录</div>
+        <a-spin :loading="chaptersLoading" style="width: 100%">
+          <button
+            class="chapter-item"
+            :class="{ active: !selectedChapterId }"
+            type="button"
+            @click="selectChapter(null)"
+          >
+            <span>全部实验</span>
+            <span class="chapter-count">{{ allTotalLabel }}</span>
+          </button>
+          <button
+            v-for="chapter in chapters"
+            :key="chapter.id"
+            class="chapter-item"
+            :class="{ active: selectedChapterId === chapter.id }"
+            type="button"
+            @click="selectChapter(chapter.id)"
+          >
+            <span>{{ chapter.setName || "未命名章节" }}</span>
+            <span class="chapter-count">{{ chapterCount(chapter) }}</span>
+          </button>
+          <a-empty
+            v-if="!chaptersLoading && !chapters.length"
+            description="暂无章节"
+          />
+        </a-spin>
+      </aside>
+
+      <section class="experiment-main">
+        <div class="experiment-section">
+          <div class="section-heading">
+            <div>
+              <h2>{{ selectedChapter || "编程实验" }}</h2>
+              <span v-if="selectedChapter" class="side-hint">本章实验列表</span>
+            </div>
+          </div>
+          <a-form
+            :model="searchParams"
+            layout="inline"
+            class="experiment-filter"
+          >
+            <a-form-item field="title" label="名称">
+              <a-input
+                v-model="searchParams.title"
+                allow-clear
+                placeholder="输入实验名称"
+              />
+            </a-form-item>
+            <a-form-item field="tags" label="节点">
+              <a-input-tag
+                v-model="searchParams.tags"
+                allow-clear
+                placeholder="输入节点名称"
+              />
+            </a-form-item>
+            <a-form-item>
+              <a-space>
+                <a-button
+                  type="primary"
+                  :loading="experimentsLoading"
+                  @click="doSearch"
+                  ><template #icon><icon-search /></template>查询</a-button
+                >
+                <a-tooltip content="重置筛选">
+                  <a-button aria-label="重置筛选" @click="clearSearch">
+                    <template #icon><icon-refresh /></template>
+                  </a-button>
+                </a-tooltip>
+              </a-space>
+            </a-form-item>
+          </a-form>
+          <a-table
+            row-key="id"
+            :columns="columns"
+            :data="dataList"
+            :loading="experimentsLoading"
+            :pagination="false"
+            :scroll="{ x: 760 }"
+          >
+            <template #tags="{ record }">
+              <a-space v-if="record.tags?.length" wrap size="mini">
+                <a-tag v-for="tag in record.tags" :key="tag" color="gray">{{
+                  tag
+                }}</a-tag>
+              </a-space>
+              <span v-else class="side-hint">未标注</span>
+            </template>
+            <template #acceptedRate="{ record }">
+              {{ acceptedRate(record) }}
+            </template>
+            <template #createTime="{ record }">
+              {{ formatDate(record.createTime) }}
+            </template>
+            <template #action="{ record }">
+              <a-button type="text" size="small" @click="toQuestionPage(record)"
+                >进入实验</a-button
+              >
+            </template>
+          </a-table>
+          <div class="table-footer">
+            <span class="side-hint">共 {{ total }} 个实验</span>
+            <a-pagination
+              v-if="!selectedChapterId"
+              v-model:current="searchParams.current"
+              :page-size="searchParams.pageSize"
+              :total="total"
+              show-total
+              @change="onPageChange"
+            />
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watchEffect } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
+import { Message } from "@arco-design/web-vue";
+import { useRoute, useRouter } from "vue-router";
 import {
-  Page_Question_,
-  Question,
   QuestionControllerService,
-  QuestionQueryRequest,
+  type QuestionQueryRequest,
+  type QuestionSets,
+  type QuestionVO,
 } from "../../../generated";
-import message from "@arco-design/web-vue/es/message";
-import * as querystring from "querystring";
-import { useRouter } from "vue-router";
-import moment from "moment";
-const position = ref("left");
 
-const tableRef = ref();
-
-const dataList = ref([]);
+const route = useRoute();
+const router = useRouter();
+const chapters = ref<QuestionSets[]>([]);
+const chaptersLoading = ref(false);
+const experimentsLoading = ref(false);
+const selectedChapterId = ref<number | null>(null);
+const dataList = ref<QuestionVO[]>([]);
 const total = ref(0);
+const allExperimentsTotal = ref<number | null>(null);
+const nodeFilter = ref("");
+const chapterQuestions = reactive<Record<number, QuestionVO[]>>({});
+const chapterLoading = reactive<Record<number, boolean>>({});
+const chapterRequests = new Map<number, Promise<QuestionVO[] | null>>();
+let loadSequence = 0;
+
 const searchParams = ref<QuestionQueryRequest>({
   title: "",
   tags: [],
@@ -77,95 +170,386 @@ const searchParams = ref<QuestionQueryRequest>({
   current: 1,
 });
 
-const loadData = async () => {
-  const res = await QuestionControllerService.listQuestionVoByPageUsingPost(
-    searchParams.value
-  );
-  if (res.code === 0) {
-    dataList.value = res.data.records;
-    total.value = res.data.total;
-  } else {
-    message.error("加载失败，" + res.message);
+const columns = [
+  { title: "实验名称", dataIndex: "title", width: 270 },
+  { title: "关联节点", slotName: "tags", minWidth: 220 },
+  { title: "通过率", slotName: "acceptedRate", width: 110 },
+  { title: "更新日期", slotName: "createTime", width: 120 },
+  { title: "操作", slotName: "action", width: 100 },
+];
+
+const selectedChapter = computed(
+  () =>
+    chapters.value.find((chapter) => chapter.id === selectedChapterId.value)
+      ?.setName || ""
+);
+
+const allTotalLabel = computed(() => {
+  return allExperimentsTotal.value === null ? "—" : allExperimentsTotal.value;
+});
+
+const chapterCount = (chapter: QuestionSets) => {
+  if (chapter.id === undefined) return "—";
+  if (chapterLoading[chapter.id]) return "…";
+  return chapterQuestions[chapter.id]
+    ? chapterQuestions[chapter.id].length
+    : "—";
+};
+
+const routeValue = (value: unknown) =>
+  Array.isArray(value)
+    ? String(value[0] || "")
+    : typeof value === "string"
+    ? value
+    : "";
+
+const loadChapterQuestions = (
+  chapter: QuestionSets
+): Promise<QuestionVO[] | null> => {
+  const id = chapter.id;
+  if (id === undefined) return Promise.resolve(null);
+  if (chapterQuestions[id] !== undefined)
+    return Promise.resolve(chapterQuestions[id]);
+  const pending = chapterRequests.get(id);
+  if (pending) return pending;
+  chapterLoading[id] = true;
+  const request = (async () => {
+    try {
+      const res = await QuestionControllerService.getQuestionBySetsUsingGet(id);
+      if (res.code === 0) {
+        const rows = res.data || [];
+        chapterQuestions[id] = rows;
+        return rows;
+      }
+      Message.error(`加载章节实验失败：${res.message || "未知错误"}`);
+    } catch (error) {
+      Message.error("加载章节实验失败，请稍后重试");
+    } finally {
+      chapterLoading[id] = false;
+      chapterRequests.delete(id);
+    }
+    return null;
+  })();
+  chapterRequests.set(id, request);
+  return request;
+};
+
+const loadChapters = async () => {
+  chaptersLoading.value = true;
+  try {
+    const res = await QuestionControllerService.getQuestionSetsUsingGet();
+    if (res.code === 0) {
+      chapters.value = res.data || [];
+    } else {
+      Message.error(`加载章节失败：${res.message || "未知错误"}`);
+    }
+  } catch (error) {
+    Message.error("加载章节失败，请稍后重试");
+  } finally {
+    chaptersLoading.value = false;
   }
 };
 
-/**
- * 监听 searchParams 变量，改变时触发页面的重新加载
- */
-watchEffect(() => {
-  loadData();
-});
-
-/**
- * 页面加载时，请求数据
- */
-onMounted(() => {
-  loadData();
-});
-
-// {id: "1", title: "A+ D", content: "新的题目内容", tags: "["二叉树"]", answer: "新的答案", submitNum: 0,…}
-
-const columns = [
-  {
-    title: "题号",
-    dataIndex: "id",
-  },
-  {
-    title: "题目名称",
-    dataIndex: "title",
-  },
-  {
-    title: "标签",
-    slotName: "tags",
-  },
-  {
-    title: "通过率",
-    slotName: "acceptedRate",
-  },
-  {
-    title: "创建时间",
-    slotName: "createTime",
-  },
-  {
-    slotName: "optional",
-  },
-];
-
-const onPageChange = (page: number) => {
-  searchParams.value = {
-    ...searchParams.value,
-    current: page,
-  };
-};
-
-const router = useRouter();
-
-/**
- * 跳转到做题页面
- * @param question
- */
-const toQuestionPage = (question: Question) => {
-  router.push({
-    path: `/view/question/${question.id}`,
+const filteredChapterRows = (rows: QuestionVO[]) => {
+  const keyword = (searchParams.value.title || "").trim().toLowerCase();
+  const tags = (searchParams.value.tags || [])
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+  return rows.filter((question) => {
+    const titleMatches =
+      !keyword || (question.title || "").toLowerCase().includes(keyword);
+    const questionTags = question.tags || [];
+    const tagsMatch = tags.every((tag) => questionTags.includes(tag));
+    const nodeMatches =
+      !nodeFilter.value || questionTags.includes(nodeFilter.value);
+    return titleMatches && tagsMatch && nodeMatches;
   });
-  // window.open(`/view/question/${question.id}`, "_blank");
 };
 
-/**
- * 确认搜索，重新加载数据
- */
-const doSubmit = () => {
-  // 这里需要重置搜索页号
+const loadData = async () => {
+  const sequence = ++loadSequence;
+  experimentsLoading.value = true;
+  try {
+    if (selectedChapterId.value !== null) {
+      const chapter = chapters.value.find(
+        (item) => item.id === selectedChapterId.value
+      );
+      if (!chapter) return;
+      const rows = await loadChapterQuestions(chapter);
+      if (sequence !== loadSequence) return;
+      if (!rows) {
+        dataList.value = [];
+        total.value = 0;
+        return;
+      }
+      dataList.value = filteredChapterRows(rows);
+      total.value = dataList.value.length;
+      return;
+    }
+    const tags = Array.from(
+      new Set(
+        [...(searchParams.value.tags || []), nodeFilter.value].filter(Boolean)
+      )
+    );
+    const request: QuestionQueryRequest = {
+      ...searchParams.value,
+      tags,
+    };
+    const res = await QuestionControllerService.listQuestionVoByPageUsingPost(
+      request
+    );
+    if (sequence !== loadSequence) return;
+    if (res.code === 0) {
+      dataList.value = res.data?.records || [];
+      total.value = res.data?.total || 0;
+      if (!request.title && !tags.length)
+        allExperimentsTotal.value = total.value;
+    } else {
+      Message.error(`加载实验失败：${res.message || "未知错误"}`);
+    }
+  } catch (error) {
+    if (sequence === loadSequence) Message.error("加载实验失败，请稍后重试");
+  } finally {
+    if (sequence === loadSequence) experimentsLoading.value = false;
+  }
+};
+
+const syncRouteQuery = () => {
+  nodeFilter.value = routeValue(route.query.nodeName);
+  const requestedChapter = routeValue(route.query.chapter);
+  const matched = chapters.value.find(
+    (chapter) => chapter.setName === requestedChapter
+  );
+  selectedChapterId.value = matched?.id ?? null;
+  void loadData();
+};
+
+const selectChapter = (id: number | null) => {
+  const chapter = chapters.value.find((item) => item.id === id);
+  router.replace({
+    query: {
+      ...route.query,
+      chapter: chapter?.setName || undefined,
+    },
+  });
+};
+
+const clearNodeFilter = () => {
+  const nextQuery = { ...route.query };
+  delete nextQuery.nodeName;
+  router.replace({ query: nextQuery });
+};
+
+const doSearch = () => {
+  searchParams.value.current = 1;
+  void loadData();
+};
+
+const clearSearch = () => {
   searchParams.value = {
     ...searchParams.value,
+    title: "",
+    tags: [],
     current: 1,
   };
+  void loadData();
 };
+
+const onPageChange = (page: number) => {
+  searchParams.value.current = page;
+  void loadData();
+};
+
+const toQuestionPage = (question: QuestionVO) => {
+  if (question.id === undefined || question.id === null) {
+    Message.error("实验编号缺失，无法进入工作区");
+    return;
+  }
+  const query: Record<string, string> = {
+    source: "experiments",
+    returnTo: route.fullPath,
+  };
+  if (nodeFilter.value) query.nodeName = nodeFilter.value;
+  if (selectedChapter.value) query.chapter = selectedChapter.value;
+  router.push({ path: `/experiments/code/${question.id}`, query });
+};
+
+const acceptedRate = (question: QuestionVO) => {
+  const submits = question.submitNum || 0;
+  if (!submits) return "暂无数据";
+  return `${Math.round(((question.acceptedNum || 0) / submits) * 100)}%`;
+};
+
+const formatDate = (value?: string) => (value ? value.slice(0, 10) : "—");
+
+watch(
+  () => route.query,
+  () => syncRouteQuery(),
+  { deep: true }
+);
+
+onMounted(async () => {
+  await loadChapters();
+  syncRouteQuery();
+});
 </script>
 
 <style scoped>
-#questionsView {
-  max-width: 90%;
+.experiments-catalog {
+  max-width: 1280px;
   margin: 0 auto;
+  padding: 4px 0 28px;
+}
+.page-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+.eyebrow {
+  color: var(--oslab-primary, #165dff);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.page-intro h1 {
+  margin: 4px 0 6px;
+  color: var(--oslab-text-title, #1d2129);
+  font-size: 24px;
+}
+.page-intro p {
+  margin: 0;
+  color: var(--oslab-text-secondary, #86909c);
+  font-size: 13px;
+}
+.intro-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: var(--oslab-text-secondary, #86909c);
+  font-size: 12px;
+}
+.intro-metric strong {
+  color: var(--oslab-text-title, #1d2129);
+  font-size: 24px;
+  line-height: 1;
+}
+.context-alert {
+  margin-bottom: 14px;
+}
+.experiment-grid {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.chapter-nav {
+  background: var(--oslab-panel, #fff);
+  border: 1px solid var(--oslab-border, #e5e6eb);
+  border-radius: var(--oslab-radius-lg, 8px);
+}
+.chapter-nav {
+  position: sticky;
+  top: 12px;
+  padding: 12px;
+}
+.chapter-nav-title {
+  padding: 2px 8px 10px;
+  color: var(--oslab-text-title, #1d2129);
+  font-size: 14px;
+  font-weight: 600;
+}
+.chapter-item {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin: 2px 0;
+  padding: 9px 8px;
+  border: 0;
+  border-radius: var(--oslab-radius-md, 6px);
+  background: transparent;
+  color: var(--oslab-text-body, #4e5969);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.chapter-item:hover,
+.chapter-item.active {
+  background: #f2f7ff;
+  color: var(--oslab-primary, #165dff);
+}
+.chapter-count {
+  color: var(--oslab-text-secondary, #86909c);
+  font-size: 12px;
+}
+.experiment-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.experiment-section {
+  padding: 16px 18px;
+  background: var(--oslab-panel, #fff);
+  border-bottom: 1px solid var(--oslab-border, #e5e6eb);
+}
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.section-heading h2 {
+  margin: 0 0 4px;
+  color: var(--oslab-text-title, #1d2129);
+  font-size: 15px;
+}
+.experiment-filter {
+  margin-bottom: 14px;
+}
+.experiment-filter :deep(.arco-form-item) {
+  margin-bottom: 0;
+}
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+}
+.experiment-section :deep(.arco-table-th) {
+  background: var(--oslab-panel-sub, #f7f8fa);
+  color: var(--oslab-text-secondary, #86909c);
+  font-size: 12px;
+}
+.experiment-section :deep(.arco-table-td) {
+  color: var(--oslab-text-body, #4e5969);
+  font-size: 13px;
+}
+.side-hint {
+  color: var(--oslab-text-secondary, #86909c);
+  font-size: 12px;
+  line-height: 1.6;
+}
+@media (max-width: 880px) {
+  .experiment-grid {
+    grid-template-columns: 1fr;
+  }
+  .chapter-nav {
+    position: static;
+  }
+}
+@media (max-width: 640px) {
+  .page-intro,
+  .section-heading,
+  .table-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .intro-metric {
+    align-items: flex-start;
+  }
 }
 </style>

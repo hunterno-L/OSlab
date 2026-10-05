@@ -52,7 +52,7 @@
           <a-space>
             <a-button type="primary" @click="doSubmit">搜索</a-button>
             <a-button @click="showModal">
-              <template #icon><PlusOutlined /></template>
+              <template #icon><IconPlus /></template>
               新增学生</a-button
             >
           </a-space>
@@ -98,7 +98,7 @@
         >
         <div class="add-batch">
           <div class="tips">
-            <QuestionCircleTwoTone />
+            <IconQuestionCircle />
             <p>
               上传的表格必须包含列名“班级”、“学号”、“姓名”，上传成功后会下载学生账号信息注意查收
             </p>
@@ -177,8 +177,8 @@ import {
   type StudentVO,
   UserControllerService,
 } from "../../../generated";
-import { message } from "ant-design-vue";
-import { QuestionCircleTwoTone, PlusOutlined } from "@ant-design/icons-vue";
+import { Message } from "@arco-design/web-vue";
+import { IconPlus, IconQuestionCircle } from "@arco-design/web-vue/es/icon";
 
 // 用户角色映射
 const userRoleMap: Record<string, string> = {
@@ -208,7 +208,7 @@ const addStudent = async () => {
     studentForm.value
   );
   if (res.code === 0) {
-    message.success("添加成功");
+    Message.success("添加成功");
     addStudentDetail.value = res.data;
     addStudentVisible.value = false;
     afterSubmitVisible.value = true;
@@ -219,7 +219,7 @@ const addStudent = async () => {
     };
     loadUserData();
   } else {
-    message.error("添加失败：", res.message);
+    Message.error("添加失败：", res.message);
   }
 };
 
@@ -342,10 +342,10 @@ const fetchStudents = async () => {
       students.value = response.data.records;
       total.value = response.data.total;
     } else {
-      message.error(response.message);
+      Message.error(response.message);
     }
   } catch (error) {
-    message.error("请求失败");
+    Message.error("请求失败");
   } finally {
     loading.value = false;
   }
@@ -367,23 +367,23 @@ const deleteStudent = async (id: number) => {
   try {
     const res = await StudentsControllerService.deleteStudentUsingPost(id);
     if (res.code === 0) {
-      message.success("删除成功");
+      Message.success("删除成功");
       await fetchStudents();
     } else {
-      message.error("删除失败: " + res.message);
+      Message.error("删除失败: " + res.message);
     }
   } catch (error) {
-    message.error("请求失败，请重试");
+    Message.error("请求失败，请重试");
   }
 };
 const resetPassword = async (id: number) => {
   const res = await StudentsControllerService.resetPasswordUsingPost(id);
   if (res.code === 0) {
-    message.success("找回密码成功");
+    Message.success("找回密码成功");
     afterSubmitVisible.value = true;
     addStudentDetail.value = res.data;
   } else {
-    message.error("找回密码失败" + res.message);
+    Message.error("找回密码失败" + res.message);
   }
 };
 </script>

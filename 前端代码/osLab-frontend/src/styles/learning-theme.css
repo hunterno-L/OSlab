@@ -1,0 +1,341 @@
+/* =========================================================
+ * OSLab 学习工作区设计令牌（log2 OpenDesign 视觉基线，阶段 1）
+ * 基线文档：docs/log2-OpenDesign视觉与交互设计.md §3/§4
+ * 参考体系：OpenDesign Notion（中性工作区、细边线）+ Expo（工具密度），
+ * 主蓝为 OSLab 品牌适配 #2059c9；状态色只表达学习状态/结果，不用于装饰。
+ *
+ * 本文件分五层，页面组件只引用第 1 层变量：
+ *   1) 设计令牌（:root）—— 颜色/字体/字号/间距/圆角/动效
+ *   2) 基础元素 —— body 字体与焦点轮廓
+ *   3) Arco 桥接（body）—— 把 Arco 主色/语义色 RGB 三元组对齐到本套令牌，
+ *      使 a-button/link/checkbox/分页/消息等与 OSLab 蓝一致（hover/active 取
+ *      --oslab-primary-hover 深蓝，与设计文档"主蓝 hover 加深"一致）
+ *   4) 兼容别名 —— 旧变量名继续可用、值指向新令牌；仅作迁移过渡，
+ *      新代码禁止再使用别名（--oslab-text-body 见下方特别注意）
+ *   5) 兜底类与通用状态类 —— .section-card/.graph-card/.detail-card/
+ *      .node-header/.side-hint/.hint 保留原类名并按新令牌重定义；
+ *      .oslab-empty/.oslab-loading/.oslab-error/.oslab-spinner 为阶段 2-6
+ *      统一的空数据/加载/错误态基类；.oslab-status-tag(--mastered/--review/
+ *      --weak/--unseen) 为掌握状态标签；.oslab-page-title/.oslab-section-title
+ *      为标题层级；.oslab-mono 用于代码/ID/算法序列。
+ *
+ * 约定：主蓝只用于当前项与主动作；hover 只改背景或边线；选中用蓝边线+
+ * 浅蓝背景；过渡 150-200ms cubic-bezier(0.645,0.045,0.355,1)，无弹跳动画；
+ * 容器圆角 8px、控件 6px、状态标签 999px；只有浮层允许极浅阴影。
+ * ========================================================= */
+
+/* ---------- 1) 设计令牌 ---------- */
+:root {
+  /* 画布与面板（Notion 中性基底） */
+  --oslab-canvas: #f7f7f5;
+  --oslab-panel: #ffffff;
+  --oslab-panel-soft: #f9f9f8;
+
+  /* 文本 */
+  --oslab-ink: #1b1b1b;
+  --oslab-ink-soft: #37352f;
+  --oslab-muted: #a39e98;
+  /* 支持令牌：比 muted 深一档的次要文本色，保证 12-14px 说明文字可读性 */
+  --oslab-muted-strong: #757069;
+
+  /* 边线：低对比度细线，面板 1px */
+  --oslab-line: rgba(0, 0, 0, 0.11);
+  --oslab-line-soft: rgba(0, 0, 0, 0.06);
+
+  /* 品牌蓝：只用于当前导航项、主按钮、选中态、学习路径与链接 */
+  --oslab-primary: #2059c9;
+  --oslab-primary-soft: #eaf0fd;
+  --oslab-primary-hover: #1748a6;
+
+  /* 语义状态色（不用于装饰）：已掌握/待巩固/薄弱/未学习 */
+  --oslab-mastered: #4f8875;
+  --oslab-mastered-soft: #e9f1ed;
+  --oslab-review: #b98239;
+  --oslab-review-soft: #f6eddf;
+  --oslab-weak: #a9695d;
+  --oslab-weak-soft: #f5eae7;
+  --oslab-unseen: #8f9994;
+  --oslab-unseen-soft: #f0f2f0;
+  /* 破坏性操作红色状态 = 状态色体系中的红褐，不另设鲜艳红 */
+  --oslab-danger: var(--oslab-weak);
+
+  /* 字体：界面无衬线，代码/ID/算法序列等宽 */
+  --oslab-font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+  --oslab-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* 字号：页面标题 26px（节点标题最多 28px）、区块 18px、正文 14px、辅助 12px */
+  --oslab-text-display: 32px;
+  --oslab-text-page: 26px;
+  --oslab-text-section: 18px;
+  --oslab-text-small: 12px;
+  --oslab-leading-body: 1.55;
+  /* 注意：设计文档 §3.2 的正文字号 14px 在本项目中暴露为 --oslab-font-body。
+     名为 --oslab-text-body 的变量是旧版"正文文本颜色"别名（13 处现有视图在
+     用，见第 4 层），阶段 2-6 重写各页时会随视图一起移除；待旧引用清零后可
+     再把字号迁回 --oslab-text-body。 */
+  --oslab-font-body: 14px;
+
+  /* 间距（4px 基准）：4/8/12/16/24/32/48 */
+  --oslab-space-1: 4px;
+  --oslab-space-2: 8px;
+  --oslab-space-3: 12px;
+  --oslab-space-4: 16px;
+  --oslab-space-6: 24px;
+  --oslab-space-8: 32px;
+  --oslab-space-12: 48px;
+
+  /* 圆角：容器 8px、输入和按钮 6px、状态标签 999px；禁止超过 12px */
+  --oslab-radius-sm: 4px;
+  --oslab-radius-md: 6px;
+  --oslab-radius-lg: 8px;
+  --oslab-radius-container: var(--oslab-radius-lg);
+  --oslab-radius-control: var(--oslab-radius-md);
+  --oslab-radius-pill: 999px;
+
+  /* 动效：150-200ms，cubic-bezier(0.645, 0.045, 0.355, 1)，无弹跳 */
+  --oslab-ease: cubic-bezier(0.645, 0.045, 0.355, 1);
+  --oslab-duration-fast: 150ms;
+  --oslab-duration: 200ms;
+
+  /* 浮层阴影：仅弹层/下拉允许，页面主体不依赖阴影分区 */
+  --oslab-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- 2) 基础元素 ---------- */
+body {
+  font-family: var(--oslab-font-ui);
+  font-size: var(--oslab-font-body);
+  line-height: var(--oslab-leading-body);
+  color: var(--oslab-ink);
+}
+
+/* 键盘可达性：焦点统一 2px 蓝色轮廓（设计文档 §10） */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: 1px;
+}
+
+/* ---------- 3) Arco 桥接 ---------- */
+body {
+  /* Arco 在 body 上以 "R, G, B" 三元组定义色阶（--arcoblue-N/--red-N/...），
+     组件再经 --primary-N/--danger-N 等语义别名消费。这里覆盖四个与本产品
+     相关的色阶三元组：主蓝对齐 #2059c9，危险红/成功绿/警示琥珀对齐语义
+     状态色系。hover(-5)/active(-7) 取加深色，与 --oslab-primary-hover 一致。
+     浅阶(1-3)取对应 soft 色的邻近过渡，用于焦点环、浅底和禁用态。
+     本段覆盖必须在 arco.css 之后加载（main.ts 的 import 顺序已保证）。 */
+
+  /* Primary → OSLab 蓝 */
+  --arcoblue-1: 234, 240, 253;
+  --arcoblue-2: 214, 226, 252;
+  --arcoblue-3: 166, 188, 236;
+  --arcoblue-4: 106, 139, 219;
+  --arcoblue-5: 23, 72, 166;
+  --arcoblue-6: 32, 89, 201;
+  --arcoblue-7: 23, 72, 166;
+  --arcoblue-8: 18, 55, 126;
+  --arcoblue-9: 13, 39, 88;
+  --arcoblue-10: 8, 23, 50;
+
+  /* Danger → 薄弱红褐 #a9695d */
+  --red-1: 245, 234, 231;
+  --red-2: 238, 216, 211;
+  --red-3: 219, 183, 176;
+  --red-4: 194, 144, 134;
+  --red-5: 143, 85, 75;
+  --red-6: 169, 105, 93;
+  --red-7: 143, 85, 75;
+  --red-8: 107, 58, 51;
+  --red-9: 71, 37, 32;
+  --red-10: 43, 21, 18;
+
+  /* Success → 已掌握绿 #4f8875 */
+  --green-1: 233, 241, 237;
+  --green-2: 214, 229, 222;
+  --green-3: 179, 205, 192;
+  --green-4: 129, 171, 155;
+  --green-5: 63, 109, 94;
+  --green-6: 79, 136, 117;
+  --green-7: 63, 109, 94;
+  --green-8: 46, 82, 70;
+  --green-9: 30, 55, 47;
+  --green-10: 17, 31, 27;
+
+  /* Warning → 待巩固琥珀 #b98239 */
+  --orange-1: 246, 237, 223;
+  --orange-2: 238, 222, 199;
+  --orange-3: 220, 199, 163;
+  --orange-4: 202, 171, 115;
+  --orange-5: 150, 104, 44;
+  --orange-6: 185, 130, 57;
+  --orange-7: 150, 104, 44;
+  --orange-8: 112, 77, 32;
+  --orange-9: 74, 51, 21;
+  --orange-10: 43, 30, 12;
+}
+
+/* ---------- 4) 旧变量名兼容别名（迁移过渡，勿新增使用） ---------- */
+:root {
+  /* 表面与边线 */
+  --oslab-panel-sub: var(--oslab-panel-soft);
+  --oslab-border: var(--oslab-line);
+  --oslab-divider: var(--oslab-line-soft);
+
+  /* 文本（--oslab-text-body 是"颜色"别名，不是字号；字号用 --oslab-font-body） */
+  --oslab-text-title: var(--oslab-ink);
+  --oslab-text-body: var(--oslab-ink-soft);
+  --oslab-text-secondary: var(--oslab-muted-strong);
+  --oslab-text-disabled: #c5c1ba;
+
+  /* 状态色旧名 */
+  --oslab-status-green: var(--oslab-mastered);
+  --oslab-status-amber: var(--oslab-review);
+  --oslab-status-red: var(--oslab-weak);
+  --oslab-status-gray: var(--oslab-unseen);
+  --oslab-green-bg: var(--oslab-mastered-soft);
+  --oslab-amber-bg: var(--oslab-review-soft);
+  --oslab-red-bg: var(--oslab-weak-soft);
+  --oslab-pass-border: #cadbd5;
+  --oslab-fail-border: #e5cbce;
+
+  /* 字号旧名（原 20px 标题字号收敛到区块级 18px） */
+  --oslab-font-title: var(--oslab-text-section);
+  --oslab-font-section: var(--oslab-text-section);
+  --oslab-font-hint: var(--oslab-text-small);
+}
+
+/* ---------- 5) 兜底类与通用状态类 ---------- */
+/* 统一面板 / 区块卡：白底 + 1px 细线 + 8px 圆角，不加阴影 */
+.section-card,
+.graph-card,
+.detail-card,
+.node-header {
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-lg);
+}
+
+/* 统一空状态/提示文本 */
+.side-hint,
+.hint {
+  color: var(--oslab-text-secondary);
+  font-size: var(--oslab-font-hint);
+  line-height: 1.6;
+}
+
+/* 通用状态类：阶段 2-6 的空数据/加载/错误态统一基类。
+   用法：<div class="oslab-empty"><span class="oslab-state-title">…</span>
+   <span class="oslab-state-hint">…</span></div>；加载态追加 .oslab-spinner；
+   错误态内可放重试按钮（主操作一个）。不使用空白区域掩盖请求失败。 */
+.oslab-empty,
+.oslab-loading,
+.oslab-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--oslab-space-2);
+  box-sizing: border-box;
+  padding: var(--oslab-space-12) var(--oslab-space-6);
+  text-align: center;
+  color: var(--oslab-text-secondary);
+  font-size: var(--oslab-font-body);
+}
+
+.oslab-state-title {
+  color: var(--oslab-ink-soft);
+  font-weight: 600;
+}
+
+.oslab-state-hint {
+  color: var(--oslab-text-secondary);
+  font-size: var(--oslab-text-small);
+}
+
+.oslab-error .oslab-state-title {
+  color: var(--oslab-weak);
+}
+
+/* 内联加载指示（配合 .oslab-loading 或单独使用） */
+.oslab-spinner {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: 2px solid var(--oslab-primary-soft);
+  border-top-color: var(--oslab-primary);
+  border-radius: 50%;
+  animation: oslab-spin 0.8s linear infinite;
+}
+
+@keyframes oslab-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oslab-spinner {
+    animation: none;
+    border-top-color: var(--oslab-primary);
+  }
+}
+
+/* 掌握状态标签：999px 胶囊，soft 底 + 状态色文字；颜色不是唯一信号，
+   标签内文字必须写明状态名（已掌握/待巩固/薄弱/未学习）。 */
+.oslab-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: var(--oslab-radius-pill);
+  font-size: var(--oslab-text-small);
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.oslab-status-tag--mastered {
+  background: var(--oslab-mastered-soft);
+  color: var(--oslab-mastered);
+}
+
+.oslab-status-tag--review {
+  background: var(--oslab-review-soft);
+  color: var(--oslab-review);
+}
+
+.oslab-status-tag--weak {
+  background: var(--oslab-weak-soft);
+  color: var(--oslab-weak);
+}
+
+.oslab-status-tag--unseen {
+  background: var(--oslab-unseen-soft);
+  color: var(--oslab-unseen);
+}
+
+/* 标题层级：页面标题 26px / 区块标题 18px，各只有一种表现 */
+.oslab-page-title {
+  margin: 0;
+  color: var(--oslab-ink);
+  font-size: var(--oslab-text-page);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.oslab-section-title {
+  margin: 0;
+  color: var(--oslab-ink);
+  font-size: var(--oslab-text-section);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* 代码 / ID / 算法序列 */
+.oslab-mono {
+  font-family: var(--oslab-font-mono);
+}
