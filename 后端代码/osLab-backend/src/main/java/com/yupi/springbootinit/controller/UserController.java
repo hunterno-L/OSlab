@@ -324,9 +324,29 @@ public class UserController {
         if (userUpdateMyRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 数据库列宽：user.userName varchar(256)、user.userAvatar varchar(1024)、
+        // user.userProfile varchar(512)。允许空串（前端清空昵称/头像时必须能真实
+        // 落库为空串，MyBatis-Plus updateById 只忽略 null 不忽略空串），
+        // 这里拦截超长请求，避免数据库层报错。
+        String userName = userUpdateMyRequest.getUserName();
+        if (userName != null && userName.length() > 256) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "昵称过长，最多 256 个字符");
+        }
+        String userAvatar = userUpdateMyRequest.getUserAvatar();
+        if (userAvatar != null && userAvatar.length() > 1024) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像地址过长，最多 1024 个字符");
+        }
+        String userProfile = userUpdateMyRequest.getUserProfile();
+        if (userProfile != null && userProfile.length() > 512) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "简介过长，最多 512 个字符");
+        }
         User loginUser = userService.getLoginUser(request);
         User user = new User();
         BeanUtils.copyProperties(userUpdateMyRequest, user);
+        // 昵称与展示规则一致：先去除首尾空白再落库
+        if (userName != null) {
+            user.setUserName(userName.trim());
+        }
         user.setId(loginUser.getId());
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);

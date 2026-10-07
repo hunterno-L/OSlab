@@ -11,6 +11,7 @@ const UserRegisterView = () => import("@/views/user/UserRegisterView.vue");
 const NoAuthView = () => import("@/views/NoAuthView.vue");
 const ManageQuestionView = () =>
   import("@/views/question/ManageQuestionView.vue");
+const AddQuestionView = () => import("@/views/question/AddQuestionView.vue");
 const QuestionsView = () => import("@/views/question/QuestionsView.vue");
 const ViewQuestionView = () => import("@/views/question/ViewQuestionView.vue");
 const LearningRecordsView = () =>
@@ -189,6 +190,28 @@ export const routes: Array<RouteRecordRaw> = [
         component: ManageQuestionView,
         meta: { access: ACCESS_ENUM.ADMIN, navKey: "teaching" },
       },
+      // 实验编辑器（AddQuestionView 依赖 path 含 "update" 区分新增/更新，
+      // 两个路径复用同一组件；查询 id 存在时为更新模式）
+      {
+        path: "/teaching/experiments/add",
+        name: "新建实验",
+        component: AddQuestionView,
+        meta: {
+          access: ACCESS_ENUM.ADMIN,
+          navKey: "teaching",
+          hideInMenu: true,
+        },
+      },
+      {
+        path: "/teaching/experiments/update",
+        name: "修改实验",
+        component: AddQuestionView,
+        meta: {
+          access: ACCESS_ENUM.ADMIN,
+          navKey: "teaching",
+          hideInMenu: true,
+        },
+      },
       {
         path: "/teaching/users",
         name: "用户管理",
@@ -272,7 +295,18 @@ export const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/add/question",
-    redirect: () => ({ path: "/teaching/experiments" }),
+    redirect: (to) => ({
+      path: "/teaching/experiments/add",
+      query: to.query,
+    }),
+    meta: { hideInMenu: true },
+  },
+  {
+    path: "/update/question",
+    redirect: (to) => ({
+      path: "/teaching/experiments/update",
+      query: to.query,
+    }),
     meta: { hideInMenu: true },
   },
   {

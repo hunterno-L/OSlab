@@ -160,7 +160,37 @@
                     </excludes>
                 </configuration>
             </plugin><plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><configuration><source>14</source><target>14</target></configuration></plugin>
+            <!--
+              遗留模板测试分类：Post/PostFavour/PostThumb/CosManager 等模板遗留测试
+              依赖教学平台未使用的基础模板 post 表或外部云凭据，标记 @Tag("legacy")
+              后默认套件排除（-Plegacy 可单独运行），不删除测试代码，不改其他测试行为。
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludedGroups>legacy</excludedGroups>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- 单独运行遗留模板测试：mvnw.cmd test -Plegacy -->
+        <profile>
+            <id>legacy</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration combine.self="override">
+                            <groups>legacy</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

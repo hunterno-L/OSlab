@@ -177,6 +177,12 @@ INSERT IGNORE INTO `learning_question_node` (`id`,`questionId`,`nodeName`) VALUE
 -- ---------------------------------------------------------------------
 
 -- 910011 判断题 · LRU 页面置换算法（主线：教师发布、学生答错判"命中后无需更新顺序"误区）
+-- 收尾计划 §5.2 四元组契约（F08 修正，语义必须自洽，缺一即为过期内容）：
+--   题干：陈述句"LRU 命中一个页面后，无需更新该页的最近访问顺序"（不得用"是否需要更新"问句形态）；
+--   标准答案：false（该说法错误）；用于制造错误的学生答案：true；
+--   解析：每次访问都更新最近访问顺序，包括命中。
+-- 已有库若存在旧形态内容，无需重建：scripts/dev/verify-learning.ps1（S3.4）会按本段
+-- 内容做幂等 UPDATE（条件 id=910011），或手工执行下方 VALUES 中对应字段。
 INSERT IGNORE INTO `learning_question`
     (`id`,`title`,`content`,`type`,`options`,`answer`,`analysis`,`misconception`,`chapter`,`difficulty`,`reviewStatus`,`userId`,`isDelete`)
 VALUES

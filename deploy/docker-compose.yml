@@ -20,7 +20,10 @@ services:
       - mysql_data:/var/lib/mysql
       - ../数据库文件/oslab_db.sql:/seed/oslab_db.sql:ro
       - ../数据库文件/oslab_upgrade_v3_learning.sql:/seed/oslab_upgrade_v3_learning.sql:ro
+      - ../数据库文件/oslab_upgrade_v4_flow.sql:/seed/oslab_upgrade_v4_flow.sql:ro
+      - ../数据库文件/oslab_upgrade_v5_teaching.sql:/seed/oslab_upgrade_v5_teaching.sql:ro
       - ../数据库文件/oslab_demo_seed_v3.sql:/seed/oslab_demo_seed_v3.sql:ro
+      - ../数据库文件/oslab_seed_v4_content.sql:/seed/oslab_seed_v4_content.sql:ro
       - ./mysql-init/10-load-oslab-db.sh:/docker-entrypoint-initdb.d/10-load-oslab-db.sh:ro
     networks:
       - oslab-network

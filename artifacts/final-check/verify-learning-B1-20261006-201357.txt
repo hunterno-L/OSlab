@@ -1,0 +1,113 @@
+﻿OSLab 学习闭环验收运行清单（RunKey=B1-20261006-201357）
+时间：2026-10-06 20:13:57 ~ 2026-10-06 20:14:03  环境：local-api + JudgeMode=Stub  BaseUrl=http://localhost:8121/api
+账号：教师=teacher_demo 学生A=student_demo1 学生B=student_demo2 班级=os2026（口令不记录）
+沙箱：http://127.0.0.1:8090 可达=True
+生成 ID：
+  teacherUserId = 2104470171261014017
+  studentAUserId = 2104470172456390658
+  studentBUserId = 2104470173349777410
+  lruJudgeQuestionId = 2107444250549112833
+  lruAttemptId1 = 2107444253376073729
+  lruAttemptEventId = 2107444253795504130
+  lruAttemptId2 = 2107444256546967553
+  simFifoEventId = 2107444258413432833
+  simCpuEventId = 2107444259361345537
+  ojWaQuestionId = 2107444261257170945
+  ojWaSubmitId = 2107444261525606401
+  judgeWaEventId = 2107444262301552642
+  ojAcQuestionId = 2107444264927186945
+  ojAcSubmitId = 2107444265015267329
+  judgeAcEventId = 2107444265292091393
+  ojSeQuestionId = 2107444268332961793
+  ojSeSubmitId = 2107444268421042178
+  judgeSeEventId = 2107444268588814337
+
+[PASS] S0.1 报告目录可用（ReportPath） | 预期: 目录存在：E:\web\web\源程序（包含数据库）\artifacts\final-check | 实际: Test-Path=True
+[PASS] S0.2 判题沙箱可达性探测（SandboxUrl） | 预期: TCP 可达 | 实际: http://127.0.0.1:8090
+[PASS] S1.1 教师登录（user/login） | 预期: code=0 | 实际: code=0
+[PASS] S1.2 学生A登录（user/login） | 预期: code=0 | 实际: code=0
+[PASS] S1.3 学生B登录（user/login） | 预期: code=0 | 实际: code=0
+[PASS] S2.1 个人图谱加载（learning/mastery/graph） | 预期: code=0 | 实际: code=0
+[PASS] S2.2 图谱节点非空 | 预期: nodes.Count>=1 | 实际: nodes.Count=150
+[PASS] S2.3 totalNodes 与节点列表一致 | 预期: totalNodes=150 | 实际: totalNodes=150, nodes.Count=150
+[PASS] S2.4 状态计数存在（statusCounts） | 预期: statusCounts 至少 1 个键 | 实际: statusCounts 键数=4
+[PASS] S3.1 RunKey 已生成（本轮新增数据标记） | 预期: RunKey 非空 | 实际: B1-20261006-201357
+[PASS] S3.2 种子题 910011 存在（manage/get） | 预期: code=0 | 实际: code=0
+[PASS] S3.3 种子题四元组守护（题干陈述句 / 答案 false / 解析含每次访问更新） | 预期: content 含修正语句且 analysis 含每次访问且 answer="false" 且无旧问句形态 | 实际: answer="false"; content 含修正语句=True; analysis 含每次访问=True; 旧问句形态=False
+[SKIP] S3.4 种子题幂等 UPDATE | 预期: 未执行 | 实际: 内容已一致，无需修复
+[PASS] S4.1 创建判断题（learning/questions/add，RunKey 标记） | 预期: code=0 | 实际: code=0
+[PASS] S4.2.SUBMIT 审核动作 SUBMIT（learning/questions/review） | 预期: code=0 | 实际: code=0
+[PASS] S4.2.APPROVE 审核动作 APPROVE（learning/questions/review） | 预期: code=0 | 实际: code=0
+[PASS] S4.2.PUBLISH 审核动作 PUBLISH（learning/questions/review） | 预期: code=0 | 实际: code=0
+[PASS] S5.1 学生读取题面（learning/questions/get） | 预期: code=0 | 实际: code=0
+[PASS] S5.2 作答前题面不含答案与解析（答案隔离） | 预期: 无 answer/correctAnswer/analysis 键 | 实际: answer=False; correctAnswer=False; analysis=False
+[PASS] S5.3 作答前 hasAttempted=false | 预期: False | 实际: False
+[PASS] S6.1 首次作答（learning/questions/answer，submissionKey=v1） | 预期: code=0 | 实际: code=0
+[PASS] S6.2 服务端判分：提交 true 为错（correct=false） | 预期: False | 实际: False
+[PASS] S6.3 首次作答 isFirst=true | 预期: True | 实际: True
+[PASS] S6.4 掌握度变化覆盖节点 LRU 页面置换算法 | 预期: masteryChanges 含该节点 | 实际: 条数=1; 命中=True
+[PASS] S6.5 事件前 pKnown 与工作台事前快照一致 | 预期: masteryBefore=0.982549180569506 | 实际: masteryBefore=0.982549180569506
+[PASS] S6.6 after 符合 5 参 BKT 公式（答错含学习转移项，映射权重 1） | 预期: after=0.888031673441406 | 实际: after=0.888031673441406
+[SKIP] S6.7 新节点规范值（after≈0.1123288 且 RED） | 预期: 未执行 | 实际: 节点非全新（before=0.982549180569506），按公式断言 S6.6 执行，不依赖历史积累
+[PASS] S6.8 首次作答计为独立观测（countedAsObservation=true） | 预期: True | 实际: True
+[PASS] S6.9 证据计数回读：概念 +1、实践不变、pKnown=after | 预期: concept=76; practice=12; pKnown=0.888031673441406 | 实际: pKnown=0.888031673441406; concept=76; practice=12; lastEventId=2107444253795504130; status=GREEN
+[PASS] S6.10 本人时间线读取（learning/mastery/timeline） | 预期: code=0 | 实际: code=0
+[PASS] S6.11 首次作答写入 ATTEMPT 事件（eventGroupKey=attempt:{attemptId}，账本可回读） | 预期: eventType=ATTEMPT 且 isFirst=true 且 resourceId=qid 且 result=FAIL 且 before/after 一致 | 实际: eventId=2107444253795504130; eventType=ATTEMPT; isFirst=True; resourceId=2107444250549112833; result=FAIL
+[PASS] S7.1 同 submissionKey 重发（服务端去重） | 预期: code=0 | 实际: code=0
+[PASS] S7.2 同 key 重发不新增观测：attemptId 不变且 masteryChanges 为空 | 预期: attemptId=2107444253376073729 且 changes=0 | 实际: attemptId=2107444253376073729; changes=0
+[PASS] S7.3 重发后掌握状态零变化 | 预期: pKnown=0.888031673441406; concept=76; practice=12; lastEventId=2107444253795504130; status=GREEN | 实际: pKnown=0.888031673441406; concept=76; practice=12; lastEventId=2107444253795504130; status=GREEN
+[PASS] S7.4 新 key 主动纠错作答（answer=false） | 预期: code=0 | 实际: code=0
+[PASS] S7.5 重复作答 isFirst=false 且服务端判分 correct=true | 预期: isFirst=False 且 correct=True | 实际: isFirst=False; correct=True
+[PASS] S7.6 重复作答按现有重复证据规则：事件 before==after（不更新模型） | 预期: before==after | 实际: before=0.888031673441406; after=0.888031673441406
+[PASS] S7.7 重复作答不增加概念证据计数 | 预期: concept=76 | 实际: concept=76
+[PASS] S7.8 作答后题面回读（learning/questions/get） | 预期: code=0 | 实际: code=0
+[PASS] S7.9 解析契约：作答后下发 analysis，仍不含答案字段 | 预期: analysis 键出现且无 answer/correctAnswer 且 hasAttempted=True | 实际: analysis=True; answer=False; correctAnswer=False; hasAttempted=True
+[PASS] S8.1 节点工作台加载（learning/mastery/node） | 预期: code=0 | 实际: code=0
+[PASS] S8.2 最近失败归因存在且指向真实资源 | 预期: errorType=WRONG_ANSWER 且 resourceId 非空 | 实际: errorType=WRONG_ANSWER; resourceId=2107444250549112833; failureState=CORRECTED
+[PASS] S8.3 页面置换模拟器入口存在 | 预期: simulationEntry 非空 | 实际: simulationEntry=True
+[PASS] S8.4 FIFO 模拟运行（learning/simulation/page，带预测） | 预期: code=0 | 实际: code=0
+[PASS] S8.5 FIFO 缺页数（固定样例） | 预期: 10 | 实际: 10
+[PASS] S8.6 FIFO 预测判分正确（t3 缺页且淘汰 7） | 预期: faultCorrect=True 且 evictedCorrect=True | 实际: faultCorrect=True; evictedCorrect=True
+[PASS] S8.7 FIFO 预测写入学习事件（eventId>0） | 预期: eventId>0 | 实际: eventId=2107444258413432833
+[PASS] S8.8 LRU 模拟运行（learning/simulation/page） | 预期: code=0 | 实际: code=0
+[PASS] S8.9 LRU 缺页数（固定样例） | 预期: 9 | 实际: 9
+[PASS] S8.10 OPT 模拟运行（learning/simulation/page） | 预期: code=0 | 实际: code=0
+[PASS] S8.11 OPT 缺页数（固定样例） | 预期: 7 | 实际: 7
+[PASS] S8.12 OPT 预测运行（对比用） | 预期: code=0 | 实际: code=0
+[PASS] S8.13 OPT 预测判分正确且不写学习事件（eventId=null） | 预期: faultCorrect=True 且 eventId=null | 实际: faultCorrect=True; eventId=
+[PASS] S8.14 CPU 调度模拟（learning/simulation/cpu，带预测） | 预期: code=0 | 实际: code=0
+[PASS] S8.15 CPU 预测判分正确且计入学习事件（FCFS t0=P1） | 预期: correct=True 且 eventId>0 | 实际: correct=True; eventId=2107444259361345537
+[PASS] S9.1 学生访问教师端被拒 | 预期: code=40101 | 实际: code=40101
+[PASS] S9.2 教师看板（learning/teacher/dashboard） | 预期: code=0 | 实际: code=0
+[PASS] S9.3 班级学生数>=1 | 预期: studentCount>=1 | 实际: studentCount=2
+[PASS] S9.4 教师班级时间线（learning/teacher/timeline） | 预期: code=0 | 实际: code=0
+[PASS] S9.5 班级时间线含事件（本次运行已产生数据） | 预期: total>=1 | 实际: total=414
+[PASS] S9.6 教师班级列表（learning/teacher/classes） | 预期: code=0 | 实际: code=0
+[PASS] S9.7 班级列表含 os2026 | 预期: className=os2026 | 实际: 命中=True
+[PASS] S9.8 教师节点下钻（learning/teacher/node/detail） | 预期: code=0 | 实际: code=0
+[PASS] S9.9 节点下钻：关联题目/实验/误区统计非空 | 预期: questions>=1 且 experiments/misconceptionStats 非空键 | 实际: questions=75; experiments=True; misconceptionStats=True
+[PASS] S10.1 创建 WA 用例编程题（question/add） | 预期: code=0 | 实际: code=0
+[PASS] S10.2 提交 WA 用例代码（question/question_submit/do） | 预期: code=0 | 实际: code=0
+[PASS] S10.3 留页轮询 30s 内到达终态 | 预期: status=2/3 | 实际: status=2
+[PASS] S10.4 Wrong Answer 终态（status=2 且 message=Wrong Answer） | 预期: status=2 且 message=Wrong Answer | 实际: status=2; message=Wrong Answer
+[PASS] S10.5 学生B 查看他人提交详情被拒 | 预期: code=40101 | 实际: code=40101
+[PASS] S10.6 管理员可查看该提交详情且 id 一致 | 预期: code=0 且 id 一致 | 实际: code=0; id=2107444261525606401
+[PASS] S10.7 WA 观测可追溯本次提交（教师时间线 JUDGE 事件） | 预期: result=FAIL 且 resourceType=QUESTION_SUBMIT 且 eventGroupKey=judge:{submitId} | 实际: eventId=2107444262301552642; result=FAIL; resourceId=2107444261525606401
+[PASS] S10.8 创建 AC 用例编程题（question/add） | 预期: code=0 | 实际: code=0
+[PASS] S10.9 提交 AC 用例代码（question/question_submit/do） | 预期: code=0 | 实际: code=0
+[PASS] S10.10 Accepted 终态（status=2 且 message=Accepted） | 预期: status=2 且 message=Accepted | 实际: status=2; message=Accepted
+[PASS] S10.11 AC 观测可追溯本次提交（JUDGE 事件 result=PASS） | 预期: result=PASS | 实际: eventId=2107444265292091393; result=PASS; resourceId=2107444265015267329
+[PASS] S10.12 创建无判题用例编程题（SE 路径） | 预期: code=0 | 实际: code=0
+[PASS] S10.13 提交 SE 路径代码（question/question_submit/do） | 预期: code=0 | 实际: code=0
+[PASS] S10.14 系统错误终态（status=3 且 message=系统错误，不伪造 WA/AC） | 预期: status=3 且 message=系统错误 | 实际: status=3; message=系统错误
+[PASS] S10.15 SE 诊断事件可追溯且 before==after（不计知识失误） | 预期: result=SYSTEM_ERROR 且 before==after | 实际: eventId=2107444268588814337; result=SYSTEM_ERROR; before=0.860614997434153; after=0.860614997434153
+[PASS] S10.16 SE 不改变掌握度/分项证据计数/lastEventId | 预期: pKnown=0.860614997434153; concept=76; practice=14; lastEventId=2107444265292091393; status=GREEN | 实际: pKnown=0.860614997434153; concept=76; practice=14; lastEventId=2107444265292091393; status=GREEN
+[PASS] S10.17 历史快照回放（learning/mastery/snapshot，锚定 SE 事件） | 预期: code=0 | 实际: code=0
+[PASS] S10.18 SE 时点快照与提交前掌握状态一致（快照零漂移） | 预期: pKnown=0.860614997434153 | 实际: pKnown=0.860614997434153
+[SKIP] S10.19 真实沙箱编译错误样例（CE） | 预期: 未执行 | 实际: 仅 JudgeMode=Real 执行（回显沙箱无法产生 Compile Error）
+[SKIP] S10.20 真实沙箱编译错误样例（CE） | 预期: 未执行 | 实际: 仅 JudgeMode=Real 执行（回显沙箱无法产生 Compile Error）
+[SKIP] S10.21 真实沙箱编译错误样例（CE） | 预期: 未执行 | 实际: 仅 JudgeMode=Real 执行（回显沙箱无法产生 Compile Error）
+[SKIP] S10.22 真实沙箱编译错误样例（CE） | 预期: 未执行 | 实际: 仅 JudgeMode=Real 执行（回显沙箱无法产生 Compile Error）
+[SKIP] S10.23 真实沙箱编译错误样例（CE） | 预期: 未执行 | 实际: 仅 JudgeMode=Real 执行（回显沙箱无法产生 Compile Error）
+
+PASS=80 FAIL=0 SKIP=7 TOTAL=87

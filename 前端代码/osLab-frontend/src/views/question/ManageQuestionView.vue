@@ -18,6 +18,9 @@
       <a-form-item>
         <a-button @click="resetForm">重置</a-button>
       </a-form-item>
+      <a-form-item>
+        <a-button type="outline" @click="goAdd">新建实验</a-button>
+      </a-form-item>
     </a-form>
     <a-divider></a-divider>
     <a-table
@@ -210,12 +213,18 @@ const doDelete = async (question: Question) => {
 const router = useRouter();
 
 const doUpdate = (question: Question) => {
+  // 指向 /teaching/experiments/update（AddQuestionView 更新模式）；
+  // 旧 /update/question 路径在阶段 1 重构后未挂路由，曾导致“修改”按钮落空。
   router.push({
-    path: "/update/question",
+    path: "/teaching/experiments/update",
     query: {
       id: question.id,
     },
   });
+};
+
+const goAdd = () => {
+  router.push({ path: "/teaching/experiments/add" });
 };
 </script>
 

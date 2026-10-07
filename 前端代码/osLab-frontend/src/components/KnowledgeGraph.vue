@@ -449,7 +449,10 @@ const buildLink = (link, ctx) => {
       ...override,
     },
     label: {
-      show: ctx.showRelationLabels || adjacent,
+      // 边的关系文字只由「关系标签」开关控制（用户反馈：选中邻接时
+      // 自动脉出的"相关/依赖"标签很惹眼）；语义改由线型/箭头/悬停
+      // tooltip 表达，tooltip 的 relationText 不受开关影响。
+      show: ctx.showRelationLabels,
       formatter: relLabel,
       fontSize: 10,
       color: MUTED_STRONG,
@@ -577,7 +580,7 @@ const buildSeries = () => {
     emphasis: {
       focus: "none",
       scale: false,
-      edgeLabel: { show: true, fontSize: 10, color: MUTED_STRONG },
+      // 悬停不再强制弹出边标签（用户反馈同上）；关系语义走 tooltip
     },
     edgeLabel: {
       fontSize: 10,

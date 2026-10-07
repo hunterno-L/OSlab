@@ -1,15 +1,20 @@
 # OSLab
 
-面向操作系统课程的在线学习与实验平台。项目将知识图谱、章节题目、在线编程判题、学习资料和 AI 问答整合在同一套 Web 应用中。
+面向操作系统课程的智能学习与实验平台：以知识图谱为课程结构，把每一次题目作答、代码提交和模拟预测转化为可解释的学习证据——自动完成薄弱点定位、补救路径规划、掌握度追踪（BKT）与教学班级分析。
 
 ## 当前能力
 
-- 按题目或章节浏览操作系统实验，并进入在线做题页面。
-- 根据知识图谱查看关联概念、关联题目和学习资料。
-- 管理员可维护图谱节点、关系和题目内容。
-- 支持 Java、C、C++、Go 的隔离式在线判题。
+- **知识图谱**：150 节点课程结构，四类关系语义（依赖/包含/相关/实现）与个人掌握状态双维可视化；薄弱节点一键生成补救路径并直达学习。
+- **节点工作台**：知识内容 / 知识详解（静态 HTML 讲义）/ 题目练习 / 实践四页签，常驻图谱导师（GraphRAG，可降级）。
+- **题目练习**：判断/单选/多选/填空四题型服务端判分，"章节→知识点→单题卡"学习流，单题与连续测评（服务端固定队列、幂等作答），待巩固与历史快照回放。
+- **编程实验**：Monaco 编辑器、留页异步判题（Java/C/C++/Go 隔离沙箱）、草稿按用户保存、失败后带上下文的"向导师提问"。
+- **交互模拟**：页面置换 FIFO/LRU/OPT 与 CPU 调度 FCFS/SJF/RR，服务端真值判分，预测计入学习证据。
+- **学习记录**：事件时间线（作答/判题/预测，含掌握度前后快照）与只读图谱回放。
+- **教学管理**：班级薄弱热力图谱与列表、节点下钻（首次正确率/实验通过率/误区）、题目审核与 JSON 导入、知识维护、用户管理。
+- **全局 AI 助手**：可拖动悬浮助手，按用户隔离会话，显式页面上下文。
 - 支持账号注册、登录、学生批量管理和密码重置。
-- 支持可选的操作系统课程 AI 问答。
+
+掌握度模型：BKT（pLearn 学习转移项对对/错观测均生效，答错后验下降再叠加转移），状态阈值 GREEN≥0.70 且需概念+实践双证据；答错首次约 0.1123（薄弱）。判分、归因、路径全部有确定性规则，AI 不可用时闭环照常运行。
 
 ## 架构
 
@@ -67,6 +72,34 @@ powershell -ExecutionPolicy Bypass -File ./run-local.ps1 -Port 8080
 ~~~
 
 此时平台地址为 http://localhost:8080/。
+
+## 本地开发与验收（原生 Windows，无 Docker）
+
+MySQL/Redis/Neo4j 以 Windows 服务常驻时（Neo4j 本地口令见启动脚本），一键启停：
+
+~~~powershell
+powershell -ExecutionPolicy Bypass -File ./start-oslab.ps1   # 后端 :8121，前端 :8080/8081
+powershell -ExecutionPolicy Bypass -File ./stop-oslab.ps1    # 只停 OSLab 进程
+~~~
+
+验收命令（前端 `前端代码/osLab-frontend`、后端 `后端代码/osLab-backend` 下执行）：
+
+~~~powershell
+# 后端：全量产品测试（遗留模板测试已 @Tag("legacy") 隔离；单独跑用 -Plegacy）
+.\mvnw.cmd test
+.\mvnw.cmd package -DskipTests
+
+# 前端：lint 0 error、构建、三个 Node 裸测（身份/工作台缓存/图谱渲染）
+npx vue-cli-service lint --no-fix
+npm run build
+node tests/user-identity.js; node tests/node-workbench-cache.js; node tests/knowledge-graph-render.js
+
+# 全链路验收（需先启动回显沙箱 python scripts/dev/sandbox_stub.py，后端指向它）
+powershell -ExecutionPolicy Bypass -File scripts/dev/verify-learning.ps1
+# 期望 PASS=80 FAIL=0 SKIP=7，失败 exit 1，报告在 artifacts/final-check/
+~~~
+
+演示账号（密码 `oslab123456`，可用 `scripts/dev/prepare-demo-accounts.ps1 -DemoPassword <口令>` 幂等准备）：`teacher_demo`（管理员）、`student_demo1/2`（学生，班级 os2026）。
 
 ## 本地脚本命令
 

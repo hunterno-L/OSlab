@@ -169,6 +169,7 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   "/learning/teacher": "/teaching/overview",
   "/center": "/teaching/users",
   "/manage/question": "/teaching/experiments",
-  "/add/question": "/teaching/experiments",
+  "/add/question": "/teaching/experiments/add",
+  "/update/question": "/teaching/experiments/update",
   "/knowledgeGraph": "/graph",
 };

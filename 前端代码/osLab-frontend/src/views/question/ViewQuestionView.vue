@@ -318,10 +318,23 @@ import {
 } from "@/composables/useAiPageContext";
 
 // AI 助手页面上下文（log3 阶段 4）：挂载注册、卸载注销
+// 最近判题结果摘要：取现有 submitDetail / judgeInfo 字段（终态 2/3 才算有效），不发明新字段
+const lastJudgeResultSummary = computed(() => {
+  const detail = submitDetail.value;
+  if (!detail || (detail.status !== 2 && detail.status !== 3)) {
+    return undefined;
+  }
+  const label = isAccepted.value ? "通过" : terminalText.value;
+  const raw = detail.judgeInfo?.message || "";
+  const message = raw ? `，判题消息：${raw}` : "";
+  return `#${detail.id ?? "—"} ${label}${message}`;
+});
+
 const aiPageContextProvider = () => ({
   pageName: "编程实验工作区",
   experimentTitle: question.value?.title || undefined,
   chapter: chapter.value || undefined,
+  lastJudgeResult: lastJudgeResultSummary.value,
 });
 onMounted(() => registerAiPageContext(aiPageContextProvider));
 onBeforeUnmount(() => unregisterAiPageContext(aiPageContextProvider));

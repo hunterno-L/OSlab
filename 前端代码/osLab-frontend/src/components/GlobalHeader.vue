@@ -28,9 +28,13 @@
           aria-haspopup="menu"
           :aria-label="`${displayName}，打开账户菜单`"
         >
-          <span class="user-avatar" aria-hidden="true">
-            <span class="avatar-letter">{{ displayName[0] || "学" }}</span>
-          </span>
+          <user-avatar
+            class="user-avatar"
+            :user-id="loginUser?.id"
+            :user-name="displayName"
+            :user-avatar="loginUser?.userAvatar"
+            :size="36"
+          />
           <span class="user-profile">
             <span class="user-name">{{ displayName }}</span>
             <span class="user-role">
@@ -42,7 +46,7 @@
         <template #content>
           <a-doption value="account">
             <template #icon><icon-user /></template>
-            学生信息
+            个人信息
           </a-doption>
           <a-doption value="records">
             <template #icon><icon-history /></template>
@@ -74,6 +78,8 @@ import { computed } from "vue";
 import { useStore } from "vuex";
 import checkAccess from "@/access/checkAccess";
 import ACCESS_ENUM from "@/access/accessEnum";
+import UserAvatar from "@/components/UserAvatar.vue";
+import { resolveDisplayName } from "@/utils/userPresentation";
 import { Message } from "@arco-design/web-vue";
 import { UserControllerService } from "../../generated";
 import { ApiError } from "../../generated/core/ApiError";
@@ -97,17 +103,20 @@ const selectedKeys = computed(() => {
   return item ? [item.path] : [];
 });
 
+const loginUser = computed(() => store.state.user?.loginUser || {});
+
 const isLoggedIn = computed(() => {
-  const userRole = store.state.user.loginUser?.userRole;
+  const userRole = loginUser.value?.userRole;
   return Boolean(userRole) && userRole !== ACCESS_ENUM.NOT_LOGIN;
 });
 
 const isAdmin = computed(() => {
-  return store.state.user.loginUser?.userRole === ACCESS_ENUM.ADMIN;
+  return loginUser.value?.userRole === ACCESS_ENUM.ADMIN;
 });
 
-const displayName = computed(
-  () => store.state.user?.loginUser?.userName || "未登录"
+// 昵称统一走展示规则：trim 后有值显示原值，空白回退“用户”。
+const displayName = computed(() =>
+  resolveDisplayName(loginUser.value?.userName)
 );
 
 const navigateToLogin = () => {
@@ -133,11 +142,8 @@ const handleProfileAction = async (value: string | number) => {
       }
       return;
     }
-    store.commit("user/updateUser", {
-      userName: "未登录",
-      userRole: ACCESS_ENUM.NOT_LOGIN,
-    });
-    localStorage.removeItem("userId");
+    // 登出与会话失效共用同一身份重置：完整清空昵称、头像、ID 并清理隔离键
+    store.commit("user/resetUser");
     await router.push({ path: "/user/login" });
   } catch (error) {
     if (!(error instanceof ApiError && error.status === 401)) {
@@ -282,21 +288,7 @@ const handleProfileAction = async (value: string | number) => {
 }
 
 .user-avatar {
-  position: relative;
   flex: 0 0 36px;
-}
-
-.avatar-letter {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--oslab-primary, #2059c9);
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .login-trigger {

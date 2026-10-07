@@ -39,7 +39,7 @@
  *   位移阈值区分点击与拖动，拖动不触发开/关）（§8.3-3）；
  * - 拖动后与 resize/缩放/窄屏变化时自动 clamp 回视口内（§8.3-4）；
  * - 位置按用户 id 写 localStorage，登录用户变化时重新载入（§8.3-6）；
- * - 登录/注册页隐藏，退出登录隐藏（§8.3-10）；
+ * - 登录/注册/无权限（/noAuth）页隐藏，退出登录隐藏（§8.3-10）；
  * - 命名“AI 助手”，与节点/实验 Tutor 无关（§8.3-11）。
  */
 import {
@@ -86,7 +86,10 @@ const isLoggedIn = computed(
     !!loginUser.value?.id && loginUser.value?.userRole !== ACCESS_ENUM.NOT_LOGIN
 );
 const hiddenByRoute = computed(
-  () => route.path === "/user/login" || route.path === "/user/register"
+  () =>
+    route.path === "/user/login" ||
+    route.path === "/user/register" ||
+    route.path === "/noAuth"
 );
 const visible = computed(() => isLoggedIn.value && !hiddenByRoute.value);
 
@@ -185,7 +188,14 @@ function loadPosition() {
           typeof saved.by === "number"
         ) {
           btnPos.value = { x: saved.bx, y: saved.by };
-          if (typeof saved.px === "number" && typeof saved.py === "number") {
+          // 面板坐标只在手动放置过（placed 标志）时恢复；
+          // 未初始化的 (0,0) 不是有效面板位置，不得当作已放置坐标
+          const hasPanelCoords =
+            typeof saved.px === "number" && typeof saved.py === "number";
+          const placedFlag =
+            saved.placed === true ||
+            (hasPanelCoords && (saved.px !== 0 || saved.py !== 0));
+          if (placedFlag && hasPanelCoords) {
             panelPos.value = { x: saved.px, y: saved.py };
             panelPlaced.value = true;
           }
@@ -205,15 +215,18 @@ function persistPosition() {
     return;
   }
   try {
-    localStorage.setItem(
-      key,
-      JSON.stringify({
-        bx: btnPos.value.x,
-        by: btnPos.value.y,
-        px: panelPos.value.x,
-        py: panelPos.value.y,
-      })
-    );
+    // 未手动放置面板时不持久化面板坐标（显式 placed 标志），
+    // 防止下次登录把未初始化的 (0,0) 当作有效面板位置
+    const saved: Record<string, unknown> = {
+      bx: btnPos.value.x,
+      by: btnPos.value.y,
+    };
+    if (panelPlaced.value) {
+      saved.placed = true;
+      saved.px = panelPos.value.x;
+      saved.py = panelPos.value.y;
+    }
+    localStorage.setItem(key, JSON.stringify(saved));
   } catch (e) {
     console.warn("[AI 助手] 位置保存失败", e);
   }

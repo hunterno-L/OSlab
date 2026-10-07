@@ -2,13 +2,18 @@
   <div id="userCenterView">
     <a-card v-if="userInfo" class="user-center-card">
       <div class="user-profile">
-        <!-- 头像部分 -->
+        <!-- 头像部分：统一走 UserAvatar，不再使用固定占位图 -->
         <div class="avatar-section">
-          <!--          <a-avatar :src="require('@/assets/avatar.png')" :size="120" />-->
-          <img :src="require('@/assets/avatar.png')" class="avatar" />
+          <user-avatar
+            class="avatar"
+            :user-id="userInfo?.id"
+            :user-name="displayName"
+            :user-avatar="userInfo?.userAvatar"
+            :size="120"
+          />
           <div class="user-name">
-            <h1>{{ userInfo.userName }}</h1>
-            <a-tag v-if="userInfo.userRole" color="blue">{{
+            <h1>{{ displayName }}</h1>
+            <a-tag v-if="userInfo?.userRole" color="blue">{{
               userRoleMap[userInfo.userRole]
             }}</a-tag>
           </div>
@@ -168,27 +173,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { computed, ref, onMounted } from "vue";
 import dayjs from "dayjs";
 import {
   LoginUserVO,
   StudentQueryRequest,
   StudentsControllerService,
   type StudentVO,
-  UserControllerService,
 } from "../../../generated";
+import { useStore } from "vuex";
 import { Message } from "@arco-design/web-vue";
 import { IconPlus, IconQuestionCircle } from "@arco-design/web-vue/es/icon";
+import UserAvatar from "@/components/UserAvatar.vue";
+import { resolveDisplayName } from "@/utils/userPresentation";
 
 // 用户角色映射
 const userRoleMap: Record<string, string> = {
-  user: "普通用户",
+  user: "学生",
   admin: "管理员",
   // 可根据实际角色扩展
 };
 
-// 响应式数据
-const userInfo = ref<LoginUserVO | null>(null);
+const store = useStore();
+// 本人摘要以全局登录态为唯一数据源，不再发起独立的身份请求
+const userInfo = computed<LoginUserVO | undefined>(
+  () => store.state.user?.loginUser
+);
+// 昵称统一走展示规则：空白昵称显示“用户”
+const displayName = computed(() =>
+  resolveDisplayName(userInfo.value?.userName)
+);
+
 const loading = ref(false);
 const error = ref<string | null>(null);
 
@@ -217,7 +232,7 @@ const addStudent = async () => {
       name: "",
       studentNumber: "",
     };
-    loadUserData();
+    fetchStudents();
   } else {
     Message.error("添加失败：", res.message);
   }
@@ -228,20 +243,6 @@ const formatTime = (time?: string) => {
   return time ? dayjs(time).format("YYYY-MM-DD HH:mm") : "未知时间";
 };
 
-// 加载用户数据
-const loadUserData = async () => {
-  try {
-    loading.value = true;
-    error.value = null;
-    const res = await UserControllerService.getLoginUserUsingGet();
-    userInfo.value = res.data || null;
-  } catch (err) {
-    error.value = "无法获取用户信息，请检查网络连接或重新登录";
-    console.error("用户信息加载失败:", err);
-  } finally {
-    loading.value = false;
-  }
-};
 const file = ref<Blob | null>(null);
 const uploading = ref(false);
 const success = ref(false);
@@ -287,7 +288,13 @@ const handleUploadError = (err: any) => {
 };
 // 生命周期钩子
 onMounted(() => {
-  loadUserData();
+  // 身份未知（未拿到 userRole/ID）时才补一次登录态请求
+  if (
+    !store.state.user?.loginUser?.userRole ||
+    !store.state.user?.loginUser?.id
+  ) {
+    store.dispatch("user/getLoginUser");
+  }
   fetchStudents();
 });
 // 学生列表相关
@@ -416,19 +423,8 @@ const resetPassword = async (id: number) => {
   margin-top: 24px;
 }
 .avatar {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
   border: 3px solid #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  object-fit: cover;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 @media (max-width: 768px) {

@@ -56,13 +56,33 @@ locally built `oslab-judge-sandbox:local` image.
 ## Database initialization
 
 On the **first** start of an empty `mysql_data` volume, MySQL creates
-`oslab_db`, then `mysql-init/10-load-oslab-db.sh` imports the repository's
-`../数据库文件/oslab_db.sql` into it. The SQL dump itself has no `USE oslab_db`,
-which is why the loader script is required.
+`oslab_db`, then `mysql-init/10-load-oslab-db.sh` imports, in order, the
+repository's base dump plus every learning upgrade and seed:
 
-Initialization scripts are not rerun for an existing named volume. To load
-different data, use a deliberate backup-and-restore procedure; do not remove a
-production volume casually.
+```text
+数据库文件/oslab_db.sql            基础库（user/question/question_submit…）
+数据库文件/oslab_upgrade_v3_learning.sql   learning 六张契约表
+数据库文件/oslab_upgrade_v4_flow.sql       测评会话、提交幂等、事件快照
+数据库文件/oslab_upgrade_v5_teaching.sql   节点共享素材表
+数据库文件/oslab_demo_seed_v3.sql          演示题与映射种子
+数据库文件/oslab_seed_v4_content.sql       两条知识链素材与补充题
+```
+
+Every file is a mandatory read-only mount on the `mysql` service; the loader
+fails fast if any mount is missing. After loading, it verifies the contract
+via `information_schema` (learning tables, v4 columns, unique keys, snapshot
+columns, admin account, seed row counts 26/50/12) and fails the container if a
+check does not pass. The base dump already contains `uk_userAccount`; the v2
+script is intentionally not executed against fresh volumes.
+
+Initialization scripts are not rerun for an existing named volume. For an
+existing database, run the idempotent upgrade check instead:
+`数据库文件/oslab_upgrade_existing_check.sql` (utf8mb4 client charset) — it
+reports missing columns/indexes, adds them only when safe, and aborts with a
+clear message when duplicate `userAccount` rows must be resolved first.
+Demo accounts (`teacher_demo`, `student_demo1/2`) are not part of the SQL
+seeds; create/verify them from a running backend with
+`scripts/dev/prepare-demo-accounts.ps1 -DemoPassword <口令>`.
 
 Neo4j is seeded automatically, but only on the first start of a new
 `neo4j_data` named volume. Before the `neo4j` service may start, Compose runs
