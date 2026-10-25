@@ -62,10 +62,14 @@ class LearningQuestionCatalogTest {
         when(nodeMapper.selectList(any()))
                 .thenReturn(List.of(mapping(101L, "LRU"), mapping(101L, "LRU"), mapping(101L, "FIFO")));
 
-        LearningCatalogVO vo = service.questionCatalog(null, user);
+        LearningCatalogVO vo = service.questionCatalog((String) null, user);
 
         assertEquals(1, vo.getTotalQuestions());
         assertEquals(1, vo.getChapters().size());
+        assertEquals(2, vo.getNodes().size());
+        assertEquals(0, vo.getAttempted());
+        assertNotNull(vo.getSections());
+        assertTrue(vo.getSections().isEmpty());
         LearningCatalogChapterVO chapter = vo.getChapters().get(0);
         assertEquals("内存管理", chapter.getChapter());
         assertEquals(1, chapter.getQuestionCount());
@@ -92,7 +96,7 @@ class LearningQuestionCatalogTest {
                 mapping(204L, "进程调度"),
                 mapping(205L, "页面置换")));
 
-        LearningCatalogVO vo = service.questionCatalog(null, user);
+        LearningCatalogVO vo = service.questionCatalog((String) null, user);
 
         assertEquals(5, vo.getTotalQuestions());
         assertEquals(3, vo.getChapters().size());
@@ -125,7 +129,7 @@ class LearningQuestionCatalogTest {
                 attempt(3L, 302L, 1, 1000L), // 先对
                 attempt(4L, 302L, 0, 2000L))); // 后错 -> needsReview
 
-        LearningCatalogVO vo = service.questionCatalog(null, user);
+        LearningCatalogVO vo = service.questionCatalog((String) null, user);
 
         assertEquals(3, vo.getTotalQuestions());
         LearningCatalogChapterVO chapter = vo.getChapters().get(0);
@@ -150,7 +154,7 @@ class LearningQuestionCatalogTest {
         when(nodeMapper.selectList(any())).thenReturn(List.of(mapping(101L, "LRU")));
         when(attemptMapper.selectList(any())).thenReturn(List.of(attempt(1L, 101L, 1, 1000L)));
 
-        service.questionCatalog(null, user);
+        service.questionCatalog((String) null, user);
 
         // 三次查询完成聚合，无 N+1
         verify(questionMapper, times(1)).selectList(any());
@@ -187,7 +191,7 @@ class LearningQuestionCatalogTest {
     void emptyCatalogReturnsCompleteZeroStructure() {
         when(questionMapper.selectList(any())).thenReturn(List.of());
 
-        LearningCatalogVO vo = service.questionCatalog(null, user);
+        LearningCatalogVO vo = service.questionCatalog((String) null, user);
 
         assertEquals(0, vo.getTotalQuestions());
         assertNotNull(vo.getChapters());
@@ -234,7 +238,7 @@ class LearningQuestionCatalogTest {
         when(nodeMapper.selectList(any())).thenReturn(List.of(mapping(501L, "LRU"), mapping(502L, "LRU")));
         when(attemptMapper.selectList(any())).thenReturn(List.of(attempt(1L, 501L, 1, 1000L)));
 
-        LearningCatalogVO vo = service.questionCatalog(null, user);
+        LearningCatalogVO vo = service.questionCatalog((String) null, user);
 
         // 类型层面不存在答案/解析字段（三个 VO 一致）
         for (Class<?> type : List.of(LearningCatalogVO.class, LearningCatalogChapterVO.class,

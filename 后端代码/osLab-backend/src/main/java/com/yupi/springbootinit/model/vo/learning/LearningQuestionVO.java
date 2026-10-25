@@ -16,6 +16,10 @@ import java.util.List;
 public class LearningQuestionVO implements Serializable {
 
     private Long id;
+    private String questionCode;
+    private String sectionCode;
+    private List<String> nodeDisplayNames;
+    private Integer revision;
 
     private String title;
 

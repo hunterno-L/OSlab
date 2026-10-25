@@ -1,202 +1,145 @@
 <template>
-  <div class="questions-flow">
-    <nav class="page-breadcrumb" aria-label="面包屑">
-      <span>操作系统</span>
-      <span class="crumb-sep" aria-hidden="true">/</span>
-      <span class="crumb-current">题目练习</span>
-    </nav>
+  <div class="question-page">
+    <CourseCatalogSidebar
+      :course-code="courseCode"
+      :course-title="courseTitle"
+      :sections="catalogSections"
+      :selected-section-code="selectedSectionCode"
+      :selected-unit-code="selectedUnitCode"
+      :expanded-sections="expandedSections"
+      :loading="treeLoading"
+      :error="treeError"
+      :progress="courseProgress"
+      @select-course="selectCourseScope"
+      @select-section="selectSectionScope"
+      @select-unit="selectUnitScope"
+      @toggle-section="toggleSection"
+      @retry="reloadTree"
+    />
 
-    <header class="page-head">
-      <h1 class="oslab-page-title">题目练习</h1>
-      <p class="page-context">
-        <template v-if="catalog">共 {{ catalog.totalQuestions }} 题</template>
-        <template v-else-if="catalogLoading">正在加载目录…</template>
-        <template v-else>目录暂不可用</template>
-        <template v-if="contextText"> · {{ contextText }}</template>
-      </p>
-    </header>
-
-    <!-- 目录失败：给出真实重试动作，不影响题目列表与答题区 -->
-    <div v-if="catalogError" class="catalog-error" role="alert">
-      <span>章节目录加载失败：{{ catalogError }}</span>
-      <a-button size="small" type="primary" @click="loadCatalog">重试</a-button>
-    </div>
-
-    <!-- 章节条：来自题目目录聚合（catalog.chapters），未原值计数 -->
-    <nav v-else-if="!catalog" class="oslab-loading" aria-label="章节目录">
-      <span class="oslab-spinner"></span>
-      <span>正在加载章节目录…</span>
-    </nav>
-    <template v-else>
-      <nav class="chip-row" aria-label="章节选择">
-        <button
-          type="button"
-          class="chip"
-          :class="{ active: !query.chapter }"
-          :aria-pressed="!query.chapter"
-          @click="selectChapter(undefined)"
-        >
-          全部章节<span class="chip-count">{{ catalog.totalQuestions }}</span>
-        </button>
-        <button
-          v-for="chapter in catalog.chapters"
-          :key="chapter.chapter"
-          type="button"
-          class="chip"
-          :class="{ active: query.chapter === chapter.chapter }"
-          :aria-pressed="query.chapter === chapter.chapter"
-          :title="`${chapter.chapter}：共 ${chapter.questionCount} 题`"
-          @click="selectChapter(chapter.chapter)"
-        >
-          {{ chapter.chapter
-          }}<span class="chip-count">{{ chapter.questionCount }}</span>
-        </button>
-      </nav>
-
-      <!-- 知识点条：当前章节下的知识点及题量/进度（未作答 = questionCount - attempted） -->
-      <nav
-        v-if="currentChapter"
-        class="chip-row node-row"
-        aria-label="知识点选择"
-      >
-        <span class="chip-row-label">知识点</span>
-        <button
-          type="button"
-          class="chip"
-          :class="{ active: !query.nodeName }"
-          :aria-pressed="!query.nodeName"
-          @click="selectNode(undefined)"
-        >
-          全部
-        </button>
-        <button
-          v-for="node in currentChapter.nodes"
-          :key="node.nodeName"
-          type="button"
-          class="chip"
-          :class="{ active: query.nodeName === node.nodeName }"
-          :aria-pressed="query.nodeName === node.nodeName"
-          :title="`共 ${node.questionCount} 题 · 已答 ${
-            node.attempted
-          } · 未答 ${node.questionCount - node.attempted} · 待复习 ${
-            node.needsReview
-          }`"
-          @click="selectNode(node.nodeName)"
-        >
-          {{ node.nodeName
-          }}<span class="chip-count">{{ node.questionCount }} 题</span>
-          <span v-if="node.needsReview" class="chip-review"
-            >待复习 {{ node.needsReview }}</span
-          >
-        </button>
-      </nav>
-      <nav
-        v-else-if="query.nodeName"
-        class="chip-row node-row"
-        aria-label="知识点筛选"
-      >
-        <span class="chip-row-label">知识点</span>
-        <span class="chip active">{{ query.nodeName }}</span>
-        <button type="button" class="chip" @click="selectNode(undefined)">
-          清除知识点
-        </button>
-      </nav>
-    </template>
-
-    <!-- 筛选条：题型 / 难度 / 学习状态 / 题目搜索（调既有 list/page） -->
-    <section class="filter-row" aria-label="题目筛选">
-      <a-select
-        :model-value="query.type"
-        placeholder="全部题型"
-        allow-clear
-        :style="{ width: '150px' }"
-        @change="setType"
-      >
-        <a-option
-          v-for="item in typeOptions"
-          :key="item.value"
-          :value="item.value"
-          >{{ item.label }}</a-option
-        >
-      </a-select>
-      <a-select
-        :model-value="query.difficulty"
-        placeholder="全部难度"
-        allow-clear
-        :style="{ width: '150px' }"
-        @change="setDifficulty"
-      >
-        <a-option
-          v-for="item in difficultyOptions"
-          :key="item.value"
-          :value="item.value"
-          >{{ item.label }}</a-option
-        >
-      </a-select>
-      <a-select
-        :model-value="query.studyState === 'ALL' ? undefined : query.studyState"
-        placeholder="全部状态"
-        allow-clear
-        :style="{ width: '150px' }"
-        @change="setStudyState"
-      >
-        <a-option
-          v-for="item in studyStateOptions"
-          :key="item.value"
-          :value="item.value"
-          >{{ item.label }}</a-option
-        >
-      </a-select>
-      <a-input-search
-        class="filter-search"
-        :model-value="query.title || ''"
-        placeholder="搜索题目标题"
-        allow-clear
-        @search="setTitle"
-        @clear="setTitle('')"
-      />
-      <a-button :disabled="!hasActiveFilters" @click="resetFilters"
-        >重置</a-button
-      >
-    </section>
-
-    <!-- 练习区：单题大卡片 + 本组进度 + 上一题/下一题；右侧为本组题目索引 -->
-    <div class="practice-grid">
-      <section class="practice-main" aria-label="答题区">
-        <div class="practice-toolbar">
-          <div class="practice-progress">
-            <span class="practice-progress-label">本组进度</span>
-            <span class="oslab-mono practice-progress-value"
-              >已答 {{ answeredInQueue }} / {{ queue.length }}</span
+    <div class="question-main">
+      <header class="page-head">
+        <div class="page-head-main">
+          <p class="page-context">
+            {{ scopeLabel }} · 当前范围 <strong>{{ total }}</strong> 题<template
+              v-if="studyStateLabel !== '全部状态'"
             >
-          </div>
-          <div class="practice-toolbar-actions">
-            <a-button
-              v-if="isNarrow"
-              size="small"
-              @click="queueDrawerVisible = true"
+              · {{ studyStateLabel }}</template
             >
-              本组题目（{{ queue.length }}）
-            </a-button>
-            <a-input-number
-              v-model:model-value="runCount"
-              :min="1"
-              :max="20"
-              :style="{ width: '104px' }"
-            >
-              <template #prefix>题数</template>
-            </a-input-number>
-            <a-button
-              :loading="starting"
-              :disabled="total === 0"
-              @click="startRun"
-            >
-              开始连续测评
-            </a-button>
-          </div>
+          </p>
         </div>
+        <div class="page-head-actions">
+          <a-input-number
+            v-model="runCount"
+            :min="1"
+            :max="20"
+            :style="{ width: '104px' }"
+          >
+            <template #prefix>题数</template>
+          </a-input-number>
+          <a-tooltip content="使用当前目录、节点与作答状态范围开始连续测评">
+            <a-button :loading="starting" :disabled="!total" @click="startRun"
+              >连续测评</a-button
+            >
+          </a-tooltip>
+        </div>
+      </header>
 
-        <div v-if="loading && !queue.length" class="oslab-loading">
+      <div v-if="treeError" class="catalog-error" role="alert">
+        <span>课程目录加载失败：{{ treeError }}</span>
+        <a-button size="small" type="primary" @click="reloadTree"
+          >重试</a-button
+        >
+      </div>
+
+      <div v-if="catalogError" class="catalog-error" role="alert">
+        <span>题目目录加载失败：{{ catalogError }}</span>
+        <a-button size="small" type="primary" @click="refreshCatalog()"
+          >重试</a-button
+        >
+      </div>
+
+      <!-- 知识节点：来自 catalog.nodes，与教材目录共用稳定代码 -->
+      <section class="filter-panel" aria-label="知识节点">
+        <div class="filter-panel-head">
+          <span class="filter-label">知识节点</span>
+          <span class="filter-hint">按稳定 nodeCode 过滤</span>
+        </div>
+        <div class="chip-row">
+          <button
+            type="button"
+            class="filter-chip"
+            :class="{ active: !nodeParam }"
+            :aria-pressed="!nodeParam"
+            @click="selectNode(undefined)"
+          >
+            全部节点
+            <span v-if="catalog" class="chip-count">{{
+              catalog.totalQuestions
+            }}</span>
+          </button>
+          <button
+            v-for="node in catalogNodes"
+            :key="nodeKeyOf(node)"
+            type="button"
+            class="filter-chip"
+            :class="{ active: nodeParam === nodeKeyOf(node) }"
+            :aria-pressed="nodeParam === nodeKeyOf(node)"
+            :title="`共 ${node.questionCount} 题 · 已答 ${node.attempted} · 待复习 ${node.needsReview}`"
+            @click="selectNode(nodeKeyOf(node))"
+          >
+            {{ node.displayName || node.nodeName }}
+            <span class="chip-count">{{ node.questionCount }}</span>
+            <span v-if="node.needsReview" class="chip-review"
+              >待复习 {{ node.needsReview }}</span
+            >
+          </button>
+          <span
+            v-if="catalogLoading && !catalogNodes.length"
+            class="filter-hint"
+            >节点加载中…</span
+          >
+          <span
+            v-else-if="catalog && !catalogNodes.length && !catalogError"
+            class="filter-hint"
+            >当前目录范围暂无可练习的节点</span
+          >
+        </div>
+      </section>
+
+      <section class="filter-row" aria-label="题目筛选">
+        <div class="state-chips">
+          <span class="filter-label">作答状态</span>
+          <button
+            v-for="state in stateOptions"
+            :key="state.value"
+            type="button"
+            class="filter-chip"
+            :class="{ active: studyStateParam === state.value }"
+            :aria-pressed="studyStateParam === state.value"
+            @click="setStudyState(state.value)"
+          >
+            {{ state.label }}
+          </button>
+        </div>
+        <div class="filter-spacer"></div>
+        <a-input-search
+          class="filter-search"
+          aria-label="搜索题目标题"
+          :input-attrs="{ 'aria-label': '搜索题目标题' }"
+          :model-value="titleParam"
+          placeholder="搜索题目标题"
+          allow-clear
+          @search="setTitle"
+          @clear="setTitle('')"
+        />
+        <a-button v-if="hasActiveFilters" @click="resetFilters"
+          >清除筛选</a-button
+        >
+      </section>
+
+      <section ref="streamRef" class="question-stream" aria-label="题目列表">
+        <div v-if="loading && !questions.length" class="oslab-loading">
           <span class="oslab-spinner"></span>
           <span>正在加载题目…</span>
         </div>
@@ -212,225 +155,109 @@
             >
           </a-space>
         </div>
-        <div v-else-if="!total" class="oslab-empty">
-          <span class="oslab-state-title">暂无匹配的题目</span>
+        <div v-else-if="!total && !pinnedQuestion" class="oslab-empty">
+          <span class="oslab-state-title">当前范围暂无可练习的题目</span>
           <span class="oslab-state-hint"
-            >换个章节、知识点或筛选条件后再试。</span
+            >换一个单元、节点或作答状态后再试；未归入教材的旧题可在“全部节点”中找到。</span
           >
-          <a-space>
-            <a-button
-              v-if="hasActiveFilters"
-              size="small"
-              type="primary"
-              @click="resetFilters"
-              >清除筛选</a-button
-            >
-            <a-button
-              v-if="query.chapter"
-              size="small"
-              @click="selectChapter(undefined)"
-              >返回全部章节</a-button
-            >
-          </a-space>
+          <a-button v-if="nodeParam" size="small" @click="selectNode(undefined)"
+            >查看全部节点</a-button
+          >
         </div>
-        <template v-else-if="focusedQuestion">
-          <QuestionAnswerCard
-            :key="focusedQuestion.id"
-            :question="focusedQuestion"
-            @answered="onAnswered"
-          />
-          <div class="practice-actions">
-            <a-button :disabled="!canGoPrev" @click="goPrev">上一题</a-button>
-            <div class="practice-actions-right">
-              <a-button
-                v-if="query.nodeName"
-                type="text"
-                @click="selectNode(undefined)"
-                >返回知识点</a-button
-              >
-              <a-button
-                :type="feedbackVisible ? 'primary' : 'secondary'"
-                :disabled="!canGoNext"
-                @click="goNext"
-                >下一题</a-button
-              >
-            </div>
+        <template v-else>
+          <article
+            v-for="question in streamQuestions"
+            :id="`question-${question.id}`"
+            :key="question.id"
+            class="stream-item"
+          >
+            <p
+              v-if="String(question.id) === pinnedQuestionId"
+              class="stream-pin"
+            >
+              指定题目
+            </p>
+            <QuestionAnswerCard
+              :question="question"
+              :context-label="cardContextLabel"
+              :source-unit-code="sourceContext.unitCode"
+              :source-activity-code="sourceContext.activityCode"
+              @answered="(result) => onAnswered(question, result)"
+            />
+          </article>
+
+          <div v-if="loading && questions.length" class="oslab-loading">
+            <span class="oslab-spinner"></span><span>正在翻页…</span>
           </div>
-        </template>
-        <div v-else class="oslab-empty">
-          <span class="oslab-state-title">本页暂无可显示的题目</span>
-          <a-button size="small" type="primary" @click="goFirstPage"
-            >回到第一页</a-button
-          >
-        </div>
 
-        <footer v-if="total > PAGE_SIZE" class="practice-footer">
-          <span class="side-hint">共 {{ total }} 题</span>
-          <a-pagination
-            :current="query.current"
-            :page-size="PAGE_SIZE"
-            :total="total"
-            show-total
-            @change="onPageChange"
-          />
-        </footer>
-      </section>
-
-      <!-- 桌面端「本组题目」索引：当前题队列，不是全站导航 -->
-      <aside
-        v-if="!isNarrow && queue.length"
-        class="queue-rail"
-        aria-label="本组题目"
-      >
-        <h2 class="queue-rail-title">本组题目</h2>
-        <ol class="queue-list">
-          <li v-for="(item, index) in queue" :key="item.id">
-            <button
-              type="button"
-              class="queue-item"
-              :class="{ current: index === focusedIndex }"
-              :aria-current="index === focusedIndex ? 'true' : undefined"
-              @click="focusQuestion(item)"
+          <footer v-if="total > PAGE_SIZE" class="stream-footer">
+            <span class="side-hint"
+              >第 {{ page }} / {{ pageCount }} 页 · 共 {{ total }} 题</span
             >
-              <span class="queue-index oslab-mono">{{ index + 1 }}</span>
-              <span class="queue-title">{{ item.title }}</span>
-              <span class="oslab-status-tag" :class="stateTagClass(item)">{{
-                stateTagText(item)
-              }}</span>
-            </button>
-          </li>
-        </ol>
-      </aside>
+            <a-pagination
+              :current="page"
+              :page-size="PAGE_SIZE"
+              :total="total"
+              :show-total="false"
+              @change="onPageChange"
+            />
+          </footer>
+        </template>
+      </section>
     </div>
-
-    <!-- 窄屏：本组题目改为顶部抽屉 -->
-    <a-drawer
-      v-model:visible="queueDrawerVisible"
-      title="本组题目"
-      placement="top"
-      :height="380"
-      :footer="false"
-      unmount-on-close
-    >
-      <ol class="queue-list">
-        <li v-for="(item, index) in queue" :key="item.id">
-          <button
-            type="button"
-            class="queue-item"
-            :class="{ current: index === focusedIndex }"
-            @click="onDrawerSelect(item)"
-          >
-            <span class="queue-index oslab-mono">{{ index + 1 }}</span>
-            <span class="queue-title">{{ item.title }}</span>
-            <span class="oslab-status-tag" :class="stateTagClass(item)">{{
-              stateTagText(item)
-            }}</span>
-          </button>
-        </li>
-      </ol>
-    </a-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { Message } from "@arco-design/web-vue";
 import { useRoute, useRouter } from "vue-router";
+import CourseCatalogSidebar from "@/components/learning/CourseCatalogSidebar.vue";
 import QuestionAnswerCard from "@/components/learning/QuestionAnswerCard.vue";
+import { useCourseCatalog } from "@/composables/useCourseCatalog";
 import {
   getLearningCatalog,
   getLearningQuestion,
   listLearningQuestions,
   startAssessment,
   type LearningAnswerResultVO,
+  type LearningCatalogNodeVO,
   type LearningCatalogVO,
   type LearningQuestionQueryRequest,
-  type LearningQuestionType,
   type LearningQuestionVO,
 } from "@/api/learning";
 
 type StudyState = "ALL" | "UNANSWERED" | "NEEDS_REVIEW" | "CORRECT";
-type FilterQuery = LearningQuestionQueryRequest & { studyState?: StudyState };
 
 const PAGE_SIZE = 10;
+const contextKeys = [
+  "returnTo",
+  "sourceUnitCode",
+  "sourceActivityCode",
+  "courseMode",
+  "source",
+];
 
 const route = useRoute();
 const router = useRouter();
 
-// ---------- 目录（章节 -> 知识点聚合） ----------
-const catalog = ref<LearningCatalogVO | null>(null);
-const catalogLoading = ref(false);
-const catalogError = ref("");
+// ---------- 课程目录（与图谱页、单元页共用同一壳） ----------
+const {
+  courseCode,
+  courseTitle,
+  sections: catalogSections,
+  loading: treeLoading,
+  error: treeError,
+  courseProgress,
+  sectionByCode,
+  unitByCode,
+  load: loadCourseCatalog,
+  ancestorCodes,
+  sectionCrumb,
+} = useCourseCatalog();
 
-const loadCatalog = async () => {
-  catalogLoading.value = true;
-  catalogError.value = "";
-  try {
-    const res = await getLearningCatalog();
-    if (res.data?.code === 0 && res.data.data) {
-      catalog.value = res.data.data;
-    } else {
-      catalogError.value = res.data?.message || "请稍后重试";
-    }
-  } catch (error) {
-    catalogError.value = "网络异常，请稍后重试";
-  } finally {
-    catalogLoading.value = false;
-  }
-};
-
-const currentChapter = computed(
-  () =>
-    catalog.value?.chapters.find(
-      (chapter) => chapter.chapter === query.value.chapter
-    ) || null
-);
-
-// ---------- 题目列表（既有 list/page；query 参数与 URL 同步） ----------
-const query = ref<FilterQuery>({
-  current: 1,
-  pageSize: PAGE_SIZE,
-  chapter: undefined,
-  nodeName: undefined,
-  type: undefined,
-  difficulty: undefined,
-  studyState: "ALL",
-  title: undefined,
-});
-const questions = ref<LearningQuestionVO[]>([]);
-const total = ref(0);
-const loading = ref(false);
-const loadError = ref("");
-let loadSequence = 0;
-let lastFilterKey = "";
-
-// 外部聚焦题（深链/被筛选掉的题）；作答后钉住以保证反馈不被重载冲掉
-const externalQuestion = ref<LearningQuestionVO | null>(null);
-let focusSequence = 0;
-
-const typeOptions: Array<{ value: LearningQuestionType; label: string }> = [
-  { value: "JUDGE", label: "判断题" },
-  { value: "SINGLE", label: "单选题" },
-  { value: "MULTIPLE", label: "多选题" },
-  { value: "FILL_BLANK", label: "填空题" },
-];
-
-const studyStateOptions: Array<{
-  value: Exclude<StudyState, "ALL">;
-  label: string;
-}> = [
-  { value: "UNANSWERED", label: "未作答" },
-  { value: "NEEDS_REVIEW", label: "待复习" },
-  { value: "CORRECT", label: "已答对" },
-];
-
-const difficultyOptions = [
-  { value: 1, label: "入门" },
-  { value: 2, label: "基础" },
-  { value: 3, label: "进阶" },
-  { value: 4, label: "挑战" },
-  { value: 5, label: "综合" },
-];
+const expandedSections = ref<string[]>([]);
+const treeReady = ref(false);
 
 const queryValue = (value: unknown) =>
   Array.isArray(value)
@@ -439,434 +266,539 @@ const queryValue = (value: unknown) =>
     ? value
     : "";
 
-const parseRoute = (): FilterQuery => {
-  const q = route.query;
-  const studyState = queryValue(q.studyState) || queryValue(q.category);
-  const type = queryValue(q.type) as LearningQuestionType;
-  const difficultyValue = Number(queryValue(q.difficulty));
-  return {
-    current: Number(queryValue(q.current)) || 1,
-    pageSize: PAGE_SIZE,
-    chapter: queryValue(q.chapter) || undefined,
-    nodeName: queryValue(q.nodeName) || undefined,
-    type: typeOptions.some((item) => item.value === type) ? type : undefined,
-    difficulty: difficultyOptions.some((item) => item.value === difficultyValue)
-      ? difficultyValue
-      : undefined,
-    studyState: studyStateOptions.some((item) => item.value === studyState)
-      ? (studyState as StudyState)
-      : "ALL",
-    title: queryValue(q.title) || undefined,
+const courseParam = computed(() => queryValue(route.query.courseCode));
+const sectionParam = computed(() => queryValue(route.query.sectionCode));
+const unitParam = computed(() => queryValue(route.query.unitCode));
+const nodeParam = computed(
+  () => queryValue(route.query.nodeCode) || queryValue(route.query.nodeName)
+);
+const titleParam = computed(() => queryValue(route.query.title));
+const page = computed(() => {
+  const value = Number(queryValue(route.query.current));
+  return Number.isFinite(value) && value > 0 ? Math.floor(value) : 1;
+});
+const studyStateParam = computed<StudyState>(() => {
+  const value = queryValue(route.query.studyState);
+  return stateOptions.some((item) => item.value === value)
+    ? (value as StudyState)
+    : "ALL";
+});
+
+const selectedUnitCode = computed(() => {
+  const code = unitParam.value;
+  return code && unitByCode.value.has(code) ? code : "";
+});
+const selectedSectionCode = computed(() => {
+  if (selectedUnitCode.value) {
+    return unitByCode.value.get(selectedUnitCode.value)?.sectionCode || "";
+  }
+  const code = sectionParam.value;
+  return code && sectionByCode.value.has(code) ? code : "";
+});
+
+const stateOptions: Array<{ value: StudyState; label: string }> = [
+  { value: "ALL", label: "全部状态" },
+  { value: "UNANSWERED", label: "未作答" },
+  { value: "NEEDS_REVIEW", label: "待复习" },
+  { value: "CORRECT", label: "已答对" },
+];
+const studyStateLabel = computed(
+  () =>
+    stateOptions.find((item) => item.value === studyStateParam.value)?.label ||
+    "全部状态"
+);
+
+const sourceContext = computed(() => {
+  const unitCode = queryValue(route.query.sourceUnitCode);
+  const activityCode = queryValue(route.query.sourceActivityCode);
+  return unitCode && activityCode
+    ? { unitCode, activityCode }
+    : { unitCode: "", activityCode: "" };
+});
+
+const scopeLabel = computed(() => {
+  if (selectedUnitCode.value) {
+    return `单元「${
+      unitByCode.value.get(selectedUnitCode.value)?.title ||
+      selectedUnitCode.value
+    }」`;
+  }
+  if (selectedSectionCode.value) {
+    return sectionCrumb(selectedSectionCode.value) || "当前小节";
+  }
+  return courseTitle.value || "全部课程";
+});
+
+const cardContextLabel = computed(() => {
+  const sourceUnit = sourceContext.value.unitCode
+    ? unitByCode.value.get(sourceContext.value.unitCode)
+    : null;
+  if (sourceUnit) return `单元 · ${sourceUnit.title}`;
+  if (selectedUnitCode.value) {
+    const unit = unitByCode.value.get(selectedUnitCode.value);
+    if (unit) return `单元 · ${unit.title}`;
+  }
+  return "";
+});
+
+// ---------- 目录写回（保留来源/返回上下文，丢弃旧分类参数） ----------
+const replaceFilters = (
+  patch: Record<string, string | undefined>,
+  resetPage = false
+) => {
+  const next: Record<string, string> = {};
+  for (const key of contextKeys) {
+    const value = queryValue(route.query[key]);
+    if (value) next[key] = value;
+  }
+  const state: Record<string, string | undefined> = {
+    courseCode: courseParam.value || courseCode.value || undefined,
+    sectionCode: sectionParam.value || undefined,
+    unitCode: unitParam.value || undefined,
+    nodeCode: queryValue(route.query.nodeCode) || undefined,
+    studyState:
+      studyStateParam.value === "ALL" ? undefined : studyStateParam.value,
+    title: titleParam.value || undefined,
+    current: page.value > 1 ? String(page.value) : undefined,
+    ...patch,
   };
+  for (const [key, value] of Object.entries(state)) {
+    if (value !== undefined && value !== "") next[key] = String(value);
+  }
+  if (resetPage) delete next.current;
+  if (!next.studyState) delete next.studyState;
+  if (!next.title) delete next.title;
+  // 旧名称参数统一迁移到 nodeCode
+  delete next.nodeName;
+  const target = router.resolve({ path: route.path, query: next }).fullPath;
+  if (target !== route.fullPath) void router.replace({ query: next });
 };
 
-const filterKeyOf = (q: FilterQuery) =>
-  JSON.stringify([
-    q.chapter,
-    q.nodeName,
-    q.type,
-    q.difficulty,
-    q.studyState,
-    q.title,
-    q.current,
-  ]);
+const toggleSection = (sectionCode: string) => {
+  const next = new Set(expandedSections.value);
+  if (next.has(sectionCode)) next.delete(sectionCode);
+  else next.add(sectionCode);
+  expandedSections.value = Array.from(next);
+};
 
-const syncFromRoute = async () => {
-  const next = parseRoute();
-  const nextKey = filterKeyOf(next);
-  const filterChanged = nextKey !== lastFilterKey;
-  query.value = next;
-  lastFilterKey = nextKey;
-  if (filterChanged) {
-    // 上下文变化后，旧的外部题不再属于当前队列
-    externalQuestion.value = null;
-    await load();
-  }
-  const questionId = queryValue(route.query.questionId);
+const expandSectionPath = (sectionCode?: string) => {
+  if (!sectionCode) return;
+  expandedSections.value = Array.from(
+    new Set([...expandedSections.value, ...ancestorCodes(sectionCode)])
+  );
+};
+
+const selectCourseScope = () =>
+  replaceFilters(
+    {
+      courseCode: courseCode.value || undefined,
+      sectionCode: undefined,
+      unitCode: undefined,
+      nodeCode: undefined,
+    },
+    true
+  );
+
+const selectSectionScope = (sectionCode: string) => {
+  expandSectionPath(sectionCode);
+  replaceFilters(
+    { sectionCode, unitCode: undefined, nodeCode: undefined },
+    true
+  );
+};
+
+const selectUnitScope = (unitCode: string) => {
+  const unit = unitByCode.value.get(unitCode);
+  if (!unit) return;
+  expandSectionPath(unit.sectionCode);
+  replaceFilters(
+    { sectionCode: unit.sectionCode, unitCode, nodeCode: undefined },
+    true
+  );
+};
+
+const selectNode = (nodeCode?: string) =>
+  replaceFilters({ nodeCode: nodeCode || undefined }, true);
+
+const setStudyState = (state: StudyState) => {
+  replaceFilters({ studyState: state === "ALL" ? undefined : state }, true);
+};
+
+const setTitle = (value: string) => {
+  const title = (value || "").trim();
+  replaceFilters({ title: title || undefined }, true);
+};
+
+const resetFilters = () =>
+  replaceFilters(
+    { nodeCode: undefined, studyState: undefined, title: undefined },
+    true
+  );
+
+const hasActiveFilters = computed(
+  () =>
+    Boolean(nodeParam.value) ||
+    studyStateParam.value !== "ALL" ||
+    Boolean(titleParam.value)
+);
+
+// ---------- 题目目录与列表 ----------
+const catalog = ref<LearningCatalogVO | null>(null);
+const catalogLoading = ref(false);
+const catalogError = ref("");
+let catalogEpoch = 0;
+
+const questions = ref<LearningQuestionVO[]>([]);
+const total = ref(0);
+const loading = ref(false);
+const loadError = ref("");
+const streamRef = ref<HTMLElement | null>(null);
+let listEpoch = 0;
+let refreshEpoch = 0;
+
+const pinnedQuestion = ref<LearningQuestionVO | null>(null);
+const pinnedQuestionId = computed(() => queryValue(route.query.questionId));
+let pinEpoch = 0;
+
+const catalogNodes = computed<LearningCatalogNodeVO[]>(
+  () => catalog.value?.nodes || []
+);
+
+const nodeKeyOf = (node: LearningCatalogNodeVO) =>
+  node.nodeCode || node.nodeName;
+
+const pageCount = computed(() =>
+  Math.max(1, Math.ceil(total.value / PAGE_SIZE))
+);
+
+const streamQuestions = computed(() => {
+  const pinned = pinnedQuestion.value;
   if (
-    questionId &&
-    !queue.value.some((item) => String(item.id) === questionId) &&
-    String(externalQuestion.value?.id || "") !== questionId
+    !pinned ||
+    questions.value.some((item) => String(item.id) === String(pinned.id))
   ) {
-    void loadFocused(questionId);
+    return questions.value;
   }
-};
+  return [pinned, ...questions.value];
+});
 
-const buildListRequest = (): LearningQuestionQueryRequest => {
-  const request: LearningQuestionQueryRequest = {
-    current: query.value.current || 1,
-    pageSize: query.value.pageSize || PAGE_SIZE,
+const effectiveScope = () => {
+  const unitCode = selectedUnitCode.value || undefined;
+  const sectionCode =
+    selectedSectionCode.value || sectionParam.value || undefined;
+  return {
+    courseCode: courseCode.value || courseParam.value || undefined,
+    sectionCode,
+    unitCode,
+    nodeCode: nodeParam.value || undefined,
+    studyState:
+      studyStateParam.value === "ALL" ? undefined : studyStateParam.value,
+    title: titleParam.value || undefined,
   };
-  // 「未归类」与 null/空白章节由后端共享谓词归一（L3-R3）：chapter 原值透传。
-  if (query.value.chapter) request.chapter = query.value.chapter;
-  if (query.value.nodeName) request.nodeName = query.value.nodeName;
-  if (query.value.type) request.type = query.value.type;
-  if (query.value.difficulty) request.difficulty = query.value.difficulty;
-  if (query.value.title) request.title = query.value.title;
-  if (query.value.studyState && query.value.studyState !== "ALL") {
-    request.studyState = query.value.studyState;
-  }
-  return request;
 };
 
-const load = async () => {
-  const sequence = ++loadSequence;
+const refreshCatalog = async (normalizeNode = true) => {
+  const epoch = ++catalogEpoch;
+  const scope = effectiveScope();
+  catalogLoading.value = true;
+  catalogError.value = "";
+  try {
+    const res = await getLearningCatalog({
+      courseCode: scope.courseCode,
+      sectionCode: scope.sectionCode,
+      unitCode: scope.unitCode,
+      studyState: scope.studyState,
+    });
+    if (epoch !== catalogEpoch) return false;
+    if (res.data?.code === 0 && res.data.data) {
+      catalog.value = res.data.data;
+      const nodes = res.data.data.nodes || [];
+      const current = nodeParam.value;
+      if (normalizeNode && current && nodes.length) {
+        const hit = nodes.find(
+          (node) =>
+            node.nodeCode === current ||
+            node.nodeName === current ||
+            node.displayName === current
+        );
+        if (!hit) {
+          // 目录切换后原节点不在新范围：清除节点筛选并保留其他条件
+          replaceFilters({ nodeCode: undefined }, true);
+          return true;
+        }
+        if (!queryValue(route.query.nodeCode) && hit.nodeCode) {
+          replaceFilters({ nodeCode: hit.nodeCode }, false);
+          return true;
+        }
+      }
+    } else {
+      catalogError.value = res.data?.message || "题目目录加载失败";
+    }
+  } catch (error) {
+    if (epoch === catalogEpoch) {
+      catalogError.value =
+        error instanceof Error ? error.message : "题目目录加载失败";
+    }
+  } finally {
+    if (epoch === catalogEpoch) catalogLoading.value = false;
+  }
+  return false;
+};
+
+const loadList = async () => {
+  const epoch = ++listEpoch;
+  const scope = effectiveScope();
+  const request: LearningQuestionQueryRequest = {
+    current: page.value,
+    pageSize: PAGE_SIZE,
+    courseCode: scope.courseCode,
+    sectionCode: scope.sectionCode,
+    unitCode: scope.unitCode,
+    nodeCode: scope.nodeCode,
+    title: scope.title,
+    studyState: scope.studyState as LearningQuestionQueryRequest["studyState"],
+  };
   loading.value = true;
   loadError.value = "";
   try {
-    const res = await listLearningQuestions(buildListRequest());
-    if (sequence !== loadSequence) return;
+    const res = await listLearningQuestions(request);
+    if (epoch !== listEpoch) return;
     if (res.data?.code === 0) {
       questions.value = res.data.data?.records || [];
       total.value = res.data.data?.total || 0;
+      if (!questions.value.length && total.value > 0 && page.value > 1) {
+        replaceFilters({ current: undefined }, false);
+        return;
+      }
+      await focusRequestedQuestion();
     } else {
       loadError.value = res.data?.message || "加载题目失败，请稍后重试";
     }
   } catch (error) {
-    if (sequence === loadSequence) loadError.value = "网络异常，请稍后重试";
+    if (epoch === listEpoch) {
+      loadError.value =
+        error instanceof Error ? error.message : "网络异常，请稍后重试";
+    }
   } finally {
-    if (sequence === loadSequence) loading.value = false;
+    if (epoch === listEpoch) loading.value = false;
   }
 };
 
-const loadFocused = async (questionId: string) => {
-  const sequence = ++focusSequence;
+const focusRequestedQuestion = async () => {
+  const id = pinnedQuestionId.value;
+  if (!id) {
+    pinnedQuestion.value = null;
+    return;
+  }
+  if (questions.value.some((item) => String(item.id) === id)) {
+    pinnedQuestion.value = null;
+    await nextTick();
+    document
+      .getElementById(`question-${id}`)
+      ?.scrollIntoView({ block: "center" });
+    return;
+  }
+  const epoch = ++pinEpoch;
   try {
-    const res = await getLearningQuestion(questionId);
-    if (sequence !== focusSequence) return;
+    const res = await getLearningQuestion(id);
+    if (epoch !== pinEpoch) return;
     if (res.data?.code === 0 && res.data.data) {
-      externalQuestion.value = res.data.data;
+      pinnedQuestion.value = res.data.data;
+      await nextTick();
+      document
+        .getElementById(`question-${id}`)
+        ?.scrollIntoView({ block: "start" });
     } else {
-      externalQuestion.value = null;
-      Message.error(res.data?.message || "题目不存在或不可用");
+      pinnedQuestion.value = null;
     }
-  } catch (error) {
-    if (sequence === focusSequence) {
-      externalQuestion.value = null;
-      Message.error("加载题目失败，请稍后重试");
-    }
+  } catch {
+    if (epoch === pinEpoch) pinnedQuestion.value = null;
   }
 };
 
-// ---------- 队列与聚焦 ----------
-const queue = computed(() => questions.value);
-
-const focusedQuestion = computed<LearningQuestionVO | null>(() => {
-  const questionId = queryValue(route.query.questionId);
-  if (questionId) {
-    const inQueue = queue.value.find((item) => String(item.id) === questionId);
-    return inQueue || externalQuestion.value;
+const refreshAll = async () => {
+  const epoch = ++refreshEpoch;
+  // 课程切换或首次进入：加载课程目录并归一 URL
+  if (courseParam.value && courseParam.value !== courseCode.value) {
+    await loadCourseCatalog(courseParam.value);
+    if (epoch !== refreshEpoch) return;
+  } else if (!courseCode.value) {
+    await loadCourseCatalog(courseParam.value || undefined);
+    if (epoch !== refreshEpoch) return;
   }
-  return queue.value[0] || null;
-});
-
-const focusedIndex = computed(() => {
-  const current = focusedQuestion.value;
-  if (!current) return -1;
-  return queue.value.findIndex(
-    (item) => String(item.id) === String(current.id)
-  );
-});
-
-const answeredInQueue = computed(
-  () => queue.value.filter((item) => item.hasAttempted).length
-);
-
-const feedbackQuestionId = ref("");
-const feedbackVisible = computed(
-  () =>
-    Boolean(focusedQuestion.value) &&
-    feedbackQuestionId.value === String(focusedQuestion.value?.id)
-);
-watch(
-  () => (focusedQuestion.value ? String(focusedQuestion.value.id) : ""),
-  () => {
-    feedbackQuestionId.value = "";
+  if (!courseParam.value && courseCode.value) {
+    replaceFilters({ courseCode: courseCode.value }, false);
+    return;
   }
-);
-
-const canGoPrev = computed(() => focusedIndex.value > 0);
-const canGoNext = computed(
-  () =>
-    queue.value.length > 0 &&
-    (focusedIndex.value < 0 || focusedIndex.value < queue.value.length - 1)
-);
-
-const stateTagClass = (question: LearningQuestionVO) => {
-  if (!question.hasAttempted) return "oslab-status-tag--unseen";
-  return question.latestResult === "CORRECT"
-    ? "oslab-status-tag--mastered"
-    : "oslab-status-tag--review";
-};
-
-const stateTagText = (question: LearningQuestionVO) => {
-  if (!question.hasAttempted) return "未作答";
-  return question.latestResult === "CORRECT" ? "已答对" : "待复习";
-};
-
-// ---------- 路由写回（保留 source/returnTo 等无关参数） ----------
-const replaceQuery = (patch: Record<string, string | undefined>) => {
-  const next: Record<string, string> = {};
-  Object.entries(route.query).forEach(([key, value]) => {
-    const v = queryValue(value);
-    if (v) next[key] = v;
-  });
-  Object.entries(patch).forEach(([key, value]) => {
-    if (value === undefined || value === "") delete next[key];
-    else next[key] = String(value);
-  });
-  const target = router.resolve({ path: route.path, query: next }).fullPath;
-  if (target !== route.fullPath) {
-    router.replace({ query: next });
+  if (
+    courseParam.value &&
+    courseCode.value &&
+    courseParam.value !== courseCode.value
+  ) {
+    replaceFilters({ courseCode: courseCode.value }, false);
+    return;
   }
-};
-
-const selectChapter = (chapter?: string) =>
-  replaceQuery({
-    chapter: chapter || undefined,
-    nodeName: undefined,
-    questionId: undefined,
-    current: undefined,
-  });
-
-const selectNode = (nodeName?: string) =>
-  replaceQuery({
-    nodeName: nodeName || undefined,
-    questionId: undefined,
-    current: undefined,
-  });
-
-const setType = (value: LearningQuestionType | undefined) =>
-  replaceQuery({
-    type: value || undefined,
-    questionId: undefined,
-    current: undefined,
-  });
-
-const setDifficulty = (value: number | undefined) =>
-  replaceQuery({
-    difficulty: value ? String(value) : undefined,
-    questionId: undefined,
-    current: undefined,
-  });
-
-const setStudyState = (value: StudyState | undefined) =>
-  replaceQuery({
-    studyState: !value || value === "ALL" ? undefined : value,
-    category: undefined,
-    questionId: undefined,
-    current: undefined,
-  });
-
-const setTitle = (value: string | undefined) => {
-  const title = (value || "").trim();
-  replaceQuery({
-    title: title || undefined,
-    questionId: undefined,
-    current: undefined,
-  });
-};
-
-const resetFilters = () =>
-  replaceQuery({
-    chapter: undefined,
-    nodeName: undefined,
-    type: undefined,
-    difficulty: undefined,
-    studyState: undefined,
-    title: undefined,
-    category: undefined,
-    questionId: undefined,
-    current: undefined,
-  });
-
-const focusQuestion = (question: LearningQuestionVO) => {
-  if (question?.id === undefined || question.id === null) return;
-  replaceQuery({ questionId: String(question.id) });
-};
-
-const goPrev = () => {
-  const index = focusedIndex.value;
-  if (index > 0) focusQuestion(queue.value[index - 1]);
-};
-
-const goNext = () => {
-  const index = focusedIndex.value;
-  const next = index < 0 ? queue.value[0] : queue.value[index + 1];
-  if (next) focusQuestion(next);
-};
-
-const goFirstPage = () =>
-  replaceQuery({ current: undefined, questionId: undefined });
-
-const onPageChange = (page: number) => {
-  replaceQuery({ current: String(page || 1), questionId: undefined });
+  // 无效的旧 section/unit 深链回落到课程范围
+  const unitInvalid = Boolean(unitParam.value) && !selectedUnitCode.value;
+  const sectionInvalid =
+    Boolean(sectionParam.value) && !selectedSectionCode.value;
+  if (sectionInvalid) {
+    replaceFilters(
+      { sectionCode: undefined, unitCode: undefined, nodeCode: undefined },
+      false
+    );
+    return;
+  }
+  if (unitInvalid) {
+    replaceFilters({ unitCode: undefined, nodeCode: undefined }, false);
+    return;
+  }
+  expandSectionPath(selectedSectionCode.value);
+  const changed = await refreshCatalog();
+  if (epoch !== refreshEpoch || changed) return;
+  await loadList();
 };
 
 const reload = () => {
-  void load();
+  void refreshAll();
 };
 
-// ---------- 作答流：钉住当前题并刷新本组/目录计数 ----------
-const onAnswered = (result: LearningAnswerResultVO) => {
-  const current = focusedQuestion.value;
-  if (current) {
-    const inQueue = queue.value.find(
-      (item) => String(item.id) === String(current.id)
-    );
-    if (inQueue) {
-      inQueue.hasAttempted = true;
-      inQueue.latestResult = result.correct ? "CORRECT" : "WRONG";
-    }
-    externalQuestion.value = current;
-    feedbackQuestionId.value = String(current.id);
-    if (queryValue(route.query.questionId) !== String(current.id)) {
-      replaceQuery({ questionId: String(current.id) });
-    }
-  }
-  void load();
-  void loadCatalog();
+const reloadTree = async () => {
+  await loadCourseCatalog(courseCode.value || courseParam.value || undefined);
+  void refreshAll();
 };
 
-// ---------- 连续测评（只传 start 支持的范围字段） ----------
+const onPageChange = (next: number) => {
+  replaceFilters(
+    { current: next > 1 ? String(next) : undefined, questionId: undefined },
+    false
+  );
+  void nextTick(() =>
+    streamRef.value?.scrollIntoView({ block: "start", behavior: "smooth" })
+  );
+};
+
+const onAnswered = (
+  question: LearningQuestionVO,
+  result: LearningAnswerResultVO
+) => {
+  question.hasAttempted = true;
+  question.attemptCount = (question.attemptCount || 0) + 1;
+  question.latestResult = result.correct ? "CORRECT" : "WRONG";
+  // 只刷新目录计数，不重载列表：避免其他题卡与当前反馈被冲掉
+  void refreshCatalog(false);
+};
+
+// ---------- 连续测评（继承同一范围；不是练习列表主界面） ----------
 const runCount = ref(5);
 const starting = ref(false);
 
 const startRun = async () => {
+  const scope = effectiveScope();
   starting.value = true;
   try {
     const res = await startAssessment({
-      chapter: query.value.chapter || undefined,
-      nodeName: query.value.nodeName || undefined,
-      type: query.value.type || undefined,
-      difficulty: query.value.difficulty || undefined,
-      studyState: query.value.studyState || "ALL",
+      courseCode: scope.courseCode,
+      sectionCode: scope.sectionCode,
+      unitCode: scope.unitCode,
+      nodeCode: scope.nodeCode,
+      studyState: scope.studyState || "ALL",
       count: runCount.value,
     });
     if (res.data?.code === 0 && res.data.data?.runId) {
-      const contextQuery: Record<string, string> = {};
-      [
-        "source",
-        "nodeName",
-        "returnTo",
-        "chapter",
-        "type",
-        "difficulty",
+      const query: Record<string, string> = {
+        returnTo: route.fullPath,
+      };
+      for (const key of [
+        "courseCode",
+        "sectionCode",
+        "unitCode",
+        "nodeCode",
         "studyState",
-      ].forEach((key) => {
+        "title",
+        "current",
+      ]) {
         const value = queryValue(route.query[key]);
-        if (value) contextQuery[key] = value;
-      });
-      if (query.value.nodeName) contextQuery.nodeName = query.value.nodeName;
-      if (query.value.chapter) contextQuery.chapter = query.value.chapter;
-      if (query.value.type) contextQuery.type = query.value.type;
-      if (query.value.difficulty) {
-        contextQuery.difficulty = String(query.value.difficulty);
+        if (value) query[key] = value;
       }
-      contextQuery.studyState = query.value.studyState || "ALL";
-      router.push({
+      if (scope.studyState) query.studyState = scope.studyState;
+      await router.push({
         path: `/assessments/run/${res.data.data.runId}`,
-        query: contextQuery,
+        query,
       });
     } else {
       Message.error(res.data?.message || "开始连续测评失败");
     }
   } catch (error) {
-    Message.error("开始连续测评失败，请稍后重试");
+    Message.error(
+      error instanceof Error ? error.message : "开始连续测评失败，请稍后重试"
+    );
   } finally {
     starting.value = false;
   }
 };
 
-// ---------- 页面上下文与派生状态 ----------
-const contextText = computed(() => {
-  const parts: string[] = [];
-  if (query.value.chapter) parts.push(query.value.chapter);
-  if (query.value.nodeName) parts.push(query.value.nodeName);
-  const type = typeOptions.find((item) => item.value === query.value.type);
-  if (type) parts.push(type.label);
-  const difficulty = difficultyOptions.find(
-    (item) => item.value === query.value.difficulty
-  );
-  if (difficulty) parts.push(difficulty.label);
-  if (query.value.studyState && query.value.studyState !== "ALL") {
-    const state = studyStateOptions.find(
-      (item) => item.value === query.value.studyState
-    );
-    if (state) parts.push(state.label);
-  }
-  if (query.value.title) parts.push(`搜索“${query.value.title}”`);
-  return parts.join(" · ");
-});
-
-const hasActiveFilters = computed(() =>
-  Boolean(
-    query.value.chapter ||
-      query.value.nodeName ||
-      query.value.type ||
-      query.value.difficulty ||
-      (query.value.studyState && query.value.studyState !== "ALL") ||
-      query.value.title
-  )
-);
-
-// ---------- 窄屏（<1024px）：本组题目索引改为顶部抽屉 ----------
-const narrowMedia = window.matchMedia("(max-width: 1023px)");
-const isNarrow = ref(narrowMedia.matches);
-const queueDrawerVisible = ref(false);
-const handleMediaChange = (event: MediaQueryListEvent) => {
-  isNarrow.value = event.matches;
-  if (!event.matches) queueDrawerVisible.value = false;
-};
-
-const onDrawerSelect = (question: LearningQuestionVO) => {
-  queueDrawerVisible.value = false;
-  focusQuestion(question);
-};
-
+// ---------- 路由驱动：筛选/翻页变化只保留最后一次请求结果 ----------
 watch(
-  () => route.query,
+  () =>
+    [
+      courseParam.value,
+      sectionParam.value,
+      unitParam.value,
+      nodeParam.value,
+      studyStateParam.value,
+      titleParam.value,
+      page.value,
+      pinnedQuestionId.value,
+    ].join("|"),
   () => {
-    void syncFromRoute();
-  },
-  { deep: true, immediate: true }
+    if (!treeReady.value) return;
+    void refreshAll();
+  }
 );
 
-onMounted(() => {
-  narrowMedia.addEventListener("change", handleMediaChange);
-  void loadCatalog();
-});
-
-onBeforeUnmount(() => {
-  narrowMedia.removeEventListener("change", handleMediaChange);
+onMounted(async () => {
+  await loadCourseCatalog(courseParam.value || undefined);
+  treeReady.value = true;
+  if (!courseParam.value && courseCode.value) {
+    replaceFilters({ courseCode: courseCode.value }, false);
+    return;
+  }
+  void refreshAll();
 });
 </script>
 
 <style scoped>
-.questions-flow {
+.question-page {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 4px 0 40px;
+}
+.question-main {
+  flex: 1;
+  min-width: 0;
+  max-width: 940px;
   display: flex;
   flex-direction: column;
   gap: var(--oslab-space-4);
 }
-.page-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: var(--oslab-space-2);
-  color: var(--oslab-muted-strong);
-  font-size: var(--oslab-text-small);
-}
-.crumb-current {
-  color: var(--oslab-ink-soft);
-}
 .page-head {
   display: flex;
-  flex-direction: column;
-  gap: var(--oslab-space-1);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--oslab-space-3);
 }
 .page-context {
   margin: 0;
   color: var(--oslab-muted-strong);
   font-size: var(--oslab-text-small);
+}
+.page-head-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--oslab-space-2);
 }
 .catalog-error {
   display: flex;
@@ -881,44 +813,57 @@ onBeforeUnmount(() => {
   color: var(--oslab-ink-soft);
   font-size: var(--oslab-text-small);
 }
-
-/* ---- 章节条 / 知识点条 ---- */
+.filter-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--oslab-space-2);
+  padding: var(--oslab-space-3);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-lg);
+  background: var(--oslab-panel);
+}
+.filter-panel-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--oslab-space-2);
+}
+.filter-label {
+  color: var(--oslab-ink-soft);
+  font-size: var(--oslab-text-small);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.filter-hint {
+  color: var(--oslab-muted-strong);
+  font-size: var(--oslab-text-small);
+}
 .chip-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: var(--oslab-space-2);
 }
-.node-row {
-  padding-top: var(--oslab-space-1);
-}
-.chip-row-label {
-  flex-shrink: 0;
-  color: var(--oslab-muted-strong);
-  font-size: var(--oslab-text-small);
-}
-.chip {
+.filter-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 5px 11px;
   border: 1px solid var(--oslab-line);
-  border-radius: var(--oslab-radius-md);
+  border-radius: var(--oslab-radius-pill);
   background: var(--oslab-panel);
   color: var(--oslab-ink-soft);
   font: inherit;
-  font-size: var(--oslab-font-body);
-  line-height: 1.4;
-  text-align: left;
+  font-size: var(--oslab-text-small);
+  line-height: 1.5;
   cursor: pointer;
   transition: border-color var(--oslab-duration-fast) var(--oslab-ease),
     background var(--oslab-duration-fast) var(--oslab-ease),
     color var(--oslab-duration-fast) var(--oslab-ease);
 }
-.chip:hover {
+.filter-chip:hover {
   border-color: var(--oslab-muted-strong);
 }
-.chip.active {
+.filter-chip.active {
   border-color: var(--oslab-primary);
   background: var(--oslab-primary-soft);
   color: var(--oslab-primary);
@@ -926,178 +871,130 @@ onBeforeUnmount(() => {
 }
 .chip-count {
   color: var(--oslab-muted-strong);
-  font-size: var(--oslab-text-small);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.chip.active .chip-count {
+.filter-chip.active .chip-count {
   color: var(--oslab-primary);
 }
 .chip-review {
   padding: 0 6px;
   border-radius: var(--oslab-radius-pill);
   background: var(--oslab-review-soft);
-  color: var(--oslab-review);
+  color: var(--oslab-review-text);
   font-size: 11px;
   line-height: 18px;
   white-space: nowrap;
 }
-
-/* ---- 筛选条 ---- */
 .filter-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: var(--oslab-space-2) var(--oslab-space-3);
 }
+.state-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--oslab-space-2);
+}
+.filter-spacer {
+  flex: 1;
+}
 .filter-search {
   width: 220px;
 }
-
-/* ---- 练习区 ---- */
-.practice-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 240px;
-  gap: var(--oslab-space-6);
-  align-items: start;
-  margin-top: var(--oslab-space-1);
-}
-.practice-main {
-  min-width: 0;
+.question-stream {
   display: flex;
   flex-direction: column;
   gap: var(--oslab-space-4);
+  scroll-margin-top: 16px;
 }
-.practice-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--oslab-space-2) var(--oslab-space-3);
+.stream-item {
+  scroll-margin-top: 16px;
 }
-.practice-progress {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--oslab-space-2);
-}
-.practice-progress-label {
-  color: var(--oslab-muted-strong);
+.stream-pin {
+  margin: 0 0 6px;
+  color: var(--oslab-primary);
   font-size: var(--oslab-text-small);
 }
-.practice-progress-value {
-  color: var(--oslab-ink);
-  font-size: var(--oslab-font-body);
-  font-variant-numeric: tabular-nums;
-}
-.practice-toolbar-actions {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--oslab-space-2);
-}
-.practice-actions {
+.stream-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: var(--oslab-space-2) var(--oslab-space-3);
-}
-.practice-actions-right {
-  display: inline-flex;
-  align-items: center;
   gap: var(--oslab-space-2);
+  padding-top: var(--oslab-space-2);
 }
-.practice-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--oslab-space-2) var(--oslab-space-3);
+/* C+B 学习图册 */
+.question-page {
+  gap: 16px;
 }
-
-/* ---- 本组题目索引 ---- */
-.queue-rail {
-  position: sticky;
-  top: var(--oslab-space-4);
+.filter-panel,
+.filter-row,
+.question-stream {
+  width: 100%;
+  max-width: 1120px;
+}
+.question-main {
+  min-width: 0;
+}
+.page-head {
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--oslab-line);
+}
+.filter-panel {
+  padding: 12px;
   background: var(--oslab-panel);
   border: 1px solid var(--oslab-line);
-  border-radius: var(--oslab-radius-lg);
-  padding: var(--oslab-space-4);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
 }
-.queue-rail-title {
-  margin: 0 0 var(--oslab-space-3);
+.filter-chip {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-pill);
+  background: var(--oslab-panel-soft);
+  color: var(--oslab-ink-soft);
+}
+.filter-chip.active {
+  background: var(--oslab-highlight-soft);
+  border-color: var(--oslab-highlight);
   color: var(--oslab-ink);
-  font-size: var(--oslab-font-body);
   font-weight: 600;
 }
-.queue-list {
-  list-style: none;
+.chip-review {
+  color: var(--oslab-annotation);
+}
+.question-stream {
+  gap: 14px;
+}
+.stream-item {
   margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--oslab-space-1);
-}
-.queue-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: var(--oslab-space-2);
-  padding: 8px;
-  border: 1px solid transparent;
-  border-radius: var(--oslab-radius-md);
-  background: transparent;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: background var(--oslab-duration-fast) var(--oslab-ease);
-}
-.queue-item:hover {
-  background: var(--oslab-panel-soft);
-}
-.queue-item.current {
-  border-color: var(--oslab-primary);
-  background: var(--oslab-primary-soft);
-}
-.queue-index {
-  flex-shrink: 0;
-  min-width: 20px;
-  text-align: center;
-  color: var(--oslab-muted-strong);
-  font-size: var(--oslab-text-small);
-}
-.queue-title {
-  flex: 1;
-  min-width: 0;
-  color: var(--oslab-ink-soft);
-  font-size: var(--oslab-text-small);
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.queue-item .oslab-status-tag {
-  flex-shrink: 0;
 }
 
-/* ---- 响应式：<1024px 单栏，本组题目走顶部抽屉 ---- */
-@media (max-width: 1023px) {
-  .practice-grid {
-    grid-template-columns: minmax(0, 1fr);
+@media (max-width: 1024px) {
+  .question-page {
+    display: block;
   }
-  .practice-toolbar-actions {
+  .question-main {
+    max-width: none;
+  }
+}
+@media (max-width: 760px) {
+  .page-head-actions {
     width: 100%;
     justify-content: flex-start;
   }
-}
-@media (max-width: 640px) {
   .filter-search {
     width: 100%;
   }
-  .catalog-error {
-    align-items: flex-start;
-    flex-direction: column;
+  .filter-spacer {
+    display: none;
+  }
+  .filter-chip {
+    padding: 5px 9px;
   }
 }
 </style>

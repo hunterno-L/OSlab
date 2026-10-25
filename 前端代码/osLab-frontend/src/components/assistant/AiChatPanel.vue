@@ -1,6 +1,13 @@
 <template>
   <section class="ai-panel" role="dialog" aria-label="AI 助手对话面板">
-    <header class="ai-panel-header" @pointerdown="onHeaderPointerDown">
+    <header
+      class="ai-panel-header"
+      role="group"
+      tabindex="0"
+      aria-label="拖动 AI 助手面板（方向键移动）"
+      @pointerdown="onHeaderPointerDown"
+      @keydown="onHeaderKeydown"
+    >
       <div class="ai-panel-titles">
         <span class="ai-panel-title">AI 助手</span>
         <span v-if="pageLabel" class="ai-panel-page"
@@ -21,6 +28,7 @@
           type="button"
           class="ai-panel-btn"
           title="关闭（Esc）"
+          aria-label="关闭 AI 助手"
           @click="emit('close')"
         >
           ✕
@@ -28,7 +36,14 @@
       </div>
     </header>
 
-    <div ref="listRef" class="ai-panel-messages">
+    <div
+      ref="listRef"
+      class="ai-panel-messages"
+      role="log"
+      aria-live="polite"
+      aria-relevant="additions"
+      aria-label="AI 对话记录"
+    >
       <div v-if="messages.length === 0 && !loading" class="ai-panel-empty">
         <p>随时提问，我会结合你当前所在的页面作答。</p>
         <p>例如：“帮我解释这个实验的验收要求”“这条判题结果说明什么？”</p>
@@ -64,8 +79,10 @@
 
     <footer class="ai-panel-footer">
       <textarea
+        ref="inputRef"
         v-model="draft"
         class="ai-panel-input"
+        aria-label="向 AI 助手提问"
         rows="3"
         :disabled="loading"
         placeholder="输入问题（Enter 发送，Shift+Enter 换行）"
@@ -94,6 +111,7 @@ import { getAiPageContext } from "@/composables/useAiPageContext";
 const emit = defineEmits<{
   (e: "close"): void;
   (e: "headerDrag", event: PointerEvent): void;
+  (e: "headerMove", delta: { dx: number; dy: number }): void;
 }>();
 
 const { messages, loading, errorMsg, canRetry, send, retry, clear } =
@@ -102,12 +120,14 @@ const { messages, loading, errorMsg, canRetry, send, retry, clear } =
 const draft = ref("");
 const mdBroken = ref(false);
 const listRef = ref<HTMLElement | null>(null);
+const inputRef = ref<HTMLTextAreaElement | null>(null);
 const pageLabel = ref("");
 
 onMounted(() => {
   // 面板仅在打开时挂载，此时读取的即当前页面注册的上下文名
   pageLabel.value = getAiPageContext()?.pageName ?? "";
   scrollToBottom();
+  nextTick(() => inputRef.value?.focus());
 });
 
 // Markdown 渲染异常时整体回退为纯文本展示，保证回复始终可读（§8.3-9）
@@ -165,6 +185,25 @@ function onHeaderPointerDown(e: PointerEvent) {
     return;
   }
   emit("headerDrag", e);
+}
+
+/** 键盘替代拖动：头部获得焦点后可用方向键移动面板。 */
+function onHeaderKeydown(e: KeyboardEvent) {
+  if (e.target !== e.currentTarget) return;
+  const step = 16;
+  const delta =
+    e.key === "ArrowLeft"
+      ? { dx: -step, dy: 0 }
+      : e.key === "ArrowRight"
+      ? { dx: step, dy: 0 }
+      : e.key === "ArrowUp"
+      ? { dx: 0, dy: -step }
+      : e.key === "ArrowDown"
+      ? { dx: 0, dy: step }
+      : null;
+  if (!delta) return;
+  e.preventDefault();
+  emit("headerMove", delta);
 }
 </script>
 
@@ -319,7 +358,7 @@ function onHeaderPointerDown(e: PointerEvent) {
   gap: var(--oslab-space-2);
   padding: var(--oslab-space-2) var(--oslab-space-3);
   background: var(--oslab-weak-soft);
-  color: var(--oslab-weak);
+  color: var(--oslab-weak-text);
   font-size: var(--oslab-text-small);
 }
 .ai-panel-error-text {

@@ -1,0 +1,81 @@
+/* 落地页演示面板共享样式；仅由 LandingView 引入 */
+
+.demo-panel {
+  position: relative;
+  padding: 20px;
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+
+.demo-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.demo-switch button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-pill);
+  background: var(--oslab-panel);
+  color: var(--oslab-muted-strong);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.demo-switch button[aria-pressed="true"] {
+  border-color: var(--oslab-highlight);
+  background: var(--oslab-highlight-soft);
+  color: var(--oslab-ink);
+}
+
+.demo-switch button:focus-visible,
+.demo-panel button:focus-visible,
+.demo-panel a:focus-visible {
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: 2px;
+}
+
+.demo-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 2px 8px;
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-pill);
+  background: var(--oslab-panel-soft);
+  color: var(--oslab-muted-strong);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.demo-note {
+  margin: 12px 0 0;
+  color: var(--oslab-muted-strong);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .demo-panel {
+    padding: 14px;
+  }
+
+  .demo-badge {
+    top: 10px;
+    right: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-panel *,
+  .demo-panel *::before,
+  .demo-panel *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

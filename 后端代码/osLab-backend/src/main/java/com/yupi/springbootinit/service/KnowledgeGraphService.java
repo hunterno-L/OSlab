@@ -25,6 +25,10 @@ public class KnowledgeGraphService {
     private Neo4jClient neo4jClient;
     @Autowired
     private org.neo4j.driver.Driver driver;
+    @Autowired
+    private com.yupi.springbootinit.learning.RegistryGraphService registryGraph;
+    @Autowired
+    private com.yupi.springbootinit.learning.NodeIdentityService nodeIdentities;
     public EntityNode saveKnowledgeGraphNode(EntityNode node) {
         return knowledgeGraphRepository.save(node);
     }
@@ -64,7 +68,31 @@ public class KnowledgeGraphService {
         return knowledgeGraphRepository.findById(id).orElse(null);
     }
     public List<EntityNode> findByName(String name) {
-        return knowledgeGraphRepository.findByName(name);
+        com.yupi.springbootinit.learning.NodeIdentityService.Identity identity = nodeIdentities == null ? null : nodeIdentities.resolve(name);
+        if (identity != null) {
+            GraphDataDTO graph = getGraphSnapshot();
+            NodeDTO node = resolveNode(graph, identity.nodeCode, identity.storageKey);
+            if (node == null) return Collections.emptyList();
+            EntityNode entity = convertToEntity(node);
+            if (node.getId() != null && node.getId().matches("\\d+")) entity.setId(Long.valueOf(node.getId()));
+            return Collections.singletonList(entity);
+        }
+        List<EntityNode> found = knowledgeGraphRepository.findByName(name);
+        if (found.size()>1) throw new BusinessException(ErrorCode.PARAMS_ERROR,"节点名称不唯一，请使用 nodeCode："+name);
+        return found;
+    }
+    /** Code wins over names; duplicate legacy names must never select an arbitrary graph node. */
+    public static NodeDTO resolveNode(GraphDataDTO graph, String code, String storageKey) {
+        List<NodeDTO> matches = new ArrayList<>();
+        for (NodeDTO node : graph.getNodes()==null?Collections.<NodeDTO>emptyList():graph.getNodes())
+            if (code!=null&&code.equals(node.getNodeCode())) matches.add(node);
+        if (matches.isEmpty()) for (NodeDTO node : graph.getNodes()==null?Collections.<NodeDTO>emptyList():graph.getNodes())
+            if (storageKey!=null&&storageKey.equals(node.getName())) matches.add(node);
+        if (matches.size()>1) throw new BusinessException(ErrorCode.PARAMS_ERROR,"节点名称不唯一，请使用 nodeCode："+storageKey);
+        return matches.isEmpty()?null:matches.get(0);
+    }
+    public static boolean isPrerequisiteRelation(String type) {
+        return RelationType.DEPENDENT.equals(type)||"REQUIRES".equals(type);
     }
     public List<KnowledgeGraphNode> getKnowledgeGraph(String name) {
         List<KnowledgeGraphNode> result=new ArrayList<>();
@@ -132,6 +160,9 @@ public class KnowledgeGraphService {
                     }
                 }
             }
+        } catch (org.neo4j.driver.exceptions.Neo4jException unavailable) {
+            if (registryGraph == null) throw unavailable;
+            // Registered course identities remain usable while the optional legacy graph is unavailable.
         }
         Map<String, Integer> chapterSummary = new LinkedHashMap<>();
         for (NodeDTO node : nodeMap.values()) {
@@ -149,6 +180,7 @@ public class KnowledgeGraphService {
         graphData.setTotalNodes(nodeMap.size());
         graphData.setTotalLinks(links.size());
         graphData.setChapterSummary(chapterSummary);
+        if (registryGraph != null) registryGraph.overlay(graphData);
         return graphData;
     }
 
@@ -157,6 +189,11 @@ public class KnowledgeGraphService {
         NodeDTO node = new NodeDTO();
         node.setId(id);
         node.setName(n.get("name").asString(null));
+        node.setDisplayName(n.get("displayName").asString(node.getName()));
+        node.setNodeType(n.get("nodeType").asString(null));
+        node.setLayer(n.get("layer").asString(null));
+        node.setHomeSectionCode(n.get("homeSectionCode").asString(null));
+        node.setNodeCode(n.get("nodeCode").asString(null));
         node.setCategory(n.get("label").asString(null));
         node.setDescription(n.get("description").asString(null));
         String chapter = n.get("chapter").asString(null);
@@ -247,6 +284,7 @@ public class KnowledgeGraphService {
         NodeDTO node = new NodeDTO();
         node.setId(entity.getId().toString());
         node.setName(entity.getName());
+        node.setNodeCode(entity.getNodeCode());
         node.setCategory(entity.getLabel());
         node.setDescription(entity.getDescription());
         String chapter = entity.getChapter();
@@ -257,6 +295,7 @@ public class KnowledgeGraphService {
     {
         EntityNode entityNode =new EntityNode();
         entityNode.setName(nodeDTO.getName());
+        entityNode.setNodeCode(nodeDTO.getNodeCode());
         entityNode.setLabel(nodeDTO.getCategory());
         entityNode.setChapter(StringUtils.isBlank(nodeDTO.getChapter()) ? "未分类" : nodeDTO.getChapter().trim());
         entityNode.setDescription(nodeDTO.getDescription());
@@ -316,6 +355,20 @@ public class KnowledgeGraphService {
     }
     public List<String> getAllRelatedNames(String name)
     {
+        if (nodeIdentities != null) {
+            com.yupi.springbootinit.learning.NodeIdentityService.Identity identity = nodeIdentities.resolve(name);
+            GraphDataDTO graph = getGraphSnapshot();
+            NodeDTO seed = resolveNode(graph, identity==null?null:identity.nodeCode, identity==null?name:identity.storageKey);
+            if (seed==null) return Collections.emptyList();
+            Set<String> ids = new LinkedHashSet<>();ids.add(seed.getId());
+            for (LinkDTO link : graph.getLinks()==null?Collections.<LinkDTO>emptyList():graph.getLinks()) {
+                if (seed.getId().equals(link.getSource())) ids.add(link.getTarget());
+                if (seed.getId().equals(link.getTarget())) ids.add(link.getSource());
+            }
+            List<String> names=new ArrayList<>();
+            for(NodeDTO node:graph.getNodes()) if(ids.contains(node.getId()))names.add(node.getName());
+            return names;
+        }
         Set<String> allNames = new HashSet<>();
         allNames.add(name);
         List<String> relationTypes = Arrays.asList(RelationType.RELATED, RelationType.DEPENDENT, RelationType.CONTAIN, RelationType.IMPLEMENTS);

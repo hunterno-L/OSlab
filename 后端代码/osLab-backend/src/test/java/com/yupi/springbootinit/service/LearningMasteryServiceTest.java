@@ -91,11 +91,15 @@ class LearningMasteryServiceTest {
     }
 
     @Test
-    void nodeWorkbench_returnsExperimentsForTaggedNode() {
-        // TLB 节点存在已发布编程实验（实验2.7/2.8 标签映射）
+    void nodeWorkbench_experimentsFollowFormalMappings() {
+        // experiment_node 是唯一正式映射；旧 tags 不再作为实验关联依据。
+        // 本地演示库尚未应用实验维护修订时，空集合是合法结果。
         NodeWorkbenchVO vo = learningMasteryService.nodeWorkbench(student(), "TLB");
         assertNotNull(vo.getExperiments());
-        assertTrue(vo.getExperiments().size() >= 1, "TLB 节点应关联至少 1 个编程实验");
+        vo.getExperiments().forEach(experiment -> {
+            assertNotNull(experiment.getId(), "实验必须指向真实 questionId");
+            assertNotNull(experiment.getTitle());
+        });
     }
 
     @Test

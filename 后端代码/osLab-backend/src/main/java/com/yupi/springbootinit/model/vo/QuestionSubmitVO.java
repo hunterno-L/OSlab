@@ -19,6 +19,8 @@ public class QuestionSubmitVO implements Serializable {
      * id
      */
     private Long id;
+    private String sourceUnitCode;
+    private String sourceActivityCode;
 
     /**
      * 编程语言

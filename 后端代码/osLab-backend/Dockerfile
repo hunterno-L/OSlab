@@ -20,6 +20,7 @@ RUN apt-get update \
     && groupadd --system spring \
     && useradd --system --gid spring --create-home spring
 WORKDIR /app
+RUN mkdir -p /app/data/task-files && chown -R spring:spring /app/data
 COPY --from=build --chown=spring:spring /workspace/target/springboot-init-0.0.1-SNAPSHOT.jar /app/app.jar
 USER spring:spring
 EXPOSE 8121

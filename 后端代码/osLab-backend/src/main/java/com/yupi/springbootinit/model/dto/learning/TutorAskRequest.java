@@ -14,6 +14,7 @@ public class TutorAskRequest implements Serializable {
      * 当前知识节点业务键（可空，空则为全图问答）
      */
     private String nodeName;
+    private String nodeCode;
 
     /**
      * 学生的问题

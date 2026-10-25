@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "KNOWLEDGE",
+  "batchCode": "batch.j.process.chapter.001",
+  "contributor": "J",
+  "courseCode": "course.operating-systems",
+  "note": "第二章空模板；完整整理后交付，节点与A对齐；后续章由生成器替换批次。",
+  "nodes": [],
+  "chunks": [],
+  "relations": []
+}

@@ -150,7 +150,7 @@ export default {
 }
 
 .user-avatar {
-  background-color: #165dff;
+  background-color: #2447d8;
   color: white;
   order: 1; /* 用户头像放在最后（右侧） */
 }
@@ -167,18 +167,19 @@ export default {
   border-radius: 20px;
   max-width: 70%;
   position: relative;
-  transition: all 0.3s ease;
+  transition: background-color 180ms var(--oslab-ease, ease),
+    color 180ms var(--oslab-ease, ease);
 }
 
 .user-message .bubble {
-  background-color: #165dff;
+  background-color: #2447d8;
   color: white;
   order: 0;
 }
 
 .user-message .bubble::before {
   right: 100%;
-  border-right-color: #165dff;
+  border-right-color: #2447d8;
 }
 
 .bot-message .bubble {
@@ -210,7 +211,7 @@ input {
 button {
   padding: 5px 10px;
   border-radius: 20px;
-  background-color: #165dff;
+  background-color: #2447d8;
   color: white;
   border: none;
   cursor: pointer;
@@ -218,6 +219,6 @@ button {
 }
 
 button:hover {
-  background-color: #165dff;
+  background-color: #2447d8;
 }
 </style>

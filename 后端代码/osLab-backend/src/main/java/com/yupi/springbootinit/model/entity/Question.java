@@ -96,6 +96,13 @@ public class Question implements Serializable {
      */
     private String originalCode;
 
+    /** SHARED（资源库）| TASK（任务私有执行副本） */
+    private String resourceScope;
+    private String ownerTaskCode;
+    private String ownerTaskItemCode;
+    /** 共享实验发布状态：DRAFT/PUBLISHED/OFFLINE */
+    private String publicationStatus;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 

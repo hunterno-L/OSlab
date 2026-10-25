@@ -54,6 +54,8 @@ class LearningEventObservationTest {
     private final QuestionSubmitService submitService = mock(QuestionSubmitService.class);
     private final KnowledgeGraphService knowledgeGraphService = mock(KnowledgeGraphService.class);
     private final LearningEventServiceImpl service = new LearningEventServiceImpl();
+    private final com.yupi.springbootinit.learning.ExperimentMappingService experimentMappings =
+            mock(com.yupi.springbootinit.learning.ExperimentMappingService.class);
 
     private LearningMastery masteryRow;
 
@@ -73,6 +75,9 @@ class LearningEventObservationTest {
         ReflectionTestUtils.setField(service, "questionService", questionService);
         ReflectionTestUtils.setField(service, "questionSubmitService", submitService);
         ReflectionTestUtils.setField(service, "knowledgeGraphService", knowledgeGraphService);
+        ReflectionTestUtils.setField(service, "experimentMappings", experimentMappings);
+        when(experimentMappings.fromSnapshot(any(), any(Long.class))).thenReturn(List.of(
+                new com.yupi.springbootinit.learning.ExperimentMappingService.Mapping("os.cpu.scheduling", "进程调度", 1.0)));
         // 判题事务模板：mock 事务管理器同步执行回调（recordJudgeEvents 用编程式事务）
         PlatformTransactionManager txManager = mock(PlatformTransactionManager.class);
         when(txManager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
@@ -94,6 +99,19 @@ class LearningEventObservationTest {
 
         masteryRow = masteryRow();
         when(masteryMapper.selectOne(any())).thenReturn(masteryRow);
+    }
+
+    @Test
+    void authoritativeMappingOverridesOldTagsAndAppliesWeightOnce() {
+        when(experimentMappings.fromSnapshot(any(), any(Long.class))).thenReturn(List.of(
+                new com.yupi.springbootinit.learning.ExperimentMappingService.Mapping("os.memory.lru", "正式实验节点", 0.3)));
+        service.recordJudgeEvents(9999L, QuestionSubmitStatusEnum.SUCCEED.getValue(), "Accepted");
+        LearningEvent event=capturedEvent();
+        assertEquals("正式实验节点",event.getNodeName());
+        assertEquals("os.memory.lru",event.getNodeCode());
+        double target=BktModel.update(0.1,true,BktModel.DEFAULT_P_LEARN,BktModel.DEFAULT_P_GUESS,BktModel.DEFAULT_P_SLIP);
+        assertEquals(0.1+0.3*(target-0.1),event.getMasteryAfter(),1e-10);
+        verify(eventMapper).insert(any(LearningEvent.class));
     }
 
     @Test
@@ -175,6 +193,10 @@ class LearningEventObservationTest {
 
     @Test
     void classifyJudgeResultUsesObservationNatureNotRawString() {
+        assertEquals(LearningResultEnum.SYSTEM_ERROR,
+                LearningEventServiceImpl.classifyJudgeResult(QuestionSubmitStatusEnum.SUCCEED.getValue(), "System Error"));
+        assertEquals(LearningResultEnum.SYSTEM_ERROR,
+                LearningEventServiceImpl.classifyJudgeResult(QuestionSubmitStatusEnum.SUCCEED.getValue(), "系统错误"));
         assertEquals(LearningResultEnum.PASS,
                 LearningEventServiceImpl.classifyJudgeResult(
                         QuestionSubmitStatusEnum.SUCCEED.getValue(), "Accepted"));

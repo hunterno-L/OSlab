@@ -68,6 +68,8 @@ import java.util.TreeMap;
  */
 @Service
 public class LearningTeacherServiceImpl implements LearningTeacherService {
+    @Resource private com.yupi.springbootinit.learning.NodeIdentityService nodeIdentities;
+    @Resource private org.springframework.jdbc.core.JdbcTemplate identityJdbc;
 
     /** 未关联资源节点最多展示数（章节完整度） */
     private static final int MAX_UNCOVERED_NODES = 20;
@@ -191,10 +193,12 @@ public class LearningTeacherServiceImpl implements LearningTeacherService {
     }
 
     @Override
-    public NodeDrillVO nodeDetail(String className, String nodeName) {
+    public NodeDrillVO nodeDetail(String className, String requestedNode) {
+        final String nodeName = nodeIdentities == null ? requestedNode : nodeIdentities.storageKey(requestedNode);
         ThrowUtils.throwIf(StringUtils.isBlank(className), ErrorCode.PARAMS_ERROR, "班级名称不能为空");
         ThrowUtils.throwIf(StringUtils.isBlank(nodeName), ErrorCode.PARAMS_ERROR, "节点名称不能为空");
-        ThrowUtils.throwIf(CollectionUtils.isEmpty(knowledgeGraphService.findByName(nodeName)),
+        ThrowUtils.throwIf((nodeIdentities == null || nodeIdentities.byStorageKey(nodeName) == null)
+                        && CollectionUtils.isEmpty(knowledgeGraphService.findByName(nodeName)),
                 ErrorCode.NOT_FOUND_ERROR, "知识节点不存在：" + nodeName);
         List<Long> members = studentIdsOfClass(className);
         NodeDrillVO vo = new NodeDrillVO();
@@ -324,6 +328,7 @@ public class LearningTeacherServiceImpl implements LearningTeacherService {
         for (LearningQuestion q : learningQuestionMapper.selectList(new LambdaQueryWrapper<LearningQuestion>()
                 .eq(LearningQuestion::getReviewStatus, LearningReviewStatusEnum.PUBLISHED.name())
                 .eq(LearningQuestion::getIsDelete, 0)
+                .eq(LearningQuestion::getResourceScope, "SHARED")
                 .select(LearningQuestion::getId))) {
             publishedIds.add(q.getId());
         }
@@ -333,17 +338,10 @@ public class LearningTeacherServiceImpl implements LearningTeacherService {
                 assessmentNodes.add(mapping.getNodeName());
             }
         }
-        // 有编程实验的节点（tags JSON 精确匹配）
+        // Authoritative experiment mapping shared with terminal judge evidence.
         Set<String> experimentNodes = new HashSet<>();
-        for (Question q : questionMapper.selectList(new LambdaQueryWrapper<Question>()
-                .eq(Question::getIsDelete, 0)
-                .select(Question::getTags))) {
-            for (String tag : parseTags(q.getTags())) {
-                if (allNodeNames.contains(tag)) {
-                    experimentNodes.add(tag);
-                }
-            }
-        }
+        if (identityJdbc != null) experimentNodes.addAll(identityJdbc.queryForList(
+                "SELECT DISTINCT n.nodeName FROM experiment_node n JOIN question q ON q.id=n.questionId WHERE q.isDelete=0 AND q.resourceScope='SHARED'", String.class));
         List<ChapterCoverageVO> result = new ArrayList<>();
         for (Map.Entry<String, List<String>> entry : nodesByChapter.entrySet()) {
             ChapterCoverageVO vo = new ChapterCoverageVO();

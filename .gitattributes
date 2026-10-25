@@ -1,0 +1,2 @@
+# 容器内初始化脚本必须保持 LF，Windows 检出时不得转成 CRLF
+deploy/mysql-init/*.sh text eol=lf

@@ -1,146 +1,230 @@
-# ============================================================
-# OSLab 本地环境启动脚本
-# 用法:  powershell -ExecutionPolicy Bypass -File .\start-oslab.ps1
-#
-# 做三件事:
-#   1. 确保 Windows 服务 MySQL / neo4j / Redis 在运行(需要管理员权限才能启动,
-#      若服务本就在运行则无需管理员)
-#   2. 启动后端 Spring Boot jar, 等待 :8121 就绪
-#   3. 启动前端 Vue dev server, 等待 8080/8081 就绪(8080 被其他程序占用时自动用 8081)
-#
-# 日志: tmp\backend.log / tmp\backend.err.log / tmp\frontend.log
-# ============================================================
+﻿[CmdletBinding()]
+param(
+    [switch]$NoBuild,
+    [switch]$Status,
+    [ValidateRange(1, 65535)][int]$BackendPort = 8121,
+    [ValidateRange(1, 65525)][int]$FrontendPort = 8080,
+    [string]$JavaHome
+)
 
+# Native Windows development launcher. Docker users should use run-local.ps1.
 $ErrorActionPreference = "Stop"
-
 $Root = $PSScriptRoot
-$JavaExe = "C:\Users\one\.jdks\ms-21.0.10\bin\java.exe"
-$BackendJar = Join-Path $Root "后端代码\osLab-backend\target\springboot-init-0.0.1-SNAPSHOT.jar"
+$BackendDir = Join-Path $Root "后端代码\osLab-backend"
+$BackendJar = Join-Path $BackendDir "target\springboot-init-0.0.1-SNAPSHOT.jar"
 $FrontendDir = Join-Path $Root "前端代码\osLab-frontend"
+$FrontendCli = Join-Path $FrontendDir "node_modules\@vue\cli-service\bin\vue-cli-service.js"
 $LogDir = Join-Path $Root "tmp"
+$StartedProcesses = @()
 
-if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Path $LogDir | Out-Null }
-
-# ---------- 工具函数 ----------
-
-function Test-PortOwned {
-    # 端口被"我们自己的进程"监听才返回真(按命令行特征匹配, 避免认领别人的 8080)
-    param([int]$Port, [string]$Pattern)
-    $conns = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
-    foreach ($c in $conns) {
-        $p = Get-CimInstance Win32_Process -Filter "ProcessId=$($c.OwningProcess)" -ErrorAction SilentlyContinue
-        if ($p -and $p.CommandLine -and ($p.CommandLine -match $Pattern)) { return $true }
+function Get-ProjectProcess {
+    param([string]$Kind)
+    $name = if ($Kind -eq "backend") { "java.exe" } else { "node.exe" }
+    $path = if ($Kind -eq "backend") { $BackendJar } else { $FrontendCli }
+    Get-CimInstance Win32_Process -Filter "Name='$name'" | Where-Object {
+        $_.CommandLine -and
+        $_.CommandLine.IndexOf($path, [StringComparison]::OrdinalIgnoreCase) -ge 0 -and
+        ($Kind -eq "backend" -or $_.CommandLine -match 'vue-cli-service.+\bserve\b')
     }
-    return $false
 }
 
-function Wait-PortOwned {
-    param([int]$Port, [string]$Pattern, [int]$TimeoutSec, [string]$What)
+function Get-ProcessPort {
+    param($ProjectProcess)
+    Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
+        Where-Object { $_.OwningProcess -in @($ProjectProcess | ForEach-Object { $_.ProcessId }) } |
+        Select-Object -ExpandProperty LocalPort -Unique
+}
+
+function Resolve-JavaHome {
+    $candidates = @($JavaHome, $env:JAVA_HOME)
+    $jdks = Join-Path $env:USERPROFILE ".jdks"
+    if (-not $JavaHome -and (Test-Path -LiteralPath $jdks)) {
+        $candidates += @(Get-ChildItem -LiteralPath $jdks -Directory | Sort-Object Name | Select-Object -ExpandProperty FullName)
+    }
+    $javaCommand = Get-Command java.exe -ErrorAction SilentlyContinue
+    if (-not $JavaHome -and $javaCommand) {
+        $candidates += Split-Path (Split-Path $javaCommand.Source -Parent) -Parent
+    }
+    if ($JavaHome) { $candidates = @($JavaHome) }
+    foreach ($candidate in $candidates) {
+        if (-not $candidate) { continue }
+        $release = Join-Path $candidate "release"
+        if (-not (Test-Path -LiteralPath $release)) { continue }
+        $version = Get-Content -LiteralPath $release | Select-String '^JAVA_VERSION="(\d+)'
+        if ($version -and [int]$version.Matches[0].Groups[1].Value -ge 17 -and
+            (Test-Path -LiteralPath (Join-Path $candidate "bin\javac.exe"))) {
+            return $candidate
+        }
+    }
+    throw "需要 JDK 17 或更新版本。请设置 JAVA_HOME，或使用 -JavaHome 指定 JDK 目录。"
+}
+
+function Start-ProjectProcess {
+    param([string]$FilePath, [string[]]$Arguments, [string]$Directory, [string]$LogName, [hashtable]$Environment = @{})
+    $previous = @{}
+    try {
+        foreach ($key in $Environment.Keys) {
+            $previous[$key] = [Environment]::GetEnvironmentVariable($key, "Process")
+            [Environment]::SetEnvironmentVariable($key, $Environment[$key], "Process")
+        }
+        Start-Process -FilePath $FilePath -ArgumentList $Arguments -WorkingDirectory $Directory `
+            -WindowStyle Hidden -PassThru `
+            -RedirectStandardOutput (Join-Path $LogDir "$LogName.log") `
+            -RedirectStandardError (Join-Path $LogDir "$LogName.err.log")
+    } finally {
+        foreach ($key in $previous.Keys) {
+            [Environment]::SetEnvironmentVariable($key, $previous[$key], "Process")
+        }
+    }
+}
+
+function Wait-ProjectHttp {
+    param($ProjectProcess, [int]$Port, [string]$Path, [int]$TimeoutSec, [switch]$Health)
     $deadline = (Get-Date).AddSeconds($TimeoutSec)
+    $uri = "http://localhost:$Port$Path"
     while ((Get-Date) -lt $deadline) {
-        if (Test-PortOwned -Port $Port -Pattern $Pattern) { return $true }
+        if (-not (Get-Process -Id $ProjectProcess.Id -ErrorAction SilentlyContinue)) {
+            throw "进程提前退出：$uri。请查看 tmp 下对应的 .log / .err.log。"
+        }
+        $listener = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue |
+            Where-Object { $_.OwningProcess -eq $ProjectProcess.Id }
+        if ($listener) {
+            try {
+                if ($Health) {
+                    $response = Invoke-RestMethod -Uri $uri -TimeoutSec 3
+                    if ($response.code -eq 0) { return }
+                } else {
+                    $response = Invoke-WebRequest -UseBasicParsing -Uri $uri -TimeoutSec 3
+                    if ($response.StatusCode -eq 200) { return }
+                }
+            } catch { }
+        }
         Start-Sleep -Seconds 2
     }
-    Write-Host "[失败] $What 在 ${TimeoutSec}s 内未就绪 (端口 $Port), 请查看日志" -ForegroundColor Red
-    return $false
+    throw "等待服务超时：$uri。请查看 tmp 下对应的 .log / .err.log。"
 }
 
-# ---------- 1. Windows 服务 ----------
-
-$services = @("MySQL", "neo4j", "Redis")
-foreach ($name in $services) {
-    $svc = Get-Service -Name $name -ErrorAction SilentlyContinue
-    if (-not $svc) {
-        Write-Host "[跳过] 未找到服务 $name" -ForegroundColor Yellow
-        continue
+try {
+    $backend = @(Get-ProjectProcess "backend")
+    $frontend = @(Get-ProjectProcess "frontend")
+    if ($Status) {
+        foreach ($kind in @("backend", "frontend")) {
+            $processes = if ($kind -eq "backend") { $backend } else { $frontend }
+            $ports = @(Get-ProcessPort $processes)
+            if (@($processes).Count -gt 0) {
+                Write-Host "[$kind] PID $($processes.ProcessId -join ', ')；监听端口：$($ports -join ', ')"
+            } else { Write-Host "[$kind] 未运行" }
+        }
+        Get-Service -Name MySQL, neo4j, Redis -ErrorAction SilentlyContinue | Format-Table Name, Status
+        exit 0
     }
-    if ($svc.Status -eq "Running") {
-        Write-Host "[服务] $name 已在运行" -ForegroundColor DarkGray
+
+    New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
+    if ($frontend.Count -gt 0) {
+        $ports = @(Get-ProcessPort $frontend)
+        if ($ports.Count -ne 1) { throw "本项目已有前端进程但监听状态不明确，请先运行 stop-oslab.ps1。" }
+        $FrontendPort = $ports[0]
     } else {
+        $freePort = $null
+        foreach ($candidate in $FrontendPort..($FrontendPort + 10)) {
+            if ($candidate -ne $BackendPort -and -not (Get-NetTCPConnection -LocalPort $candidate -State Listen -ErrorAction SilentlyContinue)) {
+                $freePort = $candidate
+                break
+            }
+        }
+        if (-not $freePort) { throw "未找到空闲前端端口，请用 -FrontendPort 指定其他起始端口。" }
+        $FrontendPort = $freePort
+    }
+    if ($backend.Count -gt 0) {
+        $ports = @(Get-ProcessPort $backend)
+        if ($ports.Count -ne 1) { throw "本项目已有后端进程但监听状态不明确，请先运行 stop-oslab.ps1。" }
+        $BackendPort = $ports[0]
+    } elseif (Get-NetTCPConnection -LocalPort $BackendPort -State Listen -ErrorAction SilentlyContinue) {
+        throw "后端端口 $BackendPort 被其他程序占用，请用 -BackendPort 指定其他端口。"
+    }
+
+    $node = Get-Command node.exe -ErrorAction Stop
+    if ($backend.Count -eq 0) { $resolvedJavaHome = Resolve-JavaHome }
+    if ($frontend.Count -eq 0 -and -not (Test-Path -LiteralPath $FrontendCli)) {
+        Write-Host "[前端] 安装依赖..."
+        Push-Location $FrontendDir
         try {
+            & npm.cmd ci
+            if ($LASTEXITCODE -ne 0) { throw "npm ci 失败。" }
+        } finally { Pop-Location }
+    }
+    foreach ($name in @("MySQL", "neo4j", "Redis")) {
+        $service = Get-Service -Name $name -ErrorAction SilentlyContinue
+        if ($service -and $service.Status -ne "Running") {
+            Write-Host "[服务] 启动 $name..."
             Start-Service -Name $name
-            Write-Host "[服务] 已启动 $name" -ForegroundColor Green
-        } catch {
-            Write-Host "[警告] 无法启动服务 $name (可能需要管理员权限): $($_.Exception.Message)" -ForegroundColor Yellow
         }
     }
-}
 
-# ---------- 2. 后端 (:8121, context-path /api) ----------
+    if ($backend.Count -eq 0) {
+        if (-not $NoBuild) {
+            Write-Host "[后端] 编译当前源码（JDK: $resolvedJavaHome）..."
+            $oldJavaHome = $env:JAVA_HOME
+            Push-Location $BackendDir
+            try {
+                $env:JAVA_HOME = $resolvedJavaHome
+                & .\mvnw.cmd -DskipTests package
+                if ($LASTEXITCODE -ne 0) { throw "后端构建失败。" }
+            } finally {
+                $env:JAVA_HOME = $oldJavaHome
+                Pop-Location
+            }
+        }
+        if (-not (Test-Path -LiteralPath $BackendJar)) { throw "找不到后端 JAR，请去掉 -NoBuild 后重试。" }
+        $origins = @($env:CORS_ALLOWED_ORIGINS)
+        foreach ($port in @(8080..8090) + @($FrontendPort)) {
+            $origins += "http://localhost:$port", "http://127.0.0.1:$port"
+        }
+        $backendArgs = @("-jar", "`"$BackendJar`"", "--server.port=$BackendPort", "--cors.allowed-origins=$($origins -join ',')")
+        # 本机 Neo4j 需要口令；判题默认指向本地回显 stub（可用同名环境变量覆盖）
+        $backendEnv = @{
+            SPRING_NEO4J_AUTHENTICATION_PASSWORD = "11111111"
+            CODESANDBOX_TYPE = "remote"
+            CODESANDBOX_REMOTE_URL = "http://127.0.0.1:8090/executeCode"
+            CODESANDBOX_REMOTE_AUTH_SECRET = "smoke-secret"
+        }
+        foreach ($key in @($backendEnv.Keys)) {
+            $override = [Environment]::GetEnvironmentVariable($key, "Process")
+            if ($override) { $backendEnv[$key] = $override }
+        }
+        Write-Host "[后端] 启动中；日志：tmp\backend.log"
+        $process = Start-ProjectProcess (Join-Path $resolvedJavaHome "bin\java.exe") $backendArgs $Root "backend" -Environment $backendEnv
+        $StartedProcesses += $process
+        Wait-ProjectHttp $process $BackendPort "/api/health/liveness" 120 -Health
+    } else {
+        $response = Invoke-RestMethod -Uri "http://localhost:$BackendPort/api/health/liveness" -TimeoutSec 5
+        if ($response.code -ne 0) { throw "已有后端进程未通过健康检查，请先停止后重新启动。" }
+        Write-Host "[后端] 已在运行；如需载入代码修改，请先停止再启动。"
+    }
 
-$BackendPattern = "springboot-init.*SNAPSHOT\.jar"
+    if ($frontend.Count -eq 0) {
+        Write-Host "[前端] 启动中（首次编译可能需要几分钟）；日志：tmp\frontend.log"
+        $frontendArgs = @("`"$FrontendCli`"", "serve", "--host", "localhost", "--port", "$FrontendPort")
+        $process = Start-ProjectProcess $node.Source $frontendArgs $FrontendDir "frontend" @{
+            VUE_APP_API_TARGET = "http://localhost:$BackendPort"
+        }
+        $StartedProcesses += $process
+        Wait-ProjectHttp $process $FrontendPort "/" 600
+    } else { Write-Host "[前端] 已在运行。" }
+    $proxyHealth = Invoke-RestMethod -Uri "http://localhost:$FrontendPort/api/health/liveness" -TimeoutSec 10
+    if ($proxyHealth.code -ne 0) { throw "前端到后端的 /api 代理健康检查未通过。" }
 
-if (-not (Test-Path $BackendJar)) {
-    Write-Host "[失败] 找不到后端 jar: $BackendJar" -ForegroundColor Red
-    Write-Host "        请先构建: cd 后端代码\osLab-backend && .\mvnw package -DskipTests" -ForegroundColor Yellow
+    Write-Host "`nOSLab 本地环境已就绪" -ForegroundColor Green
+    Write-Host "  前端：http://localhost:$FrontendPort/"
+    Write-Host "  后端：http://localhost:$BackendPort/api"
+    Write-Host "  状态：.\start-oslab.ps1 -Status"
+    Write-Host "  停止：.\stop-oslab.ps1"
+} catch {
+    foreach ($process in $StartedProcesses) {
+        if (Get-Process -Id $process.Id -ErrorAction SilentlyContinue) {
+            & taskkill.exe /PID $process.Id /T /F 2>&1 | Out-Null
+        }
+    }
+    Write-Host "[失败] $($_.Exception.Message)" -ForegroundColor Red
     exit 1
 }
-
-if (Test-PortOwned -Port 8121 -Pattern $BackendPattern) {
-    Write-Host "[后端] 已在运行 (:8121), 跳过" -ForegroundColor DarkGray
-} else {
-    if (-not (Test-Path $JavaExe)) {
-        $JavaExe = "java"   # 回退到 PATH 里的 java
-    }
-    # 本地环境必需 env(java 子进程会继承当前会话的环境变量):
-    #   Neo4j 密码 yml 默认为空, 本机服务密码是 11111111, 不设则图谱类接口认证失败
-    #   判题沙箱指向本地回显 stub(python scripts/dev/sandbox_stub.py, 端口 8090)
-    $env:SPRING_NEO4J_AUTHENTICATION_PASSWORD = "11111111"
-    $env:CODESANDBOX_TYPE = "remote"
-    $env:CODESANDBOX_REMOTE_URL = "http://127.0.0.1:8090/executeCode"
-    $env:CODESANDBOX_REMOTE_AUTH_SECRET = "smoke-secret"
-    Write-Host "[后端] 启动中... 日志: tmp\backend.log"
-    Start-Process -FilePath $JavaExe `
-        -ArgumentList @("-jar", $BackendJar) `
-        -WorkingDirectory $Root `
-        -WindowStyle Hidden `
-        -RedirectStandardOutput (Join-Path $LogDir "backend.log") `
-        -RedirectStandardError (Join-Path $LogDir "backend.err.log")
-    if (Wait-PortOwned -Port 8121 -Pattern $BackendPattern -TimeoutSec 90 -What "后端") {
-        Write-Host "[后端] 就绪: http://localhost:8121/api" -ForegroundColor Green
-    }
-}
-
-# ---------- 3. 前端 (8080, 被占用则 8081) ----------
-
-$FrontendPattern = "osLab-frontend"
-
-$ownedPort = $null
-foreach ($port in @(8080, 8081)) {
-    if (Test-PortOwned -Port $port -Pattern $FrontendPattern) { $ownedPort = $port; break }
-}
-
-if ($ownedPort) {
-    Write-Host "[前端] 已在运行 (:$ownedPort), 跳过" -ForegroundColor DarkGray
-} else {
-    Write-Host "[前端] 启动中... 日志: tmp\frontend.log"
-    Start-Process -FilePath "cmd.exe" `
-        -ArgumentList @("/c", "npm run serve") `
-        -WorkingDirectory $FrontendDir `
-        -WindowStyle Hidden `
-        -RedirectStandardOutput (Join-Path $LogDir "frontend.log") `
-        -RedirectStandardError (Join-Path $LogDir "frontend.err.log")
-
-    $deadline = (Get-Date).AddSeconds(150)
-    while ((Get-Date) -lt $deadline -and -not $ownedPort) {
-        foreach ($port in @(8080, 8081)) {
-            if (Test-PortOwned -Port $port -Pattern $FrontendPattern) { $ownedPort = $port; break }
-        }
-        if (-not $ownedPort) { Start-Sleep -Seconds 3 }
-    }
-    if ($ownedPort) {
-        Write-Host "[前端] 就绪: http://localhost:$ownedPort" -ForegroundColor Green
-    } else {
-        Write-Host "[失败] 前端 150s 内未就绪, 请查看 tmp\frontend.log" -ForegroundColor Red
-    }
-}
-
-# ---------- 汇总 ----------
-
-Write-Host ""
-Write-Host "========== OSLab 本地环境 ==========" -ForegroundColor Cyan
-if ($ownedPort) { Write-Host "  前端:  http://localhost:$ownedPort" }
-Write-Host "  后端:  http://localhost:8121/api"
-Write-Host "  演示账号: teacher_demo / student_demo1 (密码 oslab123456)"
-Write-Host "  停止:  powershell -ExecutionPolicy Bypass -File .\stop-oslab.ps1"
-Write-Host "====================================" -ForegroundColor Cyan

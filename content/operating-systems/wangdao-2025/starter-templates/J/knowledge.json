@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "KNOWLEDGE",
+  "batchCode": "batch.j.overview.chapter.001",
+  "contributor": "J",
+  "courseCode": "course.operating-systems",
+  "note": "待J重新依据教材整理的第一章整章知识包，覆盖1.1—1.7；现有1.1成果不采用、不合并。公共预分配编号可沿用，空模板不是已完成内容。",
+  "nodes": [],
+  "chunks": [],
+  "relations": []
+}

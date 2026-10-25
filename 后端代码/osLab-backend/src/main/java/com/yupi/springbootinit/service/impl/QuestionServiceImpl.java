@@ -115,6 +115,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
         queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
         queryWrapper.eq("isDelete", false);
+        queryWrapper.eq("resourceScope", "SHARED");
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), CommonConstant.SORT_ORDER_ASC.equals(sortOrder),
                 sortField);
         return queryWrapper;
@@ -171,7 +172,10 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         for(Long questionId:questionIds)
         {
             Question question=baseMapper.selectById(questionId);
-            if (question != null) {
+            if (question != null && "SHARED".equals(question.getResourceScope())
+                    && ("PUBLISHED".equals(question.getPublicationStatus())
+                    || question.getPublicationStatus() == null)
+                    && Integer.valueOf(0).equals(question.getIsDelete())) {
                 QuestionVO questionVO=QuestionVO.objToVo(question);
                 questions.add(questionVO);
             }

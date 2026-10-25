@@ -75,6 +75,10 @@ public class LearningAssessmentRunController {
         LearningQuestionQueryRequest query = new LearningQuestionQueryRequest();
         query.setChapter(request.getChapter());
         query.setNodeName(request.getNodeName());
+        query.setCourseCode(request.getCourseCode());
+        query.setSectionCode(request.getSectionCode());
+        query.setUnitCode(request.getUnitCode());
+        query.setNodeCode(request.getNodeCode());
         query.setType(request.getType());
         query.setDifficulty(request.getDifficulty());
         query.setStudyState(request.getStudyState());
@@ -250,6 +254,10 @@ public class LearningAssessmentRunController {
     public static class StartRequest {
         private String chapter;
         private String nodeName;
+        private String courseCode;
+        private String sectionCode;
+        private String unitCode;
+        private String nodeCode;
         private String type;
         private Integer difficulty;
         private String studyState;
@@ -259,6 +267,14 @@ public class LearningAssessmentRunController {
         public void setChapter(String chapter) { this.chapter = chapter; }
         public String getNodeName() { return nodeName; }
         public void setNodeName(String nodeName) { this.nodeName = nodeName; }
+        public String getCourseCode() { return courseCode; }
+        public void setCourseCode(String courseCode) { this.courseCode = courseCode; }
+        public String getSectionCode() { return sectionCode; }
+        public void setSectionCode(String sectionCode) { this.sectionCode = sectionCode; }
+        public String getUnitCode() { return unitCode; }
+        public void setUnitCode(String unitCode) { this.unitCode = unitCode; }
+        public String getNodeCode() { return nodeCode; }
+        public void setNodeCode(String nodeCode) { this.nodeCode = nodeCode; }
         public String getType() { return type; }
         public void setType(String type) { this.type = type; }
         public Integer getDifficulty() { return difficulty; }

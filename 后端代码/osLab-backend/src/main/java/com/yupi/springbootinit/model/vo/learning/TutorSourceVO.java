@@ -45,4 +45,9 @@ public class TutorSourceVO implements Serializable {
      * 行动目标 URL（可直跳的外链资源时提供；节点/题目等按 actionType+targetId 跳转时为空）
      */
     private String targetUrl;
+    /** Published textbook provenance; absent for non-textbook evidence. */
+    private String parentChunkCode;
+    private Integer revision;
+    private java.util.Map<String,Object> sourceRef;
+    private String sourceSectionTitle;
 }

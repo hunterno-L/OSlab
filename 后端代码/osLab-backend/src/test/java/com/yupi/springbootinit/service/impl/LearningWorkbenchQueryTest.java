@@ -162,6 +162,31 @@ class LearningWorkbenchQueryTest {
         verifyNoInteractions(masteryMapper, eventMapper, nodeMapper, questionService, submitService, resolver);
     }
 
+    @Test
+    void stableCodeLoadsFrozenEvidenceAfterRenameAndCanonicalPrerequisites() {
+        com.yupi.springbootinit.learning.NodeIdentityService identities=mock(com.yupi.springbootinit.learning.NodeIdentityService.class);
+        when(identities.resolve("os.memory.lru")).thenReturn(new com.yupi.springbootinit.learning.NodeIdentityService.Identity("os.memory.lru","最近最少使用","LRU"));
+        when(identities.requireCode("os.memory.lru")).thenReturn(new com.yupi.springbootinit.learning.NodeIdentityService.Identity("os.memory.lru","最近最少使用","LRU"));
+        ReflectionTestUtils.setField(service,"nodeIdentities",identities);
+        GraphDataDTO graph=new GraphDataDTO();NodeDTO renamed=node("1","LRU");renamed.setNodeCode("os.memory.lru");renamed.setDisplayName("最近最少使用");
+        graph.setNodes(List.of(renamed,node("2","页面置换")));LinkDTO requires=edge("1","2");requires.setRelationType("REQUIRES");graph.setLinks(List.of(requires));
+        when(graphService.getGraphSnapshot()).thenReturn(graph);
+        LearningMastery mastery=new LearningMastery();mastery.setNodeName("LRU");mastery.setPKnown(.3);mastery.setStatus("RED");mastery.setConceptEvidenceCount(1);
+        when(masteryMapper.selectList(any())).thenReturn(List.of(mastery));when(eventMapper.selectList(any())).thenReturn(List.of(event(10L,"FAIL")));
+        when(nodeMapper.selectList(any())).thenReturn(List.of());when(questionService.getQuestionVOs(List.of(),user)).thenReturn(List.of());when(resolver.findExperimentsByNode("LRU")).thenReturn(List.of());
+        NodeWorkbenchVO workbench=service.nodeWorkbench(user,"os.memory.lru");
+        assertEquals(.3,workbench.getMastery().getPKnown());assertEquals("最近最少使用",workbench.getMastery().getDisplayName());assertEquals(10L,workbench.getEvents().get(0).getId());
+        assertEquals("页面置换",workbench.getPrerequisites().get(0).getName());
+        ArgumentCaptor<LambdaQueryWrapper<LearningEvent>> query=ArgumentCaptor.forClass(LambdaQueryWrapper.class);verify(eventMapper).selectList(query.capture());query.getValue().getSqlSegment();
+        assertTrue(query.getValue().getParamNameValuePairs().containsValue("LRU"));
+        assertFalse(query.getValue().getParamNameValuePairs().containsValue("最近最少使用"));
+    }
+
+    @Test void duplicateLegacyNamesNeverPickArbitrarily() {
+        GraphDataDTO graph=new GraphDataDTO();graph.setNodes(List.of(node("1","FCFS"),node("2","FCFS")));when(graphService.getGraphSnapshot()).thenReturn(graph);
+        assertThrows(BusinessException.class,()->service.nodeWorkbench(user,"FCFS"));verifyNoInteractions(masteryMapper,eventMapper);
+    }
+
     private NodeDTO node(String id, String name) {
         NodeDTO node = new NodeDTO();
         node.setId(id);

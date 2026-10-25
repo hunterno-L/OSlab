@@ -16,6 +16,8 @@ public class PathItemVO implements Serializable {
      * 节点名
      */
     private String nodeName;
+    private String nodeCode;
+    private String displayName;
 
     /**
      * 顺序（1 开始）

@@ -20,6 +20,7 @@ import java.util.Date;
 @TableName(value = "learning_mastery")
 @Data
 public class LearningMastery implements Serializable {
+    private String nodeCode;
 
     /**
      * id

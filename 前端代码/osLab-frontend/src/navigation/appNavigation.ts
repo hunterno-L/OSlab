@@ -10,6 +10,8 @@ export interface NavItem {
   label: string;
   path: string;
   access?: string;
+  /** 同一入口按角色解析不同目标地址（不复制两份一级菜单） */
+  rolePaths?: Record<string, string>;
   children?: { key: string; label: string; path: string; access?: string }[];
 }
 
@@ -22,7 +24,7 @@ export const APP_NAVIGATION: NavItem[] = [
   },
   {
     key: "graph",
-    label: "知识图谱",
+    label: "课程学习",
     path: "/graph",
     access: ACCESS_ENUM.USER,
   },
@@ -60,11 +62,18 @@ export const APP_NAVIGATION: NavItem[] = [
       },
       {
         key: "exp-simulation",
-        label: "交互模拟",
+        label: "算法模拟",
         path: "/experiments/simulation",
         access: ACCESS_ENUM.USER,
       },
     ],
+  },
+  {
+    key: "tasks",
+    label: "学习任务",
+    path: "/tasks",
+    access: ACCESS_ENUM.USER,
+    rolePaths: { [ACCESS_ENUM.ADMIN]: "/teaching/tasks" },
   },
   {
     key: "resources",
@@ -78,6 +87,18 @@ export const APP_NAVIGATION: NavItem[] = [
     path: "/teaching/overview",
     access: ACCESS_ENUM.ADMIN,
     children: [
+      {
+        key: "teaching-content",
+        label: "课程内容管理",
+        path: "/teaching/content",
+        access: ACCESS_ENUM.ADMIN,
+      },
+      {
+        key: "teaching-tasks",
+        label: "学习任务",
+        path: "/teaching/tasks",
+        access: ACCESS_ENUM.ADMIN,
+      },
       {
         key: "teaching-overview",
         label: "班级分析",
@@ -144,12 +165,15 @@ export const ROLE_HOME: Record<string, string> = {
 
 /** 由路径解析所属一级领域（详情页保持顶栏选中态） */
 export function resolveNavKey(path: string): string | null {
+  if (path.startsWith("/courses")) return "graph";
   if (path.startsWith("/home")) return "home";
   if (path.startsWith("/assessments")) return "assessments";
-  if (path.startsWith("/graph") || path.startsWith("/knowledge/node"))
+  if (path.startsWith("/graph") || path.startsWith("/knowledge/"))
     return "graph";
   if (path.startsWith("/experiments") || path.startsWith("/view/question"))
     return "experiments";
+  if (path.startsWith("/tasks") || path.startsWith("/teaching/tasks"))
+    return "tasks";
   if (path.startsWith("/resources")) return "resources";
   if (path.startsWith("/records")) return "records";
   if (path.startsWith("/teaching")) return "teaching";

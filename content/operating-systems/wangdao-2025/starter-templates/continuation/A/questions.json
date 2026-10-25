@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "QUESTIONS",
+  "batchCode": "batch.a.process.chapter.001",
+  "contributor": "A",
+  "courseCode": "course.operating-systems",
+  "note": "现行四种客观题；综合应用题放同章application-questions.json，题号与教材题型组分别核对。",
+  "questions": []
+}

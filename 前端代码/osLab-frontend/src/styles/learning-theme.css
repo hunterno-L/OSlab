@@ -2,7 +2,7 @@
  * OSLab 学习工作区设计令牌（log2 OpenDesign 视觉基线，阶段 1）
  * 基线文档：docs/log2-OpenDesign视觉与交互设计.md §3/§4
  * 参考体系：OpenDesign Notion（中性工作区、细边线）+ Expo（工具密度），
- * 主蓝为 OSLab 品牌适配 #2059c9；状态色只表达学习状态/结果，不用于装饰。
+ * 主蓝为 OSLab 品牌适配 #2447d8；状态色只表达学习状态/结果，不用于装饰。
  *
  * 本文件分五层，页面组件只引用第 1 层变量：
  *   1) 设计令牌（:root）—— 颜色/字体/字号/间距/圆角/动效
@@ -26,83 +26,161 @@
 
 /* ---------- 1) 设计令牌 ---------- */
 :root {
-  /* 画布与面板（Notion 中性基底） */
-  --oslab-canvas: #f7f7f5;
+  /* C+B 学习图册：冷纸画布、索引卡、荧光笔、珊瑚批注 */
+  --oslab-canvas: #eef0e9;
   --oslab-panel: #ffffff;
-  --oslab-panel-soft: #f9f9f8;
+  --oslab-panel-soft: #f7f8f2;
+  --oslab-panel-muted: #f1f3ea;
 
   /* 文本 */
-  --oslab-ink: #1b1b1b;
-  --oslab-ink-soft: #37352f;
-  --oslab-muted: #a39e98;
-  /* 支持令牌：比 muted 深一档的次要文本色，保证 12-14px 说明文字可读性 */
-  --oslab-muted-strong: #757069;
+  --oslab-ink: #20242b;
+  --oslab-ink-soft: #3a4150;
+  --oslab-muted: #8b9187;
+  --oslab-muted-strong: #6b7168;
 
-  /* 边线：低对比度细线，面板 1px */
-  --oslab-line: rgba(0, 0, 0, 0.11);
-  --oslab-line-soft: rgba(0, 0, 0, 0.06);
+  /* 边线 */
+  --oslab-line: #dddfd3;
+  --oslab-line-soft: #eceee6;
+  --oslab-line-strong: #c9ccbe;
 
-  /* 品牌蓝：只用于当前导航项、主按钮、选中态、学习路径与链接 */
-  --oslab-primary: #2059c9;
-  --oslab-primary-soft: #eaf0fd;
-  --oslab-primary-hover: #1748a6;
+  /* 品牌钴蓝：按钮、链接、选中态 */
+  --oslab-primary: #2447d8;
+  --oslab-primary-hover: #1a35a8;
+  --oslab-primary-active: #142a87;
+  --oslab-primary-soft: #e9edff;
+  --oslab-on-primary: #ffffff;
+
+  /* 荧光笔：只标记“当前”与进度 */
+  --oslab-highlight: #f2d64b;
+  --oslab-highlight-soft: #fff7c2;
+  --oslab-highlight-strong: #ffe98a;
+
+  /* 批注：编号与页边注记 */
+  --oslab-annotation: #d7614a;
+  --oslab-annotation-soft: #f7ddd6;
 
   /* 语义状态色（不用于装饰）：已掌握/待巩固/薄弱/未学习 */
-  --oslab-mastered: #4f8875;
-  --oslab-mastered-soft: #e9f1ed;
-  --oslab-review: #b98239;
-  --oslab-review-soft: #f6eddf;
-  --oslab-weak: #a9695d;
-  --oslab-weak-soft: #f5eae7;
-  --oslab-unseen: #8f9994;
-  --oslab-unseen-soft: #f0f2f0;
-  /* 破坏性操作红色状态 = 状态色体系中的红褐，不另设鲜艳红 */
+  --oslab-mastered: #3f8f6e;
+  --oslab-mastered-soft: #e6f2ec;
+  --oslab-review: #b8892e;
+  --oslab-review-soft: #f6edd9;
+  --oslab-weak: #b8543f;
+  --oslab-weak-soft: #f6e3de;
+  --oslab-unseen: #6b7168;
+  --oslab-unseen-soft: #eeefe9;
   --oslab-danger: var(--oslab-weak);
 
-  /* 字体：界面无衬线，代码/ID/算法序列等宽 */
-  --oslab-font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "PingFang SC", "Microsoft YaHei", sans-serif;
-  --oslab-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* 状态标签文字色：11px 小字对 soft 底色需 ≥4.5:1（WCAG AA） */
+  --oslab-mastered-text: #2f6f55;
+  --oslab-review-text: #7a5a12;
+  --oslab-weak-text: #9a3f2c;
+  --oslab-unseen-text: #5b6159;
 
-  /* 字号：页面标题 26px（节点标题最多 28px）、区块 18px、正文 14px、辅助 12px */
-  --oslab-text-display: 32px;
-  --oslab-text-page: 26px;
+  /* 图谱 token：KnowledgeGraph.vue 的 GRAPH_TOKENS 必须逐项镜像 */
+  --oslab-graph-surface: transparent;
+  --oslab-graph-node-border: #c9ccbe;
+  --oslab-graph-node-radius: 8px;
+  --oslab-graph-category-concept: #e8eefc;
+  --oslab-graph-category-algorithm: #f1e9fa;
+  --oslab-graph-category-function: #e4f2ed;
+  --oslab-graph-category-default: #eeefe7;
+  --oslab-graph-node-fill-concept: #f8faff;
+  --oslab-graph-node-fill-algorithm: #fbf8ff;
+  --oslab-graph-node-fill-function: #f6fbf9;
+  --oslab-graph-node-fill-default: #fafbf7;
+  --oslab-graph-node-shadow: rgba(32, 36, 43, 0.08);
+  --oslab-graph-selection: #2447d8;
+  --oslab-graph-selection-ring: rgba(36, 71, 216, 0.18);
+  --oslab-graph-path: #8fa6c4;
+  --oslab-graph-path-strong: #6b809f;
+  --oslab-graph-path-edge: #3f66a5;
+  --oslab-graph-path-ring: rgba(107, 128, 159, 0.28);
+  --oslab-graph-review-ring: rgba(184, 137, 46, 0.26);
+  --oslab-graph-text-soft: #6b7168;
+  --oslab-graph-label-surface: #ffffff;
+  --oslab-graph-highlight-soft: #fff7c2;
+  --oslab-graph-highlight: #f2d64b;
+  --oslab-graph-edge-muted: #b0b6bf;
+  --oslab-graph-relation-dependent: #4f72b8;
+  --oslab-graph-relation-contain: #8b96a6;
+  --oslab-graph-relation-related: #9a948b;
+  --oslab-graph-relation-implements: #b8892e;
+  --oslab-graph-relation-fallback: #b0b6bf;
+
+  /* 字体：界面无衬线，标题/批注用文楷，代码/ID 用等宽 */
+  --oslab-font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC",
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+  --oslab-font-display: "LXGW WenKai", "Kaiti SC", "KaiTi", "STKaiti",
+    "Noto Serif SC", serif;
+  --oslab-font-mono: "Cascadia Code", "JetBrains Mono", ui-monospace,
+    SFMono-Regular, Menlo, Consolas, monospace;
+  --oslab-font-tech: "Bahnschrift SemiCondensed", "Arial Narrow",
+    "Noto Sans SC", "Microsoft YaHei", sans-serif;
+
+  /* 字号 */
+  --oslab-text-display: 34px;
+  --oslab-text-page: 34px;
   --oslab-text-section: 18px;
   --oslab-text-small: 12px;
-  --oslab-leading-body: 1.55;
-  /* 注意：设计文档 §3.2 的正文字号 14px 在本项目中暴露为 --oslab-font-body。
-     名为 --oslab-text-body 的变量是旧版"正文文本颜色"别名（13 处现有视图在
-     用，见第 4 层），阶段 2-6 重写各页时会随视图一起移除；待旧引用清零后可
-     再把字号迁回 --oslab-text-body。 */
+  --oslab-leading-body: 1.6;
   --oslab-font-body: 14px;
 
-  /* 间距（4px 基准）：4/8/12/16/24/32/48 */
+  /* 间距（4px 基准） */
   --oslab-space-1: 4px;
   --oslab-space-2: 8px;
   --oslab-space-3: 12px;
   --oslab-space-4: 16px;
+  --oslab-space-5: 20px;
   --oslab-space-6: 24px;
   --oslab-space-8: 32px;
+  --oslab-space-10: 40px;
   --oslab-space-12: 48px;
 
-  /* 圆角：容器 8px、输入和按钮 6px、状态标签 999px；禁止超过 12px */
-  --oslab-radius-sm: 4px;
-  --oslab-radius-md: 6px;
-  --oslab-radius-lg: 8px;
-  --oslab-radius-container: var(--oslab-radius-lg);
-  --oslab-radius-control: var(--oslab-radius-md);
+  /* 圆角：容器 14、卡片 12、控件 9、标签 999、图谱节点 8 */
+  --oslab-radius-sm: 6px;
+  --oslab-radius-md: 9px;
+  --oslab-radius-lg: 12px;
+  --oslab-radius-container: 14px;
+  --oslab-radius-control: 9px;
   --oslab-radius-pill: 999px;
 
-  /* 动效：150-200ms，cubic-bezier(0.645, 0.045, 0.355, 1)，无弹跳 */
-  --oslab-ease: cubic-bezier(0.645, 0.045, 0.355, 1);
-  --oslab-duration-fast: 150ms;
-  --oslab-duration: 200ms;
-
-  /* 浮层阴影：仅弹层/下拉允许，页面主体不依赖阴影分区 */
-  --oslab-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.08);
+  /* 动效与阴影 */
+  --oslab-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --oslab-duration-fast: 160ms;
+  --oslab-duration: 220ms;
+  --oslab-duration-slow: 420ms;
+  --oslab-shadow-card: 0 8px 24px rgba(32, 36, 43, 0.06);
+  --oslab-shadow-overlay: 0 16px 40px rgba(32, 36, 43, 0.14);
 }
 
 /* ---------- 2) 基础元素 ---------- */
+:root {
+  color-scheme: light;
+}
+
+/* 跳过导航：仅键盘聚焦时出现 */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10000;
+  padding: 10px 14px;
+  border-radius: var(--oslab-radius-control);
+  background: var(--oslab-primary);
+  color: var(--oslab-on-primary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--oslab-on-primary);
+  outline-offset: 2px;
+}
+
 body {
   font-family: var(--oslab-font-ui);
   font-size: var(--oslab-font-body);
@@ -123,60 +201,76 @@ textarea:focus-visible {
 
 /* ---------- 3) Arco 桥接 ---------- */
 body {
-  /* Arco 在 body 上以 "R, G, B" 三元组定义色阶（--arcoblue-N/--red-N/...），
-     组件再经 --primary-N/--danger-N 等语义别名消费。这里覆盖四个与本产品
-     相关的色阶三元组：主蓝对齐 #2059c9，危险红/成功绿/警示琥珀对齐语义
-     状态色系。hover(-5)/active(-7) 取加深色，与 --oslab-primary-hover 一致。
-     浅阶(1-3)取对应 soft 色的邻近过渡，用于焦点环、浅底和禁用态。
-     本段覆盖必须在 arco.css 之后加载（main.ts 的 import 顺序已保证）。 */
+  /* Arco 色阶以 "R, G, B" 三元组定义；主蓝对齐 C+B 钴蓝 #2447d8，
+     危险/成功/警示对齐语义状态色。本段必须在 arco.css 之后加载。 */
 
-  /* Primary → OSLab 蓝 */
-  --arcoblue-1: 234, 240, 253;
-  --arcoblue-2: 214, 226, 252;
-  --arcoblue-3: 166, 188, 236;
-  --arcoblue-4: 106, 139, 219;
-  --arcoblue-5: 23, 72, 166;
-  --arcoblue-6: 32, 89, 201;
-  --arcoblue-7: 23, 72, 166;
-  --arcoblue-8: 18, 55, 126;
-  --arcoblue-9: 13, 39, 88;
-  --arcoblue-10: 8, 23, 50;
+  /* Primary → C+B 钴蓝 */
+  --arcoblue-1: 233, 237, 255;
+  --arcoblue-2: 214, 221, 255;
+  --arcoblue-3: 166, 180, 246;
+  --arcoblue-4: 106, 128, 235;
+  --arcoblue-5: 26, 53, 168;
+  --arcoblue-6: 36, 71, 216;
+  --arcoblue-7: 20, 42, 135;
+  --arcoblue-8: 16, 34, 108;
+  --arcoblue-9: 12, 25, 80;
+  --arcoblue-10: 7, 15, 48;
 
-  /* Danger → 薄弱红褐 #a9695d */
-  --red-1: 245, 234, 231;
-  --red-2: 238, 216, 211;
-  --red-3: 219, 183, 176;
-  --red-4: 194, 144, 134;
-  --red-5: 143, 85, 75;
-  --red-6: 169, 105, 93;
-  --red-7: 143, 85, 75;
-  --red-8: 107, 58, 51;
-  --red-9: 71, 37, 32;
-  --red-10: 43, 21, 18;
+  /* Danger → 薄弱砖红 #b8543f */
+  --red-1: 246, 227, 222;
+  --red-2: 240, 208, 200;
+  --red-3: 226, 174, 162;
+  --red-4: 209, 132, 116;
+  --red-5: 198, 107, 88;
+  --red-6: 184, 84, 63;
+  --red-7: 154, 66, 48;
+  --red-8: 120, 49, 35;
+  --red-9: 85, 33, 23;
+  --red-10: 51, 19, 13;
 
-  /* Success → 已掌握绿 #4f8875 */
-  --green-1: 233, 241, 237;
-  --green-2: 214, 229, 222;
-  --green-3: 179, 205, 192;
-  --green-4: 129, 171, 155;
-  --green-5: 63, 109, 94;
-  --green-6: 79, 136, 117;
-  --green-7: 63, 109, 94;
-  --green-8: 46, 82, 70;
-  --green-9: 30, 55, 47;
-  --green-10: 17, 31, 27;
+  /* Success → 已掌握绿 #3f8f6e */
+  --green-1: 230, 242, 236;
+  --green-2: 208, 230, 220;
+  --green-3: 179, 211, 197;
+  --green-4: 136, 184, 164;
+  --green-5: 84, 157, 128;
+  --green-6: 63, 143, 110;
+  --green-7: 50, 120, 92;
+  --green-8: 39, 95, 73;
+  --green-9: 27, 69, 53;
+  --green-10: 15, 42, 32;
 
-  /* Warning → 待巩固琥珀 #b98239 */
-  --orange-1: 246, 237, 223;
-  --orange-2: 238, 222, 199;
-  --orange-3: 220, 199, 163;
-  --orange-4: 202, 171, 115;
-  --orange-5: 150, 104, 44;
-  --orange-6: 185, 130, 57;
-  --orange-7: 150, 104, 44;
-  --orange-8: 112, 77, 32;
-  --orange-9: 74, 51, 21;
-  --orange-10: 43, 30, 12;
+  /* Warning → 待巩固琥珀 #b8892e */
+  --orange-1: 246, 237, 217;
+  --orange-2: 240, 226, 194;
+  --orange-3: 226, 206, 160;
+  --orange-4: 210, 182, 120;
+  --orange-5: 196, 157, 74;
+  --orange-6: 184, 137, 46;
+  --orange-7: 154, 112, 36;
+  --orange-8: 120, 86, 27;
+  --orange-9: 85, 60, 18;
+  --orange-10: 51, 36, 10;
+
+  /* Arco 背景/文本/边线/圆角 */
+  --color-bg-1: #ffffff;
+  --color-bg-2: #f7f8f2;
+  --color-bg-3: #eef0e9;
+  --color-bg-4: #e6e8dd;
+  --color-bg-5: #dddfd3;
+  --color-text-1: #20242b;
+  --color-text-2: #3a4150;
+  --color-text-3: #6b7168;
+  --color-text-4: #8b9187;
+  --color-border-1: #eceee6;
+  --color-border-2: #dddfd3;
+  --color-border-3: #c9ccbe;
+  --color-fill-1: #f7f8f2;
+  --color-fill-2: #eef0e9;
+  --color-fill-3: #e6e8dd;
+  --border-radius-small: 9px;
+  --border-radius-medium: 12px;
+  --border-radius-large: 14px;
 }
 
 /* ---------- 4) 旧变量名兼容别名（迁移过渡，勿新增使用） ---------- */
@@ -258,7 +352,7 @@ body {
 }
 
 .oslab-error .oslab-state-title {
-  color: var(--oslab-weak);
+  color: var(--oslab-weak-text);
 }
 
 /* 内联加载指示（配合 .oslab-loading 或单独使用） */
@@ -300,22 +394,22 @@ body {
 
 .oslab-status-tag--mastered {
   background: var(--oslab-mastered-soft);
-  color: var(--oslab-mastered);
+  color: var(--oslab-mastered-text);
 }
 
 .oslab-status-tag--review {
   background: var(--oslab-review-soft);
-  color: var(--oslab-review);
+  color: var(--oslab-review-text);
 }
 
 .oslab-status-tag--weak {
   background: var(--oslab-weak-soft);
-  color: var(--oslab-weak);
+  color: var(--oslab-weak-text);
 }
 
 .oslab-status-tag--unseen {
   background: var(--oslab-unseen-soft);
-  color: var(--oslab-unseen);
+  color: var(--oslab-unseen-text);
 }
 
 /* 标题层级：页面标题 26px / 区块标题 18px，各只有一种表现 */
@@ -338,4 +432,214 @@ body {
 /* 代码 / ID / 算法序列 */
 .oslab-mono {
   font-family: var(--oslab-font-mono);
+}
+
+/* ---------- 6) C+B 组件皮肤 ---------- */
+body .arco-btn {
+  border-radius: var(--oslab-radius-control);
+  font-weight: 600;
+  transition: background-color var(--oslab-duration-fast) var(--oslab-ease),
+    border-color var(--oslab-duration-fast) var(--oslab-ease);
+}
+body .arco-btn-primary {
+  background: var(--oslab-primary);
+  color: var(--oslab-on-primary);
+}
+body .arco-btn-primary:hover {
+  background: var(--oslab-primary-hover);
+}
+body .arco-btn-secondary,
+body .arco-btn-outline {
+  background: var(--oslab-panel);
+  border-color: var(--oslab-line-strong);
+  color: var(--oslab-ink-soft);
+}
+body .arco-input-wrapper,
+body .arco-select-view,
+body .arco-textarea-wrapper {
+  background: var(--oslab-panel-soft);
+  border-color: var(--oslab-line-soft);
+  border-radius: var(--oslab-radius-control);
+}
+body .arco-input-wrapper:focus-within,
+body .arco-select-view:focus-within {
+  border-color: var(--oslab-primary);
+  box-shadow: 0 0 0 2px var(--oslab-primary-soft);
+}
+body .arco-table-th {
+  background: var(--oslab-panel-soft);
+  color: var(--oslab-muted-strong);
+  font-family: var(--oslab-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+body .arco-table-td {
+  border-color: var(--oslab-line-soft);
+  color: var(--oslab-ink-soft);
+}
+body .arco-table-tr:hover .arco-table-td {
+  background: var(--oslab-panel-soft);
+}
+body .arco-tag {
+  border: 0;
+  border-radius: var(--oslab-radius-pill);
+  background: var(--oslab-panel-muted);
+  color: var(--oslab-ink-soft);
+}
+body .arco-card {
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+body .arco-pagination-item {
+  border-radius: var(--oslab-radius-sm);
+}
+
+.section-card,
+.graph-card,
+.detail-card,
+.node-header {
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+
+.oslab-highlight-text {
+  display: inline;
+  padding: 0 3px;
+  background: linear-gradient(
+    transparent 56%,
+    var(--oslab-highlight) 56%,
+    var(--oslab-highlight) 92%,
+    transparent 92%
+  );
+}
+
+.oslab-highlight-block {
+  background: var(--oslab-highlight-soft);
+  border-radius: var(--oslab-radius-sm);
+}
+
+.oslab-annotation-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--oslab-primary);
+  color: var(--oslab-on-primary);
+  font-family: var(--oslab-font-mono);
+  font-size: 9px;
+  line-height: 1;
+}
+
+.oslab-empty,
+.oslab-loading,
+.oslab-error {
+  border: 1px dashed var(--oslab-line-strong);
+  border-radius: var(--oslab-radius-container);
+  background: var(--oslab-panel-soft);
+  padding: var(--oslab-space-10) var(--oslab-space-6);
+}
+.oslab-state-title {
+  font-family: var(--oslab-font-display);
+  font-size: 18px;
+  color: var(--oslab-ink);
+}
+.oslab-state-hint {
+  color: var(--oslab-muted-strong);
+  max-width: 520px;
+}
+.oslab-status-tag {
+  padding: 2px 9px;
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: 500;
+}
+.oslab-page-title {
+  font-family: var(--oslab-font-display);
+  font-size: var(--oslab-text-page);
+  font-weight: 700;
+}
+.oslab-section-title {
+  font-size: var(--oslab-text-section);
+  font-weight: 600;
+}
+
+/* 数据表默认更紧凑；页面仍可用局部样式覆盖 */
+body .arco-table-th {
+  padding: 8px 14px;
+  font-size: 11px;
+}
+body .arco-table-td {
+  padding: 8px 14px;
+  font-size: 12.5px;
+}
+
+.oslab-mono,
+.summary-value,
+.num,
+.rate,
+.cell-date {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 触控目标统一去掉双击缩放延迟；桌面端无副作用 */
+body .arco-btn,
+.filter-chip,
+.chapter-item,
+.algorithm-item,
+.summary-card,
+.sidebar-item,
+.catalog-label,
+.task-stat,
+.entry-item,
+.resource-card {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- 实验页 B：只作用于页面内容 ---------- */
+.oslab-lab-b {
+  --oslab-lab-bg: #e7ecef;
+  --oslab-lab-panel: #f8fafb;
+  --oslab-lab-panel-soft: #f1f5f7;
+  --oslab-lab-ink: #142b3b;
+  --oslab-lab-ink-soft: #3f5667;
+  --oslab-lab-muted: #5f7688;
+  --oslab-lab-line: #b7c7d3;
+  --oslab-lab-line-strong: #8da5b6;
+  --oslab-lab-blue: #1f5fbf;
+  --oslab-lab-red: #b6483a;
+  --oslab-lab-red-soft: #f7ddd6;
+
+  --oslab-canvas: var(--oslab-lab-bg);
+  --oslab-panel: var(--oslab-lab-panel);
+  --oslab-panel-soft: var(--oslab-lab-panel-soft);
+  --oslab-ink: var(--oslab-lab-ink);
+  --oslab-ink-soft: var(--oslab-lab-ink-soft);
+  --oslab-muted-strong: var(--oslab-lab-muted);
+  --oslab-line: var(--oslab-lab-line);
+  --oslab-line-strong: var(--oslab-lab-line-strong);
+  --oslab-primary: var(--oslab-lab-blue);
+  --oslab-primary-hover: #174a96;
+  --oslab-annotation: var(--oslab-lab-red);
+  --oslab-annotation-soft: var(--oslab-lab-red-soft);
+  --oslab-highlight: var(--oslab-lab-red);
+  --oslab-highlight-soft: var(--oslab-lab-red-soft);
+
+  --oslab-font-display: var(--oslab-font-tech);
+  --oslab-radius-sm: 0px;
+  --oslab-radius-md: 0px;
+  --oslab-radius-lg: 0px;
+  --oslab-radius-container: 0px;
+  --oslab-radius-control: 0px;
+  --oslab-shadow-card: none;
+
+  --arcoblue-5: 23, 74, 150;
+  --arcoblue-6: 31, 95, 191;
+  --arcoblue-7: 18, 58, 120;
+  --red-6: 182, 72, 58;
 }

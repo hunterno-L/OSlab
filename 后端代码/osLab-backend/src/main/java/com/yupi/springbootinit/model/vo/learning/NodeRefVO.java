@@ -10,6 +10,8 @@ import java.io.Serializable;
 @Data
 public class NodeRefVO implements Serializable {
     private String name;
+    private String nodeCode;
+    private String displayName;
     private String status;
     private String chapter;
 }

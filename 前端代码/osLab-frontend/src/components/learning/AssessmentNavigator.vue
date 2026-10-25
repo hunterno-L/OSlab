@@ -80,13 +80,13 @@ const stateLabel = (q: LearningQuestionVO) => {
 }
 .state-correct {
   background: var(--oslab-mastered-soft);
-  border-color: var(--oslab-mastered);
-  color: var(--oslab-mastered);
+  border-color: var(--oslab-mastered-text);
+  color: var(--oslab-mastered-text);
 }
 .state-wrong {
   background: var(--oslab-review-soft);
-  border-color: var(--oslab-review);
-  color: var(--oslab-review);
+  border-color: var(--oslab-review-text);
+  color: var(--oslab-review-text);
 }
 .state-offline {
   opacity: 0.4;

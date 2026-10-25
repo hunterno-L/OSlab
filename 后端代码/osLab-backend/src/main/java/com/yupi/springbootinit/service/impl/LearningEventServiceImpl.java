@@ -14,8 +14,7 @@ import com.yupi.springbootinit.model.entity.LearningQuestion;
 import com.yupi.springbootinit.model.entity.LearningQuestionNode;
 import com.yupi.springbootinit.model.entity.Question;
 import com.yupi.springbootinit.model.entity.QuestionSubmit;
-import com.yupi.springbootinit.model.enums.JudgeInfoMessageEnum;
-import com.yupi.springbootinit.model.enums.QuestionSubmitStatusEnum;
+import com.yupi.springbootinit.learning.JudgeResultClassifier;
 import com.yupi.springbootinit.model.enums.learning.LearningEventTypeEnum;
 import com.yupi.springbootinit.model.enums.learning.LearningResourceTypeEnum;
 import com.yupi.springbootinit.model.enums.learning.LearningResultEnum;
@@ -63,6 +62,8 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
 
     @Resource
     private LearningQuestionNodeMapper learningQuestionNodeMapper;
+    @Resource
+    private com.yupi.springbootinit.mapper.LearningAttemptMapper learningAttemptMapper;
 
     @Resource
     private QuestionService questionService;
@@ -72,6 +73,10 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
 
     @Resource
     private KnowledgeGraphService knowledgeGraphService;
+    @Resource
+    private com.yupi.springbootinit.learning.ExperimentMappingService experimentMappings;
+    @Resource
+    private com.yupi.springbootinit.learning.NodeIdentityService nodeIdentities;
 
     @Resource
     private org.springframework.transaction.PlatformTransactionManager transactionManager;
@@ -103,6 +108,7 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
             return changes;
         }
         String groupKey = "attempt:" + attemptId;
+        com.yupi.springbootinit.model.entity.LearningAttempt sourceAttempt = learningAttemptMapper == null ? null : learningAttemptMapper.selectById(attemptId);
         for (LearningQuestionNode mapping : mappings) {
             String nodeName = mapping.getNodeName();
             double weight = mapping.getWeight() == null ? 1.0 : Math.max(0.0, Math.min(1.0, mapping.getWeight()));
@@ -113,13 +119,17 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
                     JSONUtil.toJsonStr(new Evidence(
                             "普通题作答", question.getTitle(), correct ? "答对" : "答错",
                             isFirst ? "首次作答（独立观测）" : "重复作答（不计独立观测）")));
+            if(mapping.getNodeCode()!=null)event.setNodeCode(mapping.getNodeCode());
+            if(sourceAttempt!=null){event.setSourceUnitCode(sourceAttempt.getSourceUnitCode());event.setSourceActivityCode(sourceAttempt.getSourceActivityCode());
+                event.setSourceTaskCode(sourceAttempt.getSourceTaskCode());event.setSourceTaskItemCode(sourceAttempt.getSourceTaskItemCode());event.setSourceTaskRound(sourceAttempt.getSourceTaskRound());}
+            observationMetadata(event,weight);
             // U15：重复作答也写入行为事件（before==after，不更新模型）；
             // 仅首次（独立观测）才执行 BKT 更新。
-            boolean counted;
+            boolean counted = false;
             if (isFirst) {
                 counted = insertWithMasteryUpdate(userId, nodeName, event, correct, weight, true);
             } else {
-                counted = insertRepeatEvent(userId, nodeName, event);
+                insertRepeatEvent(userId, nodeName, event);
             }
             changes.add(toChangeVO(userId, nodeName, event, counted));
         }
@@ -139,7 +149,7 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
                 return;
             }
             Question question = questionService.getById(submit.getQuestionId());
-            if (question == null || StringUtils.isBlank(question.getTags())) {
+            if (question == null) {
                 return;
             }
             // 阶段 5 §5.3 观测分离：结果分类统一经 LearningResultEnum 的观测性质判定，
@@ -151,14 +161,11 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
             // §11.2 事务边界：一次提交的全部节点事件+状态更新同事务（编程式事务，
             // 异常向外抛给本方法 catch，保证回滚而非部分提交）
             judgeTxTemplate.executeWithoutResult(txStatus -> {
-                List<String> candidateNodes = JSONUtil.toList(question.getTags(), String.class);
-                for (String nodeName : candidateNodes) {
-                    if (StringUtils.isBlank(nodeName) || !isValidNode(nodeName)) {
-                        // 标签映射不上真实节点：诊断日志，不创造节点
-                        log.info("[learning] judge tag not mapped to graph node, skip. submitId={}, tag={}",
-                                questionSubmitId, nodeName);
-                        continue;
-                    }
+                List<com.yupi.springbootinit.learning.ExperimentMappingService.Mapping> mappings =
+                        experimentMappings == null ? java.util.Collections.emptyList()
+                                : experimentMappings.fromSnapshot(submit.getExperimentMappingSnapshot(), question.getId());
+                for (com.yupi.springbootinit.learning.ExperimentMappingService.Mapping mapping : mappings) {
+                    String nodeName = mapping.nodeName;
                     String idempotencyKey = "judge:" + questionSubmitId + ":" + nodeName;
                     // 事件详情保留：来源/实验（title）、错误类型（note=judgeMessage）、
                     // 语言（language）、时间（createTime 由落库补齐），供 Tutor 与归因使用
@@ -172,8 +179,15 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
                                     submit.getLanguage())));
                     // 编译错误/系统错误不能被记成 FAIL：诊断事件不计学生知识失误
                     event.setResult(result.name());
+                    event.setNodeCode(mapping.nodeCode);
+                    event.setSourceUnitCode(submit.getSourceUnitCode());
+                    event.setSourceActivityCode(submit.getSourceActivityCode());
+                    event.setSourceTaskCode(submit.getSourceTaskCode());
+                    event.setSourceTaskItemCode(submit.getSourceTaskItemCode());
+                    event.setSourceTaskRound(submit.getSourceTaskRound());
+                    observationMetadata(event,mapping.weight);
                     if (result.isKnowledgeObservation()) {
-                        insertWithMasteryUpdate(submit.getUserId(), nodeName, event, accepted, 1.0, false);
+                        insertWithMasteryUpdate(submit.getUserId(), nodeName, event, accepted, mapping.weight, false);
                     } else {
                         // 诊断事件：前后快照相同，不调用 BKT、不增加证据数、不改置信度
                         insertFrozenEvent(submit.getUserId(), nodeName, event);
@@ -197,31 +211,7 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
      * FAIL 知识观测并更新掌握度。现按 value/text/关键字三重匹配。
      */
     static LearningResultEnum classifyJudgeResult(int terminalStatus, String judgeMessage) {
-        if (terminalStatus == QuestionSubmitStatusEnum.FAILED.getValue()) {
-            return LearningResultEnum.SYSTEM_ERROR;
-        }
-        if (isCompileErrorMessage(judgeMessage)) {
-            return LearningResultEnum.COMPILE_ERROR;
-        }
-        boolean accepted = terminalStatus == QuestionSubmitStatusEnum.SUCCEED.getValue()
-                && JudgeInfoMessageEnum.ACCEPTED.getValue().equals(judgeMessage);
-        return accepted ? LearningResultEnum.PASS : LearningResultEnum.FAIL;
-    }
-
-    /**
-     * 编译错误消息判定：value（"编译错误"）/ text（"Compile Error"）/
-     * 沙箱原文关键字（compile/编译）三重匹配，不依赖单一字符串形态。
-     */
-    private static boolean isCompileErrorMessage(String judgeMessage) {
-        if (StringUtils.isBlank(judgeMessage)) {
-            return false;
-        }
-        if (JudgeInfoMessageEnum.COMPILE_ERROR.getValue().equals(judgeMessage)
-                || JudgeInfoMessageEnum.COMPILE_ERROR.getText().equalsIgnoreCase(judgeMessage.trim())) {
-            return true;
-        }
-        String lower = judgeMessage.toLowerCase();
-        return lower.contains("compile") || judgeMessage.contains("编译");
+        return JudgeResultClassifier.classify(terminalStatus, judgeMessage);
     }
 
     // endregion
@@ -232,6 +222,7 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
     @Transactional(rollbackFor = Exception.class)
     public Long recordSimulationEvent(Long userId, String nodeName, String simulationKey,
                                       boolean correct, String evidence) {
+        if(nodeIdentities!=null)nodeName=nodeIdentities.storageKey(nodeName);
         if (StringUtils.isBlank(nodeName) || !isValidNode(nodeName)) {
             log.info("[learning] simulation node invalid, skip event. userId={}, node={}", userId, nodeName);
             return null;
@@ -241,6 +232,7 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
                 LearningEventTypeEnum.SIMULATION, LearningResourceTypeEnum.SIMULATION,
                 0L, correct, true, idempotencyKey,
                 "sim:" + userId + ":" + simulationKey, evidence);
+        observationMetadata(event,1.0);
         insertWithMasteryUpdate(userId, nodeName, event, correct, 1.0, false);
         return event.getId();
     }
@@ -248,6 +240,14 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
     // endregion
 
     // region 公共工具
+    private void observationMetadata(LearningEvent event,double weight) {
+        cn.hutool.json.JSONObject evidence;
+        try {evidence=JSONUtil.parseObj(event.getEvidence());}
+        catch(cn.hutool.json.JSONException e){evidence=new cn.hutool.json.JSONObject();evidence.set("description",event.getEvidence());}
+        evidence.set("mappingWeight",weight);
+        evidence.set("modelVersion","bkt-weighted-legacy/1");
+        event.setEvidence(evidence.toString());
+    }
 
     @Override
     public boolean isValidNode(String nodeName) {
@@ -255,6 +255,7 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
             return false;
         }
         try {
+            if (nodeIdentities != null && nodeIdentities.resolve(nodeName) != null) return true;
             return CollectionUtils.isNotEmpty(knowledgeGraphService.findByName(nodeName));
         } catch (Exception e) {
             // Neo4j 不可用时保守处理：视为无效节点，不产生事件
@@ -273,6 +274,10 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
         LearningEvent event = new LearningEvent();
         event.setUserId(userId);
         event.setNodeName(nodeName);
+        if (nodeIdentities != null) {
+            com.yupi.springbootinit.learning.NodeIdentityService.Identity identity = nodeIdentities.byStorageKey(nodeName);
+            if (identity != null) event.setNodeCode(identity.nodeCode);
+        }
         event.setEventType(eventType.name());
         event.setResourceType(resourceType.name());
         event.setResourceId(resourceId);
@@ -509,6 +514,10 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
             mastery = new LearningMastery();
             mastery.setUserId(userId);
             mastery.setNodeName(nodeName);
+            if (nodeIdentities != null) {
+                com.yupi.springbootinit.learning.NodeIdentityService.Identity identity = nodeIdentities.byStorageKey(nodeName);
+                if (identity != null) mastery.setNodeCode(identity.nodeCode);
+            }
             mastery.setPKnown(BktModel.DEFAULT_P_INIT);
             mastery.setConfidence(0.0);
             mastery.setConceptScore(0.0);
@@ -573,6 +582,7 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
     private MasteryChangeVO toChangeVO(Long userId, String nodeName, LearningEvent event, boolean counted) {
         MasteryChangeVO vo = new MasteryChangeVO();
         vo.setNodeName(nodeName);
+        vo.setNodeCode(event.getNodeCode());
         vo.setMasteryBefore(event.getMasteryBefore());
         vo.setMasteryAfter(event.getMasteryAfter());
         LearningMastery mastery = learningMasteryMapper.selectOne(new LambdaQueryWrapper<LearningMastery>()

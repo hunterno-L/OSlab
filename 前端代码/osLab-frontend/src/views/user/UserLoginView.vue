@@ -6,7 +6,6 @@
     aria-labelledby="os-login-tab"
   >
     <h2>继续你的学习</h2>
-    <p class="os-form-subtitle">登录 OSLab，接着探索你的知识路径。</p>
     <form autocomplete="on" novalidate @submit.prevent="handleSubmit">
       <label class="os-field">
         <span class="os-field-label">账号</span>
@@ -16,8 +15,15 @@
           name="userAccount"
           type="text"
           autocomplete="username"
-          placeholder="输入账号"
+          spellcheck="false"
+          placeholder="输入账号，如 os2026001…"
         />
+        <span
+          v-if="error && errorField === 'account'"
+          class="os-field-error"
+          role="alert"
+          >{{ error }}</span
+        >
       </label>
       <label class="os-field">
         <span class="os-field-label">密码</span>
@@ -29,7 +35,7 @@
             name="userPassword"
             :type="showPassword ? 'text' : 'password'"
             autocomplete="current-password"
-            placeholder="输入密码"
+            placeholder="输入密码…"
           />
           <button
             type="button"
@@ -70,6 +76,12 @@
             </svg>
           </button>
         </span>
+        <span
+          v-if="error && errorField === 'password'"
+          class="os-field-error"
+          role="alert"
+          >{{ error }}</span
+        >
       </label>
       <div class="os-form-extra">
         <label class="os-remember">
@@ -78,7 +90,7 @@
         </label>
       </div>
       <button type="submit" class="os-submit" :disabled="loading">
-        <span>{{ loading ? "正在登录" : "登录" }}</span>
+        <span>{{ loading ? "正在登录…" : "登录" }}</span>
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -92,9 +104,15 @@
           <path d="m13 6 6 6-6 6" />
         </svg>
       </button>
-      <p v-show="error" class="os-error" role="alert">{{ error }}</p>
+      <p
+        v-show="error && !errorField"
+        class="os-error"
+        role="alert"
+        aria-live="polite"
+      >
+        {{ error }}
+      </p>
     </form>
-    <p class="os-account-note">账号用于保存你的练习、实验与学习记录。</p>
   </div>
 </template>
 
@@ -121,15 +139,20 @@ watch(account, (value) => {
 });
 // 提交进行中：通知布局禁用页签切换
 const authBusy = inject<Ref<boolean>>("oslabAuthBusy", ref(false));
-const advanceFlow = inject<() => void>("oslabAdvanceFlow", () => {
-  /* 独立渲染时无知识流可推进 */
-});
 
 const password = ref("");
 const showPassword = ref(false);
 const rememberAccount = ref(false);
 const loading = ref(false);
 const error = ref("");
+const errorField = ref<"account" | "password" | "">("");
+
+watch([account, password], () => {
+  if (errorField.value) {
+    error.value = "";
+    errorField.value = "";
+  }
+});
 
 onMounted(() => {
   const saved = localStorage.getItem(REMEMBER_KEY);
@@ -158,13 +181,17 @@ const handleSubmit = async () => {
     return;
   }
   error.value = "";
-  if (!account.value || !password.value) {
-    error.value = "请输入账号和密码";
-    if (!account.value) {
-      document.getElementById("oslab-account-input")?.focus();
-    } else {
-      document.getElementById("oslab-password-input")?.focus();
-    }
+  errorField.value = "";
+  if (!account.value) {
+    error.value = "请输入账号";
+    errorField.value = "account";
+    document.getElementById("oslab-account-input")?.focus();
+    return;
+  }
+  if (!password.value) {
+    error.value = "请输入密码";
+    errorField.value = "password";
+    document.getElementById("oslab-password-input")?.focus();
     return;
   }
   loading.value = true;
@@ -182,14 +209,13 @@ const handleSubmit = async () => {
       }
       await store.dispatch("user/getLoginUser");
       localStorage.setItem("userId", String(res.data.id));
-      // 成功后让知识流向前推进一小段再切换路由（总额外延迟 ≤200ms）
-      advanceFlow();
-      await new Promise((resolve) => setTimeout(resolve, 160));
       await router.replace(resolveRedirect(route.query.redirect));
       return;
     }
+    errorField.value = "";
     error.value = `登录失败：${res.message || "请检查账号和密码"}`;
   } catch {
+    errorField.value = "";
     error.value = "登录请求未完成，请检查网络连接后重试";
   } finally {
     loading.value = false;

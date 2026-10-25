@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 页面置换模拟器入口参数
+ * 节点工作台的算法演示入口；algorithms 为 18 项播放器的稳定算法键。
  */
 @Data
 public class SimulationEntryVO implements Serializable {

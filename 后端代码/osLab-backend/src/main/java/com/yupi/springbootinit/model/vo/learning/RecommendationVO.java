@@ -14,6 +14,8 @@ public class RecommendationVO implements Serializable {
      * 推荐的知识节点业务键
      */
     private String nodeName;
+    private String nodeCode;
+    private String displayName;
 
     /**
      * 推荐类型：WEAK_NODE（薄弱节点）/ PREREQUISITE（前置缺口）/ PRACTICE（练习巩固）

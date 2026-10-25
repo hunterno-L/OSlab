@@ -9,15 +9,19 @@
         :class="{ 'ai-fab-dragging': dragging }"
         :style="{ left: btnPos.x + 'px', top: btnPos.y + 'px' }"
         aria-label="AI 助手"
+        :aria-expanded="open"
+        aria-controls="ai-assistant-panel"
         title="AI 助手（点击开关，可拖动）"
         @pointerdown="startDrag($event, 'fab')"
         @keydown.enter.prevent="open = !open"
+        @keydown.space.prevent="open = !open"
       >
         AI
       </button>
       <!-- 面板：Teleport 到 body，约 400×520，max 约束在视口内 -->
       <div
         v-if="open"
+        id="ai-assistant-panel"
         ref="panelWrapRef"
         class="ai-float-panel"
         :style="{ left: panelPos.x + 'px', top: panelPos.y + 'px' }"
@@ -25,8 +29,10 @@
         <AiChatPanel
           @close="open = false"
           @header-drag="startDrag($event, 'panel')"
+          @header-move="nudgePanel"
         />
       </div>
+      <span ref="safeAreaRef" class="ai-safe-probe" aria-hidden="true"></span>
     </template>
   </Teleport>
 </template>
@@ -55,10 +61,11 @@ import { useStore } from "vuex";
 import ACCESS_ENUM from "@/access/accessEnum";
 import AiChatPanel from "./AiChatPanel.vue";
 
-const FAB_SIZE = 76;
+const FAB_SIZE = 52;
+const FAB_MARGIN = 20;
 const PANEL_WIDTH = 400;
 const PANEL_HEIGHT = 520;
-const VIEWPORT_MARGIN = 8;
+const VIEWPORT_MARGIN = 12;
 const DRAG_THRESHOLD = 4;
 const POSITION_PREFIX = "oslab-ai-assistant-position-";
 
@@ -96,6 +103,7 @@ const visible = computed(() => isLoggedIn.value && !hiddenByRoute.value);
 const open = ref(false);
 const fabRef = ref<HTMLElement | null>(null);
 const panelWrapRef = ref<HTMLElement | null>(null);
+const safeAreaRef = ref<HTMLElement | null>(null);
 const btnPos = ref<Position>({ x: 0, y: 0 });
 const panelPos = ref<Position>({ x: 0, y: 0 });
 const panelPlaced = ref(false);
@@ -161,11 +169,41 @@ function placePanelNearFab() {
   panelPos.value = { x, y };
 }
 
-function defaultFabPos(): Position {
+function safeAreaInsets() {
+  const style = safeAreaRef.value
+    ? window.getComputedStyle(safeAreaRef.value)
+    : null;
   return {
-    x: window.innerWidth - FAB_SIZE - 24,
-    y: window.innerHeight - FAB_SIZE - 24,
+    left: parseFloat(style?.paddingLeft || "0") || 0,
+    right: parseFloat(style?.paddingRight || "0") || 0,
+    bottom: parseFloat(style?.paddingBottom || "0") || 0,
   };
+}
+
+function defaultFabPos(): Position {
+  const insets = safeAreaInsets();
+  return {
+    x: window.innerWidth - FAB_SIZE - FAB_MARGIN - insets.right,
+    y: window.innerHeight - FAB_SIZE - FAB_MARGIN - insets.bottom,
+  };
+}
+
+// 浮动助手只停靠底部左右角，避免压住顶部导航、表格表头或详情操作区。
+function snapFabToBottomCorner() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const insets = safeAreaInsets();
+  const leftSide = btnPos.value.x + FAB_SIZE / 2 < vw / 2;
+  btnPos.value = clampPos(
+    {
+      x: leftSide
+        ? FAB_MARGIN + insets.left
+        : vw - FAB_SIZE - FAB_MARGIN - insets.right,
+      y: vh - FAB_SIZE - FAB_MARGIN - insets.bottom,
+    },
+    FAB_SIZE,
+    FAB_SIZE
+  );
 }
 
 function positionKey(): string {
@@ -207,6 +245,7 @@ function loadPosition() {
     }
   }
   clampAll();
+  snapFabToBottomCorner();
 }
 
 function persistPosition() {
@@ -309,9 +348,23 @@ function onDragEnd(e: PointerEvent) {
   if (state.moved) {
     if (state.kind === "panel") {
       panelPlaced.value = true;
+    } else {
+      snapFabToBottomCorner();
     }
     persistPosition();
   }
+}
+
+function nudgePanel(delta: { dx: number; dy: number }) {
+  if (!open.value) return;
+  const size = panelSize();
+  panelPos.value = clampPos(
+    { x: panelPos.value.x + delta.dx, y: panelPos.value.y + delta.dy },
+    size.x,
+    size.y
+  );
+  panelPlaced.value = true;
+  persistPosition();
 }
 
 function onGlobalKeydown(e: KeyboardEvent) {
@@ -322,8 +375,9 @@ function onGlobalKeydown(e: KeyboardEvent) {
 }
 
 function handleViewportChange() {
-  // resize / 浏览器缩放 / 窄屏切换：自动回收可见范围（§8.3-4）
+  // resize / 浏览器缩放 / 窄屏切换：自动回收可见范围并保持底部停靠
   clampAll();
+  snapFabToBottomCorner();
 }
 
 watch(open, (value) => {
@@ -335,6 +389,9 @@ watch(open, (value) => {
     window.addEventListener("keydown", onGlobalKeydown);
   } else {
     window.removeEventListener("keydown", onGlobalKeydown);
+    if (panelWrapRef.value?.contains(document.activeElement)) {
+      nextTick(() => fabRef.value?.focus());
+    }
   }
 });
 
@@ -347,8 +404,9 @@ watch(visible, (value) => {
 // 登录用户变化（含退出登录）：关闭面板并按新用户重新载入位置
 watch(
   () => loginUser.value?.id,
-  () => {
+  async () => {
     open.value = false;
+    await nextTick();
     loadPosition();
   }
 );
@@ -371,21 +429,28 @@ onBeforeUnmount(() => {
 .ai-fab {
   position: fixed;
   z-index: 2999;
-  width: 76px;
-  height: 76px;
+  width: 52px;
+  height: 52px;
   border: none;
   border-radius: var(--oslab-radius-pill);
   background: var(--oslab-primary);
   color: #fff;
   font-family: var(--oslab-font-ui);
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1;
   cursor: grab;
   touch-action: none;
   user-select: none;
-  box-shadow: var(--oslab-shadow-overlay);
-  transition: background var(--oslab-duration-fast) var(--oslab-ease);
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0.94;
+  box-shadow: var(--oslab-shadow-card);
+  transition: background var(--oslab-duration-fast) var(--oslab-ease),
+    opacity var(--oslab-duration-fast) var(--oslab-ease);
+}
+.ai-fab:hover,
+.ai-fab:focus-visible {
+  opacity: 1;
 }
 .ai-fab:hover {
   background: var(--oslab-primary-hover);
@@ -409,5 +474,23 @@ onBeforeUnmount(() => {
   border: 1px solid var(--oslab-line);
   border-radius: var(--oslab-radius-lg);
   box-shadow: var(--oslab-shadow-overlay);
+}
+
+.ai-safe-probe {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-fab {
+    transition: none;
+  }
 }
 </style>

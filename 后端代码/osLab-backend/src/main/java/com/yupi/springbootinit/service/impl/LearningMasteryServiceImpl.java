@@ -95,6 +95,12 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
 
     @Resource
     private LearningResourceResolver resourceResolver;
+    @Resource
+    private com.yupi.springbootinit.learning.NodeIdentityService nodeIdentities;
+    @Resource
+    private com.yupi.springbootinit.learning.PublishedLearningContentService publishedContent;
+    @Resource
+    private com.yupi.springbootinit.course.CourseService courseService;
 
     @Resource
     private com.yupi.springbootinit.mapper.LearningNodeContentMapper learningNodeContentMapper;
@@ -111,11 +117,14 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
             for (NodeDTO node : graph.getNodes()) {
                 MasteryNodeVO masteryNode = new MasteryNodeVO();
                 masteryNode.setId(node.getId());
+                masteryNode.setNodeCode(node.getNodeCode());
+                masteryNode.setDisplayName(node.getDisplayName());
+                masteryNode.setNodeType(node.getNodeType());masteryNode.setLayer(node.getLayer());masteryNode.setHomeSectionCode(node.getHomeSectionCode());
                 masteryNode.setName(node.getName());
                 masteryNode.setCategory(node.getCategory());
                 masteryNode.setChapter(node.getChapter());
                 masteryNode.setDescription(node.getDescription());
-                LearningMastery mastery = masteryMap.get(node.getName());
+                LearningMastery mastery = masteryMap.get(storageKey(node));
                 applyMastery(masteryNode, mastery);
                 if (mastery != null && mastery.getLastEventId() != null) {
                     LearningEvent lastEvent = lastEventMap.get(mastery.getLastEventId());
@@ -182,13 +191,12 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
     }
 
     @Override
-    public NodeWorkbenchVO nodeWorkbench(User user, String nodeName) {
+    public NodeWorkbenchVO nodeWorkbench(User user, String codeOrName) {
+        com.yupi.springbootinit.learning.NodeIdentityService.Identity identity = nodeIdentities == null ? null : nodeIdentities.resolve(codeOrName);
+        final String nodeName = identity == null ? codeOrName : identity.storageKey;
         // 一次快照同时提供节点校验、元数据和依赖边，避免高频工作台走旧图谱 N+1 路径。
         GraphDataDTO graph = knowledgeGraphService.getGraphSnapshot();
-        NodeDTO graphNode = graph.getNodes() == null ? null : graph.getNodes().stream()
-                .filter(node -> nodeName != null && nodeName.equals(node.getName()))
-                .findFirst()
-                .orElse(null);
+        NodeDTO graphNode = KnowledgeGraphService.resolveNode(graph, identity==null?null:identity.nodeCode, nodeName);
         if (StringUtils.isBlank(nodeName) || graphNode == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "知识节点不存在：" + nodeName);
         }
@@ -210,6 +218,7 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
                 .stream().map(LearningQuestionNode::getQuestionId).collect(Collectors.toList());
         vo.setQuestions(learningQuestionService.getQuestionVOs(questionIds, user));
         vo.setEvents(eventVOs(nodeEvents, MAX_EVENTS));
+        if (nodeIdentities != null) nodeIdentities.decorateEvents(vo.getEvents());
         // 节点内推荐
         List<RecommendationVO> recommendations = new ArrayList<>();
         MasteryNodeVO mastery = vo.getMastery();
@@ -227,7 +236,13 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
         }
         vo.setRecommendations(recommendations);
         // 共享学习素材（Phase 8 §12.2）：仅消费 PUBLISHED，未配置保持 null 由前端回落
-        com.yupi.springbootinit.model.entity.LearningNodeContent content =
+        if (publishedContent != null && graphNode.getNodeCode()!=null) {
+            vo.setTextbookChunks(publishedContent.chunksForNodes(Collections.singletonList(graphNode.getNodeCode())));
+            if (courseService != null) vo.setLearningUnits(courseService.nodeUnits(graphNode.getNodeCode(),user.getId()));
+            if (!vo.getTextbookChunks().isEmpty()) vo.setContentMd(vo.getTextbookChunks().stream()
+                    .map(c -> String.valueOf(c.get("contentMd"))).collect(Collectors.joining("\n\n")));
+        }
+        com.yupi.springbootinit.model.entity.LearningNodeContent content = vo.getContentMd()!=null ? null :
                 learningNodeContentMapper.selectOne(new LambdaQueryWrapper<com.yupi.springbootinit.model.entity.LearningNodeContent>()
                         .eq(com.yupi.springbootinit.model.entity.LearningNodeContent::getNodeName, nodeName)
                         .eq(com.yupi.springbootinit.model.entity.LearningNodeContent::getStatus, "PUBLISHED")
@@ -252,7 +267,7 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
         Map<String, String> idToName = new HashMap<>();
         if (graph.getNodes() != null) {
             for (NodeDTO node : graph.getNodes()) {
-                idToName.put(node.getId(), node.getName());
+                idToName.put(node.getId(), storageKey(node));
             }
         }
 
@@ -260,16 +275,16 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
         List<NodeRefVO> prerequisites = new ArrayList<>();
         List<NodeRefVO> successors = new ArrayList<>();
         for (LinkDTO link : graph.getLinks() == null ? Collections.<LinkDTO>emptyList() : graph.getLinks()) {
-            if (!"dependent".equals(link.getRelationType())) {
+            if (!KnowledgeGraphService.isPrerequisiteRelation(link.getRelationType())) {
                 continue;
             }
             String sourceName = idToName.get(link.getSource());
             String targetName = idToName.get(link.getTarget());
             if (nodeName.equals(sourceName) && targetName != null) {
-                prerequisites.add(toNodeRef(targetName, masteryMap));
+                prerequisites.add(toNodeRef(targetName, masteryMap, graph));
             }
             if (nodeName.equals(targetName) && sourceName != null) {
-                successors.add(toNodeRef(sourceName, masteryMap));
+                successors.add(toNodeRef(sourceName, masteryMap, graph));
             }
         }
         vo.setPrerequisites(prerequisites);
@@ -357,9 +372,11 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
         return failureVo;
     }
 
-    private NodeRefVO toNodeRef(String name, Map<String, LearningMastery> masteryMap) {
+    private NodeRefVO toNodeRef(String name, Map<String, LearningMastery> masteryMap, GraphDataDTO graph) {
         NodeRefVO ref = new NodeRefVO();
         ref.setName(name);
+        NodeDTO node=KnowledgeGraphService.resolveNode(graph,null,name);
+        if(node!=null){ref.setNodeCode(node.getNodeCode());ref.setDisplayName(node.getDisplayName());ref.setChapter(node.getChapter());}
         LearningMastery mastery = masteryMap.get(name);
         ref.setStatus(mastery == null ? "GRAY" : mastery.getStatus());
         return ref;
@@ -460,16 +477,21 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
     }
 
     @Override
-    public MasteryNodeVO nodeMastery(Long userId, String nodeName) {
+    public MasteryNodeVO nodeMastery(Long userId, String codeOrName) {
+        final String nodeName = nodeIdentities == null ? codeOrName : nodeIdentities.storageKey(codeOrName);
         LearningMastery mastery = learningMasteryMapper.selectOne(new LambdaQueryWrapper<LearningMastery>()
                 .eq(LearningMastery::getUserId, userId)
                 .eq(LearningMastery::getNodeName, nodeName));
         MasteryNodeVO vo = new MasteryNodeVO();
         vo.setName(nodeName);
+        if (nodeIdentities != null) {
+            com.yupi.springbootinit.learning.NodeIdentityService.Identity i = nodeIdentities.byStorageKey(nodeName);
+            if (i != null) { vo.setNodeCode(i.nodeCode); vo.setDisplayName(i.name); }
+        }
         // 概念卡：节点描述来自 Neo4j EntityNode
         try {
             List<com.yupi.springbootinit.model.entity.EntityNode> graphNodes =
-                    knowledgeGraphService.findByName(nodeName);
+                    knowledgeGraphService.findByName(vo.getNodeCode()==null?nodeName:vo.getNodeCode());
             if (CollectionUtils.isNotEmpty(graphNodes)) {
                 vo.setId(graphNodes.get(0).getId() == null ? null : String.valueOf(graphNodes.get(0).getId()));
                 vo.setCategory(graphNodes.get(0).getLabel());
@@ -495,6 +517,9 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
                                                LearningEvent latestEvent) {
         MasteryNodeVO vo = new MasteryNodeVO();
         vo.setId(node.getId());
+        vo.setNodeCode(node.getNodeCode());
+        vo.setDisplayName(node.getDisplayName());
+        vo.setNodeType(node.getNodeType());vo.setLayer(node.getLayer());vo.setHomeSectionCode(node.getHomeSectionCode());
         vo.setName(node.getName());
         vo.setCategory(node.getCategory());
         vo.setChapter(node.getChapter());
@@ -516,7 +541,7 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
         ThrowUtils.throwIf(pageSize > 100, ErrorCode.PARAMS_ERROR, "每页最多 100 条");
         LambdaQueryWrapper<LearningEvent> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(LearningEvent::getUserId, user.getId());
-        wrapper.eq(StringUtils.isNotBlank(nodeName), LearningEvent::getNodeName, nodeName);
+        wrapper.eq(StringUtils.isNotBlank(nodeName), LearningEvent::getNodeName, nodeIdentities==null?nodeName:nodeIdentities.storageKey(nodeName));
         wrapper.eq(StringUtils.isNotBlank(eventType), LearningEvent::getEventType, eventType);
         if (StringUtils.isNotBlank(startTime)) {
             wrapper.ge(LearningEvent::getCreateTime, cn.hutool.core.date.DateUtil.parse(startTime));
@@ -534,6 +559,7 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
             events.add(toEventVO(e, null));
         }
         vo.setEvents(events);
+        if (nodeIdentities != null) nodeIdentities.decorateEvents(events);
         return vo;
     }
 
@@ -581,20 +607,23 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
             for (NodeDTO node : graph.getNodes()) {
                 MasteryNodeVO vo = new MasteryNodeVO();
                 vo.setId(node.getId());
+                vo.setNodeCode(node.getNodeCode());
+                vo.setDisplayName(node.getDisplayName());
+                vo.setNodeType(node.getNodeType());vo.setLayer(node.getLayer());vo.setHomeSectionCode(node.getHomeSectionCode());
                 vo.setName(node.getName());
                 vo.setCategory(node.getCategory());
                 vo.setChapter(node.getChapter());
                 vo.setDescription(node.getDescription());
-                LearningEvent last = lastEventByNode.get(node.getName());
-                LearningEvent snapEvent = snapshotEventByNode.get(node.getName());
+                LearningEvent last = lastEventByNode.get(storageKey(node));
+                LearningEvent snapEvent = snapshotEventByNode.get(storageKey(node));
                 MasterySnapshotCodec.MasterySnapshot snap = snapEvent == null
                         ? null : MasterySnapshotCodec.parse(snapEvent.getSnapshotAfter());
                 if (snap != null) {
                     // 该时点有完整快照：展示真实记录状态
                     vo.setPKnown(snap.pKnown);
                     vo.setConfidence(snap.confidence);
-                    vo.setConceptScore(snap.conceptScore);
-                    vo.setPracticeScore(snap.practiceScore);
+                    vo.setConceptScore(snap.conceptEvidenceCount == null || snap.conceptEvidenceCount == 0 ? null : snap.conceptScore);
+                    vo.setPracticeScore(snap.practiceEvidenceCount == null || snap.practiceEvidenceCount == 0 ? null : snap.practiceScore);
                     vo.setConceptEvidenceCount(snap.conceptEvidenceCount == null ? 0 : snap.conceptEvidenceCount);
                     vo.setPracticeEvidenceCount(snap.practiceEvidenceCount == null ? 0 : snap.practiceEvidenceCount);
                     vo.setStatus(StringUtils.isBlank(snap.status) ? MasteryStatusEnum.GRAY.name() : snap.status);
@@ -658,13 +687,17 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
         for (LearningMastery m : weak) {
             WeakNodeVO vo = new WeakNodeVO();
             vo.setNodeName(m.getNodeName());
+            if(nodeIdentities!=null){com.yupi.springbootinit.learning.NodeIdentityService.Identity identity=nodeIdentities.byStorageKey(m.getNodeName());
+                if(identity!=null){vo.setNodeCode(identity.nodeCode);vo.setDisplayName(identity.name);}}
             vo.setChapter(chapterOf.get(m.getNodeName()));
             vo.setStatus(m.getStatus());
             vo.setPKnown(m.getPKnown());
-            vo.setConceptScore(m.getConceptScore());
-            vo.setPracticeScore(m.getPracticeScore());
-            vo.setConceptEvidenceCount(conceptCount(m));
-            vo.setPracticeEvidenceCount(practiceCount(m));
+            int conceptEvidence = conceptCount(m);
+            int practiceEvidence = practiceCount(m);
+            vo.setConceptScore(conceptEvidence == 0 ? null : m.getConceptScore());
+            vo.setPracticeScore(practiceEvidence == 0 ? null : m.getPracticeScore());
+            vo.setConceptEvidenceCount(conceptEvidence);
+            vo.setPracticeEvidenceCount(practiceEvidence);
             List<LearningEvent> events = learningEventMapper.selectList(
                     new LambdaQueryWrapper<LearningEvent>()
                             .eq(LearningEvent::getUserId, user.getId())
@@ -743,10 +776,12 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
         }
         vo.setPKnown(mastery.getPKnown());
         vo.setConfidence(mastery.getConfidence());
-        vo.setConceptScore(mastery.getConceptScore());
-        vo.setPracticeScore(mastery.getPracticeScore());
-        vo.setConceptEvidenceCount(conceptCount(mastery));
-        vo.setPracticeEvidenceCount(practiceCount(mastery));
+        int conceptEvidence = conceptCount(mastery);
+        int practiceEvidence = practiceCount(mastery);
+        vo.setConceptScore(conceptEvidence == 0 ? null : mastery.getConceptScore());
+        vo.setPracticeScore(practiceEvidence == 0 ? null : mastery.getPracticeScore());
+        vo.setConceptEvidenceCount(conceptEvidence);
+        vo.setPracticeEvidenceCount(practiceEvidence);
         vo.setStatus(mastery.getStatus());
         vo.setLastEventId(mastery.getLastEventId());
     }
@@ -836,6 +871,7 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
         vo.setUserId(e.getUserId());
         vo.setAnonymousName(anonymousName);
         vo.setNodeName(e.getNodeName());
+        vo.setNodeCode(e.getNodeCode());
         vo.setEventType(e.getEventType());
         vo.setResourceType(e.getResourceType());
         vo.setResourceId(e.getResourceId());
@@ -845,6 +881,8 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
         vo.setMasteryAfter(e.getMasteryAfter());
         vo.setEvidence(e.getEvidence());
         vo.setEventGroupKey(e.getEventGroupKey());
+        vo.setSourceUnitCode(e.getSourceUnitCode());
+        vo.setSourceActivityCode(e.getSourceActivityCode());
         vo.setCreateTime(e.getCreateTime());
         return vo;
     }
@@ -857,10 +895,10 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
         }
         Map<String, String> idToName = new HashMap<>();
         for (NodeDTO node : graph.getNodes()) {
-            idToName.put(node.getId(), node.getName());
+            idToName.put(node.getId(), storageKey(node));
         }
         for (LinkDTO link : graph.getLinks()) {
-            if (RELATION_DEPENDENT.equals(link.getRelationType())
+            if (KnowledgeGraphService.isPrerequisiteRelation(link.getRelationType())
                     && nodeName.equals(idToName.get(link.getSource()))) {
                 String targetName = idToName.get(link.getTarget());
                 if (targetName != null) {
@@ -874,10 +912,17 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
     private RecommendationVO rec(String nodeName, String type, String reason, double score) {
         RecommendationVO vo = new RecommendationVO();
         vo.setNodeName(nodeName);
+        if(nodeIdentities!=null){com.yupi.springbootinit.learning.NodeIdentityService.Identity identity=nodeIdentities.byStorageKey(nodeName);
+            if(identity!=null){vo.setNodeCode(identity.nodeCode);vo.setDisplayName(identity.name);}}
         vo.setType(type);
         vo.setReason(reason);
         vo.setScore(Math.round(score * 100.0) / 100.0);
         return vo;
+    }
+
+    private String storageKey(NodeDTO node) {
+        return nodeIdentities!=null&&StringUtils.isNotBlank(node.getNodeCode())
+                ?nodeIdentities.requireCode(node.getNodeCode()).storageKey:node.getName();
     }
 
     // endregion

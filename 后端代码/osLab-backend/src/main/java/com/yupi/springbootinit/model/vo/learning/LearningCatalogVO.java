@@ -18,12 +18,42 @@ import java.util.List;
 public class LearningCatalogVO implements Serializable {
 
     /**
-     * 去重后的题目总数（= 返回各章节 questionCount 之和）
+     * 去重后的题目总数（当前教材范围 + 学习状态过滤后的口径）
      */
     private Integer totalQuestions;
 
     /**
-     * 章节列表（按章节名中文排序，"未归类"恒排最后）
+     * 稳定课程代码（未传课程范围时为空）
+     */
+    private String courseCode;
+
+    /**
+     * 旧章节聚合（兼容旧入口；新学生目录使用 sections/units）
      */
     private List<LearningCatalogChapterVO> chapters;
+
+    /**
+     * 教材小节树（稳定 sectionCode；仅课程范围请求时返回）
+     */
+    private List<LearningCatalogSectionVO> sections;
+
+    /**
+     * 当前范围内的知识节点及本人在该范围内的计数
+     */
+    private List<LearningCatalogNodeVO> nodes;
+
+    /**
+     * 当前范围内本人已有作答的题目数
+     */
+    private Integer attempted;
+
+    /**
+     * 当前范围内本人最新作答错误的题目数
+     */
+    private Integer needsReview;
+
+    /**
+     * 当前范围内本人最新作答正确的题目数
+     */
+    private Integer correct;
 }

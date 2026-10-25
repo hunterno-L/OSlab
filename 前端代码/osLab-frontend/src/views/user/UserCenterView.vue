@@ -81,9 +81,12 @@
             <a-button type="primary" @click="resetPassword(record.id)"
               >找回密码</a-button
             >
-            <a-button @click="deleteStudent(record.id)" status="danger"
-              >删除</a-button
+            <a-popconfirm
+              content="删除该学生账号后无法恢复，确定继续吗？"
+              @ok="deleteStudent(record.id)"
             >
+              <a-button status="danger">删除</a-button>
+            </a-popconfirm>
             <!--          <a-button @click="resetPassword(record.id)">找回密码</a-button>-->
           </a-space>
         </template>
@@ -108,14 +111,19 @@
               上传的表格必须包含列名“班级”、“学号”、“姓名”，上传成功后会下载学生账号信息注意查收
             </p>
           </div>
-          <label>请上传表格：</label>
-          <input type="file" @change="handleFileChange" accept=".xlsx,.csv" />
+          <label for="student-upload">请上传表格：</label>
+          <input
+            id="student-upload"
+            type="file"
+            accept=".xlsx,.csv"
+            @change="handleFileChange"
+          />
           <a-button @click="uploadAndDownload" :disabled="!file" type="primary">
             上传文件
           </a-button>
-          <p v-if="uploading">上传中...</p>
-          <p v-if="error" style="color: red">{{ error }}</p>
-          <p v-if="success" style="color: green">上传成功！</p>
+          <p v-if="uploading" role="status">上传中…</p>
+          <p v-if="error" style="color: red" role="alert">{{ error }}</p>
+          <p v-if="success" style="color: green" role="status">上传成功</p>
         </div>
         <a-divider style="height: 2px; background-color: #007bff"
           >逐个添加</a-divider
@@ -166,7 +174,16 @@
         {{ addStudentDetail.userAccount }}
       </a-descriptions-item>
       <a-descriptions-item label="密码">
-        {{ addStudentDetail.userPassword }}
+        <span class="oslab-mono">{{
+          showStudentPassword ? addStudentDetail.userPassword : "••••••••"
+        }}</span>
+        <a-button
+          size="mini"
+          type="text"
+          :aria-label="showStudentPassword ? '隐藏密码' : '显示密码'"
+          @click="showStudentPassword = !showStudentPassword"
+          >{{ showStudentPassword ? "隐藏" : "显示" }}</a-button
+        >
       </a-descriptions-item>
     </a-descriptions>
   </a-modal>
@@ -174,7 +191,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted } from "vue";
-import dayjs from "dayjs";
+import { formatDateTime } from "@/utils/dateTime";
 import {
   LoginUserVO,
   StudentQueryRequest,
@@ -218,6 +235,7 @@ let studentForm = ref({
   studentNumber: "",
 });
 const addStudentDetail = ref<StudentVO>();
+const showStudentPassword = ref(false);
 const addStudent = async () => {
   const res = await StudentsControllerService.addStudentsUsingPost(
     studentForm.value
@@ -225,6 +243,7 @@ const addStudent = async () => {
   if (res.code === 0) {
     Message.success("添加成功");
     addStudentDetail.value = res.data;
+    showStudentPassword.value = false;
     addStudentVisible.value = false;
     afterSubmitVisible.value = true;
     studentForm.value = {
@@ -238,9 +257,9 @@ const addStudent = async () => {
   }
 };
 
-// 时间格式化
+// 时间格式化：统一走 Intl
 const formatTime = (time?: string) => {
-  return time ? dayjs(time).format("YYYY-MM-DD HH:mm") : "未知时间";
+  return time ? formatDateTime(time) : "未知时间";
 };
 
 const file = ref<Blob | null>(null);
@@ -387,6 +406,7 @@ const resetPassword = async (id: number) => {
   const res = await StudentsControllerService.resetPasswordUsingPost(id);
   if (res.code === 0) {
     Message.success("找回密码成功");
+    showStudentPassword.value = false;
     afterSubmitVisible.value = true;
     addStudentDetail.value = res.data;
   } else {

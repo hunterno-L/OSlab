@@ -16,6 +16,12 @@ import java.util.Date;
 @TableName(value = "learning_event")
 @Data
 public class LearningEvent implements Serializable {
+    private String nodeCode;
+    private String sourceUnitCode;
+    private String sourceActivityCode;
+    private String sourceTaskCode;
+    private String sourceTaskItemCode;
+    private Integer sourceTaskRound;
 
     /**
      * id

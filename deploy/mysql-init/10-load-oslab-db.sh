@@ -12,7 +12,11 @@ set -eu
 #   4. oslab_upgrade_v5_teaching.sql    节点共享学习素材表
 #   5. oslab_demo_seed_v3.sql           题目/映射演示种子（INSERT IGNORE 幂等）
 #   6. oslab_seed_v4_content.sql        内容种子（INSERT IGNORE / ON DUPLICATE KEY）
-# 六个文件均为必需：缺挂载即失败退出，不再静默跳过（失败即失败，不吞错）。
+#   7. oslab_upgrade_v6_courses.sql     课程/内容/进度与真实目录草稿
+#   8. oslab_upgrade_v7_identity.sql    稳定身份/题目修订/活动上下文
+#   9. oslab_upgrade_v8_teaching_tasks.sql 学习任务/私有执行副本/任务附件与证据来源
+#  10. oslab_upgrade_v9_learning_activities.sql 普通演示运行记录（与掌握证据分离）
+# 十个文件均为必需：缺挂载即失败退出，不再静默跳过（失败即失败，不吞错）。
 # 已有数据卷不会重跑本目录脚本；存量库请使用
 #   数据库文件/oslab_upgrade_existing_check.sql
 # 做信息 schema 校验后的条件增量（不要对旧库重复执行 v4 的 ALTER）。
@@ -33,12 +37,16 @@ load_required_seed() {
 }
 
 echo "=== OSLab 数据库初始化：开始加载 ==="
-load_required_seed /seed/oslab_db.sql                    "1/6 基础库 oslab_db.sql"
-load_required_seed /seed/oslab_upgrade_v3_learning.sql   "2/6 v3 学习闭环表"
-load_required_seed /seed/oslab_upgrade_v4_flow.sql       "3/6 v4 测评会话/幂等/快照"
-load_required_seed /seed/oslab_upgrade_v5_teaching.sql   "4/6 v5 教学素材表"
-load_required_seed /seed/oslab_demo_seed_v3.sql          "5/6 v3 演示种子"
-load_required_seed /seed/oslab_seed_v4_content.sql       "6/6 v4 内容种子"
+load_required_seed /seed/oslab_db.sql                    "1/9 基础库 oslab_db.sql"
+load_required_seed /seed/oslab_upgrade_v3_learning.sql   "2/9 v3 学习闭环表"
+load_required_seed /seed/oslab_upgrade_v4_flow.sql       "3/9 v4 测评会话/幂等/快照"
+load_required_seed /seed/oslab_upgrade_v5_teaching.sql   "4/9 v5 教学素材表"
+load_required_seed /seed/oslab_demo_seed_v3.sql          "5/9 v3 演示种子"
+load_required_seed /seed/oslab_seed_v4_content.sql       "6/9 v4 内容种子"
+load_required_seed /seed/oslab_upgrade_v6_courses.sql    "7/9 v6 课程/内容/进度草稿"
+load_required_seed /seed/oslab_upgrade_v7_identity.sql   "8/9 v7 稳定身份/修订/提交上下文"
+load_required_seed /seed/oslab_upgrade_v8_teaching_tasks.sql "9/10 v8 学习任务/执行副本/任务附件"
+load_required_seed /seed/oslab_upgrade_v9_learning_activities.sql "10/10 v9 普通演示运行记录"
 
 # ---------------------------------------------------------------------
 # 加载后契约校验（§6.1.2-6）：逐项核对 information_schema，任一不符即整体失败。
@@ -118,4 +126,22 @@ expect_scalar \
     "SELECT COUNT(*) FROM learning_node_content" \
     12 "节点素材种子共 12 条"
 
+expect_scalar \
+    "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('course_catalog','course_section','learning_content_chunk','learning_unit','learning_unit_position','knowledge_node_registry','knowledge_node_relation','experiment_node')" \
+    8 "v6/v7 课程、内容、位置及稳定身份核心表存在"
+expect_scalar \
+    "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('learning_attempt','question_submit') AND COLUMN_NAME IN ('sourceUnitCode','sourceActivityCode')" \
+    4 "知识题/实验真实提交的单元活动上下文存在"
+expect_scalar \
+    "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('learning_task','learning_task_item','learning_task_recipient','learning_task_item_work','learning_task_submission','learning_task_file')" \
+    6 "v8 学习任务六张表存在"
+expect_scalar \
+    "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('learning_question','question') AND COLUMN_NAME='resourceScope'" \
+    2 "v8 共享/任务资源作用域列存在"
+expect_scalar \
+    "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('learning_attempt','question_submit','learning_event') AND COLUMN_NAME='sourceTaskCode'" \
+    3 "v8 任务来源字段存在"
+expect_scalar \
+    "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='learning_activity_record'" \
+    1 "v9 普通演示运行记录表存在"
 echo "=== OSLab 数据库初始化：加载与契约校验全部通过 ==="

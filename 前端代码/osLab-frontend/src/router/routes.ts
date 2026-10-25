@@ -33,12 +33,25 @@ const AssessmentRunView = () =>
   import("@/views/learning/AssessmentRunView.vue");
 const HomeView = () => import("@/views/HomeView.vue");
 const StudentProfileView = () => import("@/views/user/StudentProfileView.vue");
+const MyTasksView = () => import("@/views/tasks/MyTasksView.vue");
+const TaskDetailView = () => import("@/views/tasks/TaskDetailView.vue");
+const TeachingTasksView = () => import("@/views/tasks/TeachingTasksView.vue");
+const TeachingTaskEditorView = () =>
+  import("@/views/tasks/TeachingTaskEditorView.vue");
+const TeachingTaskReviewView = () =>
+  import("@/views/tasks/TeachingTaskReviewView.vue");
 
 /**
  * Phase 1 路由重构：嵌套布局壳 + 规范路径 + 旧路径兼容重定向（保留 query/params）。
  * navKey 用于顶栏选中态；学习与教学分别使用独立布局壳。
  */
 export const routes: Array<RouteRecordRaw> = [
+  {
+    path: "/welcome",
+    name: "平台介绍",
+    component: UserLayout,
+    meta: { hideInMenu: true },
+  },
   {
     path: "/user",
     name: "用户",
@@ -60,9 +73,34 @@ export const routes: Array<RouteRecordRaw> = [
         name: "角色首页",
         redirect: () => {
           const role = store.state.user.loginUser?.userRole;
-          return ROLE_HOME[role] || "/user/login";
+          return ROLE_HOME[role] || "/welcome";
         },
         meta: { hideInMenu: true },
+      },
+      // 旧课程首页/目录保留兼容跳转，统一回到课程图谱并携带课程上下文
+      {
+        path: "/courses",
+        redirect: (to) => ({ path: "/graph", query: to.query }),
+        meta: { hideInMenu: true },
+      },
+      {
+        path: "/courses/:courseCode",
+        redirect: (to) => ({
+          path: "/graph",
+          query: { ...to.query, courseCode: to.params.courseCode },
+        }),
+        meta: { hideInMenu: true },
+      },
+      {
+        path: "/courses/:courseCode/units/:unitCode",
+        name: "课程教学条目",
+        component: () => import("@/views/learning/CourseUnitView.vue"),
+        meta: {
+          access: ACCESS_ENUM.USER,
+          navKey: "graph",
+          hideSidebar: true,
+          contentWidth: "wide",
+        },
       },
       {
         path: "/home",
@@ -77,8 +115,10 @@ export const routes: Array<RouteRecordRaw> = [
         meta: {
           access: ACCESS_ENUM.USER,
           navKey: "assessments",
-          // 题目练习不渲染课程侧栏，章节/知识点目录在页面内容区
+          pageTitle: "题目练习",
+          // 题目练习不渲染全局侧栏，页面内使用课程目录 + 纵向题卡流
           hideSidebar: true,
+          contentWidth: "wide",
         },
       },
       {
@@ -94,11 +134,12 @@ export const routes: Array<RouteRecordRaw> = [
       },
       {
         path: "/graph",
-        name: "知识图谱",
+        name: "课程学习",
         component: KnowledgeGraphView,
         meta: {
           access: ACCESS_ENUM.USER,
           navKey: "graph",
+          pageTitle: "课程学习",
           // log3 收尾 A：图谱画布是页面主工作区，使用 wide 内容宽度（1760px）
           contentWidth: "wide",
         },
@@ -110,12 +151,19 @@ export const routes: Array<RouteRecordRaw> = [
         meta: { access: ACCESS_ENUM.USER, navKey: "graph", hideInMenu: true },
       },
       {
+        path: "/knowledge/concept/:nodeCode",
+        name: "知识概念学习工作台",
+        component: NodeLearningWorkspaceView,
+        meta: { access: ACCESS_ENUM.USER, navKey: "graph", hideInMenu: true },
+      },
+      {
         path: "/experiments",
         name: "编程实验",
         component: QuestionsView,
         meta: {
           access: ACCESS_ENUM.USER,
           navKey: "experiments",
+          pageTitle: "实验中心",
           // log3 收尾 A：实验中心同样两侧留白过大，先就位 wide 宽度机制
           //（阶段 3 再做页内重排）
           contentWidth: "wide",
@@ -138,7 +186,12 @@ export const routes: Array<RouteRecordRaw> = [
         path: "/experiments/simulation",
         name: "交互模拟",
         component: SimulationView,
-        meta: { access: ACCESS_ENUM.USER, navKey: "experiments" },
+        meta: {
+          access: ACCESS_ENUM.USER,
+          navKey: "experiments",
+          contentWidth: "wide",
+          pageTitle: "算法模拟",
+        },
       },
       {
         path: "/records",
@@ -151,6 +204,30 @@ export const routes: Array<RouteRecordRaw> = [
         name: "学习资源",
         component: ResourcesView,
         meta: { access: ACCESS_ENUM.USER, navKey: "resources" },
+      },
+      {
+        path: "/tasks",
+        name: "我的学习任务",
+        component: MyTasksView,
+        meta: {
+          access: ACCESS_ENUM.USER,
+          navKey: "tasks",
+          pageTitle: "学习任务",
+          hideSidebar: true,
+          contentWidth: "wide",
+        },
+      },
+      {
+        path: "/tasks/:taskCode",
+        name: "学习任务详情",
+        component: TaskDetailView,
+        meta: {
+          access: ACCESS_ENUM.USER,
+          navKey: "tasks",
+          hideInMenu: true,
+          hideSidebar: true,
+          contentWidth: "wide",
+        },
       },
       {
         path: "/account",
@@ -167,6 +244,12 @@ export const routes: Array<RouteRecordRaw> = [
     meta: { hideInMenu: true },
     children: [
       {
+        path: "/teaching/content",
+        name: "课程内容管理",
+        component: () => import("@/views/learning/ManageCourseContentView.vue"),
+        meta: { access: ACCESS_ENUM.ADMIN, navKey: "teaching" },
+      },
+      {
         path: "/teaching/overview",
         name: "班级分析",
         component: TeacherDashboardView,
@@ -177,6 +260,36 @@ export const routes: Array<RouteRecordRaw> = [
         name: "知识维护",
         component: KnowledgeGraphView,
         meta: { access: ACCESS_ENUM.ADMIN, navKey: "teaching" },
+      },
+      {
+        path: "/teaching/tasks",
+        name: "教师学习任务",
+        component: TeachingTasksView,
+        meta: { access: ACCESS_ENUM.ADMIN, navKey: "tasks" },
+      },
+      {
+        path: "/teaching/tasks/new",
+        name: "新建学习任务",
+        component: TeachingTaskEditorView,
+        meta: { access: ACCESS_ENUM.ADMIN, navKey: "tasks", hideInMenu: true },
+      },
+      {
+        path: "/teaching/tasks/:taskCode/edit",
+        name: "编辑学习任务",
+        component: TeachingTaskEditorView,
+        meta: { access: ACCESS_ENUM.ADMIN, navKey: "tasks", hideInMenu: true },
+      },
+      {
+        path: "/teaching/tasks/:taskCode/preview",
+        name: "预览学习任务",
+        component: TeachingTaskEditorView,
+        meta: { access: ACCESS_ENUM.ADMIN, navKey: "tasks", hideInMenu: true },
+      },
+      {
+        path: "/teaching/tasks/:taskCode/review",
+        name: "批阅学习任务",
+        component: TeachingTaskReviewView,
+        meta: { access: ACCESS_ENUM.ADMIN, navKey: "tasks", hideInMenu: true },
       },
       {
         path: "/teaching/assessments",
@@ -307,6 +420,11 @@ export const routes: Array<RouteRecordRaw> = [
       path: "/teaching/experiments/update",
       query: to.query,
     }),
+    meta: { hideInMenu: true },
+  },
+  {
+    path: "/learning/tasks",
+    redirect: (to) => ({ path: "/tasks", query: to.query }),
     meta: { hideInMenu: true },
   },
   {

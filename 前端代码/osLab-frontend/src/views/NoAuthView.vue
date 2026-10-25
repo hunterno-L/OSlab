@@ -50,7 +50,7 @@ const router = useRouter();
   font-size: 40px;
   font-weight: 700;
   line-height: 1;
-  color: var(--oslab-primary, #165dff);
+  color: var(--oslab-primary, #2447d8);
   font-variant-numeric: tabular-nums;
 }
 

@@ -96,6 +96,12 @@ public class LearningTutorServiceImpl implements LearningTutorService {
 
     @Resource
     private LearningPathService learningPathService;
+    @Resource
+    private com.yupi.springbootinit.learning.NodeIdentityService nodeIdentities;
+    @Resource
+    private com.yupi.springbootinit.learning.ExperimentMappingService experimentMappings;
+    @Resource
+    private com.yupi.springbootinit.learning.PublishedLearningContentService publishedContent;
 
     @Value("${ai.ark.api-key:}")
     private String apiKey;
@@ -122,14 +128,16 @@ public class LearningTutorServiceImpl implements LearningTutorService {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "问题不能为空");
         }
         List<String> trace = new ArrayList<>();
-        String seedNode = request.getNodeName();
+        String seedIdentity = StringUtils.defaultIfBlank(request.getNodeCode(),request.getNodeName());
+        String seedNode = seedIdentity;
+        if (nodeIdentities!=null&&StringUtils.isNotBlank(seedNode)) seedNode=nodeIdentities.storageKey(seedNode);
         TutorIntent intent = classifyIntent(question);
         String seedDescription = null;
 
         // 1. 种子节点（当前节点保证位；节点不存在直接报错，不伪造证据）
         Set<String> nodeScope = new LinkedHashSet<>();
         if (StringUtils.isNotBlank(seedNode)) {
-            List<EntityNode> found = knowledgeGraphService.findByName(seedNode);
+            List<EntityNode> found = knowledgeGraphService.findByName(seedIdentity);
             if (CollectionUtils.isEmpty(found)) {
                 throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "知识节点不存在：" + seedNode);
             }
@@ -142,7 +150,7 @@ public class LearningTutorServiceImpl implements LearningTutorService {
 
         // 2. 一跳相关节点（前置/后续关系，配额内；同时扩展检索范围供题目/事件命中）
         int relatedQuota = intent == TutorIntent.CONCEPT ? 2 : 1;
-        List<TutorSourceVO> relatedSources = findRelatedNodeSources(seedNode, nodeScope, relatedQuota);
+        List<TutorSourceVO> relatedSources = findRelatedNodeSources(seedIdentity, nodeScope, relatedQuota);
         if (!relatedSources.isEmpty()) {
             trace.add("图谱扩展 " + relatedSources.size() + " 个一跳相关节点");
         } else if (StringUtils.isNotBlank(seedNode)) {
@@ -167,7 +175,7 @@ public class LearningTutorServiceImpl implements LearningTutorService {
 
         // 6. 可执行下一步（既有 LearningPathService；失败不阻塞问答）
         TutorSourceVO nextStepSource = StringUtils.isBlank(seedNode)
-                ? null : buildNextStepSource(user, seedNode, trace);
+                ? null : buildNextStepSource(user, seedIdentity, trace);
 
         // 7. 按意图决定组顺序组装（引用编号 = 列表序号 + 1，与 AI/fallback 引用一致）
         List<TutorSourceVO> seedSources = StringUtils.isBlank(seedNode)
@@ -180,6 +188,17 @@ public class LearningTutorServiceImpl implements LearningTutorService {
                 ? Collections.emptyList() : Collections.singletonList(nextStepSource);
         List<TutorSourceVO> experimentSources = experiments.stream()
                 .map(this::experimentSource).collect(Collectors.toList());
+        List<String> codes = new ArrayList<>();
+        if(nodeIdentities!=null)for(String name:nodeScope){
+            com.yupi.springbootinit.learning.NodeIdentityService.Identity identity=nodeIdentities.byStorageKey(name);
+            if(identity!=null)codes.add(identity.nodeCode);
+        }
+        List<TutorSourceVO> textbookSources=publishedContent==null?Collections.emptyList():publishedContent.sources(codes,question,2);
+        trace.add("检索到 "+textbookSources.size()+" 个已发布教材片段（保留正文块、版本与出处）");
+        // Textbook material shares the content quota; personal evidence and next action keep their reserved places.
+        List<TutorSourceVO> contentSources=new ArrayList<>(textbookSources);
+        for(TutorSourceVO source:questionSources)if(contentSources.size()<questionQuota)contentSources.add(source);
+        if(contentSources.size()>questionQuota)contentSources=new ArrayList<>(contentSources.subList(0,questionQuota));
 
         List<List<TutorSourceVO>> groups = new ArrayList<>();
         groups.add(seedSources);
@@ -187,19 +206,19 @@ public class LearningTutorServiceImpl implements LearningTutorService {
             case ERROR_DIAGNOSIS:
                 groups.add(eventSources);
                 groups.add(nextStepSources);
-                groups.add(questionSources);
+                groups.add(contentSources);
                 groups.add(relatedSources);
                 break;
             case NEXT_STEP:
                 groups.add(nextStepSources);
                 groups.add(eventSources);
-                groups.add(questionSources);
+                groups.add(contentSources);
                 groups.add(relatedSources);
                 break;
             case CONCEPT:
             default:
+                groups.add(contentSources);
                 groups.add(relatedSources);
-                groups.add(questionSources);
                 groups.add(nextStepSources);
                 groups.add(eventSources);
                 break;
@@ -324,7 +343,8 @@ public class LearningTutorServiceImpl implements LearningTutorService {
                     continue;
                 }
                 nodeScope.add(name);
-                List<EntityNode> nodes = knowledgeGraphService.findByName(name);
+                com.yupi.springbootinit.learning.NodeIdentityService.Identity identity=nodeIdentities==null?null:nodeIdentities.byStorageKey(name);
+                List<EntityNode> nodes = knowledgeGraphService.findByName(identity==null?name:identity.nodeCode);
                 String description = CollectionUtils.isEmpty(nodes) ? "" : nodes.get(0).getDescription();
                 result.add(nodeSource(name, description));
             }
@@ -367,31 +387,17 @@ public class LearningTutorServiceImpl implements LearningTutorService {
     }
 
     /**
-     * 编程实验（tags 命中范围内节点，配额 1）
+     * 编程实验（正式节点映射，配额 1；标签不构成教学或判题证据）
      */
     private List<Question> findExperimentQuestions(Set<String> nodeScope) {
         if (CollectionUtils.isEmpty(nodeScope)) {
             return new ArrayList<>();
         }
-        try {
-            List<Question> all = questionService.list();
-            List<Question> matched = new ArrayList<>();
-            for (Question q : all) {
-                if (StringUtils.isBlank(q.getTags())) {
-                    continue;
-                }
-                List<String> tags = JSONUtil.toList(q.getTags(), String.class);
-                if (CollectionUtils.isNotEmpty(tags) && nodeScope.stream().anyMatch(tags::contains)) {
-                    matched.add(q);
-                }
-                if (matched.size() >= 1) {
-                    break;
-                }
-            }
-            return matched;
-        } catch (Exception e) {
-            return new ArrayList<>();
+        if (experimentMappings != null) {
+            for(String node:nodeScope){List<Question> mapped=experimentMappings.experiments(node);if(!mapped.isEmpty())return Collections.singletonList(mapped.get(0));}
+            return Collections.emptyList();
         }
+        return Collections.emptyList();
     }
 
     /**
@@ -417,9 +423,13 @@ public class LearningTutorServiceImpl implements LearningTutorService {
                 vo.setSourceType("NODE");
                 vo.setActionType("NODE");
                 vo.setTargetId(first.getNodeName());
+                if(first.getNodeCode()!=null){vo.setTargetId(first.getNodeCode());vo.setTargetUrl("/knowledge/concept/"+first.getNodeCode());}
             }
             vo.setSourceId(vo.getTargetId());
-            vo.setTitle("下一步：" + first.getNodeName());
+            if(action!=null&&action.getUnitCode()!=null&&action.getCourseCode()!=null){
+                vo.setTargetUrl("/courses/"+action.getCourseCode()+"/units/"+action.getUnitCode()+"?mode=REVIEW");
+            }
+            vo.setTitle("下一步：" + StringUtils.defaultIfBlank(first.getDisplayName(),first.getNodeName()));
             vo.setSnippet(StringUtils.defaultIfBlank(first.getReason(), "按补救路径先完成该节点"));
             trace.add("生成可执行下一步：" + first.getNodeName());
             return vo;
@@ -440,6 +450,7 @@ public class LearningTutorServiceImpl implements LearningTutorService {
             material.append("[").append(i + 1).append("] 类型=").append(s.getSourceType())
                     .append(" 标题=").append(s.getTitle())
                     .append(" 摘要=").append(StringUtils.abbreviate(s.getSnippet(), 300))
+                    .append(s.getParentChunkCode()==null?"":" 原文块="+s.getParentChunkCode()+" 版本="+s.getRevision()+" 出处="+JSONUtil.toJsonStr(s.getSourceRef()))
                     .append("\n");
         }
         String system = "你是操作系统课程的节点导师。回答规则：先给定位提示（指出学生应先查看"
@@ -501,10 +512,16 @@ public class LearningTutorServiceImpl implements LearningTutorService {
         if (StringUtils.isNotBlank(seedNode)) {
             sb.append("当前节点「").append(seedNode).append("」的说明：");
             TutorSourceVO nodeSource = sources.stream()
-                    .filter(s -> "NODE".equals(s.getSourceType()) && seedNode.equals(s.getSourceId()))
+                    .filter(s -> "NODE".equals(s.getSourceType()) && s.getTitle()!=null&&!s.getTitle().startsWith("下一步"))
                     .findFirst().orElse(null);
             sb.append(nodeSource == null || StringUtils.isBlank(nodeSource.getSnippet())
                     ? "暂无描述" : nodeSource.getSnippet()).append("\n\n");
+        }
+        for (int i=0;i<sources.size();i++) {
+            TutorSourceVO source=sources.get(i);
+            if("TEXTBOOK".equals(source.getSourceType())) sb.append(source.getTitle()).append(" [").append(i+1).append("]\n")
+                    .append(source.getSnippet()).append("\n出处：").append(source.getSourceSectionTitle()==null?"":source.getSourceSectionTitle())
+                    .append(" ").append(JSONUtil.toJsonStr(source.getSourceRef())).append("\n\n");
         }
         List<TutorSourceVO> events = sources.stream()
                 .filter(s -> "EVENT".equals(s.getSourceType())).collect(Collectors.toList());
@@ -552,6 +569,10 @@ public class LearningTutorServiceImpl implements LearningTutorService {
         vo.setActionType("NODE");
         vo.setTargetId(name);
         vo.setTitle("节点：" + name);
+        if(nodeIdentities!=null){
+            com.yupi.springbootinit.learning.NodeIdentityService.Identity identity=nodeIdentities.byStorageKey(name);
+            if(identity!=null){vo.setSourceId(identity.nodeCode);vo.setTargetId(identity.nodeCode);vo.setTitle("节点："+identity.name);vo.setTargetUrl("/knowledge/concept/"+identity.nodeCode);}
+        }
         vo.setSnippet(StringUtils.abbreviate(description, 200));
         return vo;
     }

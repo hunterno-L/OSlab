@@ -5,6 +5,11 @@ import lombok.Data;
 @Data
 public class NodeDTO {
     private String id;
+    private String nodeCode;
+    private String displayName;
+    private String nodeType;
+    private String layer;
+    private String homeSectionCode;
     private String name;
     private String category; // 分类索引
     private String description; // 节点的详细信息

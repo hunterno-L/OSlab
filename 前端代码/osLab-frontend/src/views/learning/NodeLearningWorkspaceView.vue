@@ -1,13 +1,32 @@
 <template>
   <div class="node-workspace">
+    <NodeCourseLinks
+      :node-code="
+        routeNodeCode ||
+        (typeof route.query.nodeCode === 'string'
+          ? route.query.nodeCode
+          : '') ||
+        workbench?.mastery?.nodeCode
+      "
+    />
     <!-- 顶部紧凑头部（一行区）：返回 / 节点名 / 状态 / 紧凑掌握度 / 唯一动作=刷新 -->
-    <header class="node-header">
+    <header class="node-header node-hero">
       <div class="node-heading">
+        <div class="node-kicker">NODE / CONCEPT</div>
         <div class="node-title-row">
           <button type="button" class="back-link" @click="goBack">
             <IconArrowLeft />返回
           </button>
-          <h1 class="node-title">{{ nodeName }}</h1>
+          <h1 class="node-title oslab-highlight-text">
+            {{
+              workbench?.mastery?.displayName ||
+              workbench?.mastery?.name ||
+              nodeName
+            }}
+          </h1>
+          <span class="node-code">{{
+            currentNodeCode || workbench?.mastery?.nodeCode
+          }}</span>
           <span
             v-if="workbench"
             class="oslab-status-tag"
@@ -27,12 +46,18 @@
           <template v-if="hasMasteryRecord">
             <span class="metric"
               >概念<strong>{{
-                percentText(workbench.mastery?.conceptScore)
+                scoreText(
+                  workbench.mastery?.conceptScore,
+                  workbench.mastery?.conceptEvidenceCount
+                )
               }}</strong></span
             >
             <span class="metric"
               >实践<strong>{{
-                percentText(workbench.mastery?.practiceScore)
+                scoreText(
+                  workbench.mastery?.practiceScore,
+                  workbench.mastery?.practiceEvidenceCount
+                )
               }}</strong></span
             >
             <span class="metric"
@@ -62,6 +87,7 @@
     <!-- 副标题行：一句话定义 + 唯一推荐行动（仅一条、可点击） -->
     <div v-if="definitionLine || primaryRecommendation" class="node-subtitle">
       <p v-if="definitionLine" class="node-definition">
+        <span class="node-definition-label">定义</span>
         {{ definitionLine }}
       </p>
       <button
@@ -84,16 +110,21 @@
     </div>
 
     <div class="workspace-grid">
-      <main class="workspace-main">
+      <div class="workspace-main">
         <nav class="text-tabs" role="tablist" aria-label="节点学习分区">
           <button
             v-for="tab in tabs"
+            :id="`node-tab-${tab.key}`"
             :key="tab.key"
+            :ref="(el) => setTabRef(tab.key, el)"
             type="button"
             role="tab"
             :aria-selected="activeTab === tab.key"
+            :aria-controls="`node-panel-${tab.key}`"
+            :tabindex="activeTab === tab.key ? 0 : -1"
             :class="['text-tab', { active: activeTab === tab.key }]"
             @click="setTab(tab.key)"
+            @keydown="onTabKeydown($event, tab.key)"
           >
             {{ tab.title
             }}<span v-if="tab.count" class="tab-count">{{ tab.count }}</span>
@@ -102,10 +133,11 @@
 
         <!-- 页签 1：知识内容 -->
         <section
+          id="node-panel-learn"
           v-show="activeTab === 'learn'"
           class="tab-panel"
           role="tabpanel"
-          aria-label="知识内容"
+          aria-labelledby="node-tab-learn"
         >
           <div v-if="loading && !workbench" class="oslab-loading">
             <span class="oslab-spinner"></span><span>正在加载节点内容…</span>
@@ -113,8 +145,46 @@
           <template v-else-if="workbench">
             <section class="content-section">
               <h2 class="oslab-section-title content-heading">概念摘要</h2>
+              <template v-if="workbench.textbookChunks?.length"
+                ><article
+                  v-for="(chunk, chunkIndex) in workbench.textbookChunks"
+                  :key="chunk.chunkCode"
+                  :id="`chunk-${chunk.chunkCode}`"
+                  class="content-section textbook-chunk"
+                >
+                  <div class="chunk-head">
+                    <span class="chunk-index">{{
+                      String(chunkIndex + 1).padStart(2, "0")
+                    }}</span>
+                    <h3>{{ chunk.title }}</h3>
+                  </div>
+                  <p class="figure-source">
+                    {{ chunk.sourceSectionTitle }} · 版本
+                    {{ chunk.revision || 1
+                    }}<span v-if="chunk.sourceRef">
+                      ·
+                      {{
+                        Object.values(chunk.sourceRef)
+                          .filter((value) => typeof value !== "object")
+                          .join(" · ")
+                      }}</span
+                    >
+                  </p>
+                  <MdViewer :value="chunk.contentMd" />
+                  <AnnotationNote
+                    v-if="
+                      chunkIndex === 0 &&
+                      (focusSummary || primaryRecommendation)
+                    "
+                    :index="3"
+                    title="当前节点"
+                  >
+                    {{ focusSummary || primaryRecommendation?.reason }}
+                  </AnnotationNote>
+                </article></template
+              >
               <MdViewer
-                v-if="workbench.contentMd"
+                v-else-if="workbench.contentMd"
                 :value="workbench.contentMd"
               />
               <p
@@ -129,6 +199,23 @@
                   >共享学习素材由教师发布后显示；可先查看知识关联与阅读材料。</span
                 >
               </div>
+            </section>
+            <section
+              v-if="workbench.learningUnits?.length"
+              class="content-section"
+            >
+              <h2 class="oslab-section-title">在课程中复习</h2>
+              <p v-for="unit in workbench.learningUnits" :key="unit.unitCode">
+                <router-link
+                  :to="{
+                    path: `/courses/${encodeURIComponent(
+                      unit.courseCode
+                    )}/units/${encodeURIComponent(unit.unitCode)}`,
+                    query: { mode: 'REVIEW' },
+                  }"
+                  >{{ unit.title }}</router-link
+                >
+              </p>
             </section>
 
             <section
@@ -158,12 +245,12 @@
                   <div class="relation-links">
                     <button
                       v-for="node in prerequisites"
-                      :key="node.name"
+                      :key="node.nodeCode || node.name"
                       type="button"
-                      @click="switchNode(node.name)"
+                      @click="switchNode(node.nodeCode || node.name)"
                     >
                       <i :class="['dot', dotClass(node.status)]"></i
-                      >{{ node.name }}
+                      >{{ node.displayName || displayNameOf(node.name) }}
                     </button>
                   </div>
                 </div>
@@ -172,12 +259,12 @@
                   <div class="relation-links">
                     <button
                       v-for="node in successors"
-                      :key="node.name"
+                      :key="node.nodeCode || node.name"
                       type="button"
-                      @click="switchNode(node.name)"
+                      @click="switchNode(node.nodeCode || node.name)"
                     >
                       <i :class="['dot', dotClass(node.status)]"></i
-                      >{{ node.name }}
+                      >{{ node.displayName || displayNameOf(node.name) }}
                     </button>
                   </div>
                 </div>
@@ -186,12 +273,12 @@
                   <div class="relation-links">
                     <button
                       v-for="item in relatedNodes"
-                      :key="item.name"
+                      :key="item.nodeCode || item.name"
                       type="button"
-                      @click="switchNode(item.name)"
+                      @click="switchNode(item.nodeCode || item.name)"
                     >
                       <i :class="['dot', dotClass(item.status)]"></i
-                      >{{ item.name
+                      >{{ displayNameOf(item.name)
                       }}<em
                         v-for="tag in item.tags"
                         :key="tag"
@@ -261,10 +348,11 @@
 
         <!-- 页签 2：知识详解（复用静态 HTML 资源；iframe 懒加载，同一时刻仅一个） -->
         <section
+          id="node-panel-resources"
           v-show="activeTab === 'resources'"
           class="tab-panel"
           role="tabpanel"
-          aria-label="知识详解"
+          aria-labelledby="node-tab-resources"
         >
           <template v-if="nodeResources.length">
             <div v-if="nodeResources.length > 1" class="resource-chips">
@@ -348,10 +436,11 @@
 
         <!-- 页签 3：题目练习（全宽答题卡，不再用右侧窄抽屉） -->
         <section
+          id="node-panel-assess"
           v-show="activeTab === 'assess'"
           class="tab-panel"
           role="tabpanel"
-          aria-label="题目练习"
+          aria-labelledby="node-tab-assess"
         >
           <div v-if="loading && !workbench" class="oslab-loading">
             <span class="oslab-spinner"></span><span>正在加载题目…</span>
@@ -425,10 +514,11 @@
 
         <!-- 页签 4：实践（编程实验 / 算法演示，不再复制实验中心） -->
         <section
+          id="node-panel-lab"
           v-show="activeTab === 'lab'"
           class="tab-panel"
           role="tabpanel"
-          aria-label="实践"
+          aria-labelledby="node-tab-lab"
         >
           <div v-if="loading && !workbench" class="oslab-loading">
             <span class="oslab-spinner"></span><span>正在加载实践入口…</span>
@@ -454,10 +544,21 @@
               <span class="practice-kind">算法演示</span>
               <div class="resource-row-main">
                 <strong>{{ simulationTitle }}</strong>
-                <span class="side-hint">{{
-                  workbench.simulationEntry.algorithms.join(" / ")
-                }}</span>
+                <span class="side-hint">运行演示不写判题/掌握事件</span>
               </div>
+              <a-select
+                v-if="simulationOptions.length > 1"
+                v-model="selectedSimulationKey"
+                size="small"
+                style="width: 190px"
+              >
+                <a-option
+                  v-for="option in simulationOptions"
+                  :key="option.key"
+                  :value="option.key"
+                  >{{ option.label }}</a-option
+                >
+              </a-select>
               <a-button size="small" @click="openSimulator"
                 >进入演示<IconArrowRight
               /></a-button>
@@ -483,20 +584,22 @@
               >
                 <button
                   v-for="node in prerequisites"
-                  :key="node.name"
+                  :key="node.nodeCode || node.name"
                   type="button"
-                  @click="switchNode(node.name)"
+                  @click="switchNode(node.nodeCode || node.name)"
                 >
-                  <i :class="['dot', dotClass(node.status)]"></i>{{ node.name }}
+                  <i :class="['dot', dotClass(node.status)]"></i
+                  >{{ node.displayName || displayNameOf(node.name) }}
                 </button>
               </div>
             </div>
           </template>
         </section>
-      </main>
+      </div>
 
       <!-- 右侧图谱导师面板：常驻，<1024px 折叠到内容底部 -->
       <aside class="tutor-panel" aria-label="图谱导师">
+        <div class="tutor-kicker">NODE MENTOR</div>
         <button
           type="button"
           class="tutor-toggle"
@@ -515,12 +618,15 @@
           />
         </button>
         <div v-show="!tutorCollapsed" class="tutor-body">
-          <div class="tutor-focus">
-            <span class="context-label">当前学习焦点</span>
-            <p>{{ focusSummary }}</p>
+          <div class="tutor-focus tutor-focus-note">
+            <span class="tutor-focus-index">③</span>
+            <div>
+              <span class="context-label">当前学习焦点</span>
+              <p>{{ focusSummary }}</p>
+            </div>
           </div>
           <!-- 证据摘要卡：掌握状态 / 证据数 / 最近失败，全部真实数据 -->
-          <div class="evidence-card">
+          <div class="evidence-card tutor-evidence">
             <div class="evidence-line">
               <span class="evidence-label">掌握状态</span>
               <span class="evidence-value evidence-status">
@@ -611,7 +717,12 @@
                   type="button"
                   @click="openTutorSource(source)"
                 >
-                  {{ sourceIndex + 1 }}. {{ source.title }}<IconArrowRight />
+                  {{ sourceIndex + 1 }}. {{ source.title
+                  }}<span v-if="source.sourceSectionTitle">
+                    · {{ source.sourceSectionTitle }}</span
+                  ><span v-if="source.revision">
+                    · 版本 {{ source.revision }}</span
+                  ><IconArrowRight />
                 </button>
               </div>
             </article>
@@ -622,6 +733,7 @@
           <div class="tutor-compose">
             <a-textarea
               v-model="currentSession.input"
+              aria-label="向节点导师提问"
               placeholder="向导师提问"
               :auto-size="{ minRows: 2, maxRows: 5 }"
               :max-length="1000"
@@ -673,8 +785,20 @@ import {
   IconSend,
 } from "@arco-design/web-vue/es/icon";
 import MdViewer from "@/components/MdViewer.vue";
+import NodeCourseLinks from "@/components/learning/NodeCourseLinks.vue";
+import AnnotationNote from "@/components/learning/AnnotationNote.vue";
+import {
+  normalizedGraphRelation,
+  safeLocalLearningUrl,
+} from "@/utils/graphSemantics";
+import { scoreText } from "@/utils/masteryDisplay";
 import QuestionAnswerCard from "@/components/learning/QuestionAnswerCard.vue";
 import { getResourcesForNode } from "@/data/learningResources";
+import {
+  ALGORITHM_BY_KEY,
+  algorithmKeyFromLegacy,
+  algorithmKeyFromNodeCode,
+} from "@/simulation";
 import {
   loadNodeWorkbench,
   peekNodeWorkbench,
@@ -705,9 +829,14 @@ const route = useRoute();
 const router = useRouter();
 const store = useStore();
 // Vue Router already decodes params; decoding twice corrupts literal percent signs.
-const nodeName = computed(() =>
+const routeNodeCode = computed(() =>
+  typeof route.params.nodeCode === "string" ? route.params.nodeCode : ""
+);
+const routeNodeName = computed(() =>
   typeof route.params.nodeName === "string" ? route.params.nodeName : ""
 );
+// 稳定代码优先，旧名称路径仅作兼容；API 层据此区分 nodeCode / nodeName
+const nodeName = computed(() => routeNodeCode.value || routeNodeName.value);
 const userId = computed(() =>
   String(store.state.user?.loginUser?.id || "anonymous")
 );
@@ -725,6 +854,29 @@ let disposed = false;
 const graphNodes = ref<MasteryNodeVO[]>([]);
 const graphLinks = ref<GraphLinkDTO[]>([]);
 const graphState = ref<"idle" | "loading" | "ready" | "error">("idle");
+const matchedGraphNode = computed(
+  () =>
+    graphNodes.value.find(
+      (node) =>
+        (node.nodeCode && node.nodeCode === nodeName.value) ||
+        node.name === nodeName.value
+    ) || null
+);
+/** 真实节点名（旧名称入口即参数本身；稳定代码入口经工作台/图谱解析） */
+const currentNodeName = computed(
+  () =>
+    workbench.value?.mastery?.name ||
+    matchedGraphNode.value?.name ||
+    routeNodeName.value ||
+    nodeName.value
+);
+const currentNodeCode = computed(
+  () =>
+    workbench.value?.mastery?.nodeCode ||
+    matchedGraphNode.value?.nodeCode ||
+    routeNodeCode.value ||
+    ""
+);
 
 // ---- 窄屏（<1024px）导师面板折叠到内容底部 ----
 const narrowMedia = window.matchMedia("(max-width: 1023px)");
@@ -787,6 +939,8 @@ const load = async (force = false) => {
     )
       return;
     workbench.value = data;
+    await nextTick();
+    scrollToTextbookChunk();
   } catch (error) {
     if (disposed || sequence !== loadSequence) return;
     loadError.value =
@@ -817,7 +971,9 @@ const loadGraph = async () => {
 // ---- 知识详解（tab=resources）：复用静态 HTML 资源，iframe 懒加载 ----
 // 本块必须先于下方 watch(route.query.tab) 注册，否则直达 ?tab=resources 时
 // activeTab 的变更不会被监听到，iframe 不会懒加载。
-const nodeResources = computed(() => getResourcesForNode(nodeName.value));
+const nodeResources = computed(() =>
+  getResourcesForNode(currentNodeName.value)
+);
 const activeResourceId = ref("");
 const activeResource = computed(() => {
   const list = nodeResources.value;
@@ -859,12 +1015,17 @@ watch(activeTab, (tab) => {
 watch(
   () => activeResource.value?.url,
   (url) => {
+    clearResourceTimer();
     if (!url) {
-      clearResourceTimer();
       resourceLoadState.value = "idle";
       return;
     }
-    markResourceLoading();
+    // 页签未打开时不启动超时计时，避免首开误报加载失败
+    if (activeTab.value === "resources" && resourceVisited.value) {
+      markResourceLoading();
+    } else {
+      resourceLoadState.value = "idle";
+    }
   }
 );
 const selectResource = (id: string) => {
@@ -915,6 +1076,44 @@ const setTab = (key: string) => {
     router.replace({ query: { ...route.query, tab: key } });
 };
 
+const tabRefs: Record<string, HTMLButtonElement | null> = {};
+const setTabRef = (key: string, el: unknown) => {
+  tabRefs[key] = (el as HTMLButtonElement | null) || null;
+};
+
+/** WAI-ARIA tabs：左右方向键、Home/End 切换并移动焦点。 */
+const onTabKeydown = (event: KeyboardEvent, key: string) => {
+  const keys = tabs.value.map((tab) => tab.key);
+  const index = keys.indexOf(key);
+  if (index < 0) return;
+  let nextIndex = index;
+  if (event.key === "ArrowRight") nextIndex = (index + 1) % keys.length;
+  else if (event.key === "ArrowLeft")
+    nextIndex = (index - 1 + keys.length) % keys.length;
+  else if (event.key === "Home") nextIndex = 0;
+  else if (event.key === "End") nextIndex = keys.length - 1;
+  else return;
+  event.preventDefault();
+  const nextKey = keys[nextIndex];
+  setTab(nextKey);
+  nextTick(() => tabRefs[nextKey]?.focus());
+};
+function scrollToTextbookChunk() {
+  if (!route.hash.startsWith("#chunk-")) return;
+  const target = document.getElementById(
+    decodeURIComponent(route.hash.slice(1))
+  );
+  target?.scrollIntoView({ block: "start" });
+}
+watch(
+  () => route.hash,
+  async () => {
+    activeTab.value = "learn";
+    await nextTick();
+    scrollToTextbookChunk();
+  }
+);
+
 const refreshAll = () => {
   void load(true);
 };
@@ -923,26 +1122,62 @@ const onAnswered = () => {
   void load(true);
 };
 
+const queryText = (value: unknown) =>
+  Array.isArray(value) ? String(value[0] || "") : String(value || "");
 const backTarget = computed(() => {
-  const raw = route.query.returnTo;
-  const value = Array.isArray(raw) ? String(raw[0] || "") : String(raw || "");
+  const value = queryText(route.query.returnTo);
   if (value.startsWith("/") && !value.startsWith("//")) return value;
   return "/graph";
 });
-const goBack = () => router.push(backTarget.value);
+const goBack = () => {
+  const resolved = router.resolve(backTarget.value);
+  const query = { ...resolved.query };
+  if (resolved.path.startsWith("/courses/")) {
+    const activity = queryText(route.query.returnActivity);
+    const mode = queryText(route.query.returnMode);
+    if (activity) query.activity = activity;
+    if (mode === "REVIEW" || mode === "MAINLINE") query.mode = mode;
+  }
+  router.push({ path: resolved.path, query, hash: resolved.hash });
+};
 
-const switchNode = (name: string) => {
-  if (!name || name === nodeName.value) return;
+const switchNode = (keyOrName: string) => {
+  if (!keyOrName) return;
+  const target = graphNodes.value.find(
+    (node) => node.nodeCode === keyOrName || node.name === keyOrName
+  );
+  const targetCode =
+    target?.nodeCode || (keyOrName.startsWith("os.") ? keyOrName : "");
+  const targetName = target?.name || keyOrName;
+  if (
+    (targetCode && targetCode === currentNodeCode.value) ||
+    (!targetCode && targetName === currentNodeName.value)
+  )
+    return;
+  const query: Record<string, string> = {};
+  const returnTo = queryText(route.query.returnTo);
+  const returnActivity = queryText(route.query.returnActivity);
+  const returnMode = queryText(route.query.returnMode);
+  if (returnTo) query.returnTo = returnTo;
+  if (returnActivity) query.returnActivity = returnActivity;
+  if (returnMode) query.returnMode = returnMode;
+  if (activeTab.value !== "learn") query.tab = activeTab.value;
   router.push({
-    path: `/knowledge/node/${encodeURIComponent(name)}`,
-    query: activeTab.value === "learn" ? undefined : { tab: activeTab.value },
+    path: targetCode
+      ? `/knowledge/concept/${encodeURIComponent(targetCode)}`
+      : `/knowledge/node/${encodeURIComponent(targetName)}`,
+    query: Object.keys(query).length ? query : undefined,
   });
 };
 
 const startAssessment = () =>
   router.push({
     path: "/assessments",
-    query: { nodeName: nodeName.value, returnTo: route.fullPath },
+    query: {
+      nodeName: currentNodeName.value,
+      ...(currentNodeCode.value ? { nodeCode: currentNodeCode.value } : {}),
+      returnTo: route.fullPath,
+    },
   });
 
 const goPractice = () => setTab("assess");
@@ -950,18 +1185,27 @@ const goPractice = () => setTab("assess");
 const openExperiment = (id: number | string) =>
   router.push({
     path: `/experiments/code/${id}`,
-    query: { nodeName: nodeName.value, returnTo: route.fullPath },
-  });
-
-const openSimulator = () =>
-  router.push({
-    path: "/experiments/simulation",
     query: {
-      nodeName: nodeName.value,
-      tab: simulationTab.value,
+      nodeName: currentNodeName.value,
+      ...(currentNodeCode.value ? { nodeCode: currentNodeCode.value } : {}),
       returnTo: route.fullPath,
     },
   });
+
+const openSimulator = () => {
+  const key =
+    selectedSimulationKey.value || simulationOptions.value[0]?.key || "";
+  if (!key) return;
+  router.push({
+    path: "/experiments/simulation",
+    query: {
+      algorithmKey: key,
+      nodeName: currentNodeName.value,
+      ...(currentNodeCode.value ? { nodeCode: currentNodeCode.value } : {}),
+      returnTo: route.fullPath,
+    },
+  });
+};
 
 const scrollTutor = async () => {
   await nextTick();
@@ -982,7 +1226,11 @@ const askTutor = async (suggestedQuestion?: string) => {
   session.pending = true;
   void scrollTutor();
   try {
-    const response = await tutorAsk({ nodeName: requestNode, question });
+    const response = await tutorAsk({
+      nodeName: currentNodeName.value,
+      ...(currentNodeCode.value ? { nodeCode: currentNodeCode.value } : {}),
+      question,
+    });
     if (disposed || requestUser !== userId.value) return;
     if (response.data.code === 0 && response.data.data) {
       const answer = response.data.data;
@@ -1016,6 +1264,10 @@ const askTutor = async (suggestedQuestion?: string) => {
 };
 
 const openTutorSource = (source: TutorSourceVO) => {
+  if (safeLocalLearningUrl(source.targetUrl)) {
+    activeTab.value = "learn";
+    return router.push(source.targetUrl as string);
+  }
   if (source.sourceType === "NODE") {
     activeTab.value = "learn";
     return switchNode(source.sourceId);
@@ -1025,7 +1277,11 @@ const openTutorSource = (source: TutorSourceVO) => {
   if (source.sourceType === "QUESTION")
     return router.push({
       path: "/assessments",
-      query: { nodeName: nodeName.value, questionId: source.sourceId },
+      query: {
+        nodeName: currentNodeName.value,
+        ...(currentNodeCode.value ? { nodeCode: currentNodeCode.value } : {}),
+        questionId: source.sourceId,
+      },
     });
   if (source.sourceType === "EXPERIMENT")
     return openExperiment(source.sourceId);
@@ -1118,35 +1374,38 @@ const successors = computed(() => workbench.value?.successors || []);
 
 // ---- 相关节点：related / contain / implements（历史 implemente 兼容），不产生学习顺序 ----
 const RELATED_TAG_TEXT: Record<string, string> = {
+  contrasts: "对比",
+  based: "依据",
   related: "相关",
   contain: "包含",
   implements: "实现",
 };
+const displayNameOf = (name: string) =>
+  graphNodes.value.find((node) => node.name === name)?.displayName || name;
 interface RelatedNodeItem {
   name: string;
+  nodeCode: string;
   status: string;
   tags: string[];
 }
 const relatedNodes = computed<RelatedNodeItem[]>(() => {
   if (graphState.value !== "ready") return [];
-  const selfName = nodeName.value;
+  const selfName = currentNodeName.value;
   if (!selfName) return [];
   const idToName = new Map(
     graphNodes.value.map(
       (node) => [String(node.id), node.name] as [string, string]
     )
   );
-  const statusByName = new Map(
-    graphNodes.value.map(
-      (node) => [node.name, node.status || "GRAY"] as [string, string]
-    )
+  const infoByName = new Map(
+    graphNodes.value.map((node) => [node.name, node] as const)
   );
   const related = new Map<string, RelatedNodeItem>();
   for (const link of graphLinks.value) {
     const raw = String(link.relationType ?? link.value ?? "")
       .trim()
       .toLowerCase();
-    const type = raw === "implemente" ? "implements" : raw;
+    const type = normalizedGraphRelation(raw);
     const tag = RELATED_TAG_TEXT[type];
     if (!tag) continue;
     const sourceName = idToName.get(String(link.source));
@@ -1161,7 +1420,8 @@ const relatedNodes = computed<RelatedNodeItem[]>(() => {
     if (!other) continue;
     const entry = related.get(other) || {
       name: other,
-      status: statusByName.get(other) || "GRAY",
+      nodeCode: infoByName.get(other)?.nodeCode || "",
+      status: infoByName.get(other)?.status || "GRAY",
       tags: [],
     };
     if (!entry.tags.includes(tag)) entry.tags = [...entry.tags, tag];
@@ -1179,14 +1439,52 @@ const hasRelations = computed(
     relatedNodes.value.length > 0
 );
 
-const simulationTab = computed(() => {
-  const algorithms = workbench.value?.simulationEntry?.algorithms || [];
-  return algorithms.some((name) => ["FCFS", "SJF", "RR"].includes(name))
-    ? "cpu"
-    : "page";
-});
-const simulationTitle = computed(() =>
-  simulationTab.value === "cpu" ? "CPU 调度模拟" : "页面置换模拟"
+const selectedSimulationKey = ref("");
+const simulationOptions = computed<Array<{ key: string; label: string }>>(
+  () => {
+    const raw = workbench.value?.simulationEntry?.algorithms || [];
+    const seen = new Set<string>();
+    const options: Array<{ key: string; label: string }> = [];
+    for (const item of raw) {
+      const key = ALGORITHM_BY_KEY.has(item)
+        ? item
+        : algorithmKeyFromLegacy(item);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      const definition = ALGORITHM_BY_KEY.get(key);
+      options.push({
+        key,
+        label: definition
+          ? `${definition.shortTitle} · ${definition.title}`
+          : item,
+      });
+    }
+    if (!options.length) {
+      const key =
+        algorithmKeyFromNodeCode(currentNodeCode.value) ||
+        algorithmKeyFromNodeCode(workbench.value?.mastery?.nodeCode || "");
+      const definition = ALGORITHM_BY_KEY.get(key);
+      if (definition) {
+        options.push({
+          key: definition.key,
+          label: `${definition.shortTitle} · ${definition.title}`,
+        });
+      }
+    }
+    return options;
+  }
+);
+watch(
+  simulationOptions,
+  (options) => {
+    if (!options.some((option) => option.key === selectedSimulationKey.value)) {
+      selectedSimulationKey.value = options[0]?.key || "";
+    }
+  },
+  { immediate: true }
+);
+const simulationTitle = computed(
+  () => ALGORITHM_BY_KEY.get(selectedSimulationKey.value)?.title || "算法演示"
 );
 
 const focusSummary = computed(() => {
@@ -1473,7 +1771,7 @@ onBeforeUnmount(() => {
   overflow-wrap: anywhere;
 }
 .load-error-text strong {
-  color: var(--oslab-weak);
+  color: var(--oslab-weak-text);
   margin-right: 8px;
 }
 
@@ -1778,7 +2076,7 @@ onBeforeUnmount(() => {
 .resource-failed-text strong {
   display: block;
   margin-bottom: 4px;
-  color: var(--oslab-weak);
+  color: var(--oslab-weak-text);
 }
 .resource-failed-actions {
   display: flex;
@@ -1907,6 +2205,41 @@ onBeforeUnmount(() => {
   text-align: left;
   cursor: pointer;
 }
+/* C+B 学习图册 */
+.node-header,
+.evidence-card,
+.content-section,
+.answer-panel {
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+}
+.node-title {
+  font-family: var(--oslab-font-display);
+  font-size: 30px;
+}
+.node-definition,
+.concept-text {
+  color: var(--oslab-ink-soft);
+  font-family: var(--oslab-font-display);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.text-tab.active {
+  color: var(--oslab-primary);
+  border-bottom-color: var(--oslab-primary);
+}
+.metric {
+  background: var(--oslab-panel-soft);
+  border-radius: var(--oslab-radius-md);
+}
+.failure-hint {
+  border-left: 2px solid var(--oslab-annotation);
+  border-radius: 0 var(--oslab-radius-sm) var(--oslab-radius-sm) 0;
+  background: var(--oslab-annotation-soft);
+  font-family: var(--oslab-font-display);
+}
+
 @media (min-width: 1024px) {
   .tutor-toggle {
     cursor: default;
@@ -2129,6 +2462,158 @@ onBeforeUnmount(() => {
   color: var(--oslab-muted-strong);
   font-size: var(--oslab-text-small);
   line-height: 1.7;
+}
+
+/* 2026-10-24 节点工作台：hero、教材编号、导师焦点 */
+.node-hero {
+  padding: 14px 16px;
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.node-kicker {
+  margin-bottom: 2px;
+  color: var(--oslab-muted-strong);
+  font-family: var(--oslab-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+.node-title {
+  display: inline;
+  padding: 0 4px;
+  font-family: var(--oslab-font-display);
+  font-size: 32px;
+}
+.node-code {
+  padding: 2px 7px;
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-pill);
+  color: var(--oslab-muted-strong);
+  font-family: var(--oslab-font-mono);
+  font-size: 9.5px;
+}
+.node-definition {
+  padding: 9px 11px;
+  border-left: 2px solid var(--oslab-primary);
+  border-radius: 0 var(--oslab-radius-md) var(--oslab-radius-md) 0;
+  background: var(--oslab-highlight-soft);
+  color: var(--oslab-ink-soft);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.node-definition-label {
+  margin-right: 6px;
+  color: var(--oslab-primary);
+  font-family: var(--oslab-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+.workspace-grid {
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 16px;
+}
+.workspace-main {
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+  padding: 14px 20px 6px;
+}
+.text-tab.active {
+  border-radius: var(--oslab-radius-sm) var(--oslab-radius-sm) 0 0;
+  background: var(--oslab-highlight-soft);
+}
+.text-tab.active::after {
+  background: var(--oslab-primary);
+}
+.content-section {
+  border-bottom-color: var(--oslab-line);
+}
+.textbook-chunk {
+  padding-top: 10px;
+}
+.chunk-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.chunk-index {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--oslab-primary);
+  color: #fff;
+  font-family: var(--oslab-font-mono);
+  font-size: 9px;
+}
+.chunk-head h3 {
+  margin: 0;
+  font-size: 15px;
+}
+.figure-source {
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+  color: var(--oslab-muted-strong);
+  font-family: var(--oslab-font-mono);
+  font-size: 8.5px;
+  line-height: 1.6;
+}
+.workspace-main :deep(.annotation-note) {
+  margin: 10px 0 12px;
+}
+.tutor-panel {
+  padding: 14px;
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.tutor-kicker {
+  margin-bottom: 3px;
+  color: var(--oslab-muted-strong);
+  font-family: var(--oslab-font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+}
+.tutor-focus {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--oslab-primary);
+  border-radius: var(--oslab-radius-md);
+  background: var(--oslab-highlight-soft);
+}
+.tutor-focus-index {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--oslab-primary);
+  color: #fff;
+  font-family: var(--oslab-font-mono);
+  font-size: 9px;
+}
+.tutor-focus .context-label {
+  color: var(--oslab-muted-strong);
+  font-family: var(--oslab-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+.tutor-focus p {
+  margin: 2px 0 0;
+  color: var(--oslab-ink-soft);
+  font-family: var(--oslab-font-display);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.tutor-evidence {
+  margin-top: 10px;
 }
 
 /* ---- 响应式：<1024px 导师面板移到内容底部（可折叠） ---- */

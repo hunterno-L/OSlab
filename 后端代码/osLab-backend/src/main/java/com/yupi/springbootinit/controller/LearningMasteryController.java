@@ -41,16 +41,20 @@ public class LearningMasteryController {
 
     @Resource
     private UserService userService;
+    @Resource
+    private com.yupi.springbootinit.learning.NodeIdentityService nodeIdentities;
 
     /**
      * 补救学习路径（第三阶段 §6.3）：多前置拓扑排序 + 真实资源行动，
      * 图谱路径投影、工作台与课程目录共用
      */
     @GetMapping("/path")
-    public BaseResponse<LearningPathVO> path(@RequestParam("targetNodeName") String targetNodeName,
+    public BaseResponse<LearningPathVO> path(@RequestParam(value="targetNodeName",required=false) String targetNodeName,
+                                             @RequestParam(value="targetNodeCode",required=false) String targetNodeCode,
                                              HttpServletRequest request) {
         User user = userService.getLoginUser(request);
-        return ResultUtils.success(learningPathService.buildPath(user, targetNodeName));
+        return ResultUtils.success(learningPathService.buildPath(user,
+                StringUtils.isNotBlank(targetNodeCode) ? nodeIdentities.requireCode(targetNodeCode).nodeCode : targetNodeName));
     }
 
     /**
@@ -66,10 +70,12 @@ public class LearningMasteryController {
      * 节点工作台：概念、前置、关联题目、事件证据、推荐
      */
     @GetMapping("/node")
-    public BaseResponse<NodeWorkbenchVO> nodeWorkbench(@RequestParam("nodeName") String nodeName,
+    public BaseResponse<NodeWorkbenchVO> nodeWorkbench(@RequestParam(value="nodeName",required=false) String nodeName,
+                                                       @RequestParam(value="nodeCode",required=false) String nodeCode,
                                                        HttpServletRequest request) {
         User user = userService.getLoginUser(request);
-        return ResultUtils.success(learningMasteryService.nodeWorkbench(user, nodeName));
+        String identity = StringUtils.isNotBlank(nodeCode) ? nodeIdentities.requireCode(nodeCode).nodeCode : nodeName;
+        return ResultUtils.success(learningMasteryService.nodeWorkbench(user, identity));
     }
 
     /**
@@ -87,6 +93,7 @@ public class LearningMasteryController {
      */
     @GetMapping("/timeline")
     public BaseResponse<TimelineVO> myTimeline(@RequestParam(value = "nodeName", required = false) String nodeName,
+                                               @RequestParam(value = "nodeCode", required = false) String nodeCode,
                                                @RequestParam(value = "eventType", required = false) String eventType,
                                                @RequestParam(value = "startTime", required = false) String startTime,
                                                @RequestParam(value = "endTime", required = false) String endTime,
@@ -95,7 +102,7 @@ public class LearningMasteryController {
                                                HttpServletRequest request) {
         User user = userService.getLoginUser(request);
         return ResultUtils.success(learningMasteryService.myTimeline(
-                user, nodeName, eventType, startTime, endTime, current, pageSize));
+                user, StringUtils.isNotBlank(nodeCode) ? nodeIdentities.requireCode(nodeCode).storageKey : nodeName, eventType, startTime, endTime, current, pageSize));
     }
 
     /**

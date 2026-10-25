@@ -53,6 +53,9 @@ public class LearningQuestionAddRequest implements Serializable {
      */
     private String chapter;
 
+    /** 所属小节稳定代码（可选，优先于 chapter 的展示名） */
+    private String sectionCode;
+
     /**
      * 难度 1-5
      */

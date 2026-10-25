@@ -26,4 +26,10 @@ public class LearningAnswerRequest implements Serializable {
 
     /** 提交幂等键（同键重发服务端去重；主动重试使用新键） */
     private String submissionKey;
+    private String sourceUnitCode;
+    private String sourceActivityCode;
+    /** 任务上下文；由任务接口服务端补齐，普通练习保持为空。 */
+    private String sourceTaskCode;
+    private String sourceTaskItemCode;
+    private Integer sourceTaskRound;
 }

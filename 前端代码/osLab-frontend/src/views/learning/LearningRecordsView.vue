@@ -1,42 +1,76 @@
 <template>
   <div class="learning-records-view">
     <header class="records-heading">
-      <h1>{{ activeView === "review" ? "待巩固" : "学习时间线" }}</h1>
+      <h1>{{ activeView === "review" ? "待巩固" : "学习记录" }}</h1>
       <span v-if="activeView !== 'review'" class="hint"
-        >{{ total }} 条记录</span
+        >{{ total }} 条学习活动</span
       >
     </header>
     <section v-if="activeView === 'timeline'">
       <div class="filter-bar">
         <a-input
           v-model:model-value="filters.nodeName"
-          placeholder="知识点名称"
+          placeholder="知识点名称/编码"
           allow-clear
-          style="width: 200px"
+          style="width: 190px"
           @press-enter="onSearch"
         />
         <a-select
           v-model:model-value="filters.eventType"
-          placeholder="记录类型"
+          placeholder="活动类型"
           allow-clear
           style="width: 170px"
         >
           <a-option value="ATTEMPT">题目练习</a-option>
           <a-option value="JUDGE">编程实验判题</a-option>
-          <a-option value="SIMULATION">交互模拟</a-option>
-          <a-option value="STATE_BASELINE">状态基线</a-option>
+          <a-option value="SIMULATION">交互模拟（判分）</a-option>
+          <a-option value="SIMULATION_RUN">算法模拟运行</a-option>
+          <a-option value="TASK">学习任务</a-option>
+          <a-option value="UNIT">单元活动</a-option>
+        </a-select>
+        <a-select
+          v-model:model-value="filters.courseCode"
+          placeholder="全部课程"
+          allow-clear
+          style="width: 200px"
+        >
+          <a-option
+            v-for="course in courses"
+            :key="course.courseCode"
+            :value="course.courseCode"
+            >{{ course.title }}</a-option
+          >
+        </a-select>
+        <a-select
+          v-model:model-value="filters.unitCode"
+          placeholder="全部单元"
+          allow-clear
+          :disabled="!filters.courseCode"
+          style="width: 200px"
+        >
+          <a-option
+            v-for="unit in courseUnits"
+            :key="unit.unitCode"
+            :value="unit.unitCode"
+            >{{ unit.title }}</a-option
+          >
         </a-select>
         <a-range-picker
           v-model:model-value="filters.range"
           value-format="YYYY-MM-DD"
           allow-clear
-          style="width: 260px"
+          style="width: 250px"
         />
         <a-button type="primary" :loading="loading" @click="onSearch">
           查询
         </a-button>
         <a-button @click="onReset">重置</a-button>
       </div>
+
+      <a-alert v-if="usingEventFallback" type="warning" class="fallback-banner">
+        活动记录接口暂不可用，已回退到事件时间线。普通模拟运行与学习任务记录需应用
+        v9 数据库迁移并重启后端后显示。
+      </a-alert>
 
       <!-- 空态一：接口失败 -->
       <div v-if="loadError" class="section-card empty-state">
@@ -52,7 +86,9 @@
         class="section-card empty-state"
       >
         <div class="empty-title">还没有学习记录</div>
-        <div class="hint">暂无题目、实验或交互模拟活动。</div>
+        <div class="hint">
+          暂无题目练习、编程实验、算法模拟、学习任务或单元活动记录。
+        </div>
         <a-button
           type="primary"
           style="margin-top: 12px"
@@ -85,68 +121,132 @@
           >
             <h2 class="timeline-date">{{ group.date }}</h2>
             <article
-              v-for="event in group.events"
-              :key="event.id"
-              class="timeline-event"
+              v-for="activity in group.activities"
+              :key="activity.activityId"
+              class="timeline-event activity-card"
             >
-              <time class="event-time">{{ clockTime(event.createTime) }}</time>
-              <i :class="['event-dot', `dot-${event.result.toLowerCase()}`]" />
+              <time class="event-time">{{
+                clockTime(activity.occurredAt)
+              }}</time>
+              <i
+                :class="[
+                  'event-dot',
+                  `dot-${(activity.result || 'completed').toLowerCase()}`,
+                ]"
+              />
               <div class="event-content">
                 <div class="event-heading">
                   <div class="event-title">
                     <a
-                      v-if="hasResourceAction(event)"
+                      v-if="activity.returnRoute"
                       class="cell-link"
-                      @click="openResource(event)"
-                      >{{ resourceLabel(event) }}</a
+                      @click="openActivity(activity)"
+                      >{{ activity.title }}</a
                     >
-                    <span v-else>{{ resourceLabel(event) }}</span>
-                    <a-tag :color="resultColor(event.result)" size="small">{{
-                      resultText(event.result)
+                    <span v-else>{{ activity.title }}</span>
+                    <a-tag color="blue" size="small">{{
+                      activityTypeName(activity.activityType)
                     }}</a-tag>
+                    <a-tag
+                      :color="resultColor(activity.result || activity.status)"
+                      size="small"
+                      >{{
+                        resultText(activity.result || activity.status)
+                      }}</a-tag
+                    >
                   </div>
-                  <a-button size="small" type="text" @click="openReplay(event)"
-                    ><template #icon><IconHistory /></template>回放</a-button
-                  >
+                  <div class="event-actions">
+                    <a-button
+                      v-if="activity.replayEventId"
+                      size="small"
+                      type="text"
+                      @click="openReplayForEvent(activity.replayEventId)"
+                      ><template #icon><IconHistory /></template>回放</a-button
+                    >
+                    <a-button
+                      v-if="activity.resourceType === 'QUESTION_SUBMIT'"
+                      size="small"
+                      type="text"
+                      @click="openSubmitDetail(activity.resourceId)"
+                      >提交详情</a-button
+                    >
+                  </div>
                 </div>
                 <div class="event-context">
-                  <span>{{ eventTypeName(event.eventType) }}</span
-                  ><a class="cell-link" @click="goNode(event.nodeName)">{{
-                    event.nodeName
-                  }}</a
-                  ><span>{{
-                    isIndependentEvidence(event) ? "独立证据" : "非独立证据"
-                  }}</span>
+                  <span>{{ activityTypeName(activity.activityType) }}</span>
+                  <span v-if="activity.courseCode"
+                    >课程 {{ activity.courseCode }}</span
+                  >
+                  <span v-if="activity.unitCode"
+                    >单元 {{ activity.unitCode }}</span
+                  >
+                  <span v-if="activity.taskCode"
+                    >任务 {{ activity.taskCode }}</span
+                  >
+                  <span v-if="activity.roundNo"
+                    >第 {{ activity.roundNo }} 轮</span
+                  >
                 </div>
-                <div
-                  class="mastery-comparison"
-                  :aria-label="`掌握度从${percentText(
-                    event.masteryBefore
-                  )}到${percentText(event.masteryAfter)}`"
-                >
-                  <span class="comparison-label">掌握度</span>
-                  <div class="comparison-value">
-                    <span>之前 {{ percentText(event.masteryBefore) }}</span>
-                    <div class="comparison-track before">
-                      <i
-                        :style="{ width: masteryWidth(event.masteryBefore) }"
-                      />
-                    </div>
-                  </div>
-                  <IconArrowRight class="comparison-arrow" />
-                  <div class="comparison-value">
-                    <span>之后 {{ percentText(event.masteryAfter) }}</span>
-                    <div class="comparison-track after">
-                      <i :style="{ width: masteryWidth(event.masteryAfter) }" />
-                    </div>
-                  </div>
-                </div>
-                <p
-                  v-if="evidenceSummary(event.evidence)"
-                  class="event-evidence hint"
-                >
-                  {{ evidenceSummary(event.evidence) }}
+                <p v-if="activity.summary" class="event-evidence hint">
+                  {{ activity.summary }}
                 </p>
+                <details
+                  v-if="activity.nodeRefs && activity.nodeRefs.length"
+                  class="activity-nodes"
+                >
+                  <summary>
+                    关联 {{ activity.nodeRefs.length }} 个知识节点与掌握变化
+                  </summary>
+                  <div
+                    v-for="ref in activity.nodeRefs"
+                    :key="ref.nodeCode || ref.nodeName"
+                    class="activity-node-row"
+                  >
+                    <a
+                      class="cell-link"
+                      @click="goNode(ref.nodeCode || ref.nodeName)"
+                      >{{ ref.nodeName }}</a
+                    >
+                    <span class="activity-mastery oslab-mono"
+                      >{{ percentText(ref.masteryBefore) }} →
+                      {{ percentText(ref.masteryAfter) }}</span
+                    >
+                    <a-tag size="small" :color="resultColor(ref.result)">{{
+                      resultText(ref.result)
+                    }}</a-tag>
+                    <span class="hint">{{
+                      ref.independent ? "独立证据" : "非独立证据"
+                    }}</span>
+                    <a-button
+                      v-if="ref.eventId"
+                      size="mini"
+                      type="text"
+                      @click="openReplayForEvent(ref.eventId)"
+                      >回放</a-button
+                    >
+                  </div>
+                </details>
+                <details v-if="activity.inputSnapshot" class="activity-run">
+                  <summary>
+                    运行输入与结果摘要（普通演示，不计掌握证据）
+                  </summary>
+                  <div class="run-snapshot-grid">
+                    <div>
+                      <span class="hint">输入快照</span>
+                      <pre>{{ prettyJson(activity.inputSnapshot) }}</pre>
+                    </div>
+                    <div>
+                      <span class="hint">结果摘要</span>
+                      <pre>{{ prettyJson(activity.resultSnapshot) }}</pre>
+                    </div>
+                  </div>
+                  <a-button
+                    size="small"
+                    type="primary"
+                    @click="restoreRun(activity)"
+                    >恢复输入并打开同一算法</a-button
+                  >
+                </details>
               </div>
             </article>
           </section>
@@ -211,8 +311,18 @@
           </div>
           <div class="weak-metrics">
             <span>综合掌握 {{ percentText(node.pKnown) }}</span>
-            <span>概念分 {{ percentText(node.conceptScore) }}</span>
-            <span>实践分 {{ percentText(node.practiceScore) }}</span>
+            <span
+              >概念分
+              {{
+                scoreText(node.conceptScore, node.conceptEvidenceCount)
+              }}</span
+            >
+            <span
+              >实践分
+              {{
+                scoreText(node.practiceScore, node.practiceEvidenceCount)
+              }}</span
+            >
             <span>概念证据 {{ node.conceptEvidenceCount ?? 0 }} 次</span>
             <span>实践证据 {{ node.practiceEvidenceCount ?? 0 }} 次</span>
             <span v-if="node.lastActivityTime">
@@ -408,13 +518,23 @@
                     <div class="detail-fact">
                       <dt>概念分</dt>
                       <dd>
-                        {{ percentText(replaySelectedNode.conceptScore) }}
+                        {{
+                          scoreText(
+                            replaySelectedNode.conceptScore,
+                            replaySelectedNode.conceptEvidenceCount
+                          )
+                        }}
                       </dd>
                     </div>
                     <div class="detail-fact">
                       <dt>实践分</dt>
                       <dd>
-                        {{ percentText(replaySelectedNode.practiceScore) }}
+                        {{
+                          scoreText(
+                            replaySelectedNode.practiceScore,
+                            replaySelectedNode.practiceEvidenceCount
+                          )
+                        }}
                       </dd>
                     </div>
                     <div class="detail-fact">
@@ -497,13 +617,15 @@
                 <span>实践分</span>
                 <span>快照</span>
               </div>
-              <div
+              <button
                 v-for="node in learnedNodes(replay.data)"
                 :key="node.name"
+                type="button"
                 class="replay-grid replay-row"
                 :class="{
                   'replay-row-active': replay.selectedName === node.name,
                 }"
+                :aria-pressed="replay.selectedName === node.name"
                 @click="selectReplayNode(node)"
               >
                 <span>
@@ -516,8 +638,12 @@
                   </span>
                 </span>
                 <span>{{ percentText(node.pKnown) }}</span>
-                <span>{{ percentText(node.conceptScore) }}</span>
-                <span>{{ percentText(node.practiceScore) }}</span>
+                <span>{{
+                  scoreText(node.conceptScore, node.conceptEvidenceCount)
+                }}</span>
+                <span>{{
+                  scoreText(node.practiceScore, node.practiceEvidenceCount)
+                }}</span>
                 <span>
                   <a-tag
                     v-if="node.snapshotAvailable === false"
@@ -528,7 +654,7 @@
                   </a-tag>
                   <a-tag v-else size="small" color="green">完整快照</a-tag>
                 </span>
-              </div>
+              </button>
               <div
                 v-if="learnedNodes(replay.data).length === 0"
                 class="empty-state"
@@ -585,23 +711,40 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, reactive, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { IconArrowRight, IconHistory } from "@arco-design/web-vue/es/icon";
 import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  watch,
+} from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { IconHistory } from "@arco-design/web-vue/es/icon";
+import {
+  learningActivities,
   masterySnapshot,
   masteryTimeline,
   masteryWeakness,
   type LastFailureVO,
+  type ActivityNodeRefVO,
+  type LearningActivityVO,
   type LearningEventVO,
   type MasterySnapshotVO,
   type WeakNodeVO,
 } from "@/api/learning";
 import {
+  getCourseOutline,
+  listCourses,
+  type CourseSummary,
+  type UnitSummary,
+} from "@/api/course";
+import {
   QuestionControllerService,
   type QuestionSubmitVO,
 } from "../../../generated";
 import KnowledgeGraph from "@/components/KnowledgeGraph.vue";
+import { scoreText } from "@/utils/masteryDisplay";
 
 const route = useRoute();
 const router = useRouter();
@@ -624,67 +767,256 @@ const activeView = computed(() =>
 const filters = reactive({
   nodeName: "",
   eventType: "",
+  courseCode: "",
+  unitCode: "",
   range: [] as string[],
 });
 
 const loading = ref(false);
 const loadError = ref("");
-const events = ref<LearningEventVO[]>([]);
+const usingEventFallback = ref(false);
+const activities = ref<LearningActivityVO[]>([]);
 const total = ref(0);
 const current = ref(1);
 const pageSize = ref(10);
 let timelineSequence = 0;
 
-const EVENT_TYPE_OPTIONS = ["ATTEMPT", "JUDGE", "SIMULATION", "STATE_BASELINE"];
+const courses = ref<CourseSummary[]>([]);
+const courseUnits = ref<UnitSummary[]>([]);
+
+const EVENT_TYPE_OPTIONS = [
+  "ATTEMPT",
+  "JUDGE",
+  "SIMULATION",
+  "SIMULATION_RUN",
+  "TASK",
+  "UNIT",
+];
 
 const hasActiveFilter = computed(
   () =>
     filters.nodeName.trim() !== "" ||
-    filters.eventType !== "" ||
+    Boolean(filters.eventType) ||
+    Boolean(filters.courseCode) ||
+    Boolean(filters.unitCode) ||
     (filters.range?.length === 2 && !!filters.range[0] && !!filters.range[1])
 );
+
+const loadCourses = async () => {
+  try {
+    courses.value = await listCourses();
+  } catch {
+    courses.value = [];
+  }
+};
+
+const loadCourseUnits = async (courseCode: string) => {
+  courseUnits.value = [];
+  if (!courseCode) return;
+  try {
+    const outline = await getCourseOutline(courseCode);
+    const result: UnitSummary[] = [];
+    const walk = (sections: typeof outline.sections) => {
+      sections.forEach((section) => {
+        result.push(...(section.units || []));
+        if (section.children?.length) walk(section.children);
+      });
+    };
+    walk(outline.sections || []);
+    courseUnits.value = result;
+  } catch {
+    courseUnits.value = [];
+  }
+};
+
+watch(
+  () => filters.courseCode,
+  (code) => {
+    filters.courseCode = code || "";
+    filters.unitCode = "";
+    void loadCourseUnits(filters.courseCode);
+  }
+);
+
+const EVIDENCE_EVENT_TYPES = ["ATTEMPT", "JUDGE", "SIMULATION"];
+
+const fallbackTitle = (event: LearningEventVO) => {
+  try {
+    const evidence = JSON.parse(event.evidence || "{}");
+    if (evidence?.title) return String(evidence.title);
+  } catch {
+    // 历史证据不是 JSON 时使用稳定兜底标题
+  }
+  if (event.eventType === "ATTEMPT") return `题目练习 #${event.resourceId}`;
+  if (event.eventType === "JUDGE") return `提交 #${event.resourceId}`;
+  if (event.eventType === "SIMULATION") return "交互模拟";
+  return "学习活动";
+};
+
+const fallbackSummary = (event: LearningEventVO) => {
+  try {
+    const evidence = JSON.parse(event.evidence || "{}");
+    return [evidence.source, evidence.resultText, evidence.note]
+      .filter(Boolean)
+      .join(" · ");
+  } catch {
+    return "";
+  }
+};
+
+const fallbackReturnRoute = (event: LearningEventVO) => {
+  if (event.eventType === "ATTEMPT") {
+    return `/assessments?questionId=${event.resourceId}`;
+  }
+  if (event.eventType === "SIMULATION") {
+    return `/experiments/simulation?nodeName=${encodeURIComponent(
+      event.nodeName
+    )}`;
+  }
+  return null;
+};
+
+/** 活动接口不可用时，把既有事件时间线映射成同构活动卡片。 */
+const mapEventsToFallbackActivities = (
+  events: LearningEventVO[]
+): LearningActivityVO[] => {
+  const groups = new Map<string, LearningEventVO[]>();
+  events
+    .filter((event) => event.eventType !== "STATE_BASELINE")
+    .forEach((event) => {
+      const key = event.eventGroupKey
+        ? `g:${event.eventGroupKey}`
+        : `e:${event.id}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)?.push(event);
+    });
+  return Array.from(groups.values()).map((group) => {
+    const anchor = group[0];
+    const seen = new Set<string>();
+    const nodeRefs = group
+      .map((event) => {
+        const key = event.nodeCode || event.nodeName;
+        if (seen.has(key)) return null;
+        seen.add(key);
+        return {
+          nodeCode: event.nodeCode || null,
+          nodeName: event.nodeName,
+          masteryBefore: event.masteryBefore,
+          masteryAfter: event.masteryAfter,
+          result: event.result,
+          independent: !!event.isFirst && event.result !== "SYSTEM_ERROR",
+          eventId: event.id,
+        };
+      })
+      .filter(Boolean) as ActivityNodeRefVO[];
+    return {
+      activityId: `event:${
+        anchor.eventGroupKey ? anchor.eventGroupKey : anchor.id
+      }`,
+      activityType: anchor.eventType,
+      title: fallbackTitle(anchor),
+      status: anchor.result,
+      result: anchor.result,
+      occurredAt: anchor.createTime,
+      unitCode: anchor.sourceUnitCode || null,
+      activityCode: anchor.sourceActivityCode || null,
+      taskCode: anchor.sourceTaskCode || null,
+      taskItemCode: anchor.sourceTaskItemCode || null,
+      roundNo: anchor.sourceTaskRound ?? null,
+      resourceType: anchor.resourceType,
+      resourceId: anchor.resourceId,
+      summary: fallbackSummary(anchor),
+      nodeRefs,
+      evidenceRefs: group.map((event) => event.id),
+      replayEventId: anchor.id,
+      returnRoute: fallbackReturnRoute(anchor),
+    };
+  });
+};
+
+const loadEventFallback = async (
+  params: { startTime?: string; endTime?: string },
+  sequence: number
+) => {
+  if (filters.eventType && !EVIDENCE_EVENT_TYPES.includes(filters.eventType)) {
+    return false;
+  }
+  try {
+    const res = await masteryTimeline({
+      nodeName: filters.nodeName.trim() || undefined,
+      eventType: filters.eventType || undefined,
+      startTime: params.startTime,
+      endTime: params.endTime,
+      current: current.value,
+      pageSize: pageSize.value,
+    });
+    if (sequence !== timelineSequence) return true;
+    if (res.data?.code !== 0) return false;
+    activities.value = mapEventsToFallbackActivities(
+      res.data.data?.events ?? []
+    );
+    total.value = Number(res.data.data?.total ?? 0);
+    usingEventFallback.value = true;
+    loadError.value = "";
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 const loadTimeline = async () => {
   const sequence = ++timelineSequence;
   loading.value = true;
   loadError.value = "";
+  const params: {
+    type?: string;
+    nodeCode?: string;
+    courseCode?: string;
+    unitCode?: string;
+    startTime?: string;
+    endTime?: string;
+    current?: number;
+    pageSize?: number;
+  } = {
+    current: current.value,
+    pageSize: pageSize.value,
+  };
+  if (filters.nodeName.trim()) {
+    params.nodeCode = filters.nodeName.trim();
+  }
+  if (filters.eventType) {
+    params.type = filters.eventType;
+  }
+  if (filters.courseCode) {
+    params.courseCode = filters.courseCode;
+  }
+  if (filters.unitCode) {
+    params.unitCode = filters.unitCode;
+  }
+  if (filters.range?.length === 2 && filters.range[0] && filters.range[1]) {
+    params.startTime = `${filters.range[0]} 00:00:00`;
+    params.endTime = `${filters.range[1]} 23:59:59`;
+  }
   try {
-    const params: {
-      nodeName?: string;
-      eventType?: string;
-      startTime?: string;
-      endTime?: string;
-      current?: number;
-      pageSize?: number;
-    } = {
-      current: current.value,
-      pageSize: pageSize.value,
-    };
-    if (filters.nodeName.trim()) {
-      params.nodeName = filters.nodeName.trim();
-    }
-    if (filters.eventType) {
-      params.eventType = filters.eventType;
-    }
-    if (filters.range?.length === 2 && filters.range[0] && filters.range[1]) {
-      params.startTime = `${filters.range[0]} 00:00:00`;
-      params.endTime = `${filters.range[1]} 23:59:59`;
-    }
-    const res = await masteryTimeline(params);
+    const res = await learningActivities(params);
     if (sequence !== timelineSequence) return;
     if (res.data?.code === 0) {
-      events.value = res.data.data?.events ?? [];
+      activities.value = res.data.data?.records ?? [];
       total.value = Number(res.data.data?.total ?? 0);
-    } else {
-      // 拦截器已弹全局提示，这里只落页面错误态
-      loadError.value = res.data?.message || "学习记录加载失败";
-      events.value = [];
-      total.value = 0;
+      usingEventFallback.value = false;
+      return;
     }
+    if (await loadEventFallback(params, sequence)) return;
+    loadError.value =
+      res.data?.message || "学习记录加载失败（活动接口不可用且事件回退失败）";
+    activities.value = [];
+    total.value = 0;
   } catch {
     if (sequence !== timelineSequence) return;
-    loadError.value = "网络或服务异常，请稍后重试";
-    events.value = [];
+    if (await loadEventFallback(params, sequence)) return;
+    loadError.value =
+      "学习记录接口暂不可用，事件回退也失败；请检查后端版本或稍后重试";
+    activities.value = [];
     total.value = 0;
   } finally {
     if (sequence === timelineSequence) loading.value = false;
@@ -699,7 +1031,10 @@ const onSearch = () => {
 const onReset = () => {
   filters.nodeName = "";
   filters.eventType = "";
+  filters.courseCode = "";
+  filters.unitCode = "";
   filters.range = [];
+  courseUnits.value = [];
   current.value = 1;
   loadTimeline();
 };
@@ -973,10 +1308,6 @@ const openReplayForEvent = async (eventId: number | string) => {
   await gotoStep(index >= 0 ? index : 0);
 };
 
-const openReplay = async (event: LearningEventVO) => {
-  await openReplayForEvent(event.id);
-};
-
 const selectReplayNode = (node: { name: string; id?: string | null }) => {
   replay.selectedName = node.name;
   replay.selectedId = node.id || node.name;
@@ -1095,31 +1426,51 @@ const percentText = (value: number | null | undefined) =>
 const eventTypeName = (type: string) => {
   const map: Record<string, string> = {
     ATTEMPT: "题目练习",
-    JUDGE: "实验判题",
-    SIMULATION: "交互模拟",
+    JUDGE: "编程实验判题",
+    SIMULATION: "交互模拟（判分）",
+    SIMULATION_RUN: "算法模拟运行",
+    TASK_ACCEPTED: "接受任务",
+    TASK_SUBMISSION: "任务提交",
+    UNIT_COMPLETED: "单元活动",
     STATE_BASELINE: "状态基线",
   };
   return map[type] || type;
 };
+// 模板以活动语义命名；与事件类型共用同一映射。
+const activityTypeName = eventTypeName;
 
-const resultText = (result: string) => {
+const resultText = (result: string | null | undefined) => {
   const map: Record<string, string> = {
     PASS: "通过",
     FAIL: "未通过",
     SYSTEM_ERROR: "系统错误",
     BASELINE: "状态基线",
+    ACCEPTED: "已接受",
+    IN_PROGRESS: "进行中",
+    SUBMITTED: "已提交",
+    RETURNED: "已退回",
+    REVIEWED: "已批阅",
+    COMPLETED: "已完成",
+    SIMULATION_RUN: "运行完成",
   };
-  return map[result] || result;
+  return map[result || ""] || result || "";
 };
 
-const resultColor = (result: string) => {
+const resultColor = (result: string | null | undefined) => {
   const map: Record<string, string> = {
     PASS: "green",
     FAIL: "red",
     SYSTEM_ERROR: "gray",
     BASELINE: "gray",
+    ACCEPTED: "green",
+    IN_PROGRESS: "blue",
+    SUBMITTED: "blue",
+    RETURNED: "orange",
+    REVIEWED: "green",
+    COMPLETED: "green",
+    SIMULATION_RUN: "gray",
   };
-  return map[result] || "gray";
+  return map[result || ""] || "gray";
 };
 
 const statusText = (status: string) => {
@@ -1162,70 +1513,81 @@ const failurePillClass = (state: string) => {
   return map[state] || "pill-gray";
 };
 
-/** 独立证据口径与后端一致：非基线、非系统错误、且为首答/首判 */
-const isIndependentEvidence = (event: LearningEventVO) =>
-  event.eventType !== "STATE_BASELINE" &&
-  event.result !== "SYSTEM_ERROR" &&
-  !!event.isFirst;
-
 const dateGroups = computed(() => {
-  const groups = new Map<string, LearningEventVO[]>();
-  events.value.forEach((event) => {
-    const date = new Date(event.createTime).toLocaleDateString("zh-CN");
+  const groups = new Map<string, LearningActivityVO[]>();
+  activities.value.forEach((activity) => {
+    const date = new Date(activity.occurredAt).toLocaleDateString("zh-CN");
     if (!groups.has(date)) groups.set(date, []);
-    groups.get(date)?.push(event);
+    groups.get(date)?.push(activity);
   });
-  return Array.from(groups, ([date, items]) => ({ date, events: items }));
+  return Array.from(groups, ([date, items]) => ({ date, activities: items }));
 });
 const clockTime = (time: string) =>
   new Date(time).toLocaleTimeString("zh-CN", { hour12: false });
-const masteryWidth = (value: number | null | undefined) =>
-  `${Math.max(0, Math.min(100, (value || 0) * 100))}%`;
 
-const evidenceSummary = (evidenceJson: string | null) => {
-  if (!evidenceJson) return "";
+const prettyJson = (value: string | null | undefined) => {
+  if (!value) return "—";
   try {
-    const parsed = JSON.parse(evidenceJson);
-    return [parsed.source, parsed.title, parsed.resultText, parsed.note]
-      .filter(Boolean)
-      .join(" · ");
+    return JSON.stringify(JSON.parse(value), null, 2);
   } catch {
-    return evidenceJson;
+    return value;
   }
 };
 
-const resourceLabel = (event: LearningEventVO) => {
-  if (event.eventType === "JUDGE") {
-    return `提交 #${event.resourceId}`;
+const openActivity = (activity: LearningActivityVO) => {
+  if (activity.returnRoute && activity.returnRoute.startsWith("/")) {
+    router.push(activity.returnRoute);
+    return;
   }
-  if (event.eventType === "ATTEMPT") {
-    return `题目 #${event.resourceId}`;
+  if (activity.resourceType === "QUESTION_SUBMIT" && activity.resourceId) {
+    openSubmitDetail(activity.resourceId);
   }
-  if (event.eventType === "SIMULATION") {
-    return "模拟练习";
-  }
-  return "状态基线";
 };
 
-const hasResourceAction = (event: LearningEventVO) =>
-  event.eventType === "JUDGE" ||
-  event.eventType === "ATTEMPT" ||
-  event.eventType === "SIMULATION";
-
-const openResource = (event: LearningEventVO) => {
-  if (event.eventType === "JUDGE") {
-    openSubmitDetail(event.resourceId);
-  } else if (event.eventType === "ATTEMPT") {
-    router.push({
-      path: "/assessments",
-      query: { nodeName: event.nodeName, questionId: String(event.resourceId) },
-    });
-  } else if (event.eventType === "SIMULATION") {
-    router.push({
-      path: "/experiments/simulation",
-      query: { nodeName: event.nodeName },
-    });
+/** 普通演示记录：从输入快照恢复同一算法与参数 */
+const restoreRun = (activity: LearningActivityVO) => {
+  if (!activity.algorithmKey || !activity.inputSnapshot) {
+    if (activity.returnRoute) router.push(activity.returnRoute);
+    return;
   }
+  let input: Record<string, unknown>;
+  try {
+    input = JSON.parse(activity.inputSnapshot);
+    if (!input || typeof input !== "object" || Array.isArray(input)) {
+      throw new Error("invalid snapshot");
+    }
+  } catch {
+    if (activity.returnRoute) router.push(activity.returnRoute);
+    return;
+  }
+  const query: Record<string, string> = {
+    algorithmKey: activity.algorithmKey,
+  };
+  if (activity.courseCode) query.courseCode = activity.courseCode;
+  if (activity.unitCode) query.sourceUnitCode = activity.unitCode;
+  if (activity.activityCode) query.sourceActivityCode = activity.activityCode;
+  if (Array.isArray(input.processes)) {
+    query.processes = JSON.stringify(input.processes);
+    query.timeSlice = String(input.quantum ?? 2);
+    if (Array.isArray(input.mlfqQueues)) {
+      query.queueSlices = (input.mlfqQueues as number[]).join(",");
+    }
+  } else if (Array.isArray(input.operations)) {
+    query.memorySize = String(input.memorySize ?? 0);
+    query.operations = JSON.stringify(input.operations);
+    if (Array.isArray(input.initialPartitions)) {
+      query.initialPartitions = (input.initialPartitions as number[]).join(",");
+    }
+  } else if (typeof input.frames !== "undefined") {
+    query.frames = String(input.frames);
+    query.accessSequence =
+      (input.sequence as number[] | undefined)?.join(",") || "";
+  } else {
+    query.head = String(input.head ?? 1);
+    query.requests = (input.requests as number[] | undefined)?.join(",") || "";
+    query.direction = String(input.direction || "UP");
+  }
+  router.push({ path: "/experiments/simulation", query });
 };
 
 const failureSummary = (failure: LastFailureVO) => {
@@ -1284,6 +1646,9 @@ watch(
   },
   { immediate: true }
 );
+onMounted(() => {
+  void loadCourses();
+});
 onBeforeUnmount(() => {
   timelineSequence += 1;
   replaySequence += 1;
@@ -1319,6 +1684,9 @@ onBeforeUnmount(() => {
   padding: 12px 0 16px;
   border-bottom: 1px solid var(--oslab-border);
   margin-bottom: 16px;
+}
+.fallback-banner {
+  margin-bottom: 14px;
 }
 
 /* ---- 空态 ---- */
@@ -1447,7 +1815,7 @@ onBeforeUnmount(() => {
   background: #c9cdd4;
 }
 .comparison-track.after i {
-  background: #165dff;
+  background: #2447d8;
 }
 .comparison-arrow {
   color: #86909c;
@@ -1455,6 +1823,60 @@ onBeforeUnmount(() => {
 }
 .event-evidence {
   margin: 12px 0 0;
+  overflow-wrap: anywhere;
+}
+.event-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.activity-nodes,
+.activity-run {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--oslab-line-soft);
+  border-radius: var(--oslab-radius-md);
+  background: var(--oslab-panel-soft);
+  font-size: 12px;
+}
+.activity-nodes summary,
+.activity-run summary {
+  cursor: pointer;
+  color: var(--oslab-text-secondary);
+}
+.activity-node-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 1px dashed var(--oslab-line-soft);
+}
+.activity-node-row:first-of-type {
+  margin-top: 6px;
+}
+.activity-mastery {
+  color: var(--oslab-text-secondary);
+}
+.run-snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin: 8px 0;
+}
+.run-snapshot-grid pre {
+  max-height: 220px;
+  overflow: auto;
+  margin: 4px 0 0;
+  padding: 8px;
+  border-radius: var(--oslab-radius-md);
+  background: var(--oslab-panel);
+  color: var(--oslab-text-secondary);
+  font-family: var(--oslab-font-mono, monospace);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 .cell-link {
@@ -1695,6 +2117,12 @@ onBeforeUnmount(() => {
   white-space: nowrap;
 }
 .replay-row {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
 }
 .replay-row:hover {
@@ -1722,6 +2150,51 @@ onBeforeUnmount(() => {
   word-break: break-all;
   text-align: left;
 }
+/* C+B 学习图册 */
+.learning-records-view {
+  gap: 16px;
+}
+.records-heading h1 {
+  display: inline;
+  padding: 0 4px;
+  font-family: var(--oslab-font-display);
+  font-size: 30px;
+  background: linear-gradient(
+    transparent 56%,
+    var(--oslab-highlight) 56%,
+    var(--oslab-highlight) 92%,
+    transparent 92%
+  );
+}
+.filter-bar {
+  padding: 12px;
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.event-content {
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.event-title {
+  color: var(--oslab-ink);
+  font-weight: 600;
+}
+.event-evidence,
+.failure-line {
+  color: var(--oslab-ink-soft);
+  font-family: var(--oslab-font-display);
+}
+.status-pill {
+  border-radius: var(--oslab-radius-pill);
+}
+.pager-row {
+  border-top: 1px solid var(--oslab-line-soft);
+}
+
 @media (max-width: 768px) {
   .replay-main {
     grid-template-columns: 1fr;

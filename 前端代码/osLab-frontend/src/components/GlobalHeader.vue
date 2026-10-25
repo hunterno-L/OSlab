@@ -1,7 +1,7 @@
 <template>
   <header id="globalHeader">
     <router-link class="title-bar" to="/home" aria-label="OSLab 首页">
-      <img class="logo" src="../assets/oj-logo.svg" alt="" />
+      <span class="logo brand-mark" aria-hidden="true">OS</span>
       <span class="title">OSLab <small>操作系统</small></span>
     </router-link>
     <nav class="main-navigation" aria-label="主导航">
@@ -88,11 +88,16 @@ const router = useRouter();
 const route = useRoute();
 const store = useStore();
 
-// 顶栏一级菜单：来自统一导航配置，按权限过滤
+// 顶栏一级菜单：来自统一导航配置，按权限过滤；同一入口按角色解析目标地址。
 const visibleRoutes = computed(() => {
+  const role = store.state.user.loginUser?.userRole;
   return APP_NAVIGATION.filter((item) =>
     checkAccess(store.state.user.loginUser, item.access as string)
-  ).map((item) => ({ path: item.path, name: item.label, key: item.key }));
+  ).map((item) => ({
+    path: item.rolePaths?.[role] || item.path,
+    name: item.label,
+    key: item.key,
+  }));
 });
 
 // 路由变化后，按领域解析顶栏选中态（详情页保持所属一级入口高亮）。
@@ -100,7 +105,9 @@ const visibleRoutes = computed(() => {
 const selectedKeys = computed(() => {
   const key = resolveNavKey(route.path);
   const item = APP_NAVIGATION.find((n) => n.key === key);
-  return item ? [item.path] : [];
+  if (!item) return [];
+  const role = store.state.user.loginUser?.userRole;
+  return [item.rolePaths?.[role] || item.path];
 });
 
 const loginUser = computed(() => store.state.user?.loginUser || {});
@@ -158,12 +165,14 @@ const handleProfileAction = async (value: string | number) => {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 20px;
-  min-height: 64px;
-  padding: 0 20px;
+  gap: 18px;
+  min-height: 60px;
+  padding: 0 16px;
   box-sizing: border-box;
-  background: var(--oslab-panel, #ffffff);
-  border-bottom: 1px solid var(--oslab-line, rgba(0, 0, 0, 0.11));
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
 }
 
 .title-bar {
@@ -179,9 +188,10 @@ const handleProfileAction = async (value: string | number) => {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  color: var(--oslab-ink, #1b1b1b);
-  font-size: 17px;
-  font-weight: 600;
+  color: var(--oslab-ink);
+  font-family: var(--oslab-font-display);
+  font-size: 20px;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -195,6 +205,14 @@ const handleProfileAction = async (value: string | number) => {
   width: 36px;
   height: 36px;
   flex: 0 0 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--oslab-highlight);
+  color: #3a3320;
+  font-family: var(--oslab-font-mono);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .main-navigation {
@@ -210,24 +228,28 @@ const handleProfileAction = async (value: string | number) => {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
-  min-height: 44px;
-  padding: 0 12px;
-  border-bottom: 2px solid transparent;
-  color: var(--oslab-ink-soft, #37352f);
+  min-height: 36px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: var(--oslab-radius-pill);
+  color: var(--oslab-ink-soft);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
   white-space: nowrap;
-  transition: color var(--oslab-duration-fast, 150ms) var(--oslab-ease, ease);
+  transition: background-color var(--oslab-duration-fast) var(--oslab-ease),
+    color var(--oslab-duration-fast) var(--oslab-ease);
 }
 
 .main-nav-link:hover,
 .main-nav-link:focus-visible {
-  color: var(--oslab-primary, #2059c9);
+  background: var(--oslab-panel-soft);
+  color: var(--oslab-ink);
 }
 
 .main-nav-link.active {
-  border-bottom-color: var(--oslab-primary, #2059c9);
-  color: var(--oslab-primary, #2059c9);
+  background: var(--oslab-primary);
+  color: var(--oslab-on-primary);
   font-weight: 600;
 }
 .user-info {
@@ -292,7 +314,7 @@ const handleProfileAction = async (value: string | number) => {
 }
 
 .login-trigger {
-  color: var(--oslab-primary, #2059c9);
+  color: var(--oslab-primary, #2447d8);
   padding: 8px 12px;
 }
 @media (max-width: 900px) {
@@ -307,7 +329,7 @@ const handleProfileAction = async (value: string | number) => {
     width: 100%;
   }
   .main-nav-link {
-    min-height: 42px;
+    min-height: 34px;
     padding: 0 11px;
   }
   .user-info {

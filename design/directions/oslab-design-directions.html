@@ -1,0 +1,961 @@
+<style>
+  .review, .review * { box-sizing: border-box; }
+  .review {
+    margin: 0;
+    padding: 18px;
+    min-height: 100vh;
+    background: #0e0f11;
+    color: #e9e7e2;
+    font-family: "Noto Sans SC", "Microsoft YaHei", -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .review :where(button) { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  .review :where(a) { color: inherit; text-decoration: none; }
+  .review :focus-visible { outline: 2px solid var(--focus, #8ab4ff); outline-offset: 2px; }
+
+  .review-bar {
+    max-width: 1520px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    padding: 6px 8px 16px;
+  }
+  .review-eyebrow {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: #8e9196;
+  }
+  .review-intro h1 { margin: 5px 0 4px; font-size: 24px; font-weight: 600; letter-spacing: .01em; }
+  .review-intro p { margin: 0; font-size: 12.5px; color: #9a9c9f; }
+  .review-tools { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+  .seg { display: flex; gap: 2px; padding: 3px; background: #1a1c1f; border: 1px solid #2a2d31; border-radius: 10px; }
+  .seg-btn { padding: 7px 12px; border-radius: 7px; font-size: 12px; color: #a9acb0; white-space: nowrap; }
+  .seg-btn:hover { color: #fff; background: #23262a; }
+  .seg-btn.is-active { background: #e9e7e2; color: #15171a; font-weight: 600; }
+
+  .direction-note { max-width: 1520px; margin: 0 auto 12px; }
+  .note-card {
+    display: none;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 18px;
+    align-items: center;
+    padding: 12px 16px;
+    background: #17191c;
+    border: 1px solid #2a2d31;
+    border-left: 3px solid var(--note-accent, #8ab4ff);
+    border-radius: 10px;
+  }
+  .review[data-dir="a"] .note-a { display: grid; --note-accent: #4fd1e0; }
+  .review[data-dir="b"] .note-b { display: grid; --note-accent: #1f5fbf; }
+  .review[data-dir="c"] .note-c { display: grid; --note-accent: #f2d64b; }
+  .review[data-dir="cb"] .note-cb { display: grid; --note-accent: #d7614a; }
+  .note-title { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: .01em; }
+  .note-title span {
+    margin-left: 8px;
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 9.5px;
+    font-weight: 400;
+    letter-spacing: .14em;
+    color: #8e9196;
+  }
+  .note-card p { margin: 4px 0 0; max-width: 980px; font-size: 12px; line-height: 1.65; color: #a9acb0; }
+  .note-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .note-tags span { padding: 1px 7px; border: 1px solid #2e3237; border-radius: 999px; font-size: 10px; color: #8e9196; }
+  .swatches { display: flex; gap: 6px; }
+  .swatches i { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18); }
+
+  .stage {
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 14px;
+    background: #191b1e;
+    border: 1px solid #2a2d31;
+    border-radius: 16px;
+    overflow: auto;
+  }
+  .app {
+    --bg: #0b0d10; --panel: #121418; --panel-2: #171a1f; --surface: #0f1115;
+    --text: #e8e6e1; --text-2: #b9b7b1; --muted: #8a8882;
+    --line: #2a2c31; --line-strong: #3a3d43;
+    --accent: #8ab4ff; --accent-2: #ffd479; --accent-soft: rgba(138,180,255,.12); --on-accent: #0b0d10;
+    --ok: #6fd3a6; --warn: #e0b25c; --bad: #e07a6a; --unseen: #8a8882;
+    --radius: 8px; --radius-sm: 6px; --shadow: none;
+    --font-ui: "Noto Sans SC", "Microsoft YaHei", -apple-system, "Segoe UI", sans-serif;
+    --font-display: "Bahnschrift", "DIN Alternate", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    --font-mono: "Cascadia Code", "IBM Plex Mono", Consolas, monospace;
+    --font-note: var(--font-ui);
+    --focus: var(--accent);
+    position: relative;
+    width: 100%;
+    min-width: 1180px;
+    max-width: 1440px;
+    height: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.55;
+    box-shadow: 0 24px 70px rgba(0,0,0,.45);
+  }
+  .app :where(button) { color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  .app :where(a) { color: inherit; text-decoration: none; }
+  .app .kicker {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .app main { display: flex; flex: 1; min-height: 0; }
+  .app .page { display: none; flex: 1; min-height: 0; flex-direction: column; padding: 20px 24px 18px; }
+  .app[data-page="course"] .page-course { display: flex; }
+  .app[data-page="labs"] .page-labs { display: flex; }
+
+  .topbar { display: flex; align-items: center; gap: 28px; height: 64px; padding: 0 24px; flex: 0 0 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+  .brand-mark {
+    width: 34px; height: 34px; display: grid; place-items: center;
+    border: 1px solid var(--line-strong);
+    color: var(--accent);
+    font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+  }
+  .brand-word b { display: block; font-size: 16px; line-height: 1.15; letter-spacing: .02em; }
+  .brand-word small { display: block; font-size: 10px; line-height: 1.3; color: var(--muted); }
+  .mainnav { display: flex; align-items: stretch; gap: 22px; flex: 1; min-width: 0; }
+  .mainnav a { position: relative; display: flex; align-items: center; padding: 21px 0; font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .mainnav a:hover { color: var(--text); }
+  .app[data-page="course"] .nav-course,
+  .app[data-page="labs"] .nav-labs,
+  .app[data-page="course"] .nav-course:hover,
+  .app[data-page="labs"] .nav-labs:hover { color: var(--text); }
+  .userbox { display: flex; align-items: center; gap: 9px; flex: 0 0 auto; }
+  .avatar {
+    width: 30px; height: 30px; display: grid; place-items: center;
+    border-radius: 50%; background: var(--accent); color: var(--on-accent);
+    font-size: 11px; font-weight: 700;
+  }
+  .usertext b { display: block; font-size: 11.5px; line-height: 1.2; }
+  .usertext small { display: block; font-size: 9.5px; color: var(--muted); }
+  .ai-btn {
+    width: 42px; height: 42px; margin-left: 6px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    background: var(--accent); color: var(--on-accent);
+    font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+  }
+
+  .pagehead { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 16px; flex: 0 0 auto; }
+  .eyebrow { margin-bottom: 4px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  .fig-ref { display: none; }
+  .pagehead h1 { margin: 0; font-size: 30px; line-height: 1.15; font-weight: 700; letter-spacing: .01em; }
+  .lede { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+  .meta { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; flex: 0 0 auto; }
+  .scope, .progress-meta { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-2); }
+  .meta-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .scope b { font-weight: 500; color: var(--text); }
+  .scope i { font-style: normal; color: var(--muted); }
+  .num { font-family: var(--font-mono); font-size: 14px; color: var(--text); }
+  .unit { font-size: 10.5px; color: var(--muted); }
+  .meter { display: inline-block; width: 92px; height: 4px; margin-left: 4px; background: var(--line); }
+  .meter i { display: block; height: 100%; background: var(--accent); }
+
+  .course-grid { display: grid; grid-template-columns: 264px minmax(0, 1fr) 320px; gap: 12px; flex: 1; min-height: 0; }
+  .panel { display: flex; flex-direction: column; min-height: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+  .rail { overflow: hidden; }
+  .rail-course { display: flex; align-items: center; gap: 10px; padding: 14px; border-bottom: 1px solid var(--line); }
+  .course-mark {
+    width: 34px; height: 34px; display: grid; place-items: center;
+    background: var(--accent); color: var(--on-accent);
+    font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+    border-radius: var(--radius-sm);
+  }
+  .rail-course b { display: block; font-size: 13px; }
+  .rail-course small { display: block; margin-top: 1px; font-family: var(--font-mono); font-size: 9px; color: var(--muted); }
+  .rail-meta { display: flex; justify-content: space-between; align-items: center; padding: 9px 14px; border-bottom: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+  .rail-meta b { font-weight: 500; color: var(--text-2); }
+  .tree { flex: 1; overflow: auto; padding: 6px 8px 10px; scrollbar-width: thin; }
+  .chapter-btn, .unit-btn { width: 100%; display: flex; align-items: center; gap: 7px; padding: 7px; text-align: left; border-radius: var(--radius-sm); color: var(--text-2); }
+  .chapter-btn { font-size: 12px; }
+  .chapter-btn .idx, .unit-btn .idx { flex: 0 0 20px; width: 20px; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+  .chapter-btn .label, .unit-btn .label { flex: 1; min-width: 0; }
+  .chapter-btn .chev { color: var(--muted); font-size: 10px; }
+  .unit-list { margin-left: 10px; padding-left: 4px; border-left: 1px solid var(--line); }
+  .unit-btn { padding: 6px 7px; font-size: 12px; }
+  .unit-btn em { display: block; margin-top: 1px; font-style: normal; font-size: 10px; color: var(--muted); }
+  .unit-btn.is-selected { background: var(--accent-soft); color: var(--text); }
+  .unit-btn.is-selected .idx { color: var(--accent); }
+  .lesson { margin: 2px 0 5px 18px; padding: 6px 8px; border-left: 2px solid var(--line); }
+  .lesson-title { display: block; font-size: 11.5px; line-height: 1.45; color: var(--text-2); }
+  .lesson-meta { display: block; margin-top: 2px; font-size: 10px; color: var(--muted); }
+  .lesson.is-current { border-left-color: var(--accent); background: var(--accent-soft); }
+  .rail-foot { display: flex; justify-content: space-between; padding: 9px 14px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+  .rail-foot b { font-family: var(--font-mono); color: var(--text-2); }
+
+  .graph-panel { overflow: hidden; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 16px; border-bottom: 1px solid var(--line); flex: 0 0 auto; }
+  .panel-title h2 { margin: 2px 0 0; font-size: 16px; line-height: 1.2; }
+  .graph-tools { display: flex; align-items: center; gap: 8px; }
+  .toggle { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--muted); }
+  .toggle i { position: relative; width: 26px; height: 14px; border-radius: 999px; background: var(--line); }
+  .toggle i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%; background: var(--panel); }
+  .toggle.is-on i { background: var(--accent); }
+  .toggle.is-on i::after { left: 14px; }
+  .mini-btn { height: 26px; padding: 0 9px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: 11px; color: var(--text-2); }
+  .mini-btn.is-on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .scope-tools { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-bottom: 1px solid var(--line); flex: 0 0 auto; }
+  .search-box, .select-box { height: 30px; display: flex; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: 11.5px; color: var(--muted); }
+  .search-box { flex: 1; max-width: 300px; }
+  .search-box kbd { margin-left: auto; font-family: var(--font-mono); font-size: 9px; color: var(--muted); }
+  .graph-stats { margin-left: auto; font-family: var(--font-mono); font-size: 10px; color: var(--muted); white-space: nowrap; }
+  .graph-stats b { color: var(--text-2); font-weight: 500; }
+
+  .graph-stage { position: relative; flex: 1; min-height: 0; padding: 12px 14px 0; }
+  .graph { position: relative; width: 100%; aspect-ratio: 760 / 430; }
+  .edges { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .edge { fill: none; stroke: var(--line-strong); stroke-width: 1; }
+  .edge.is-path { stroke: var(--accent); stroke-width: 1.4; }
+  .gnode {
+    position: absolute; transform: translate(-50%, -50%);
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 9px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    background: var(--panel-2);
+    color: var(--text-2);
+    font-size: 11.5px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .gnode:hover { color: var(--text); border-color: var(--accent); }
+  .gnode.is-selected { color: var(--text); border-color: var(--accent); background: var(--accent-soft); }
+  .gnode .glabel { position: relative; z-index: 1; }
+  .gcode { display: none; font-family: var(--font-mono); font-size: 8.5px; color: var(--muted); }
+  .gdot { width: 5px; height: 5px; border-radius: 50%; background: var(--unseen); flex: 0 0 auto; }
+  .dot-mastered { background: var(--ok); }
+  .dot-review { background: var(--warn); }
+  .dot-weak { background: var(--bad); }
+  .dot-unseen { background: var(--unseen); }
+  .tick-ruler { display: none; }
+  .graph-scale { display: none; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 9px 14px; border-top: 1px solid var(--line); flex: 0 0 auto; font-size: 10.5px; color: var(--muted); }
+  .legend-group { display: flex; align-items: center; gap: 6px; }
+  .legend-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .lg-chip { padding: 1px 6px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+  .lg-state { display: flex; align-items: center; gap: 4px; }
+  .lg-state::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .lg-state.is-mastered { color: var(--ok); }
+  .lg-state.is-review { color: var(--warn); }
+  .lg-state.is-weak { color: var(--bad); }
+  .lg-state.is-unseen { color: var(--unseen); }
+  .lg-line { display: flex; align-items: center; gap: 5px; }
+  .lg-line::before { content: ""; width: 18px; height: 1px; background: var(--line-strong); }
+  .lg-line.solid::before { background: var(--accent); }
+  .lg-line.dashed::before { background: repeating-linear-gradient(90deg, var(--line-strong) 0 3px, transparent 3px 6px); }
+  .lg-line.dotted::before { background: repeating-linear-gradient(90deg, var(--line-strong) 0 1px, transparent 1px 4px); }
+
+  .detail { position: relative; padding: 16px; overflow: auto; scrollbar-width: thin; }
+  .detail-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .badge { padding: 2px 8px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill, 999px); font-family: var(--font-mono); font-size: 9.5px; color: var(--muted); white-space: nowrap; }
+  .badge.is-unseen { color: var(--muted); }
+  .detail h2 { margin: 8px 0 4px; font-size: 22px; line-height: 1.3; font-weight: 700; }
+  .crumbs { margin-bottom: 14px; font-family: var(--font-mono); font-size: 9.5px; color: var(--muted); }
+  .crumbs i { padding: 0 4px; font-style: normal; }
+  .definition { margin: 0 0 14px; padding: 11px 12px 11px 13px; border-left: 2px solid var(--accent); background: var(--accent-soft); font-size: 12.5px; line-height: 1.7; color: var(--text-2); }
+  .def-label { display: block; margin-bottom: 4px; font-family: var(--font-mono); font-size: 9px; letter-spacing: .12em; color: var(--muted); }
+  .field { padding: 11px 0; border-top: 1px solid var(--line); }
+  .field-label { margin-bottom: 5px; font-family: var(--font-mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .field p { margin: 0; font-size: 12px; line-height: 1.65; color: var(--text-2); }
+  .evidence { display: flex; gap: 18px; font-size: 11.5px; color: var(--text-2); }
+  .evidence b { margin-right: 2px; font-family: var(--font-mono); font-size: 16px; color: var(--text); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips span { padding: 2px 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: 10.5px; color: var(--text-2); }
+  .detail-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .btn { height: 36px; padding: 0 14px; border: 1px solid transparent; border-radius: var(--radius-sm); font-size: 12.5px; font-weight: 600; }
+  .btn-primary { background: var(--accent); color: var(--on-accent); }
+  .btn-ghost { border-color: var(--line-strong); color: var(--text-2); }
+  .detail-foot { margin: 10px 0 0; text-align: center; font-size: 10px; color: var(--muted); }
+  .margin-note { display: none; }
+
+  .labs-grid { display: grid; grid-template-columns: 160px 220px minmax(0, 1fr); gap: 12px; flex: 1; min-height: 0; }
+  .lab-switch { padding: 14px; gap: 8px; }
+  .lab-switch .kicker { margin-bottom: 4px; }
+  .mode-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 9px 10px; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-2); border: 1px solid transparent; }
+  .mode-btn b { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+  .mode-btn.is-on { background: var(--accent-soft); border-color: var(--accent); color: var(--text); }
+  .mode-btn.is-on b { color: var(--accent); }
+  .mode-note { margin: 10px 2px 0; font-size: 10.5px; line-height: 1.6; color: var(--muted); }
+  .lab-chapters { overflow: hidden; }
+  .chapters { flex: 1; overflow: auto; padding: 8px; }
+  .chapter-row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px; border-radius: var(--radius-sm); font-size: 11.5px; color: var(--text-2); text-align: left; }
+  .chapter-row b { font-family: var(--font-mono); font-size: 10px; font-weight: 400; color: var(--muted); }
+  .chapter-row.is-on { background: var(--accent-soft); color: var(--text); }
+  .chapter-row.is-on b { color: var(--accent); }
+  .chapter-hint { padding: 9px 14px; border-top: 1px solid var(--line); font-size: 10px; color: var(--muted); }
+  .lab-main { overflow: hidden; }
+  .lab-head { display: flex; align-items: flex-end; justify-content: space-between; padding: 13px 16px; border-bottom: 1px solid var(--line); flex: 0 0 auto; }
+  .lab-head h2 { margin: 2px 0 0; font-size: 18px; }
+  .lab-count { font-size: 10.5px; color: var(--muted); }
+  .lab-count b { margin-right: 3px; font-family: var(--font-mono); font-size: 18px; color: var(--accent); }
+  .lab-filters { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line); flex: 0 0 auto; }
+  .filter { flex: 1; max-width: 220px; height: 32px; display: flex; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: 11.5px; }
+  .filter span { color: var(--text-2); font-size: 10.5px; white-space: nowrap; }
+  .filter i { overflow: hidden; color: var(--muted); font-style: normal; white-space: nowrap; text-overflow: ellipsis; }
+  .lab-filters .btn { height: 32px; }
+  .table-wrap { flex: 1; overflow: auto; }
+  .lab-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .lab-table th { padding: 10px 16px; border-bottom: 1px solid var(--line); text-align: left; font-size: 10.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .lab-table td { padding: 10px 16px; border-bottom: 1px solid var(--line); color: var(--text-2); vertical-align: middle; }
+  .lab-table td b { display: block; font-size: 12px; font-weight: 600; color: var(--text); }
+  .lab-table small { display: block; margin-top: 1px; font-size: 9.5px; color: var(--muted); }
+  .lab-table tr:hover td { background: var(--accent-soft); }
+  .tag { display: inline-block; margin: 1px 4px 1px 0; padding: 1px 7px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: 10px; color: var(--text-2); white-space: nowrap; }
+  .rate { font-family: var(--font-mono); font-size: 11.5px; }
+  .rate.is-full { color: var(--ok); }
+  .rate.is-mid { color: var(--warn); }
+  .rate.is-low { color: var(--bad); }
+  .rate.is-empty { color: var(--muted); }
+  .cell-date { font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+  .link { color: var(--accent); font-size: 11.5px; white-space: nowrap; }
+  .pagination { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--line); font-size: 10.5px; color: var(--muted); flex: 0 0 auto; }
+  .pagination .page { margin-left: auto; }
+  .pager { display: flex; align-items: center; gap: 3px; }
+  .pager button { min-width: 24px; height: 24px; padding: 0 6px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 10px; color: var(--text-2); }
+  .pager button.is-on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+  .statusbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 30px; padding: 0 16px; flex: 0 0 30px; border-top: 1px solid var(--line); background: var(--surface); font-family: var(--font-mono); font-size: 9px; color: var(--muted); }
+  .statusbar .st { display: none; }
+  .app[data-dir="a"] .status-a, .app[data-dir="b"] .status-b, .app[data-dir="c"] .status-c { display: inline; }
+  .status-right { font-size: 9px; color: var(--muted); }
+
+  /* A · Kernel Trace */
+  .app[data-dir="a"] {
+    --bg: #070d13; --panel: #0b141c; --panel-2: #0d1923; --surface: #081018;
+    --text: #dce7f0; --text-2: #a9bccb; --muted: #7c93a6;
+    --line: #1b2b38; --line-strong: #2c4558;
+    --accent: #4fd1e0; --accent-2: #f5b754; --accent-soft: rgba(79,209,224,.10); --on-accent: #052026;
+    --ok: #5fd3a6; --warn: #f5b754; --bad: #ff7a6b; --unseen: #6f8798;
+    --radius: 3px; --radius-sm: 2px; --shadow: none;
+    --font-display: "Bahnschrift", "DIN Alternate", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    background:
+      radial-gradient(900px 460px at 18% -12%, rgba(79,209,224,.09), transparent 62%),
+      linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px) 0 0 / 32px 32px,
+      linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px) 0 0 / 32px 32px,
+      var(--bg);
+  }
+  .app[data-dir="a"] .topbar { background: rgba(7,13,19,.9); border-bottom: 1px solid var(--line); }
+  .app[data-dir="a"] .brand-mark { border-radius: 0; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%); }
+  .app[data-dir="a"] .brand-word b { font-family: var(--font-display); font-size: 17px; letter-spacing: .14em; text-transform: uppercase; }
+  .app[data-dir="a"] .mainnav a { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .06em; }
+  .app[data-dir="a"][data-page="course"] .nav-course::after,
+  .app[data-dir="a"][data-page="labs"] .nav-labs::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .app[data-dir="a"][data-page="course"] .nav-course,
+  .app[data-dir="a"][data-page="labs"] .nav-labs { color: var(--accent); }
+  .app[data-dir="a"] .pagehead h1 { font-family: var(--font-display); font-size: 30px; font-weight: 600; letter-spacing: .05em; }
+  .app[data-dir="a"] .pagehead h1::before { content: "> "; color: var(--accent); font-family: var(--font-mono); font-size: 20px; font-weight: 400; }
+  .app[data-dir="a"] .eyebrow { color: var(--accent); }
+  .app[data-dir="a"] .meter { background: #162733; }
+  .app[data-dir="a"] .panel { border-radius: 3px; }
+  .app[data-dir="a"] .panel-head, .app[data-dir="a"] .scope-tools, .app[data-dir="a"] .rail-meta, .app[data-dir="a"] .rail-course { background: rgba(255,255,255,.008); }
+  .app[data-dir="a"] .kicker { color: var(--accent); }
+  .app[data-dir="a"] .unit-btn.is-selected { box-shadow: inset 2px 0 0 var(--accent); }
+  .app[data-dir="a"] .lesson.is-current { box-shadow: inset 2px 0 0 var(--accent); }
+  .app[data-dir="a"] .mini-btn, .app[data-dir="a"] .btn { border-radius: 0; clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 0 100%); }
+  .app[data-dir="a"] .btn-primary { background: var(--accent); color: var(--on-accent); }
+  .app[data-dir="a"] .gnode { border-radius: 2px; border-left-width: 2px; }
+  .app[data-dir="a"] .gnode.is-selected { box-shadow: 0 0 0 1px rgba(79,209,224,.35), 0 0 22px rgba(79,209,224,.16); }
+  .app[data-dir="a"] .gcode-a { display: inline; }
+  .app[data-dir="a"] .graph-stage {
+    padding-top: 30px;
+    background:
+      linear-gradient(rgba(79,209,224,.045) 1px, transparent 1px) 0 0 / 40px 40px,
+      linear-gradient(90deg, rgba(79,209,224,.045) 1px, transparent 1px) 0 0 / 40px 40px;
+  }
+  .app[data-dir="a"] .tick-ruler {
+    display: flex; justify-content: space-between;
+    position: absolute; left: 14px; right: 14px; top: 4px; height: 20px;
+    border-bottom: 1px solid var(--line);
+    background: repeating-linear-gradient(90deg, transparent 0 39px, var(--line) 39px 40px);
+  }
+  .app[data-dir="a"] .tick-ruler span { position: relative; top: 1px; padding: 0 2px; background: var(--panel); font-family: var(--font-mono); font-size: 8px; color: var(--muted); }
+  .app[data-dir="a"] .edge.is-path { stroke-dasharray: 4 6; animation: traceflow 1.8s linear infinite; }
+  @keyframes traceflow { to { stroke-dashoffset: -20; } }
+  .app[data-dir="a"] .detail h2 { font-family: var(--font-display); font-weight: 600; }
+  .app[data-dir="a"] .definition { background: rgba(79,209,224,.07); }
+  .app[data-dir="a"] .statusbar { color: #6f8798; }
+
+  /* B · Lab Blueprint */
+  .app[data-dir="b"] {
+    --bg: #e7ecef; --panel: #f8fafb; --panel-2: #f1f5f7; --surface: #f3f6f8;
+    --text: #142b3b; --text-2: #3f5667; --muted: #5f7688;
+    --line: #b7c7d3; --line-strong: #8da5b6;
+    --accent: #1f5fbf; --accent-2: #b6483a; --accent-soft: #e3ecf7; --on-accent: #ffffff;
+    --ok: #3e7c74; --warn: #a97a2c; --bad: #b6483a; --unseen: #5f7688;
+    --radius: 0px; --radius-sm: 0px; --shadow: none;
+    --font-display: "Bahnschrift SemiCondensed", "Arial Narrow", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    --font-note: "KaiTi", "Kaiti SC", "STKaiti", serif;
+    background:
+      linear-gradient(rgba(31,95,191,.055) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(90deg, rgba(31,95,191,.055) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(rgba(31,95,191,.10) 1px, transparent 1px) 0 0 / 120px 120px,
+      linear-gradient(90deg, rgba(31,95,191,.10) 1px, transparent 1px) 0 0 / 120px 120px,
+      var(--bg);
+  }
+  .app[data-dir="b"] .topbar { background: #f8fafb; border-bottom: 1px solid var(--text); box-shadow: 0 2px 0 -1px #f8fafb, 0 3px 0 -1px var(--line-strong); }
+  .app[data-dir="b"] .brand-mark { background: transparent; color: var(--text); box-shadow: inset 0 0 0 2px #f8fafb, inset 0 0 0 3px var(--line-strong); }
+  .app[data-dir="b"] .brand-word b { font-family: var(--font-display); font-size: 19px; letter-spacing: .08em; }
+  .app[data-dir="b"] .mainnav a { font-size: 12px; letter-spacing: .04em; }
+  .app[data-dir="b"][data-page="course"] .nav-course,
+  .app[data-dir="b"][data-page="labs"] .nav-labs { color: var(--accent); }
+  .app[data-dir="b"][data-page="course"] .nav-course::after,
+  .app[data-dir="b"][data-page="labs"] .nav-labs::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--accent-2); }
+  .app[data-dir="b"] .avatar { border-radius: 0; background: var(--text); color: #fff; }
+  .app[data-dir="b"] .ai-btn { border-radius: 0; background: var(--text); color: #fff; }
+  .app[data-dir="b"] .pagehead { padding-bottom: 10px; border-bottom: 1px solid var(--line-strong); }
+  .app[data-dir="b"] .fig-ref { display: inline; margin-right: 8px; padding: 1px 5px; border: 1px solid var(--accent-2); color: var(--accent-2); }
+  .app[data-dir="b"] .pagehead h1 { font-family: var(--font-display); font-size: 30px; font-weight: 700; letter-spacing: .05em; }
+  .app[data-dir="b"] .eyebrow { color: var(--accent); }
+  .app[data-dir="b"] .meter { height: 5px; background: repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 9px); }
+  .app[data-dir="b"] .panel { border: 1px solid var(--line-strong); background: var(--surface); }
+  .app[data-dir="b"] .panel-head, .app[data-dir="b"] .scope-tools, .app[data-dir="b"] .rail-meta, .app[data-dir="b"] .rail-course { border-bottom-color: var(--line-strong); }
+  .app[data-dir="b"] .kicker { color: var(--accent); }
+  .app[data-dir="b"] .chapter-btn { border-bottom: 1px solid var(--line-strong); border-radius: 0; }
+  .app[data-dir="b"] .unit-btn { border-bottom: 1px dotted var(--line); border-radius: 0; }
+  .app[data-dir="b"] .unit-btn.is-selected { background: transparent; color: var(--accent); border-left: 2px solid var(--accent); }
+  .app[data-dir="b"] .unit-btn.is-selected::after { content: "◀"; margin-left: 4px; font-size: 8px; color: var(--accent-2); }
+  .app[data-dir="b"] .lesson { border-left-color: var(--line-strong); }
+  .app[data-dir="b"] .lesson.is-current { background: transparent; border-left-color: var(--accent-2); }
+  .app[data-dir="b"] .gnode { background: #fbfcfd; border-color: var(--text); color: var(--text); padding-left: 12px; }
+  .app[data-dir="b"] .gnode.is-selected { background: var(--accent-soft); border-color: var(--accent); box-shadow: 0 0 0 3px #f8fafb, 0 0 0 4px var(--accent); }
+  .app[data-dir="b"] .gcode-b {
+    display: grid; place-items: center;
+    position: absolute; left: -9px; top: -9px;
+    width: 16px; height: 16px;
+    border: 1px solid var(--text); border-radius: 50%;
+    background: #fbfcfd; color: var(--text); font-size: 8.5px;
+  }
+  .app[data-dir="b"] .graph-stage { background: transparent; }
+  .app[data-dir="b"] .graph-scale { display: flex; position: absolute; right: 16px; top: 8px; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 8.5px; color: var(--muted); }
+  .app[data-dir="b"] .graph-scale i { width: 86px; height: 7px; border-left: 1px solid var(--line-strong); border-right: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); }
+  .app[data-dir="b"] .badge.is-unseen { border-color: var(--accent-2); color: var(--accent-2); transform: rotate(-5deg); border-radius: 0; }
+  .app[data-dir="b"] .detail h2 { font-family: var(--font-display); font-weight: 700; }
+  .app[data-dir="b"] .definition { background: transparent; border-left: 2px solid var(--accent-2); }
+  .app[data-dir="b"] .margin-note { display: block; margin: -4px 2px 10px auto; max-width: 190px; text-align: right; font-family: var(--font-note); font-size: 12px; line-height: 1.55; color: var(--accent-2); transform: rotate(-2deg); }
+  .app[data-dir="b"] .btn-primary { background: var(--accent); color: #fff; }
+  .app[data-dir="b"] .tag { border-radius: 0; }
+  .app[data-dir="b"] .link { color: var(--accent-2); }
+  .app[data-dir="b"] .lab-table th { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .08em; border-bottom: 1px solid var(--text); }
+  .app[data-dir="b"] .lab-table td { border-bottom: 1px solid var(--line-strong); }
+  .app[data-dir="b"] .lab-table tr:hover td { background: rgba(31,95,191,.05); }
+
+  /* C · Study Desk */
+  .app[data-dir="c"] {
+    --bg: #eef0e9; --panel: #ffffff; --panel-2: #f7f8f2; --surface: #f7f8f2;
+    --text: #20242b; --text-2: #525866; --muted: #6b7168;
+    --line: #dddfd3; --line-strong: #c9ccbe;
+    --accent: #2447d8; --accent-2: #f2d64b; --accent-soft: #fff7c2; --on-accent: #ffffff;
+    --ok: #3f8f6e; --warn: #b8892e; --bad: #d7614a; --unseen: #6b7168;
+    --radius: 14px; --radius-sm: 9px; --shadow: 0 8px 24px rgba(32,36,43,.06);
+    --font-display: "LXGW WenKai", "Kaiti SC", "KaiTi", "Noto Serif SC", serif;
+    --font-note: "LXGW WenKai", "Kaiti SC", "KaiTi", serif;
+    background:
+      radial-gradient(rgba(32,36,43,.075) 1px, transparent 1px) 0 0 / 22px 22px,
+      var(--bg);
+  }
+  .app[data-dir="c"] .topbar { height: 60px; margin: 12px 12px 0; padding: 0 16px; flex: 0 0 60px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+  .app[data-dir="c"] .brand-mark { border: 0; border-radius: 9px; background: var(--accent-2); color: #3a3320; }
+  .app[data-dir="c"] .brand-word b { font-family: var(--font-display); font-size: 21px; font-weight: 700; }
+  .app[data-dir="c"] .mainnav a { padding: 7px 13px; margin: 0 -2px; border-radius: 999px; font-size: 12.5px; }
+  .app[data-dir="c"] .mainnav a:hover { background: var(--panel-2); }
+  .app[data-dir="c"][data-page="course"] .nav-course,
+  .app[data-dir="c"][data-page="labs"] .nav-labs { background: var(--accent); color: #fff; }
+  .app[data-dir="c"] .mainnav a { align-self: center; padding-top: 7px; padding-bottom: 7px; }
+  .app[data-dir="c"] .avatar { background: var(--accent); }
+  .app[data-dir="c"] .ai-btn { width: 38px; height: 38px; background: var(--accent); }
+  .app[data-dir="c"] .page { padding-top: 18px; }
+  .app[data-dir="c"] .pagehead { align-items: center; }
+  .app[data-dir="c"] .pagehead h1 {
+    display: inline-block; padding: 0 4px; font-family: var(--font-display); font-size: 36px; font-weight: 700;
+    background: linear-gradient(transparent 56%, var(--accent-2) 56%, var(--accent-2) 92%, transparent 92%);
+  }
+  .app[data-dir="c"] .eyebrow { color: var(--accent); }
+  .app[data-dir="c"] .meter { height: 8px; border-radius: 999px; background: #e6e7dc; overflow: hidden; }
+  .app[data-dir="c"] .meter i { border-radius: 999px; background: linear-gradient(90deg, var(--accent-2), #ffe98a); }
+  .app[data-dir="c"] .panel { border-radius: 14px; background: var(--panel); }
+  .app[data-dir="c"] .rail-course { padding: 14px 16px; }
+  .app[data-dir="c"] .course-mark { border-radius: 9px; background: var(--accent); }
+  .app[data-dir="c"] .tree { padding: 8px 10px; }
+  .app[data-dir="c"] .chapter-btn, .app[data-dir="c"] .unit-btn { border-radius: 8px; }
+  .app[data-dir="c"] .chapter-btn { padding-top: 6px; padding-bottom: 6px; }
+  .app[data-dir="c"] .unit-btn { padding-top: 5px; padding-bottom: 5px; }
+  .app[data-dir="c"] .lesson { padding-top: 5px; padding-bottom: 5px; margin-bottom: 4px; }
+  .app[data-dir="c"] .unit-btn:hover { background: var(--panel-2); }
+  .app[data-dir="c"] .unit-btn.is-selected { background: var(--accent-2); color: var(--text); }
+  .app[data-dir="c"] .unit-btn.is-selected .idx { color: var(--accent); }
+  .app[data-dir="c"] .unit-btn.is-selected::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex: 0 0 auto; margin-left: -2px; }
+  .app[data-dir="c"] .lesson { border-left: 0; border-radius: 8px; background: var(--panel-2); }
+  .app[data-dir="c"] .lesson.is-current { background: var(--accent-soft); }
+  .app[data-dir="c"] .mini-btn { border-radius: 999px; }
+  .app[data-dir="c"] .mini-btn.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .app[data-dir="c"] .toggle i { background: #d9dccf; }
+  .app[data-dir="c"] .toggle.is-on i { background: var(--accent); }
+  .app[data-dir="c"] .search-box, .app[data-dir="c"] .select-box { border-radius: 999px; background: var(--panel-2); border-color: transparent; }
+  .app[data-dir="c"] .graph-stage { background: radial-gradient(rgba(32,36,43,.10) 1px, transparent 1px) 0 0 / 20px 20px; }
+  .app[data-dir="c"] .gnode {
+    padding: 8px 11px; border-radius: 8px; border-color: var(--line);
+    background: #fff; color: var(--text); box-shadow: 0 3px 10px rgba(32,36,43,.07);
+  }
+  .app[data-dir="c"] .gnode:nth-child(even) { transform: translate(-50%, -50%) rotate(-.7deg); }
+  .app[data-dir="c"] .gnode:nth-child(3n) { transform: translate(-50%, -50%) rotate(.6deg); }
+  .app[data-dir="c"] .gnode.is-selected { transform: translate(-50%, -50%); border-color: var(--accent); box-shadow: 0 0 0 3px rgba(36,71,216,.10), 0 8px 20px rgba(36,71,216,.12); }
+  .app[data-dir="c"] .gnode.is-selected > .glabel { padding: 0 2px; background: linear-gradient(transparent 54%, var(--accent-2) 54%, var(--accent-2) 94%, transparent 94%); }
+  .app[data-dir="c"] .gnode.is-selected::before { content: ""; position: absolute; left: 50%; top: -5px; transform: translateX(-50%); width: 28px; height: 6px; border-radius: 1px; background: rgba(242,214,75,.85); }
+  .app[data-dir="c"] .gcode-c { display: inline; position: absolute; right: 6px; top: 4px; font-size: 8px; color: var(--muted); }
+  .app[data-dir="c"] .edge { stroke: #c2c6b7; stroke-width: 1.5; stroke-dasharray: 3 5; stroke-linecap: round; }
+  .app[data-dir="c"] .edge.is-path { stroke: var(--accent); stroke-width: 1.8; }
+  .app[data-dir="c"] .badge { border: 0; border-radius: 6px; background: var(--accent-soft); color: #6b5c18; }
+  .app[data-dir="c"] .detail h2 { font-family: var(--font-display); font-size: 24px; }
+  .app[data-dir="c"] .detail h2 { padding: 0 3px; background: linear-gradient(transparent 58%, var(--accent-2) 58%, var(--accent-2) 94%, transparent 94%); }
+  .app[data-dir="c"] .definition { border-left: 0; border-radius: 10px; background: linear-gradient(transparent 8%, #fff7c2 8%, #fff7c2 94%, transparent 94%); color: var(--text); }
+  .app[data-dir="c"] .btn { border-radius: 999px; }
+  .app[data-dir="c"] .btn-primary { background: var(--accent); color: #fff; }
+  .app[data-dir="c"] .btn-ghost { border-color: var(--line-strong); background: #fff; }
+  .app[data-dir="c"] .tag { border: 0; border-radius: 999px; background: var(--panel-2); }
+  .app[data-dir="c"] .rate.is-full { padding: 1px 6px; border-radius: 4px; background: var(--accent-2); color: #3a3320; }
+  .app[data-dir="c"] .rate.is-mid { padding: 1px 6px; border-radius: 4px; background: #f6e6bd; color: #6b5218; }
+  .app[data-dir="c"] .rate.is-low { padding: 1px 6px; border-radius: 4px; background: #f7ddd6; color: #8b3b2b; }
+  .app[data-dir="c"] .mode-btn { border-radius: 10px; }
+  .app[data-dir="c"] .chapter-row { border-radius: 10px; }
+  .app[data-dir="c"] .chapter-row.is-on { background: var(--accent-2); color: var(--text); }
+  .app[data-dir="c"] .chapter-row.is-on b { color: var(--accent); }
+  .app[data-dir="c"] .lab-table th { border-bottom-color: var(--line); }
+  .app[data-dir="c"] .lab-table td { border-bottom-color: var(--line); }
+  .app[data-dir="c"] .link { color: var(--accent); font-weight: 600; }
+  .app[data-dir="c"] .pager button { border-radius: 8px; }
+  .app[data-dir="c"] .statusbar { margin: 0 12px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); }
+
+  .graph-anno, .anno-notes { display: none; }
+  .app[data-mode="cb"] .gcode-b {
+    display: grid; place-items: center;
+    position: absolute; left: -9px; top: -9px;
+    width: 18px; height: 18px;
+    border: 2px solid #fff; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-family: var(--font-mono); font-size: 9px;
+    box-shadow: 0 2px 6px rgba(36,71,216,.25);
+  }
+  .app[data-mode="cb"] .gcode-c { display: none; }
+  .app[data-mode="cb"] .gnode { padding-left: 10px; }
+  .app[data-mode="cb"] .graph-anno {
+    position: absolute; left: 2.5%; top: 1.5%; z-index: 2;
+    display: flex; gap: 7px; align-items: center;
+    padding: 7px 10px;
+    border: 1px solid var(--accent); border-radius: 999px;
+    background: rgba(255,255,255,.96);
+    box-shadow: 0 6px 18px rgba(32,36,43,.08);
+    font-family: var(--font-note);
+    white-space: nowrap;
+    transform: rotate(-1deg);
+  }
+  .graph-anno-num {
+    display: grid; place-items: center;
+    width: 18px; height: 18px; flex: 0 0 auto;
+    border-radius: 50%; background: var(--accent); color: #fff;
+    font-family: var(--font-mono); font-size: 9px;
+  }
+  .graph-anno-copy { font-size: 10.5px; color: var(--text-2); }
+  .graph-anno-copy b { font-family: var(--font-ui); font-size: 11px; color: var(--text); }
+  .app[data-mode="cb"] .anno-notes {
+    display: block; margin: 2px 0 6px; padding: 9px 11px;
+    border: 1px solid var(--line); border-radius: 10px;
+    background: var(--panel-2);
+  }
+  .anno-notes-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+  .anno-notes-head .kicker { margin: 0; }
+  .anno-index {
+    display: grid; place-items: center;
+    width: 18px; height: 18px;
+    border-radius: 50%; background: var(--accent); color: #fff;
+    font-family: var(--font-mono); font-size: 9px;
+  }
+  .anno-notes p { margin: 2px 0; font-family: var(--font-note); font-size: 11.5px; line-height: 1.5; color: var(--text-2); }
+  .anno-notes p b {
+    display: inline-grid; place-items: center;
+    width: 14px; height: 14px; margin-right: 4px;
+    border: 1px solid var(--accent); border-radius: 50%;
+    color: var(--accent); font-family: var(--font-mono); font-size: 8px; font-weight: 400;
+    vertical-align: 1px;
+  }
+
+  @media (max-width: 1280px) {
+    .course-grid { grid-template-columns: 230px minmax(0, 1fr) 290px; }
+    .review-bar { flex-direction: column; align-items: stretch; }
+    .review-tools { align-items: flex-start; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .review *, .review *::before, .review *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="review" id="oslab-review" data-dir="cb">
+  <div class="review-bar">
+    <div class="review-intro">
+      <div class="review-eyebrow">OSLab · 视觉方向探索 / 2026-10-24</div>
+      <h1>三种气质，一个混合基线</h1>
+      <p>已选 C + B：学习台的亲和力，加上实验图册的编号与批注。</p>
+    </div>
+    <div class="review-tools">
+      <div class="seg" role="group" aria-label="设计方向">
+        <button type="button" class="seg-btn" data-set-dir="a" aria-pressed="false">A · 内核追踪</button>
+        <button type="button" class="seg-btn" data-set-dir="b" aria-pressed="false">B · 实验图册</button>
+        <button type="button" class="seg-btn" data-set-dir="c" aria-pressed="false">C · 学习台</button>
+        <button type="button" class="seg-btn is-active" data-set-dir="cb" aria-pressed="true">C+B · 学习图册</button>
+      </div>
+      <div class="seg" role="group" aria-label="预览页面">
+        <button type="button" class="seg-btn is-active" data-set-page="course" aria-pressed="true">课程学习</button>
+        <button type="button" class="seg-btn" data-set-page="labs" aria-pressed="false">实验中心</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="direction-note">
+    <div class="note-card note-a">
+      <div>
+        <div class="note-title">A · 内核追踪 <span>KERNEL TRACE</span></div>
+        <p>把知识图谱读成一次执行追踪：顶部刻度、节点偏移、信号色只表示状态。信息密度高，适合高年级工科；移动端需要降级为列表。</p>
+        <div class="note-tags"><span>tick ruler</span><span>hex offset</span><span>signal color</span></div>
+      </div>
+      <div class="swatches"><i style="background:#070d13"></i><i style="background:#4fd1e0"></i><i style="background:#f5b754"></i><i style="background:#ff7a6b"></i></div>
+    </div>
+    <div class="note-card note-b">
+      <div>
+        <div class="note-title">B · 实验图册 <span>LAB BLUEPRINT</span></div>
+        <p>把页面做成实验手册：编号引线、页边批注、蓝图网格。它让“依据”变得可见，适合需要反复查阅的知识点；代价是节奏偏慢。</p>
+        <div class="note-tags"><span>① ② ③ callouts</span><span>margin notes</span><span>blueprint grid</span></div>
+      </div>
+      <div class="swatches"><i style="background:#e7ecef"></i><i style="background:#142b3b"></i><i style="background:#1f5fbf"></i><i style="background:#b6483a"></i></div>
+    </div>
+    <div class="note-card note-c">
+      <div>
+        <div class="note-title">C · 学习台 <span>STUDY DESK</span></div>
+        <p>把知识点当作索引卡，用荧光笔标记进度。亲近、低压力，适合低年级入门；密集数据页需要用更规整的表格承载。</p>
+        <div class="note-tags"><span>highlighter</span><span>index cards</span><span>sticky notes</span></div>
+      </div>
+      <div class="swatches"><i style="background:#eef0e9"></i><i style="background:#2447d8"></i><i style="background:#f2d64b"></i><i style="background:#3f8f6e"></i></div>
+    </div>
+    <div class="note-card note-cb">
+      <div>
+        <div class="note-title">C + B · 学习图册 <span>SELECTED BASELINE</span></div>
+        <p>以学习台为底，只把 B 的编号引线与批注加到图谱和关键结论上。亲和力保留，依据可见；实现成本介于 C 与 B 之间。</p>
+        <div class="note-tags"><span>highlighter</span><span>numbered callouts</span><span>margin notes</span></div>
+      </div>
+      <div class="swatches"><i style="background:#eef0e9"></i><i style="background:#2447d8"></i><i style="background:#f2d64b"></i><i style="background:#d7614a"></i></div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="app" id="oslab-app" data-dir="c" data-mode="cb" data-page="course">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="OSLab 首页">
+          <span class="brand-mark" aria-hidden="true">OS</span>
+          <span class="brand-word"><b>OSLab</b><small>操作系统</small></span>
+        </a>
+        <nav class="mainnav" aria-label="主导航">
+          <a href="#">首页</a>
+          <a href="#" class="nav-course">课程学习</a>
+          <a href="#" class="nav-practice">题目练习</a>
+          <a href="#" class="nav-labs">实验中心</a>
+          <a href="#" class="nav-tasks">学习任务</a>
+          <a href="#" class="nav-res">学习资源</a>
+        </nav>
+        <div class="userbox">
+          <span class="avatar" aria-hidden="true">用</span>
+          <span class="usertext"><b>用户</b><small>学生 · 操作系统</small></span>
+          <button type="button" class="ai-btn" aria-label="打开 AI 助手">AI</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="page page-course" aria-label="课程学习">
+          <div class="pagehead">
+            <div class="titleblock">
+              <div class="eyebrow"><span class="fig-ref">FIG. 1.3</span>COURSE / LEARNING</div>
+              <h1>课程学习</h1>
+              <p class="lede">从课程结构进入知识点，沿依赖关系展开。</p>
+            </div>
+            <div class="meta">
+              <div class="scope"><span class="meta-label">当前范围</span><b>1 计算机系统概述</b><i>/</i><b>1.3 操作系统的运行环境</b></div>
+              <div class="progress-meta"><span class="meta-label">学习记录</span><span class="num">2 / 185</span><span class="unit">节点</span><span class="meter" aria-hidden="true"><i style="width:12%"></i></span></div>
+            </div>
+          </div>
+
+          <div class="course-grid">
+            <aside class="panel rail" aria-label="课程目录">
+              <div class="rail-course">
+                <span class="course-mark" aria-hidden="true">OS</span>
+                <div><b>操作系统</b><small>course-operating-systems</small></div>
+              </div>
+              <div class="rail-meta"><span>全部课程</span><b>10 个单元</b></div>
+              <nav class="tree" aria-label="课程树">
+                <button type="button" class="chapter-btn"><span class="idx">1</span><span class="label">计算机系统概述</span><span class="chev">−</span></button>
+                <div class="unit-list">
+                  <button type="button" class="unit-btn"><span class="idx">1.1</span><span class="label">操作系统的基本概念<em>2 个单元</em></span></button>
+                  <button type="button" class="unit-btn"><span class="idx">1.2</span><span class="label">操作系统发展历程<em>1 个单元</em></span></button>
+                  <button type="button" class="unit-btn is-selected" aria-current="true"><span class="idx">1.3</span><span class="label">操作系统的运行环境<em>3 个单元</em></span></button>
+                  <div class="lesson is-current"><span class="lesson-title">程序如何在用户态与内核态运行</span><span class="lesson-meta">未开始 · 22 分钟</span></div>
+                  <div class="lesson"><span class="lesson-title">中断与异常怎样改变执行过程</span><span class="lesson-meta">未开始 · 22 分钟</span></div>
+                  <div class="lesson"><span class="lesson-title">应用如何请求操作系统服务</span><span class="lesson-meta">未开始 · 22 分钟</span></div>
+                  <button type="button" class="unit-btn"><span class="idx">1.4</span><span class="label">操作系统结构<em>1 个单元</em></span></button>
+                  <button type="button" class="unit-btn"><span class="idx">1.5</span><span class="label">操作系统引导<em>1 个单元</em></span></button>
+                  <button type="button" class="unit-btn"><span class="idx">1.6</span><span class="label">虚拟机<em>1 个单元</em></span></button>
+                  <button type="button" class="unit-btn"><span class="idx">1.7</span><span class="label">本章复习与疑难点<em>1 个单元</em></span></button>
+                </div>
+                <button type="button" class="chapter-btn"><span class="idx">2</span><span class="label">进程与线程</span><span class="chev">+</span></button>
+                <button type="button" class="chapter-btn"><span class="idx">3</span><span class="label">内存管理</span><span class="chev">+</span></button>
+                <button type="button" class="chapter-btn"><span class="idx">4</span><span class="label">文件管理</span><span class="chev">+</span></button>
+                <button type="button" class="chapter-btn"><span class="idx">5</span><span class="label">输入 / 输出（I/O）管理</span><span class="chev">+</span></button>
+              </nav>
+              <div class="rail-foot"><span>已学完单元</span><b>0 / 10</b></div>
+            </aside>
+
+            <section class="panel graph-panel" aria-label="知识图谱">
+              <div class="panel-head">
+                <div class="panel-title"><span class="kicker">KNOWLEDGE GRAPH</span><h2>知识图谱</h2></div>
+                <div class="graph-tools">
+                  <span class="toggle is-on"><span>关系标签</span><i aria-hidden="true"></i></span>
+                  <button type="button" class="mini-btn is-on">只看学习路径</button>
+                  <button type="button" class="mini-btn">重置视野</button>
+                </div>
+              </div>
+              <div class="scope-tools">
+                <div class="search-box">
+                  <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor"/><path d="M10.4 10.4 14 14" stroke="currentColor"/></svg>
+                  <span>搜索范围内的知识点</span><kbd>⌘K</kbd>
+                </div>
+                <button type="button" class="select-box">全部状态 <span aria-hidden="true">⌄</span></button>
+                <div class="graph-stats">185 节点 · 198 关系 · 可见 <b>11</b></div>
+              </div>
+              <div class="graph-stage">
+                <div class="tick-ruler" aria-hidden="true"><span>0x00</span><span>0x10</span><span>0x20</span><span>0x30</span><span>0x40</span><span>0x50</span><span>0x60</span><span>0x70</span></div>
+                <div class="graph" role="img" aria-label="知识图谱：操作系统资源管理功能与用户态、内核态、中断、异常、系统调用等 11 个节点">
+                  <svg class="edges" viewBox="0 0 760 430" preserveAspectRatio="none" aria-hidden="true">
+                    <path class="edge is-path" vector-effect="non-scaling-stroke" d="M230 120 Q330 72 430 55"/>
+                    <path class="edge" vector-effect="non-scaling-stroke" d="M230 120 Q430 38 630 80"/>
+                    <path class="edge is-path" vector-effect="non-scaling-stroke" d="M430 55 Q448 110 455 165"/>
+                    <path class="edge" vector-effect="non-scaling-stroke" d="M630 80 Q560 128 455 165"/>
+                    <path class="edge" vector-effect="non-scaling-stroke" d="M430 55 Q530 52 630 80" stroke-dasharray="4 6"/>
+                    <path class="edge is-path" vector-effect="non-scaling-stroke" d="M455 165 Q520 196 600 220"/>
+                    <path class="edge" vector-effect="non-scaling-stroke" d="M455 165 Q560 198 660 235"/>
+                    <path class="edge" vector-effect="non-scaling-stroke" d="M600 220 L660 235" stroke-dasharray="4 5"/>
+                    <path class="edge" vector-effect="non-scaling-stroke" d="M600 220 Q470 300 300 345"/>
+                    <path class="edge is-path" vector-effect="non-scaling-stroke" d="M600 220 Q540 262 455 300"/>
+                    <path class="edge" vector-effect="non-scaling-stroke" d="M455 300 Q560 320 655 340" stroke-dasharray="4 5"/>
+                    <path class="edge" vector-effect="non-scaling-stroke" d="M145 215 Q220 280 300 345" stroke-dasharray="2 5"/>
+                    <path class="edge" vector-effect="non-scaling-stroke" d="M110 375 Q280 392 455 300" stroke-dasharray="2 5"/>
+                    <path class="edge" vector-effect="non-scaling-stroke" d="M630 80 Q672 160 660 235"/>
+                  </svg>
+
+                  <div class="graph-anno" aria-hidden="true">
+                    <span class="graph-anno-num">③</span>
+                    <span class="graph-anno-copy"><b>机制类</b> · 1.1 基本概念 · 3 条关系</span>
+                  </div>
+
+                  <button type="button" class="gnode is-selected" style="left:30.3%;top:27.9%"><span class="gcode gcode-a">0x1A3F</span><span class="gcode gcode-b">③</span><span class="gcode gcode-c">#03</span><span class="glabel">操作系统资源管理功能</span><span class="gdot dot-unseen" aria-hidden="true"></span></button>
+                  <button type="button" class="gnode" style="left:56.6%;top:12.8%"><span class="gcode gcode-a">0x0B12</span><span class="gcode gcode-b">①</span><span class="gcode gcode-c">#01</span><span class="glabel">用户态</span><span class="gdot dot-mastered" aria-hidden="true"></span></button>
+                  <button type="button" class="gnode" style="left:82.9%;top:18.6%"><span class="gcode gcode-a">0x0B40</span><span class="gcode gcode-b">②</span><span class="gcode gcode-c">#02</span><span class="glabel">内核态</span><span class="gdot dot-weak" aria-hidden="true"></span></button>
+                  <button type="button" class="gnode" style="left:59.9%;top:38.4%"><span class="gcode gcode-a">0x0C07</span><span class="gcode gcode-b">④</span><span class="gcode gcode-c">#04</span><span class="glabel">处理器状态</span><span class="gdot dot-unseen" aria-hidden="true"></span></button>
+                  <button type="button" class="gnode" style="left:78.9%;top:51.2%"><span class="gcode gcode-a">0x0D21</span><span class="gcode gcode-b">⑤</span><span class="gcode gcode-c">#05</span><span class="glabel">中断</span><span class="gdot dot-review" aria-hidden="true"></span></button>
+                  <button type="button" class="gnode" style="left:86.8%;top:54.7%"><span class="gcode gcode-a">0x0D55</span><span class="gcode gcode-b">⑥</span><span class="gcode gcode-c">#06</span><span class="glabel">异常</span><span class="gdot dot-unseen" aria-hidden="true"></span></button>
+                  <button type="button" class="gnode" style="left:59.9%;top:69.8%"><span class="gcode gcode-a">0x0E08</span><span class="gcode gcode-b">⑦</span><span class="gcode gcode-c">#07</span><span class="glabel">系统调用</span><span class="gdot dot-unseen" aria-hidden="true"></span></button>
+                  <button type="button" class="gnode" style="left:86.2%;top:79.1%"><span class="gcode gcode-a">0x0E31</span><span class="gcode gcode-b">⑧</span><span class="gcode gcode-c">#08</span><span class="glabel">原语</span><span class="gdot dot-unseen" aria-hidden="true"></span></button>
+                  <button type="button" class="gnode" style="left:19.1%;top:50%"><span class="gcode gcode-a">0x0A10</span><span class="gcode gcode-b">⑨</span><span class="gcode gcode-c">#09</span><span class="glabel">特权指令</span><span class="gdot dot-unseen" aria-hidden="true"></span></button>
+                  <button type="button" class="gnode" style="left:39.5%;top:80.2%"><span class="gcode gcode-a">0x0F02</span><span class="gcode gcode-b">⑩</span><span class="gcode gcode-c">#10</span><span class="glabel">中断处理流程</span><span class="gdot dot-weak" aria-hidden="true"></span></button>
+                  <button type="button" class="gnode" style="left:14.5%;top:87.2%"><span class="gcode gcode-a">0x0F18</span><span class="gcode gcode-b">⑪</span><span class="gcode gcode-c">#11</span><span class="glabel">访管指令</span><span class="gdot dot-unseen" aria-hidden="true"></span></button>
+                </div>
+                <div class="graph-scale" aria-hidden="true"><span>0</span><i></i><span>10 节点</span></div>
+              </div>
+              <div class="legend">
+                <div class="legend-group"><span class="legend-label">类型</span><span class="lg-chip">概念</span><span class="lg-chip">算法</span><span class="lg-chip">机制</span><span class="lg-chip">实现</span></div>
+                <div class="legend-group"><span class="legend-label">掌握</span><span class="lg-state is-mastered">已掌握</span><span class="lg-state is-review">待巩固</span><span class="lg-state is-weak">薄弱</span><span class="lg-state is-unseen">未学习</span></div>
+                <div class="legend-group"><span class="legend-label">关系</span><span class="lg-line solid">依赖</span><span class="lg-line dashed">包含</span><span class="lg-line dotted">相关</span></div>
+              </div>
+            </section>
+
+            <aside class="panel detail" aria-label="知识点详情">
+              <div class="detail-head"><span class="kicker">NODE / INSPECTOR</span><span class="badge is-unseen">未学习</span></div>
+              <h2>操作系统资源管理功能</h2>
+              <div class="crumbs">1 计算机系统概述 <i>/</i> 1.1 操作系统的基本概念 <i>/</i> 机制</div>
+              <blockquote class="definition"><span class="def-label">定义</span>对处理器、存储器、文件和设备的分配、组织、保护与使用实施管理的功能集合。</blockquote>
+              <span class="margin-note" aria-hidden="true">① 机制类节点 · 归属 1.1 基本概念</span>
+              <div class="anno-notes" aria-label="批注">
+                <div class="anno-notes-head"><span class="kicker">批注 / NOTES</span><span class="anno-index">③</span></div>
+                <p><b>③</b>机制类节点，归属 1.1 基本概念；先读定义，再进入节点工作台。</p>
+              </div>
+              <div class="field">
+                <div class="field-label">掌握状态</div>
+                <p>尚未学习。完成本节点的题目、实验或模拟练习后，这里会显示掌握状态。</p>
+              </div>
+              <div class="field">
+                <div class="field-label">掌握证据</div>
+                <div class="evidence"><span><b>5</b>本节点题目</span><span><b>0</b>已作答</span></div>
+              </div>
+              <div class="field">
+                <div class="field-label">关联节点</div>
+                <div class="chips"><span>用户态</span><span>内核态</span><span>系统调用</span></div>
+              </div>
+              <div class="detail-actions">
+                <button type="button" class="btn btn-primary">进入节点工作台</button>
+                <button type="button" class="btn btn-ghost">查看关联题目</button>
+              </div>
+              <p class="detail-foot">双击图谱节点可直接进入 · 当前节点 3 条关系</p>
+            </aside>
+          </div>
+        </section>
+
+        <section class="page page-labs" aria-label="实验中心">
+          <div class="pagehead">
+            <div class="titleblock">
+              <div class="eyebrow"><span class="fig-ref">FIG. 3.1</span>LAB / INDEX</div>
+              <h1>实验中心</h1>
+              <p class="lede">从章节进入实验，提交后在这里查看评测结果。</p>
+            </div>
+            <div class="meta">
+              <div class="scope"><span class="meta-label">当前范围</span><b>操作系统</b><i>/</i><b>编程实验</b></div>
+              <div class="progress-meta"><span class="meta-label">实验总数</span><span class="num">62</span><span class="unit">个</span></div>
+            </div>
+          </div>
+
+          <div class="labs-grid">
+            <aside class="panel lab-switch" aria-label="实验模式">
+              <span class="kicker">MODE</span>
+              <button type="button" class="mode-btn is-on"><span>编程实验</span><b>62</b></button>
+              <button type="button" class="mode-btn"><span>算法模拟</span><b>14</b></button>
+              <p class="mode-note">实验按章节组织，也可用关联节点筛选。</p>
+            </aside>
+
+            <aside class="panel lab-chapters" aria-label="实验章节目录">
+              <div class="rail-meta"><span>章节目录</span><b>4 章</b></div>
+              <nav class="chapters">
+                <button type="button" class="chapter-row is-on"><span>全部实验</span><b>62</b></button>
+                <button type="button" class="chapter-row"><span>第一章 硬件管理</span><b>—</b></button>
+                <button type="button" class="chapter-row"><span>第二章 内存管理</span><b>31</b></button>
+                <button type="button" class="chapter-row"><span>第三章 进程管理</span><b>18</b></button>
+                <button type="button" class="chapter-row"><span>第四章 文件系统</span><b>13</b></button>
+              </nav>
+              <div class="chapter-hint">当前章节：全部实验</div>
+            </aside>
+
+            <section class="panel lab-main" aria-label="实验列表">
+              <div class="lab-head">
+                <div><span class="kicker">PROGRAMMING LAB</span><h2>编程实验</h2></div>
+                <div class="lab-count"><b>62</b>当前结果</div>
+              </div>
+              <div class="lab-filters">
+                <div class="filter"><span>名称</span><i>输入实验名称</i></div>
+                <div class="filter"><span>节点</span><i>输入节点名称</i></div>
+                <button type="button" class="btn btn-primary">查询</button>
+                <button type="button" class="btn btn-ghost">重置</button>
+              </div>
+              <div class="table-wrap">
+                <table class="lab-table">
+                  <thead><tr><th>实验名称</th><th>关联节点</th><th>通过率</th><th>更新日期</th><th>操作</th></tr></thead>
+                  <tbody>
+                    <tr><td><b>实验 2.1 内存控制块</b><small>MIPS / C</small></td><td><span class="tag">内存管理</span></td><td><span class="rate is-full">100%</span></td><td class="cell-date">2025-04-05</td><td><button type="button" class="link">进入实验</button></td></tr>
+                    <tr><td><b>实验 2.2 初始化全局变量</b><small>MIPS / C</small></td><td><span class="tag">内存管理</span></td><td><span class="rate is-mid">92%</span></td><td class="cell-date">2025-04-05</td><td><button type="button" class="link">进入实验</button></td></tr>
+                    <tr><td><b>实验 2.3 空闲内存管理</b><small>MIPS / C</small></td><td><span class="tag">内存管理</span><span class="tag">空闲链表</span></td><td><span class="rate is-mid">78%</span></td><td class="cell-date">2025-04-05</td><td><button type="button" class="link">进入实验</button></td></tr>
+                    <tr><td><b>实验 2.4 内存分配与释放管理</b><small>MIPS / C</small></td><td><span class="tag">内存管理</span><span class="tag">内存分配</span></td><td><span class="rate is-mid">64%</span></td><td class="cell-date">2025-04-05</td><td><button type="button" class="link">进入实验</button></td></tr>
+                    <tr><td><b>实验 2.5 页表创建</b><small>MIPS / C</small></td><td><span class="tag">内存管理</span><span class="tag">页表</span></td><td><span class="rate is-empty">暂无数据</span></td><td class="cell-date">2025-04-05</td><td><button type="button" class="link">进入实验</button></td></tr>
+                    <tr><td><b>实验 2.6 地址映射</b><small>MIPS / C</small></td><td><span class="tag">地址映射</span></td><td><span class="rate is-empty">暂无数据</span></td><td class="cell-date">2025-04-05</td><td><button type="button" class="link">进入实验</button></td></tr>
+                    <tr><td><b>实验 2.7 页表项插入与移除</b><small>MIPS / C</small></td><td><span class="tag">页表</span><span class="tag">TLB</span></td><td><span class="rate is-low">41%</span></td><td class="cell-date">2025-04-05</td><td><button type="button" class="link">进入实验</button></td></tr>
+                    <tr><td><b>实验 2.8 TLB 管理</b><small>MIPS / C</small></td><td><span class="tag">TLB</span></td><td><span class="rate is-low">12%</span></td><td class="cell-date">2025-04-05</td><td><button type="button" class="link">进入实验</button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination">
+                <span>共 62 个实验</span>
+                <span class="page">共 62 条</span>
+                <div class="pager"><button type="button" aria-label="上一页">‹</button><button type="button" class="is-on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><button type="button">4</button><button type="button">5</button><button type="button">6</button><button type="button">7</button><button type="button">8</button><button type="button" aria-label="下一页">›</button></div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <footer class="statusbar">
+        <span class="st status-a">TRACE 0x2F · 11 NODES VISIBLE · 198 EDGES · 2/185 MASTERED</span>
+        <span class="st status-b">OSLab 实验手册 · FIG. 1.3 / 共 6 图 · 最后校对 2026-10-24</span>
+        <span class="st status-c">已学完 0 / 10 单元 · 今天已学习 0 分钟</span>
+        <span class="status-right">OSLab / DESIGN DIRECTIONS</span>
+      </footer>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.getElementById('oslab-review');
+  var app = document.getElementById('oslab-app');
+  if (!root || !app) return;
+
+  var dirBtns = Array.prototype.slice.call(root.querySelectorAll('[data-set-dir]'));
+  var pageBtns = Array.prototype.slice.call(root.querySelectorAll('[data-set-page]'));
+
+  function syncHash() {
+    try {
+      history.replaceState(null, '', '?dir=' + app.getAttribute('data-mode') + '&page=' + app.getAttribute('data-page'));
+    } catch (e) {}
+  }
+
+  function setDir(dir) {
+    app.setAttribute('data-dir', dir === 'cb' ? 'c' : dir);
+    app.setAttribute('data-mode', dir);
+    root.setAttribute('data-dir', dir);
+    dirBtns.forEach(function (btn) {
+      var on = btn.getAttribute('data-set-dir') === dir;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    syncHash();
+  }
+
+  function setPage(page) {
+    app.setAttribute('data-page', page);
+    pageBtns.forEach(function (btn) {
+      var on = btn.getAttribute('data-set-page') === page;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    syncHash();
+  }
+
+  dirBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () { setDir(btn.getAttribute('data-set-dir')); });
+  });
+  pageBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () { setPage(btn.getAttribute('data-set-page')); });
+  });
+  Array.prototype.forEach.call(root.querySelectorAll('a[href="#"]'), function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); });
+  });
+
+  var params = new URLSearchParams(location.search);
+  var qDir = params.get('dir');
+  var qPage = params.get('page');
+  if (/^(a|b|c|cb)$/.test(qDir || '') && /^(course|labs)$/.test(qPage || '')) {
+    setDir(qDir);
+    setPage(qPage);
+  }
+  var initial = /^#(a|b|c|cb)-(course|labs)$/.exec(location.hash);
+  if (initial) { setDir(initial[1]); setPage(initial[2]); }
+})();
+</script>

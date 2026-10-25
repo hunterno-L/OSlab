@@ -143,12 +143,18 @@ const contextQuery = computed(() => {
   [
     "source",
     "nodeName",
+    "nodeCode",
+    "courseCode",
+    "sectionCode",
+    "unitCode",
     "returnTo",
     "category",
     "chapter",
     "type",
     "difficulty",
     "studyState",
+    "title",
+    "current",
   ].forEach((key) => {
     const value = queryValue(route.query[key]);
     if (value) result[key] = value;
@@ -352,6 +358,21 @@ const finishRun = async () => {
   gap: var(--oslab-space-2);
   margin-top: var(--oslab-space-3);
 }
+/* C+B 学习图册 */
+.run-title {
+  font-family: var(--oslab-font-display);
+}
+.question-area {
+  padding: 16px;
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.run-summary {
+  border-radius: var(--oslab-radius-container);
+}
+
 @media (max-width: 640px) {
   .run-title {
     font-size: 22px;

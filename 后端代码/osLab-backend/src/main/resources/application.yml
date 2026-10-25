@@ -42,8 +42,9 @@ spring:
   # 文件上传
   servlet:
     multipart:
-      # 大小限制
+      # 大小限制（任务附件单文件 10MB，预留 multipart 开销）
       max-file-size: 10MB
+      max-request-size: 12MB
   neo4j:
     authentication:
       username: ${SPRING_NEO4J_AUTHENTICATION_USERNAME:neo4j}
@@ -61,7 +62,8 @@ server:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 逐条 SQL 同步打 stdout 会显著拖慢图谱/工作台查询；需要排查时再临时打开。
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
   global-config:
     db-config:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名
@@ -96,6 +98,12 @@ cos:
     secretKey: ${COS_SECRET_KEY:}
     region: ${COS_REGION:ap-beijing}
     bucket: ${COS_BUCKET:}
+# 教师学习任务私有附件（不放 public/static，容器部署需挂载持久卷）
+oslab:
+  tasks:
+    storage-dir: ${OSLAB_TASK_STORAGE_DIR:./data/task-files}
+    max-file-bytes: 10485760
+    max-files-per-item: 5
 # 接口文档配置
 knife4j:
   enable: true
@@ -127,5 +135,6 @@ cors:
   allowed-origins: http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080,http://localhost:8081,http://127.0.0.1:8081
 logging:
   level:
-    org.neo4j: DEBUG
-    org.springframework.data.neo4j: DEBUG
+    # 全图快照会返回大量 Bolt 记录；逐条 DEBUG 会拖慢 /mastery/graph、/node、/path。
+    org.neo4j: WARN
+    org.springframework.data.neo4j: WARN

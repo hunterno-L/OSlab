@@ -12,6 +12,7 @@ public class EntityNode {
     @GeneratedValue
     private Long id;
     private String identity;
+    private String nodeCode;
     private String name;
     private String description;
     private String label;

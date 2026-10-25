@@ -1,5 +1,9 @@
 <template>
-  <div class="knowledge-graph-container">
+  <div
+    class="knowledge-graph-container"
+    role="img"
+    :aria-label="`知识图谱：${nodes.length} 个节点，${links.length} 条关系。点击节点可在右侧查看详情。`"
+  >
     <div
       ref="chart"
       class="knowledge-graph-chart"
@@ -12,35 +16,9 @@
 import { ref, reactive, watch, onMounted, onBeforeUnmount } from "vue";
 import * as echarts from "echarts";
 
-// setOption 会重新初始化 force；视野操作只更新坐标变换和视图，保留已收敛布局。
-echarts.registerAction(
-  { type: "oslabGraphFit", event: "oslabGraphFit", update: "none" },
-  (payload, model, api) => {
-    model.eachComponent({ mainType: "series", query: payload }, (series) => {
-      const view = series.coordinateSystem;
-      if (!view || view.type !== "view") return;
-      view.setCenter(payload.center, api);
-      view.setZoom(payload.zoom);
-      series.setCenter(view.getCenter());
-      series.setZoom(view.getZoom());
-      const chartView = api.getViewOfSeriesModel(series);
-      chartView.group.attr({
-        x: view.x,
-        y: view.y,
-        scaleX: view.scaleX,
-        scaleY: view.scaleY,
-      });
-      series.getData().eachItemGraphicEl((symbol) => {
-        if (symbol) symbol.setSymbolScale(1 / view.scaleX);
-      });
-      // 与 ECharts 5.6 graph 的原生 roam 一致，同步下一次滚轮缩放的基准。
-      chartView._controllerHost.zoom = view.getZoom();
-      chartView.updateLayout(series);
-    });
-  }
-);
-
-// 仅刷新节点/关系样式，不经过 setOption 的布局流水线重新启动 force。
+// 仅刷新节点/关系样式；布局为确定性坐标，不经过布局流水线。
+// 视野缩放/居中一律使用 ECharts 公开的 graphRoam（zoom + dx/dy），
+// 不直接访问 graph view 的私有字段。
 echarts.registerAction(
   {
     type: "oslabGraphStyle",
@@ -62,8 +40,8 @@ echarts.registerAction(
 );
 
 // 类别底色和掌握状态独立表达；dependent 连线反向绘制为学习顺序。
-// 力导向异步布局，拓扑变化才重建。节点和文字保持屏幕尺寸一致，
-// 不使用 labelLayout：其绝对标签定位会与力导向移动、边标签缩放冲突。
+// 确定性分组布局，拓扑变化才重建；节点、标签与边按同一缩放比例变换。
+// 不使用 labelLayout：其绝对标签定位会与确定性坐标、边标签缩放冲突。
 
 // eslint-disable-next-line no-undef
 const props = defineProps({
@@ -79,6 +57,11 @@ const props = defineProps({
   showStatus: { type: Boolean, default: true },
   // 常显关系文字标签开关（hover / 选中相邻边始终显示）
   showRelationLabels: { type: Boolean, default: false },
+  // 编号批注：key = 节点稳定 key，value = 显示编号。只给被批注引用的节点渲染编号。
+  annotations: { type: Object, default: () => ({}) },
+  // 边色调：semantic = 按关系类型着色（其他页面默认）；
+  // muted = 课程学习图谱的灰度边，只有选中邻接/路径使用钴蓝。
+  edgeTone: { type: String, default: "semantic" },
   // 只读投影模式（log3 收尾 E）：节点底色按掌握状态浅色渲染（班级聚合热力图）。
   // 默认 false，保持"类别底色 + 状态条/圆点"的个人图谱渲染完全不变。
   fillByStatus: { type: Boolean, default: false },
@@ -103,25 +86,107 @@ const emit = defineEmits(["node-click", "node-dblclick"]);
 const chart = ref(null);
 let myChart = null;
 let clickTimer = null;
+// 当前一帧的完整节点数据（updateVisual 不会回写 series.data，点击载荷从这里取）
+let renderedNodeByKey = new Map();
 const CLICK_DELAY = 220;
+// 当前缩放级别（由 graphRoam / fit 同步）与悬停节点（关系标签按需显示）
+const currentZoom = ref(1);
+const hoveredNodeId = ref("");
+let lastZoomBand = 1;
 
-// ---------- 设计令牌（与 learning-theme.css 同源的画布内实色） ----------
-const PRIMARY = "#2059c9";
-const REVIEW = "#b98239";
-const INK_SOFT = "#37352f";
-const MUTED_STRONG = "#757069";
-const NODE_BORDER = "rgba(0, 0, 0, 0.15)";
+// ---------- 设计令牌（learning-theme.css 图谱 token 的逐项镜像） ----------
+// ECharts 画布/SSR 字符串无法读取 CSS 变量，因此在这里保留唯一一份
+// 画布内实色；每个值都能在 learning-theme.css 的 --oslab-graph-* /
+// --oslab-mastered 等 token 中找到同名来源，测试会逐项比对，禁止在
+// 组件其他位置新增裸色值。
+const GRAPH_TOKENS = Object.freeze({
+  surface: "transparent",
+  nodeBorder: "#c9ccbe",
+  nodeRadius: 8,
+  category: Object.freeze({
+    concept: "#e8eefc",
+    algorithm: "#f1e9fa",
+    function: "#e4f2ed",
+    fallback: "#eeefe7",
+  }),
+  nodeFill: Object.freeze({
+    concept: "#f8faff",
+    algorithm: "#fbf8ff",
+    function: "#f6fbf9",
+    fallback: "#fafbf7",
+  }),
+  nodeShadow: "rgba(32, 36, 43, 0.08)",
+  selection: "#2447d8",
+  selectionRing: "rgba(36, 71, 216, 0.18)",
+  path: "#8fa6c4",
+  pathStrong: "#6b809f",
+  pathEdge: "#3f66a5",
+  pathRing: "rgba(107, 128, 159, 0.28)",
+  reviewRing: "rgba(184, 137, 46, 0.26)",
+  inkSoft: "#3a4150",
+  textSoft: "#6b7168",
+  labelSurface: "#ffffff",
+  highlightSoft: "#fff7c2",
+  highlight: "#f2d64b",
+  mutedEdge: "#b0b6bf",
+  relation: Object.freeze({
+    dependent: "#4f72b8",
+    contain: "#8b96a6",
+    related: "#9a948b",
+    implements: "#b8892e",
+    fallback: "#b0b6bf",
+  }),
+  status: Object.freeze({
+    GREEN: "#3f8f6e",
+    YELLOW: "#b8892e",
+    RED: "#b8543f",
+    GRAY: "#6b7168",
+  }),
+  statusFill: Object.freeze({
+    GREEN: "#e6f2ec",
+    YELLOW: "#f6edd9",
+    RED: "#f6e3de",
+    GRAY: "#eeefe9",
+  }),
+});
 
-// 课程类别 → 节点底色（§5.2）；按关键词匹配中英文类别名，未标注兜底
+const PRIMARY = GRAPH_TOKENS.selection;
+const REVIEW = GRAPH_TOKENS.relation.implements;
+const INK_SOFT = GRAPH_TOKENS.inkSoft;
+const MUTED_STRONG = GRAPH_TOKENS.textSoft;
+const NODE_BORDER = GRAPH_TOKENS.nodeBorder;
+// 单元/补救路径提示：低强度细边，绝不与选中主蓝描边共用
+const PATH_HINT_BORDER = GRAPH_TOKENS.path;
+
+// 课程类别 → 节点底色（§5.2）；优先使用稳定的 nodeType，旧数据回退 category。
+// 类别只占底色，不参与名称文字色，也不使用状态色系。
 const CATEGORY_FILLS = [
-  { keys: ["概念", "concept"], fill: "#eaf0fd" },
-  { keys: ["算法", "algorithm"], fill: "#f6eddf" },
-  { keys: ["功能", "机制", "模块", "function"], fill: "#e9f1ed" },
+  { keys: ["概念", "concept"], fill: GRAPH_TOKENS.nodeFill.concept },
+  { keys: ["算法", "algorithm"], fill: GRAPH_TOKENS.nodeFill.algorithm },
+  {
+    keys: ["功能", "机制", "模块", "function", "mechanism"],
+    fill: GRAPH_TOKENS.nodeFill.function,
+  },
+  {
+    keys: ["实现", "implementation"],
+    fill: GRAPH_TOKENS.nodeFill.fallback,
+  },
 ];
-const CATEGORY_FALLBACK_FILL = "#f0f2f0";
+const CATEGORY_FALLBACK_FILL = GRAPH_TOKENS.nodeFill.fallback;
 
-const categoryFillOf = (category) => {
-  const c = String(category || "")
+const NODE_TYPE_TEXT = Object.freeze({
+  CONCEPT: "概念",
+  ALGORITHM: "算法",
+  MECHANISM: "机制",
+  IMPLEMENTATION: "实现",
+});
+const nodeTypeTextOf = (node) =>
+  NODE_TYPE_TEXT[String(node?.nodeType || "").toUpperCase()] ||
+  node?.category ||
+  "未标注";
+
+const categoryFillOf = (value) => {
+  const c = String(value || "")
     .trim()
     .toLowerCase();
   for (const def of CATEGORY_FILLS) {
@@ -131,12 +196,7 @@ const categoryFillOf = (category) => {
 };
 
 // 个人掌握状态色（§5.2；只表达状态，不用于装饰）
-const STATUS_COLORS = {
-  GREEN: "#4f8875",
-  YELLOW: "#b98239",
-  RED: "#a9695d",
-  GRAY: "#8f9994",
-};
+const STATUS_COLORS = GRAPH_TOKENS.status;
 const STATUS_TEXT = {
   GREEN: "已掌握",
   YELLOW: "待巩固",
@@ -145,23 +205,22 @@ const STATUS_TEXT = {
 };
 
 // fillByStatus（只读投影）的节点底色：与 learning-theme.css 的
-// --oslab-mastered/review/weak/unseen-soft 令牌同值；状态条/圆点仍用
+// --oslab-mastered/review/weak/unseen-soft 令牌同值；名称文字仍用
 // STATUS_COLORS 强色，图例（父视图渲染）与节点实际颜色保持一致
-const STATUS_FILLS = {
-  GREEN: "#e9f1ed",
-  YELLOW: "#f6eddf",
-  RED: "#f5eae7",
-  GRAY: "#f0f2f0",
-};
+const STATUS_FILLS = GRAPH_TOKENS.statusFill;
 
 // 关系语义文案；历史拼写 implemente 兼容映射为 implements
 const RELATION_TEXT = {
+  contrasts: "对比",
+  based: "依据 / 原理",
   dependent: "依赖 / 前置知识",
   contain: "包含 / 所属",
   related: "相关",
   implements: "实现",
 };
 const RELATION_LABEL = {
+  contrasts: "对比",
+  based: "依据",
   dependent: "依赖",
   contain: "包含",
   related: "相关",
@@ -172,14 +231,57 @@ const normalizeRelationType = (link) => {
   const raw = String(link?.relationType ?? link?.value ?? "")
     .trim()
     .toLowerCase();
-  return raw === "implemente" ? "implements" : raw;
+  return (
+    {
+      requires: "dependent",
+      contains: "contain",
+      related_to: "related",
+      implemente: "implements",
+      contrasts_with: "contrasts",
+      based_on: "based",
+    }[raw] || raw
+  );
 };
 
-// ---------- ID 归一化（log3 收尾 B.1） ----------
-// 节点 id / 连线 source-target / 选中 id 一律先经同一转换函数字符串化再比较，
-// 消灭数字 ID 与字符串 ID 混用导致的"找不到邻居/选中失效"假阴性。
-const toId = (value) =>
-  value === null || value === undefined ? "" : String(value);
+// ---------- 节点身份规则（唯一来源，log3 收尾 B.1 的升级） ----------
+// nodeKey = nodeCode || stableId || String(id) || name
+// data.id、link.source/target、selectedId、点击载荷都使用同一规则；
+// displayName 只用于展示，绝不参与身份比较。
+const identityPart = (value) =>
+  value === null || value === undefined || value === ""
+    ? ""
+    : String(value).trim();
+const nodeKeyOf = (node) => {
+  if (!node) return "";
+  return (
+    identityPart(node.nodeCode) ||
+    identityPart(node.stableId) ||
+    identityPart(node.id) ||
+    identityPart(node.name)
+  );
+};
+
+// 兼容旧消费方仍传原始 id/name 的 selectedId 与连线端点
+const createKeyResolver = (nodes) => {
+  const aliases = new Map();
+  for (const node of nodes || []) {
+    const key = nodeKeyOf(node);
+    if (!key) continue;
+    for (const candidate of [
+      node.nodeCode,
+      node.stableId,
+      node.id,
+      node.name,
+    ]) {
+      const alias = identityPart(candidate);
+      if (alias && !aliases.has(alias)) aliases.set(alias, key);
+    }
+  }
+  return (value) => {
+    const raw = identityPart(value);
+    return aliases.get(raw) || raw;
+  };
+};
 
 // ---------- 状态脉冲（1.2s，进步蓝 / 退步琥珀） ----------
 const pulseMap = ref(new Map());
@@ -191,8 +293,11 @@ watch(
     if (!Array.isArray(list) || list.length === 0) return;
     const next = new Map();
     for (const item of list) {
-      if (item && item.name) {
-        next.set(String(item.name), item.color === "blue" ? "blue" : "amber");
+      if (item && (item.key || item.name)) {
+        next.set(
+          String(item.key || item.name),
+          item.color === "blue" ? "blue" : "amber"
+        );
       }
     }
     if (next.size === 0) return;
@@ -208,15 +313,28 @@ watch(
 );
 
 // ---------- 节点几何与富文本标签 ----------
-// 节点高 40（单行）/46（两行）；名称超宽两行截断 + 省略号；全名进 tooltip。
-const PAD = 7; // 标签左右内边距
-const BAR_W = 6; // 左侧状态条宽
-const BAR_GAP = 5;
-const DOT_W = 10; // 右上角状态圆点占位
-const DOT_GAP = 5;
-const CHAR_W = 12; // fontSize 12 下 CJK 字宽估计
-const LAT_W = 6.5;
-const NAME_LINE_MAX = 108; // 名称单行最大宽度（约 9 个中文字符）
+// 节点只识别概念并表达掌握状态：固定三档尺寸（小图 132–156，大图 112–128），
+// 名称最多两行、超出省略；类型说明交给图例和右侧详情。尺寸只由稳定的
+// nodeType 决定，不随名称长度或每次渲染抖动。
+const NODE_TIERS = Object.freeze({
+  compact: Object.freeze({ width: 112, height: 32 }),
+  regular: Object.freeze({ width: 120, height: 34 }),
+  wide: Object.freeze({ width: 128, height: 36 }),
+});
+// 小图（<=40 节点）用更宽的索引卡，避免章节视图里长名称被截断；
+// 大图保持紧凑档，避免 150+ 节点互相挤压。
+const NODE_TIERS_ROOMY = Object.freeze({
+  compact: Object.freeze({ width: 140, height: 38 }),
+  regular: Object.freeze({ width: 152, height: 40 }),
+  wide: Object.freeze({ width: 164, height: 42 }),
+});
+// 兼容旧消费方的导出名：以常规档为基准。
+const NODE_PADDING_X = 8;
+const NODE_PADDING_Y = 3;
+const STATUS_DOT_SPACE = 12;
+const NAME_MAX_WIDTH = NODE_TIERS.compact.width - NODE_PADDING_X * 2;
+const CHAR_W = 13;
+const LAT_W = 7.5;
 const isWide = (ch) =>
   /[\u2e80-\ua4cf\uac00-\ud7a3\uf900-\ufaff\ufe30-\ufe4f\uff00-\uffef\u3000-\u303f]/.test(
     ch
@@ -227,128 +345,214 @@ const textWidth = (s) => {
   return w;
 };
 
-const splitName = (name) => {
+const truncateName = (name, availableWidth) => {
   const s = String(name || "").replace(/\r?\n/g, " ");
-  if (!s) return { lines: [""], box: 8 };
-  const budget = NAME_LINE_MAX - 4;
-  if (textWidth(s) <= NAME_LINE_MAX) {
-    return { lines: [s], box: Math.ceil(textWidth(s)) + 2 };
-  }
-  let i = 0;
+  const maxWidth = Math.max(
+    CHAR_W * 3,
+    Number(availableWidth) || NAME_MAX_WIDTH
+  );
+  if (!s || textWidth(s) <= maxWidth) return s;
+  let index = 0;
   let acc = 0;
-  for (; i < s.length; i++) {
-    const w = isWide(s[i]) ? CHAR_W : LAT_W;
-    if (acc + w > budget) break;
+  for (; index < s.length; index++) {
+    const w = isWide(s[index]) ? CHAR_W : LAT_W;
+    if (acc + w > maxWidth - CHAR_W) break;
     acc += w;
   }
-  const l1 = s.slice(0, i);
-  let l2 = s.slice(i);
-  if (textWidth(l2) > budget) {
-    let j = 0;
-    let acc2 = 0;
-    for (; j < l2.length; j++) {
-      const w = isWide(l2[j]) ? CHAR_W : LAT_W;
-      if (acc2 + w > budget - CHAR_W) break;
-      acc2 += w;
-    }
-    l2 = l2.slice(0, j) + "…";
-  }
-  return { lines: l2 ? [l1, l2] : [l1], box: NAME_LINE_MAX };
+  return `${s.slice(0, index)}…`;
 };
 
-const nodeSizeOf = (lines, box, showStatusUI) => {
-  const inner = showStatusUI ? BAR_W + BAR_GAP + box + DOT_GAP + DOT_W : box;
-  const width = Math.max(64, inner + PAD * 2);
-  const height = lines.length > 1 ? 46 : 40;
-  return [width, height];
+const nodeTierOf = (node) => {
+  const raw = String(node?.nodeType || node?.category || "").toLowerCase();
+  if (/实现|implementation/.test(raw)) return "wide";
+  if (/算法|机制|功能|algorithm|mechanism|function/.test(raw)) return "regular";
+  return "compact";
+};
+const NODE_AUTO_WIDTH_LIMIT = 40;
+const nodeSizeOf = (node) => {
+  const fixed = (
+    (props.nodes?.length ?? 0) <= NODE_AUTO_WIDTH_LIMIT
+      ? NODE_TIERS_ROOMY
+      : NODE_TIERS
+  )[nodeTierOf(node)];
+  if ((props.nodes?.length ?? 0) > NODE_AUTO_WIDTH_LIMIT) return fixed;
+  const label = String(node.displayName || node.name || "");
+  const len = label.length;
+  const width =
+    len <= 2 ? 96 : len <= 4 ? 120 : len <= 6 ? 150 : len <= 8 ? 180 : 210;
+  return { width, height: fixed.height };
 };
 
 const buildLabel = (ctx) => {
-  const nameStyle = {
-    // log3 B.2/B.4：默认态用主/次级文字色；弱化态也不得低于次级文字色
-    // （原 #b8b3ab 浅灰会让非邻接文字不可读）
-    color: ctx.dimmed ? MUTED_STRONG : INK_SOFT,
-    fontSize: 12,
-    lineHeight: 15,
-    width: ctx.box,
-    fontWeight: ctx.selected ? 600 : 500,
-  };
+  // 名称始终使用正文色，掌握状态只用状态圆点表达；弱状态不把标题变淡。
+  // 小图缩放较小时切到紧凑模式：只保留名称、隐藏编号/圆点，
+  // 避免屏幕尺寸文字挤爆已缩小的索引卡。
+  const compact = !!ctx.compactLabels;
+  const dotWidth = compact ? 0 : ctx.showStatusUI ? STATUS_DOT_SPACE : 0;
+  const numWidth = compact ? 0 : ctx.annotationNumber ? 20 : 0;
+  const labelWidth = compact
+    ? Math.max(24, ctx.width * currentZoom.value - 4)
+    : ctx.width - ((props.nodes?.length ?? 0) <= 40 ? 32 : 16);
+  const nameWidth = compact
+    ? Math.max(24, (labelWidth - 8) / 0.8)
+    : labelWidth - 8 - dotWidth - numWidth;
+  const displayName = truncateName(ctx.displayName, nameWidth);
   const rich = {
-    name: nameStyle,
-    sp: { width: DOT_GAP },
-    pad: { width: BAR_W + BAR_GAP },
+    num: {
+      color: "#ffffff",
+      backgroundColor: PRIMARY,
+      fontSize: 9,
+      lineHeight: 16,
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      align: "center",
+      verticalAlign: "middle",
+      padding: [2, 0, 0, 0],
+    },
+    dot: {
+      color: ctx.statusColor,
+      fontSize: 9,
+      lineHeight: 15,
+      width: STATUS_DOT_SPACE,
+      align: "left",
+    },
+    name: {
+      color: ctx.dimmed ? MUTED_STRONG : INK_SOFT,
+      fontSize: compact ? 10 : 12.5,
+      lineHeight: compact ? 12 : 15,
+      align: "left",
+      fontWeight: ctx.isSelected ? 600 : 500,
+      backgroundColor: ctx.isSelected
+        ? GRAPH_TOKENS.highlightSoft
+        : "transparent",
+      padding: ctx.isSelected ? (compact ? [0, 1] : [1, 3]) : 0,
+    },
   };
-  let text;
-  if (ctx.showStatusUI) {
-    rich.bar = {
-      width: BAR_W,
-      height: 22,
-      backgroundColor: ctx.statusColor,
-      borderRadius: 3,
-    };
-    rich.dot = { color: ctx.statusColor, fontSize: 9, width: DOT_W };
-    text = `{bar| }{name|${ctx.lines[0]}}{sp| }{dot|●}`;
-    if (ctx.lines[1]) text += `\n{pad|}{name|${ctx.lines[1]}}`;
-  } else {
-    text = `{name|${ctx.lines[0]}}`;
-    if (ctx.lines[1]) text += `\n{name|${ctx.lines[1]}}`;
-  }
+  const numPrefix =
+    !compact && ctx.annotationNumber ? `{num|${ctx.annotationNumber}} ` : "";
+  const dot = !compact && ctx.showStatusUI ? "{dot|●}" : "";
+  const text = `${numPrefix}${dot}{name|${displayName}}`;
   return {
-    show: true,
+    show: ctx.labelsVisible,
     position: "inside",
     align: "center",
     verticalAlign: "middle",
-    fontSize: 12,
-    padding: [2, PAD],
+    width: labelWidth,
+    padding: compact ? [2, 2] : [NODE_PADDING_Y, 0],
+    overflow: "truncate",
+    ellipsis: "…",
     formatter: text,
     rich,
   };
 };
 
 const buildNodeStyle = (node, ctx) => {
-  const selected =
-    (props.selectedId && toId(node.id) === ctx.selectedId) || node.highlight;
-  const dimmed =
-    !!ctx.selectedId &&
-    !selected &&
-    !ctx.neighborIds.has(toId(node.id ?? node.name));
+  const key = nodeKeyOf(node);
+  // 三种状态严格分离：选中只认规范化 selectedId；highlight 只作路径提示；
+  // 脉冲只作状态变化提示，均不得互相伪装。
+  const isSelected = !!ctx.selectedId && key === ctx.selectedId;
+  const isPathHighlighted = !!(node.pathHighlighted || node.highlight);
+  const isPulsing = pulseMap.value.get(nodeKeyOf(node));
+  const dimmed = !!ctx.selectedId && !isSelected && !ctx.neighborIds.has(key);
   const statusColor =
     STATUS_COLORS[node.status || "GRAY"] || STATUS_COLORS.GRAY;
-  const pulsing = pulseMap.value.get(String(node.name || ""));
-  const borderColor = pulsing
-    ? pulsing === "blue"
-      ? PRIMARY
+  // 蓝色脉冲在路径节点上必须使用路径 token，不能借用选中主蓝。
+  const pulseBorder = isPulsing
+    ? isPulsing === "blue"
+      ? isPathHighlighted
+        ? GRAPH_TOKENS.pathStrong
+        : PRIMARY
       : REVIEW
-    : selected
+    : "";
+  const borderColor = isSelected
     ? PRIMARY
+    : isPulsing
+    ? pulseBorder
+    : isPathHighlighted
+    ? PATH_HINT_BORDER
+    : ctx.fillByStatus
+    ? // 教师班级聚合投影：底色已表达状态，1px 状态色边线与聚合图例同源
+      statusColor
     : NODE_BORDER;
-  const split = splitName(node.name);
+  // 选中：2px 锐利描边 + 3px 低透明度外圈；路径提示只保留 1px 细边。
+  const pulseShadow = isPulsing
+    ? isPulsing === "blue"
+      ? isPathHighlighted
+        ? GRAPH_TOKENS.pathRing
+        : GRAPH_TOKENS.selectionRing
+      : GRAPH_TOKENS.reviewRing
+    : "transparent";
+  const annotationNumber = Number(props.annotations?.[key]) || 0;
+  const isSmallGraph = (props.nodes?.length ?? 0) <= 40;
+  const baseSize = nodeSizeOf(node);
+  const annotationCount = Object.keys(props.annotations || {}).length;
+  const allNumbered =
+    annotationCount > 0 && annotationCount === (props.nodes?.length ?? 0);
+  const annotationBump = allNumbered ? 20 : 32;
+  const size = annotationNumber
+    ? {
+        width: Math.min(240, baseSize.width + annotationBump),
+        height: baseSize.height,
+      }
+    : baseSize;
+  const rest = { ...node };
+  delete rest.highlight;
   return {
-    id: toId(node.id ?? node.name),
+    ...rest,
+    id: key,
+    nodeCode: node.nodeCode,
+    stableId: node.stableId,
     name: node.name,
+    displayName: node.displayName || node.name,
+    nodeType: node.nodeType,
     category: node.category,
     chapter: node.chapter,
     description: node.description,
     status: node.status,
+    pathHighlighted: isPathHighlighted,
+    highlightReason:
+      node.highlightReason || (node.highlight ? "path-highlight" : undefined),
     symbol: "rect",
-    symbolSize: nodeSizeOf(split.lines, split.box, ctx.showStatusUI),
+    symbolSize: [size.width, size.height],
     itemStyle: {
       // fillByStatus：底色 = 状态浅色（聚合热力投影）；默认 = 类别底色
       color: ctx.fillByStatus
         ? STATUS_FILLS[node.status || "GRAY"] || CATEGORY_FALLBACK_FILL
-        : categoryFillOf(node.category || node.label),
+        : categoryFillOf(node.nodeType || node.category || node.label),
       borderColor,
-      borderWidth: pulsing ? 3 : selected ? 2 : 1,
-      borderRadius: 6,
+      // 只有选中态使用 2px；脉冲只加外圈，避免非选中节点伪装成选中
+      borderWidth: isSelected ? 2 : 1,
+      borderRadius: GRAPH_TOKENS.nodeRadius,
       opacity: 1,
+      shadowBlur: isSelected
+        ? isSmallGraph
+          ? 10
+          : 3
+        : isPulsing
+        ? 4
+        : isSmallGraph
+        ? 6
+        : 0,
+      shadowColor: isSelected
+        ? GRAPH_TOKENS.selectionRing
+        : isPulsing
+        ? pulseShadow
+        : isSmallGraph
+        ? GRAPH_TOKENS.nodeShadow
+        : "transparent",
+      shadowOffsetY: isSelected ? 0 : isSmallGraph ? 2 : 0,
     },
     label: buildLabel({
-      selected,
+      isSelected,
       dimmed,
       statusColor,
       showStatusUI: ctx.showStatusUI,
-      lines: split.lines,
-      box: split.box,
+      labelsVisible: ctx.labelsVisible,
+      compactLabels: ctx.compactLabels,
+      displayName: node.displayName || node.name,
+      width: size.width,
+      annotationNumber,
     }),
   };
 };
@@ -363,19 +567,28 @@ const escapeHtml = (s) =>
       ])
   );
 
-const buildLink = (link, ctx) => {
+const buildLink = (link, ctx, linkIndex) => {
   const type = normalizeRelationType(link);
+  // 连线端点同样走 nodeKey 归一化后再进入 ECharts
+  const sourceKey = ctx.resolveKey(link.source);
+  const targetKey = ctx.resolveKey(link.target);
   // R10：dependent 存储为 A→B（A 依赖 B），画布按 B→A 绘制（先学箭尾）
   const isDependent = type === "dependent";
-  const from = toId(isDependent ? link.target : link.source);
-  const to = toId(isDependent ? link.source : link.target);
+  const from = isDependent ? targetKey : sourceKey;
+  const to = isDependent ? sourceKey : targetKey;
   const adjacent =
-    !!ctx.selectedId &&
-    (toId(link.source) === ctx.selectedId ||
-      toId(link.target) === ctx.selectedId);
+    (!!ctx.selectedId &&
+      (sourceKey === ctx.selectedId || targetKey === ctx.selectedId)) ||
+    (!!ctx.hoveredId &&
+      (sourceKey === ctx.hoveredId || targetKey === ctx.hoveredId));
   const dimmed = !!ctx.selectedId && !adjacent;
-  // log3 B.4：非邻接边弱化下限 0.45（原 0.15 会把关系线压到几乎不可见）
-  const dim = dimmed ? 0.45 : 1;
+  // 非邻接边弱化下限：保持关系结构可读，不再压到几乎不可见
+  const dim = dimmed ? 0.55 : 1;
+  // 视图注入的路径强调（只看学习路径）优先于语义默认值；标记转成
+  // 组件内 token，避免在视图中散落画布色值。
+  const override = { ...(link.lineStyle || {}) };
+  const pathEmphasis = !!override.pathEmphasis;
+  delete override.pathEmphasis;
   let color;
   let width;
   let lineType;
@@ -383,40 +596,59 @@ const buildLink = (link, ctx) => {
   let symbolSize;
   switch (type) {
     case "dependent":
-      color = PRIMARY;
+      color = GRAPH_TOKENS.relation.dependent;
       width = 1.8;
       lineType = "solid";
       symbol = ["none", "arrow"];
       symbolSize = [9, 11];
       break;
     case "contain":
-      color = "#7d8ba1";
-      width = 1.2;
+      color = GRAPH_TOKENS.relation.contain;
+      width = 1.5;
       lineType = "dashed";
       symbol = ["none", "arrow"];
       symbolSize = [7, 8];
       break;
     case "related":
-      color = "#b3ada5";
-      width = 1.4;
+    case "contrasts":
+      color = GRAPH_TOKENS.relation.related;
+      width = 1.6;
       lineType = "dotted";
       symbol = ["circle", "circle"];
       symbolSize = [3, 3];
       break;
     case "implements":
-      color = REVIEW;
-      width = 1.5;
+    case "based":
+      color = GRAPH_TOKENS.relation.implements;
+      width = 1.6;
       lineType = "dashed";
       symbol = ["none", "arrow"];
       symbolSize = [6, 7];
       break;
     default:
       // 未知/空关系类型：灰色细实线兜底，不抛异常
-      color = "#c9c4bd";
-      width = 1;
+      color = GRAPH_TOKENS.relation.fallback;
+      width = 1.3;
       lineType = "solid";
       symbol = ["none", "none"];
       symbolSize = [0, 0];
+  }
+  if (props.edgeTone === "muted") {
+    if (pathEmphasis || adjacent) {
+      color = GRAPH_TOKENS.pathEdge;
+      width = pathEmphasis ? 2 : 1.6;
+      lineType = [4, 4];
+    } else {
+      color = GRAPH_TOKENS.mutedEdge;
+      width = 1.4;
+      lineType = type === "related" ? [1, 4] : [3, 5];
+    }
+  }
+  if (pathEmphasis) {
+    // 路径强调：统一的短蓝线，不发光，与依赖语义蓝/选中邻接宽度区分
+    color = GRAPH_TOKENS.pathEdge;
+    width = 2.2;
+    lineType = props.edgeTone === "muted" ? [4, 4] : "solid";
   }
   const relText = RELATION_TEXT[type] || "未知关系";
   const relLabel = RELATION_LABEL[type] || "未知";
@@ -431,9 +663,17 @@ const buildLink = (link, ctx) => {
     tooltipText = `${relText}：「${nameA}」实现「${nameB}」`;
   } else if (type === "related") {
     tooltipText = `${relText}：「${nameA}」与「${nameB}」相关`;
+  } else if (type === "contrasts") {
+    tooltipText = `${relText}：「${nameA}」与「${nameB}」对比`;
+  } else if (type === "based") {
+    tooltipText = `${relText}：「${nameA}」以「${nameB}」为依据`;
   }
-  // 视图注入的强调样式（如补救学习路径）优先于语义默认值
-  const override = link.lineStyle || {};
+  const baseCurve = Number(ctx.curveOf(link)) || 0;
+  const curve = pathEmphasis
+    ? 0.08
+    : Math.abs(baseCurve) < 0.08
+    ? 0.12
+    : baseCurve;
   return {
     ...link,
     source: from,
@@ -442,26 +682,306 @@ const buildLink = (link, ctx) => {
     symbolSize,
     lineStyle: {
       color,
-      width: adjacent ? width + 0.6 : width,
+      width: pathEmphasis ? width : adjacent ? width + 0.6 : width,
       type: lineType,
-      opacity: dim,
-      curveness: ctx.curveOf(link),
+      opacity: pathEmphasis ? 1 : dim,
+      curveness: curve,
+      cap: "round",
       ...override,
     },
     label: {
-      // 边的关系文字只由「关系标签」开关控制（用户反馈：选中邻接时
-      // 自动脉出的"相关/依赖"标签很惹眼）；语义改由线型/箭头/悬停
-      // tooltip 表达，tooltip 的 relationText 不受开关影响。
-      show: ctx.showRelationLabels,
+      // 标签由开关 + 缩放层级 + 避让结果共同决定；关闭时不残留文字。
+      show: ctx.showRelationLabels && ctx.labelIndexes.has(linkIndex),
       formatter: relLabel,
-      fontSize: 10,
+      position: "middle",
+      offset: [0, -8],
+      fontSize: 10.5,
+      lineHeight: 14,
+      rotate: 0,
       color: MUTED_STRONG,
-      backgroundColor: "#ffffff",
+      backgroundColor: GRAPH_TOKENS.labelSurface,
       padding: [1, 4],
-      borderRadius: 4,
+      borderRadius: 2,
     },
     relationText: tooltipText,
   };
+};
+
+// ---------- 确定性分组布局 ----------
+// 章节是稳定的空间分组；章节内按 sectionCode 与输入顺序排列，章节块按
+// 画布比例做行列装箱。没有随机播种，也没有异步力导向，筛选/回放不抖动。
+const NODE_LABEL_MIN_ZOOM = 0.72;
+const RELATION_LABEL_MIN_ZOOM = 0.25;
+const RELATION_LABEL_ZOOM = 0.25;
+const RELATION_LABEL_DENSE_ZOOM = 1.6;
+const RELATION_LABEL_MAX = 36;
+const RELATION_LABEL_MAX_COMPACT = 18;
+const LAYOUT_CELL_W = 140;
+const LAYOUT_CELL_H = 50;
+const LAYOUT_BLOCK_GAP = 0.35;
+
+const compareChapters = (a, b) => {
+  if (a === b) return 0;
+  if (a === "未分类") return 1;
+  if (b === "未分类") return -1;
+  return a.localeCompare(b, "zh-CN", { numeric: true });
+};
+
+const ORGANIC_LAYOUT_LIMIT = 12;
+
+/**
+ * 小图放射布局：选中节点作为根，直连节点分布在一环右侧扇形，
+ * 其余节点在二环；角度/半径用固定正弦扰动，保持确定性与稳定。
+ */
+const computeOrganicLayout = (nodes, links, selectedKey, resolveKey) => {
+  const keys = nodes.map((node) => nodeKeyOf(node));
+  const keySet = new Set(keys);
+  const adjacency = new Map(keys.map((key) => [key, new Set()]));
+  for (const link of links || []) {
+    const source = resolveKey(link.source);
+    const target = resolveKey(link.target);
+    if (!keySet.has(source) || !keySet.has(target) || source === target) {
+      continue;
+    }
+    adjacency.get(source).add(target);
+    adjacency.get(target).add(source);
+  }
+  const root = keySet.has(selectedKey)
+    ? selectedKey
+    : keys
+        .slice()
+        .sort(
+          (a, b) =>
+            adjacency.get(b).size - adjacency.get(a).size ||
+            keys.indexOf(a) - keys.indexOf(b)
+        )[0];
+  const direct = Array.from(adjacency.get(root) || []).filter(
+    (key) => key !== root
+  );
+  const directSet = new Set(direct);
+  const rest = keys.filter((key) => key !== root && !directSet.has(key));
+  const aspect = Math.max(
+    0.8,
+    Math.min(
+      1.8,
+      (myChart?.getWidth?.() || 1120) / (myChart?.getHeight?.() || 620)
+    )
+  );
+  const scaleX = Math.min(1.15, Math.max(0.85, aspect));
+  const rootX = -160;
+  const ring1X = 215 * scaleX;
+  const ring1Y = 140;
+  const positions = new Map([[root, { x: rootX, y: 0 }]]);
+  direct.forEach((key, index) => {
+    const angle =
+      -Math.PI * 0.72 + (index / Math.max(1, direct.length)) * Math.PI * 1.44;
+    const wobble = 1 + 0.07 * Math.sin((index + 1) * 1.7);
+    positions.set(key, {
+      x: Math.round(rootX + Math.cos(angle) * ring1X * wobble),
+      y: Math.round(Math.sin(angle) * ring1Y * wobble),
+    });
+  });
+  const ring2X = 340 * scaleX;
+  const ring2Y = 225;
+  rest.forEach((key, index) => {
+    const angle = (index / Math.max(1, rest.length)) * Math.PI * 2 + 0.42;
+    const wobble = 1 + 0.06 * Math.sin((index + 2) * 2.1);
+    positions.set(key, {
+      x: Math.round(rootX + Math.cos(angle) * ring2X * wobble),
+      y: Math.round(Math.sin(angle) * ring2Y * wobble),
+    });
+  });
+  return positions;
+};
+
+const computeDeterministicLayout = (
+  nodes,
+  links = [],
+  selectedKey = "",
+  resolveKey = (value) => String(value)
+) => {
+  if (nodes.length > 0 && nodes.length <= ORGANIC_LAYOUT_LIMIT) {
+    return computeOrganicLayout(nodes, links, selectedKey, resolveKey);
+  }
+  const groups = new Map();
+  nodes.forEach((node, index) => {
+    const chapter = String(node.chapter || "").trim() || "未分类";
+    if (!groups.has(chapter)) groups.set(chapter, []);
+    groups.get(chapter).push({ node, index });
+  });
+  const chapterNames = [...groups.keys()].sort(compareChapters);
+  const blocks = chapterNames.map((chapter) => {
+    const items = groups
+      .get(chapter)
+      .slice()
+      .sort((a, b) => {
+        const sectionA = String(a.node.homeSectionCode || "").trim();
+        const sectionB = String(b.node.homeSectionCode || "").trim();
+        if (sectionA !== sectionB) {
+          return sectionA.localeCompare(sectionB, "zh-CN", { numeric: true });
+        }
+        return a.index - b.index;
+      });
+    const cols = Math.max(
+      1,
+      Math.min(12, Math.ceil(Math.sqrt(Math.max(1, items.length))))
+    );
+    return {
+      chapter,
+      items,
+      cols,
+      rows: Math.ceil(items.length / cols),
+    };
+  });
+
+  const chartWidth = myChart?.getWidth?.() || 1120;
+  const chartHeight = myChart?.getHeight?.() || 620;
+  const targetAspect = Math.max(0.5, chartWidth / Math.max(1, chartHeight));
+
+  let best = null;
+  for (
+    let blockCols = 1;
+    blockCols <= Math.max(1, blocks.length);
+    blockCols++
+  ) {
+    const blockRows = Math.ceil(blocks.length / blockCols);
+    let totalWidth = 0;
+    let totalHeight = 0;
+    for (let row = 0; row < blockRows; row++) {
+      let rowWidth = 0;
+      let rowHeight = 0;
+      for (let col = 0; col < blockCols; col++) {
+        const block = blocks[row * blockCols + col];
+        if (!block) continue;
+        rowWidth += block.cols + LAYOUT_BLOCK_GAP;
+        rowHeight = Math.max(rowHeight, block.rows);
+      }
+      totalWidth = Math.max(totalWidth, rowWidth - LAYOUT_BLOCK_GAP);
+      totalHeight += rowHeight + LAYOUT_BLOCK_GAP;
+    }
+    totalHeight -= LAYOUT_BLOCK_GAP;
+    const actualAspect =
+      (Math.max(1, totalWidth) * LAYOUT_CELL_W) /
+      (Math.max(1, totalHeight) * LAYOUT_CELL_H);
+    const score = Math.abs(Math.log(actualAspect / targetAspect));
+    if (!best || score < best.score - 1e-9) {
+      best = { blockCols, totalWidth, totalHeight, score };
+    }
+  }
+
+  const positions = new Map();
+  const startY = -(best?.totalHeight || 1) / 2;
+  let currentY = startY;
+  const blockRows = Math.ceil(blocks.length / (best?.blockCols || 1));
+  for (let row = 0; row < blockRows; row++) {
+    let currentX = -(best?.totalWidth || 1) / 2;
+    let rowHeight = 0;
+    for (let col = 0; col < (best?.blockCols || 1); col++) {
+      const block = blocks[row * (best?.blockCols || 1) + col];
+      if (!block) continue;
+      block.items.forEach((item, position) => {
+        const localCol = position % block.cols;
+        const localRow = Math.floor(position / block.cols);
+        positions.set(nodeKeyOf(item.node), {
+          x: Math.round((currentX + localCol) * LAYOUT_CELL_W),
+          y: Math.round((currentY + localRow) * LAYOUT_CELL_H),
+        });
+      });
+      currentX += block.cols + LAYOUT_BLOCK_GAP;
+      rowHeight = Math.max(rowHeight, block.rows);
+    }
+    currentY += rowHeight + LAYOUT_BLOCK_GAP;
+  }
+  return positions;
+};
+
+const boxesOverlap = (a, b) =>
+  a.x1 < b.x2 && a.x2 > b.x1 && a.y1 < b.y2 && a.y2 > b.y1;
+
+const computeRelationLabelIndexes = (links, positions, nodeBoxes, ctx) => {
+  const indexes = new Set();
+  if (
+    !props.showRelationLabels ||
+    currentZoom.value < RELATION_LABEL_MIN_ZOOM
+  ) {
+    return indexes;
+  }
+  const zoom = currentZoom.value;
+  const candidates = [];
+  links.forEach((link, index) => {
+    const sourceKey = ctx.resolveKey(link.source);
+    const targetKey = ctx.resolveKey(link.target);
+    const source = positions.get(sourceKey);
+    const target = positions.get(targetKey);
+    if (!source || !target) return;
+    const hoverAdjacent =
+      !!ctx.hoveredId &&
+      (sourceKey === ctx.hoveredId || targetKey === ctx.hoveredId);
+    const selectedAdjacent =
+      !!ctx.selectedId &&
+      (sourceKey === ctx.selectedId || targetKey === ctx.selectedId);
+    let priority = 99;
+    if (hoverAdjacent) {
+      priority = 0;
+    } else if (selectedAdjacent) {
+      priority = 1;
+    } else if (
+      !ctx.selectedId &&
+      !ctx.hoveredId &&
+      zoom >= RELATION_LABEL_ZOOM
+    ) {
+      priority = 2;
+    } else if (zoom >= RELATION_LABEL_DENSE_ZOOM) {
+      priority = 3;
+    }
+    if (priority === 99) return;
+    if (Math.hypot(target.x - source.x, target.y - source.y) < 24) return;
+    const type = normalizeRelationType(link);
+    const label = RELATION_LABEL[type] || "未知";
+    const labelScale = Math.max(0.5, zoom);
+    candidates.push({
+      index,
+      priority,
+      width: Math.max(22, label.length * 10.5 + 10) / labelScale,
+      height: 16 / labelScale,
+      sourceKey,
+      targetKey,
+      midX: (source.x + target.x) / 2,
+      midY: (source.y + target.y) / 2,
+      labelWidth: label.length,
+    });
+  });
+  candidates.sort(
+    (a, b) =>
+      a.priority - b.priority ||
+      a.labelWidth - b.labelWidth ||
+      a.index - b.index
+  );
+  const placed = [];
+  const limit = zoom < 0.9 ? RELATION_LABEL_MAX_COMPACT : RELATION_LABEL_MAX;
+  for (const candidate of candidates) {
+    if (candidate.priority >= 2 && placed.length >= limit) break;
+    const box = {
+      x1: candidate.midX - candidate.width / 2 - 3,
+      x2: candidate.midX + candidate.width / 2 + 3,
+      y1: candidate.midY - candidate.height / 2 - 2,
+      y2: candidate.midY + candidate.height / 2 + 2,
+    };
+    if (
+      nodeBoxes.some(
+        (nodeBox) =>
+          nodeBox.key !== candidate.sourceKey &&
+          nodeBox.key !== candidate.targetKey &&
+          boxesOverlap(box, nodeBox)
+      )
+    ) {
+      continue;
+    }
+    if (placed.some((occupied) => boxesOverlap(box, occupied))) continue;
+    placed.push(box);
+    indexes.add(candidate.index);
+  }
+  return indexes;
 };
 
 const buildSeries = () => {
@@ -472,45 +992,55 @@ const buildSeries = () => {
   // 页面从此冻结（转圈不停、按钮无响应）。
   const seen = new Set();
   const safeNodes = chartData.nodes.filter((node) => {
-    const key = toId(node.id ?? node.name);
+    const key = nodeKeyOf(node);
     if (!key || seen.has(key)) {
       return false;
     }
     seen.add(key);
     return true;
   });
-  const nodeKeys = new Set(safeNodes.map((node) => toId(node.id ?? node.name)));
+  const nodeKeys = new Set(safeNodes.map((node) => nodeKeyOf(node)));
+  const resolveKey = createKeyResolver(safeNodes);
   const safeLinks = chartData.links.filter(
-    (link) => nodeKeys.has(toId(link.source)) && nodeKeys.has(toId(link.target))
+    (link) =>
+      nodeKeys.has(resolveKey(link.source)) &&
+      nodeKeys.has(resolveKey(link.target))
   );
   // 掌握状态条/圆点：数据里没有任何 status（如未登录的结构预览）时自动隐藏
   const showStatusUI =
     props.showStatus && safeNodes.some((node) => !!node.status);
   // log3 B.5：选中 id 只有仍在当前可见节点集合内才生效；
   // 筛选把选中节点过滤掉后按"无选中"处理，不把高亮残留到隐藏节点。
+  // 兼容旧消费方传原始 id/name：先经同一别名表归一化到 nodeKey。
+  const requestedSelectedId = resolveKey(props.selectedId);
   const selectedId =
-    props.selectedId && nodeKeys.has(toId(props.selectedId))
-      ? toId(props.selectedId)
+    props.selectedId && nodeKeys.has(requestedSelectedId)
+      ? requestedSelectedId
       : "";
   const idName = new Map(
-    safeNodes.map((node) => [toId(node.id ?? node.name), node.name || ""])
+    safeNodes.map((node) => [
+      nodeKeyOf(node),
+      node.displayName || node.name || "",
+    ])
   );
   const neighborIds = new Set();
   if (selectedId) {
     for (const link of safeLinks) {
-      if (toId(link.source) === selectedId) {
-        neighborIds.add(toId(link.target));
+      const sourceKey = resolveKey(link.source);
+      const targetKey = resolveKey(link.target);
+      if (sourceKey === selectedId) {
+        neighborIds.add(targetKey);
       }
-      if (toId(link.target) === selectedId) {
-        neighborIds.add(toId(link.source));
+      if (targetKey === selectedId) {
+        neighborIds.add(sourceKey);
       }
     }
   }
   // 稳定轻微曲率：同一对节点的多条边按出现序递增曲率（确定性，避免重叠）
   const pairCount = new Map();
   const curveOf = (link) => {
-    const a = toId(link.source);
-    const b = toId(link.target);
+    const a = resolveKey(link.source);
+    const b = resolveKey(link.target);
     const key = a < b ? `${a}|${b}` : `${b}|${a}`;
     const n = pairCount.get(key) || 0;
     pairCount.set(key, n + 1);
@@ -522,57 +1052,83 @@ const buildSeries = () => {
     showStatusUI,
     showRelationLabels: props.showRelationLabels,
     fillByStatus: props.fillByStatus,
+    labelsVisible:
+      currentZoom.value >=
+      ((props.nodes?.length ?? 0) <= 12 ? 0.35 : NODE_LABEL_MIN_ZOOM),
+    compactLabels:
+      (props.nodes?.length ?? 0) <= 12 &&
+      currentZoom.value < NODE_LABEL_MIN_ZOOM,
+    hoveredId: hoveredNodeId.value,
+    labelIndexes: new Set(),
     curveOf,
-    nameOf: (id) => idName.get(String(id)) || "",
+    resolveKey,
+    nameOf: (id) => idName.get(resolveKey(id)) || "",
   };
 
-  // 章节播种（R3）：章节锚点环绕 + 章节内确定性黄金角螺旋散布。
-  // 坐标只写入本次传给 ECharts 的派生对象，绝不写回 props 节点数据，
-  // 也不设置 fixed —— force 从播种位置开始异步迭代（layoutAnimation: true）。
-  const chapterOf = (node) => String(node.chapter || "").trim() || "未分类";
-  const chapters = Array.from(new Set(safeNodes.map(chapterOf))).sort((a, b) =>
-    a.localeCompare(b, "zh-CN", { numeric: true })
+  const positions = computeDeterministicLayout(
+    safeNodes,
+    safeLinks,
+    selectedId,
+    resolveKey
   );
-  const chapterIndex = new Map(chapters.map((c, i) => [c, i]));
-  const anchorR = 260 + chapters.length * 45;
-  const counters = new Map();
+  const nodeBoxes = safeNodes.map((node) => {
+    const point = positions.get(nodeKeyOf(node)) || { x: 0, y: 0 };
+    const size = nodeSizeOf(node);
+    return {
+      key: nodeKeyOf(node),
+      x1: point.x - size.width / 2 - 3,
+      y1: point.y - size.height / 2 - 3,
+      x2: point.x + size.width / 2 + 3,
+      y2: point.y + size.height / 2 + 3,
+    };
+  });
+  ctx.labelIndexes = computeRelationLabelIndexes(
+    safeLinks,
+    positions,
+    nodeBoxes,
+    ctx
+  );
+
   const data = safeNodes.map((node) => {
     const style = buildNodeStyle(node, ctx);
-    const ch = chapterOf(node);
-    const k = counters.get(ch) || 0;
-    counters.set(ch, k + 1);
-    const anchorAngle =
-      (2 * Math.PI * (chapterIndex.get(ch) || 0)) /
-        Math.max(1, chapters.length) -
-      Math.PI / 2;
-    const spiralR = 26 * Math.sqrt(k);
-    const spiralAngle = k * 2.399963229728653;
-    style.x = Math.round(
-      Math.cos(anchorAngle) * anchorR + spiralR * Math.cos(spiralAngle)
-    );
-    style.y = Math.round(
-      Math.sin(anchorAngle) * anchorR + spiralR * Math.sin(spiralAngle)
-    );
+    const position = positions.get(nodeKeyOf(node)) || { x: 0, y: 0 };
+    style.x = position.x;
+    style.y = position.y;
     return style;
   });
+  renderedNodeByKey = new Map(data.map((node) => [node.id, node]));
 
   return {
     id: "oslab-knowledge-graph",
     type: "graph",
-    layout: "force",
-    force: {
-      repulsion: 1100,
-      edgeLength: 200,
-      gravity: 0.05,
-      friction: 0.6,
-      layoutAnimation: true,
-    },
-    draggable: true,
+    // 确定性分组/分层坐标；不再使用随机力导向，筛选/回放不改变相对布局规则。
+    layout: "none",
+    draggable: false,
     roam: true,
-    nodeScaleRatio: 0,
-    scaleLimit: { min: 0.02, max: 4 },
+    // 节点与标签随画布同比缩放，相对间距恒定，任何缩放级别都不会互相覆盖。
+    nodeScaleRatio: 1,
+    scaleLimit: { min: 0.05, max: 4 },
     data,
-    links: safeLinks.map((link) => buildLink(link, ctx)),
+    markPoint: (() => {
+      const selected = data.find((node) => node.id === ctx.selectedId);
+      if (!selected) return { data: [] };
+      return {
+        silent: true,
+        symbol: "rect",
+        symbolSize: [28, 5],
+        itemStyle: {
+          color: GRAPH_TOKENS.highlight,
+          borderRadius: 1,
+        },
+        data: [
+          {
+            coord: [selected.x, selected.y],
+            symbolOffset: [0, -24],
+          },
+        ],
+      };
+    })(),
+    links: safeLinks.map((link, index) => buildLink(link, ctx, index)),
     label: { show: true },
     // log3 B.3：focus = "none" 关闭 ECharts 的 adjacency blur（全图默认
     // 虚化的来源）。hover 只强调被悬停元素本身；选中态的主蓝描边与邻接
@@ -580,13 +1136,13 @@ const buildSeries = () => {
     emphasis: {
       focus: "none",
       scale: false,
-      // 悬停不再强制弹出边标签（用户反馈同上）；关系语义走 tooltip
     },
     edgeLabel: {
-      fontSize: 10,
+      fontSize: 10.5,
       lineHeight: 14,
+      rotate: 0,
       color: MUTED_STRONG,
-      backgroundColor: "#ffffff",
+      backgroundColor: GRAPH_TOKENS.labelSurface,
       padding: [1, 4],
     },
     edgeSymbol: ["none", "arrow"],
@@ -594,55 +1150,95 @@ const buildSeries = () => {
   };
 };
 
+const zoomBandOf = (zoom) => {
+  if (zoom < RELATION_LABEL_MIN_ZOOM) return 0;
+  if (zoom < NODE_LABEL_MIN_ZOOM) return 1;
+  if (zoom < RELATION_LABEL_DENSE_ZOOM) return 2;
+  return 3;
+};
+
+const readZoom = () => {
+  if (!myChart) return currentZoom.value;
+  const option = myChart.getOption();
+  const zoom = Number(option?.series?.[0]?.zoom);
+  return Number.isFinite(zoom) && zoom > 0 ? zoom : currentZoom.value;
+};
+
+const syncZoom = () => {
+  const zoom = readZoom();
+  currentZoom.value = zoom;
+  const band = zoomBandOf(zoom);
+  if (band !== lastZoomBand) {
+    lastZoomBand = band;
+    // 缩放跨过标签层级时只刷新视觉，不改坐标与视野。
+    updateChart();
+  }
+};
+
+const handleNodeMouseOver = (params) => {
+  if (params?.dataType !== "node" || !props.showRelationLabels) return;
+  const key = nodeKeyOf(params.data);
+  if (!key || key === hoveredNodeId.value) return;
+  hoveredNodeId.value = key;
+  updateChart();
+};
+
+const handleNodeMouseOut = (params) => {
+  if (params?.dataType !== "node" || !props.showRelationLabels) return;
+  if (!hoveredNodeId.value) return;
+  hoveredNodeId.value = "";
+  updateChart();
+};
+
 const initChart = () => {
   myChart = echarts.init(chart.value);
   myChart.on("click", handleChartClick);
   myChart.on("dblclick", handleNodeDblClick);
-  myChart.on("rendered", handleChartRendered);
-  myChart.on("graphRoam", cancelAutoFit);
+  myChart.on("graphRoam", syncZoom);
+  myChart.on("mouseover", handleNodeMouseOver);
+  myChart.on("mouseout", handleNodeMouseOut);
   lastTopologySignature = graphTopologySignature();
   updateChart({ rebuild: true });
 };
 
+const clickPayloadOf = (params) => {
+  const key = nodeKeyOf(params?.data);
+  return renderedNodeByKey.get(key) || params?.data || null;
+};
+
 const handleChartClick = (params) => {
-  if (params.dataType !== "node") {
+  // 点击空白画布或关系线不改变选中态
+  if (params?.dataType !== "node") {
     return;
   }
   if (clickTimer) {
-    clearTimeout(clickTimer);
+    window.clearTimeout(clickTimer);
   }
   clickTimer = window.setTimeout(() => {
     clickTimer = null;
     // 单击只选中节点（右栏展示详情），不重新请求整图
-    emit("node-click", params.data);
+    const payload = clickPayloadOf(params);
+    if (payload) emit("node-click", { ...payload });
   }, CLICK_DELAY);
 };
 
 const handleNodeDblClick = (params) => {
-  if (params.dataType !== "node") {
+  if (params?.dataType !== "node") {
     return;
   }
   if (clickTimer) {
-    clearTimeout(clickTimer);
+    window.clearTimeout(clickTimer);
     clickTimer = null;
   }
-  emit("node-dblclick", params.data);
+  const payload = clickPayloadOf(params);
+  if (payload) emit("node-dblclick", { ...payload });
 };
 
-// rebuild=true：数据变化，notMerge 全量重建（清布局记忆，全新迭代）；
+// rebuild=true：数据/拓扑变化，notMerge 全量重建并重新适配视野；
 // rebuild=false：选中/脉冲/标签开关只刷新视觉，保留布局与视野。
 
-let autoFitPending = false;
-let autoFitTimer = null;
-const cancelAutoFit = () => {
-  autoFitPending = false;
-  if (autoFitTimer) {
-    window.clearTimeout(autoFitTimer);
-    autoFitTimer = null;
-  }
-};
-
-// 使用布局后的坐标和当前像素变换计算缩放，不能把播种包围盒当最终布局。
+// 视野适配：基于确定性坐标计算内容包围盒（含节点尺寸），
+// 用公开 graphRoam 的 zoom + dx/dy 完成缩放与居中。
 const fitCurrentLayout = () => {
   if (!myChart || !myChart.getWidth() || !myChart.getHeight()) return;
   const series = myChart.getModel().getSeriesByIndex(0);
@@ -653,8 +1249,8 @@ const fitCurrentLayout = () => {
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
-  let marginX = 32;
-  let marginY = 32;
+  let maxHalfWidth = 0;
+  let maxHalfHeight = 0;
   data.each((index) => {
     const point = data.getItemLayout(index);
     if (!point || !point.every(Number.isFinite)) return;
@@ -664,46 +1260,68 @@ const fitCurrentLayout = () => {
     maxY = Math.max(maxY, point[1]);
     const size = data.getItemVisual(index, "symbolSize");
     if (Array.isArray(size)) {
-      marginX = Math.max(marginX, size[0] / 2 + 24);
-      marginY = Math.max(marginY, size[1] / 2 + 24);
+      maxHalfWidth = Math.max(maxHalfWidth, size[0] / 2);
+      maxHalfHeight = Math.max(maxHalfHeight, size[1] / 2);
     }
   });
   if (!Number.isFinite(minX)) return;
-  const finder = { seriesIndex: 0 };
-  const p1 = myChart.convertToPixel(finder, [minX, minY]);
-  const p2 = myChart.convertToPixel(finder, [maxX, maxY]);
-  if (![...p1, ...p2].every(Number.isFinite)) return;
-  const width = Math.max(1, Math.abs(p2[0] - p1[0]));
-  const height = Math.max(1, Math.abs(p2[1] - p1[1]));
-  const ratio = Math.min(
-    Math.max(1, myChart.getWidth() - marginX * 2) / width,
-    Math.max(1, myChart.getHeight() - marginY * 2) / height
-  );
-  const previousZoom = series.coordinateSystem.getZoom();
-  const zoom =
-    data.count() === 1 ? 1 : Math.max(0.02, Math.min(4, previousZoom * ratio));
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  // 节点随缩放同比变化，按数据单位把节点半径并入包围盒。
+  const p1 = myChart.convertToPixel({ seriesIndex: 0 }, [
+    minX - maxHalfWidth,
+    minY - maxHalfHeight,
+  ]);
+  const p2 = myChart.convertToPixel({ seriesIndex: 0 }, [
+    maxX + maxHalfWidth,
+    maxY + maxHalfHeight,
+  ]);
+  if (!p1 || !p2 || ![...p1, ...p2].every(Number.isFinite)) return;
+  const pixelWidth = Math.max(1, Math.abs(p2[0] - p1[0]));
+  const pixelHeight = Math.max(1, Math.abs(p2[1] - p1[1]));
+  const availW = Math.max(1, myChart.getWidth() - 24);
+  const availH = Math.max(1, myChart.getHeight() - 24);
+  const current = readZoom();
+  const ratio = Math.min(availW / pixelWidth, availH / pixelHeight);
+  const targetZoom = Math.max(0.05, Math.min(1.45, current * ratio));
+  const zoomRatio = targetZoom / Math.max(0.0001, current);
+  const previousBand = zoomBandOf(currentZoom.value);
+  currentZoom.value = targetZoom;
+  lastZoomBand = zoomBandOf(targetZoom);
   myChart.dispatchAction({
-    type: "oslabGraphFit",
+    type: "graphRoam",
     seriesIndex: 0,
-    center: [(minX + maxX) / 2, (minY + maxY) / 2],
-    zoom,
+    zoom: zoomRatio,
+    originX: myChart.getWidth() / 2,
+    originY: myChart.getHeight() / 2,
   });
-};
-
-// 最后一帧力导向结束后再适配；用户主动平移/缩放会取消自动适配。
-const handleChartRendered = () => {
-  if (!autoFitPending) return;
-  if (autoFitTimer) window.clearTimeout(autoFitTimer);
-  autoFitTimer = window.setTimeout(() => {
-    if (!myChart || !myChart.getWidth() || !myChart.getHeight()) return;
-    cancelAutoFit();
-    fitCurrentLayout();
-  }, 120);
+  // 适配可能跨过标签可读阈值：同步刷新标签显示层级（不改变布局与视野）。
+  if (lastZoomBand !== previousBand) {
+    updateChart();
+  }
+  // 缩放围绕画布中心；再平移到内容中心。dx/dy 与 ECharts roam 的
+  // 拖拽语义一致：content 移动量 = 画布中心 − 当前中心像素。
+  const centerPixel = myChart.convertToPixel({ seriesIndex: 0 }, [
+    centerX,
+    centerY,
+  ]);
+  if (centerPixel && centerPixel.every(Number.isFinite)) {
+    const dx = myChart.getWidth() / 2 - centerPixel[0];
+    const dy = myChart.getHeight() / 2 - centerPixel[1];
+    if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+      myChart.dispatchAction({
+        type: "graphRoam",
+        seriesIndex: 0,
+        dx,
+        dy,
+      });
+    }
+  }
 };
 
 const updateChart = ({ rebuild = false } = {}) => {
   const option = {
-    backgroundColor: "#ffffff",
+    backgroundColor: GRAPH_TOKENS.surface,
     tooltip: {
       trigger: "item",
       confine: true,
@@ -714,16 +1332,18 @@ const updateChart = ({ rebuild = false } = {}) => {
     `,
       formatter: (params) => {
         if (params.dataType === "node") {
-          const node = params.data || {};
+          const node =
+            renderedNodeByKey.get(nodeKeyOf(params.data)) || params.data || {};
           const parts = [];
           const chapter = String(node.chapter || "").trim();
           if (chapter) parts.push(`章节：${escapeHtml(chapter)}`);
-          if (node.category) parts.push(`类别：${escapeHtml(node.category)}`);
+          if (node.nodeType || node.category)
+            parts.push(`类型：${escapeHtml(nodeTypeTextOf(node))}`);
           if (props.showStatus && node.status) {
             parts.push(`状态：${STATUS_TEXT[node.status] || "未学习"}`);
           }
           let html = `<div style="font-weight:600;margin-bottom:4px;">${escapeHtml(
-            node.name
+            node.displayName || node.name
           )}</div>`;
           if (parts.length) {
             html += `<div style="margin-bottom:4px;">${parts.join(
@@ -746,11 +1366,18 @@ const updateChart = ({ rebuild = false } = {}) => {
     series: [buildSeries()],
   };
   if (rebuild) {
-    cancelAutoFit();
-    autoFitPending = true;
     myChart.setOption(option, { notMerge: true });
     fitCurrentLayout();
   } else {
+    // updateVisual 不会自动清理 ECharts 的 hover/emphasis 状态；
+    // 先显式 downplay 全部节点与关系，再应用新的选中/状态样式，
+    // 保证 hover→click→mouseout 与快速 A→B 切换不残留旧强调。
+    myChart.dispatchAction({ type: "downplay", seriesIndex: 0 });
+    myChart.dispatchAction({
+      type: "downplay",
+      seriesIndex: 0,
+      dataType: "edge",
+    });
     myChart.dispatchAction({
       type: "oslabGraphStyle",
       seriesIndex: 0,
@@ -780,6 +1407,17 @@ watch(
   }
 );
 
+// 批注映射变化时只刷新标签，不重算布局
+watch(
+  () => props.annotations,
+  () => {
+    if (myChart) {
+      updateChart();
+    }
+  },
+  { deep: true }
+);
+
 // 拓扑签名（log3 收尾 E）：节点 id + 连线 + 类别的可序列化指纹。
 // 签名不变（仅状态/样式叠加更新：回放步进、班级聚合着色刷新）时保留当前
 // 视野；签名变化（筛选、切换数据源）才复位全景 —— 既不破坏既有消费方的
@@ -788,12 +1426,13 @@ const graphTopologySignature = () => {
   const nodes = props.nodes || [];
   const links = props.links || [];
   const categories = props.categories || [];
+  const resolveKey = createKeyResolver(nodes);
   return [
-    nodes.map((node) => toId(node.id ?? node.name)).join(","),
+    nodes.map((node) => nodeKeyOf(node)).join(","),
     links
       .map(
         (link) =>
-          `${toId(link.source)}>${toId(link.target)}:${String(
+          `${resolveKey(link.source)}>${resolveKey(link.target)}:${String(
             link.relationType ?? link.value ?? ""
           )}`
       )
@@ -821,15 +1460,19 @@ const applyGraphState = () => {
   chartData.nodes = next.nodes;
   chartData.links = next.links;
   chartData.categories = next.categories;
+  // 被筛掉的悬停节点不得继续驱动关系标签。
+  if (
+    hoveredNodeId.value &&
+    !next.nodes.some((node) => nodeKeyOf(node) === hoveredNodeId.value)
+  ) {
+    hoveredNodeId.value = "";
+  }
   updateChart({ rebuild });
 };
 
 // 重置当前可见节点的视野，保留布局；百分比中心不适用于图数据坐标。
 const resetView = () => {
-  cancelAutoFit();
-  autoFitPending = true;
   fitCurrentLayout();
-  handleChartRendered();
 };
 
 // ---------- 画布尺寸自适应（log3 收尾 B.7） ----------
@@ -842,8 +1485,6 @@ const handleContainerResize = () => {
   resizeFrame = window.requestAnimationFrame(() => {
     resizeFrame = 0;
     if (myChart) {
-      cancelAutoFit();
-      autoFitPending = true;
       myChart.resize();
       fitCurrentLayout();
     }
@@ -863,7 +1504,6 @@ onMounted(() => {
 defineExpose({ resetView, fit: resetView, reset: resetView });
 
 onBeforeUnmount(() => {
-  cancelAutoFit();
   if (resizeObserver) {
     resizeObserver.disconnect();
     resizeObserver = null;
@@ -873,7 +1513,7 @@ onBeforeUnmount(() => {
     resizeFrame = 0;
   }
   if (clickTimer) {
-    clearTimeout(clickTimer);
+    window.clearTimeout(clickTimer);
     clickTimer = null;
   }
   if (pulseTimer) {
@@ -883,8 +1523,9 @@ onBeforeUnmount(() => {
   if (myChart) {
     myChart.off("click", handleChartClick);
     myChart.off("dblclick", handleNodeDblClick);
-    myChart.off("rendered", handleChartRendered);
-    myChart.off("graphRoam", cancelAutoFit);
+    myChart.off("graphRoam", syncZoom);
+    myChart.off("mouseover", handleNodeMouseOver);
+    myChart.off("mouseout", handleNodeMouseOut);
     myChart.dispose();
     myChart = null;
   }

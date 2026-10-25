@@ -1,9 +1,19 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import { routes } from "@/router/routes";
 
+const SITE_TITLE = "OSLab 操作系统学习平台";
+
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+});
+
+router.afterEach((to) => {
+  const pageTitle =
+    typeof to.meta?.pageTitle === "string" ? to.meta.pageTitle : "";
+  const routeName = typeof to.name === "string" ? to.name : "";
+  const section = pageTitle || routeName;
+  document.title = section ? `${section} · ${SITE_TITLE}` : SITE_TITLE;
 });
 
 // 全局前置守卫已统一收敛到 src/access/index.ts：

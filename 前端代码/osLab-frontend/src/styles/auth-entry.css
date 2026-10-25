@@ -1,0 +1,220 @@
+/* 认证弹层内的页签与表单样式；由 UserLayout 引入，使用 #userLayout 命名空间 */
+
+#userLayout .os-tabs {
+  position: relative;
+  display: flex;
+  gap: 40px;
+  width: 128px;
+}
+
+#userLayout .os-tab {
+  padding: 0 0 12px;
+  border: 0;
+  background: none;
+  color: var(--oslab-muted-strong);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#userLayout .os-tab[aria-selected="true"] {
+  color: var(--oslab-ink);
+  font-weight: 600;
+}
+
+#userLayout .os-tab:focus-visible {
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: 2px;
+}
+
+#userLayout .os-tab-rule {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 28px;
+  height: 2px;
+  background: var(--oslab-primary);
+  transition: transform var(--oslab-duration-fast) var(--oslab-ease);
+}
+
+#userLayout .os-tab-rule.is-register {
+  transform: translateX(69px);
+}
+
+#userLayout .os-auth-panel h2 {
+  margin: 20px 0 0;
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+#userLayout .os-field {
+  display: block;
+  margin: 22px 0 0;
+}
+
+#userLayout .os-field-label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--oslab-ink-soft);
+  font-size: 12px;
+}
+
+#userLayout input[type="text"],
+#userLayout input[type="password"] {
+  width: 100%;
+  height: 48px;
+  padding: 0 15px;
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-control);
+  background: var(--oslab-panel);
+  color: var(--oslab-ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+#userLayout input::placeholder {
+  color: var(--oslab-muted);
+}
+
+#userLayout input:focus-visible {
+  border-color: var(--oslab-primary);
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: 1px;
+}
+
+#userLayout .os-input-wrap {
+  position: relative;
+  display: block;
+}
+
+#userLayout .os-password {
+  padding-right: 46px !important;
+}
+
+#userLayout .os-eye {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  background: none;
+  color: var(--oslab-muted-strong);
+  cursor: pointer;
+}
+
+#userLayout .os-eye svg {
+  width: 17px;
+  height: 17px;
+}
+
+#userLayout .os-eye:focus-visible {
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: 2px;
+}
+
+#userLayout .os-form-extra {
+  margin: 14px 0 18px;
+  font-size: 12px;
+}
+
+#userLayout .os-remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#userLayout .os-remember input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--oslab-primary);
+}
+
+#userLayout .os-submit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 50px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--oslab-radius-control);
+  background: var(--oslab-ink);
+  color: var(--oslab-on-primary);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#userLayout .os-submit:hover {
+  background: var(--oslab-ink-soft);
+}
+
+#userLayout .os-submit:active {
+  transform: translateY(1px);
+}
+
+#userLayout .os-submit:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+#userLayout .os-submit:focus-visible {
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: 2px;
+}
+
+#userLayout .os-submit svg {
+  width: 17px;
+  height: 17px;
+}
+
+#userLayout .os-field-error,
+#userLayout .os-error {
+  display: block;
+  margin-top: 6px;
+  color: var(--oslab-weak);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+#userLayout .os-confirm-row {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows var(--oslab-duration-fast) var(--oslab-ease),
+    opacity var(--oslab-duration-fast) var(--oslab-ease);
+}
+
+#userLayout .os-confirm-row.is-expanded {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+#userLayout .os-confirm-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+#userLayout .os-register-hint {
+  color: var(--oslab-muted-strong);
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  #userLayout input[type="text"],
+  #userLayout input[type="password"] {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #userLayout .os-tab-rule,
+  #userLayout .os-confirm-row {
+    transition: none;
+  }
+}

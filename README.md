@@ -1,14 +1,18 @@
 # OSLab
 
-面向操作系统课程的智能学习与实验平台：以知识图谱为课程结构，把每一次题目作答、代码提交和模拟预测转化为可解释的学习证据——自动完成薄弱点定位、补救路径规划、掌握度追踪（BKT）与教学班级分析。
+面向操作系统课程的智能学习与实验平台：以教材目录和学习单元组织循序渐进的学习，以知识图谱连接概念、资源和个人证据，把题目作答、代码提交和模拟预测转化为可解释的学习画像。
+
+教材驱动课程系统已实现，学生统一入口 `/graph`（`/courses` 兼容跳转），L 的资源包接收入口 `/teaching/content`。第一章十个单元已于 2026-10-20 完成编排与发布：35 个知识节点、57 个教学块、103 道题和章末复习均可从学生端学习；发布回执与余项见 [第一章发布回执](artifacts/course-first-chapter/20261020/release-receipts/README.md)。
+
+教材内容现按章交付：现有 1.1 成果不采用，J/A 重新整理第一章整章知识包与题目包，历史实验维护独立交包。成员要求和最新版开工包入口见 [按章交付与第一章重整要求](docs/教材驱动课程重构/14-按章交付与第一章重整要求.md) 与 [开工交接说明](docs/教材驱动课程重构/08-JA开工与资源包交接.md)。
 
 ## 当前能力
 
-- **知识图谱**：150 节点课程结构，四类关系语义（依赖/包含/相关/实现）与个人掌握状态双维可视化；薄弱节点一键生成补救路径并直达学习。
+- **知识图谱**：185 节点课程结构（150 旧图谱 + 35 第一章），四类关系语义（依赖/包含/相关/实现）与个人掌握状态双维可视化；薄弱节点一键生成补救路径并直达学习。
 - **节点工作台**：知识内容 / 知识详解（静态 HTML 讲义）/ 题目练习 / 实践四页签，常驻图谱导师（GraphRAG，可降级）。
-- **题目练习**：判断/单选/多选/填空四题型服务端判分，"章节→知识点→单题卡"学习流，单题与连续测评（服务端固定队列、幂等作答），待巩固与历史快照回放。
+- **题目练习**：按教材章/节/单元、稳定知识节点和个人作答状态筛选的纵向多题卡流，判断/单选/多选/填空服务端判分；连续测评保留为次级入口，支持服务端固定队列、幂等作答、待巩固与历史快照回放。
 - **编程实验**：Monaco 编辑器、留页异步判题（Java/C/C++/Go 隔离沙箱）、草稿按用户保存、失败后带上下文的"向导师提问"。
-- **交互模拟**：页面置换 FIFO/LRU/OPT 与 CPU 调度 FCFS/SJF/RR，服务端真值判分，预测计入学习证据。
+- **交互模拟**：18 项 CPU 调度、连续内存分配、页面置换和磁盘调度 Vue 3 演示播放器，共用 `/experiments/simulation` 与课程活动入口；步骤由确定性纯函数生成，当前全部为运行演示，不写判题/掌握事件。
 - **学习记录**：事件时间线（作答/判题/预测，含掌握度前后快照）与只读图谱回放。
 - **教学管理**：班级薄弱热力图谱与列表、节点下钻（首次正确率/实验通过率/误区）、题目审核与 JSON 导入、知识维护、用户管理。
 - **全局 AI 助手**：可拖动悬浮助手，按用户隔离会话，显式页面上下文。
@@ -75,12 +79,29 @@ powershell -ExecutionPolicy Bypass -File ./run-local.ps1 -Port 8080
 
 ## 本地开发与验收（原生 Windows，无 Docker）
 
-MySQL/Redis/Neo4j 以 Windows 服务常驻时（Neo4j 本地口令见启动脚本），一键启停：
+已安装 Node.js、JDK 17+，并将 MySQL/Redis/Neo4j 配为 Windows 服务时，在仓库根目录一键启停：
 
 ~~~powershell
-powershell -ExecutionPolicy Bypass -File ./start-oslab.ps1   # 后端 :8121，前端 :8080/8081
-powershell -ExecutionPolicy Bypass -File ./stop-oslab.ps1    # 只停 OSLab 进程
+powershell -ExecutionPolicy Bypass -File ./start-oslab.ps1          # 编译最新后端并启动前后端
+powershell -ExecutionPolicy Bypass -File ./start-oslab.ps1 -Status  # 查看进程、端口、数据库服务状态
+powershell -ExecutionPolicy Bypass -File ./stop-oslab.ps1           # 只停止本仓库的前后端
 ~~~
+
+默认后端为 `http://localhost:8121/api`；前端从 8080 起寻找空闲端口，本机通常为 `http://localhost:8081/`，以启动结果为准。启动成功前会检查后端健康状态、前端页面与 `/api` 代理。重复启动会复用已运行的进程；后端代码修改后，先停止再启动即可重新编译。首次缺少前端依赖时自动执行 `npm ci`。
+
+~~~powershell
+# 已编译且后端源码没有变化时，快速启动
+powershell -ExecutionPolicy Bypass -File ./start-oslab.ps1 -NoBuild
+
+# 也可指定端口和 JDK 路径
+powershell -ExecutionPolicy Bypass -File ./start-oslab.ps1 -FrontendPort 8081 -BackendPort 8121 -JavaHome "C:\path\to\jdk-21"
+
+# 查看日志
+Get-Content ./tmp/backend.log -Tail 50
+Get-Content ./tmp/frontend.log -Tail 50
+~~~
+
+脚本不写入数据库密码，也不导入或清空数据。数据库连接、Neo4j 认证、AI 和真实代码沙箱沿用 `application.yml` 及当前环境变量；本机 Neo4j 关闭认证时无需密码。默认停止操作保留 MySQL/Redis/Neo4j；需要同时停止这三项 Windows 服务时使用 `stop-oslab.ps1 -Services`，通常需要管理员权限。原 `run-local.ps1` 继续用于 Docker Compose，和上述原生开发脚本用途不同。
 
 验收命令（前端 `前端代码/osLab-frontend`、后端 `后端代码/osLab-backend` 下执行）：
 
@@ -203,13 +224,14 @@ npm run build
 
 本次版本已完成以下本地验证：
 
-- 后端编译通过。
-- 历史 MD5 密码兼容与自动迁移回归测试通过。
-- 前端生产构建通过。
-- 注册、登录、获取当前用户、注销会话链路通过。
-- 前端 API 代理、CORS 预检和知识图谱接口通过。
+- 后端全量测试 211 run / 0 failures / 0 errors / 1 skipped；后端此后未改动。
+- 前端 lint 0 error / 54 warning；生产构建 hash `75710cc0a0958966`。
+- 图谱 Node/ECharts 测试 26/26；算法播放器 19/19；18 项算法真值 fixture 全部通过。
+- 第一章发布：57/57 教学块、103/103 第一章题目、10/10 单元 PUBLISHED，图谱同步 `SYNCED`。
+- 学生账号整章走查 62 项检查通过：10 个单元完成、92 个活动完成、错题归因与 BKT 掌握度、目录/题库计数一致、复习不倒退主线。
+- 发布与反馈修正回执见 `artifacts/course-first-chapter/20261020/release-receipts/` 与 `artifacts/feedback-fix-20261020/delivery.md`。
 
-当前前端仍保留部分历史 ESLint warning，但生产构建不存在 error。
+L 已人工查看图谱选中/视觉、三个页面标题层级与图例（2026-10-21）；算法动画与教师维护区可按 `artifacts/feedback-fix-20261020/visual-check.md` 复查。本轮未使用浏览器自动化，未提交、推送或部署。旧节点/旧题清理与 18 项演示资源发布尚未执行。
 
 ## 常见问题
 

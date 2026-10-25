@@ -21,6 +21,9 @@ public class LearningEventVO implements Serializable {
     private String anonymousName;
 
     private String nodeName;
+    private String nodeCode;
+    private String sourceUnitCode;
+    private String sourceActivityCode;
 
     private String eventType;
 

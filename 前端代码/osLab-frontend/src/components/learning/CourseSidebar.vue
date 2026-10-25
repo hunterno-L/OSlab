@@ -1,5 +1,8 @@
 <template>
-  <aside class="course-sidebar">
+  <aside
+    class="course-sidebar"
+    :class="{ 'course-sidebar--compact': navKey === 'experiments' }"
+  >
     <div class="sidebar-block">
       <button
         v-for="item in childItems"
@@ -89,6 +92,7 @@ const go = (path: string) => {
 
 <style scoped>
 .course-sidebar {
+  box-sizing: border-box;
   width: 200px;
   flex-shrink: 0;
   background: var(--oslab-panel, #fff);
@@ -103,6 +107,11 @@ const go = (path: string) => {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+/* 实验中心/算法模拟的模式卡按设计稿收窄到 160px */
+.course-sidebar--compact {
+  width: 160px;
 }
 .sidebar-item {
   padding: var(--oslab-space-2, 8px) 10px;
@@ -123,7 +132,7 @@ const go = (path: string) => {
 }
 .sidebar-item.active {
   background: var(--oslab-primary-soft, #eaf0fd);
-  color: var(--oslab-primary, #2059c9);
+  color: var(--oslab-primary, #2447d8);
   font-weight: 600;
 }
 @media (max-width: 1024px) {
@@ -143,5 +152,19 @@ const go = (path: string) => {
     flex: 0 0 auto;
     white-space: nowrap;
   }
+}
+
+/* C+B 学习图册 */
+.course-sidebar {
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.sidebar-item {
+  border-radius: var(--oslab-radius-control);
+}
+.sidebar-item.active {
+  background: var(--oslab-highlight-soft);
+  color: var(--oslab-ink);
+  box-shadow: inset 2px 0 0 var(--oslab-primary);
 }
 </style>

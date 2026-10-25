@@ -12,6 +12,8 @@
       v-if="hasImage"
       class="oslab-user-avatar-image"
       :src="avatarSrc"
+      :width="size"
+      :height="size"
       alt=""
       @error="handleImageError"
       @load="handleImageLoad"
@@ -92,7 +94,7 @@ const handleImageLoad = () => {
   flex-shrink: 0;
   overflow: hidden;
   border-radius: 50%;
-  background: var(--oslab-primary, #2059c9);
+  background: var(--oslab-primary, #2447d8);
   color: #ffffff;
   font-weight: 600;
   line-height: 1;

@@ -13,6 +13,8 @@ import java.util.Date;
 public class WeakNodeVO implements Serializable {
 
     private String nodeName;
+    private String nodeCode;
+    private String displayName;
 
     /**
      * 所属章节（当前课程结构）

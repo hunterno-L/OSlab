@@ -6,7 +6,6 @@
     aria-labelledby="os-register-tab"
   >
     <h2>创建你的学习账号</h2>
-    <p class="os-form-subtitle">从一个知识点开始，记录你的每次进步。</p>
     <form autocomplete="on" novalidate @submit.prevent="handleSubmit">
       <label class="os-field">
         <span class="os-field-label">账号</span>
@@ -16,8 +15,15 @@
           name="userAccount"
           type="text"
           autocomplete="username"
-          placeholder="输入账号"
+          spellcheck="false"
+          placeholder="输入账号，如 os2026001…"
         />
+        <span
+          v-if="error && errorField === 'account'"
+          class="os-field-error"
+          role="alert"
+          >{{ error }}</span
+        >
       </label>
       <label class="os-field">
         <span class="os-field-label">密码</span>
@@ -29,7 +35,7 @@
             name="userPassword"
             :type="showPassword ? 'text' : 'password'"
             autocomplete="new-password"
-            placeholder="输入密码"
+            placeholder="输入密码，至少 8 位…"
           />
           <button
             type="button"
@@ -70,6 +76,12 @@
             </svg>
           </button>
         </span>
+        <span
+          v-if="error && errorField === 'password'"
+          class="os-field-error"
+          role="alert"
+          >{{ error }}</span
+        >
       </label>
       <!-- 确认密码字段：挂载后高度展开（280ms） -->
       <div class="os-confirm-row" :class="{ 'is-expanded': expanded }">
@@ -82,8 +94,14 @@
               name="checkPassword"
               type="password"
               autocomplete="new-password"
-              placeholder="再次输入密码"
+              placeholder="再次输入密码…"
             />
+            <span
+              v-if="error && errorField === 'check'"
+              class="os-field-error"
+              role="alert"
+              >{{ error }}</span
+            >
           </label>
         </div>
       </div>
@@ -91,7 +109,7 @@
         <span class="os-register-hint">账号至少 4 位，密码至少 8 位。</span>
       </div>
       <button type="submit" class="os-submit" :disabled="loading">
-        <span>{{ loading ? "正在创建" : "创建账号" }}</span>
+        <span>{{ loading ? "正在创建…" : "创建账号" }}</span>
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -105,9 +123,15 @@
           <path d="m13 6 6 6-6 6" />
         </svg>
       </button>
-      <p v-show="error" class="os-error" role="alert">{{ error }}</p>
+      <p
+        v-show="error && !errorField"
+        class="os-error"
+        role="alert"
+        aria-live="polite"
+      >
+        {{ error }}
+      </p>
     </form>
-    <p class="os-account-note">账号用于保存你的练习、实验与学习记录。</p>
   </div>
 </template>
 
@@ -129,16 +153,21 @@ watch(account, (value) => {
 });
 // 提交进行中：通知布局禁用页签切换
 const authBusy = inject<Ref<boolean>>("oslabAuthBusy", ref(false));
-const advanceFlow = inject<() => void>("oslabAdvanceFlow", () => {
-  /* 独立渲染时无知识流可推进 */
-});
 
 const password = ref("");
 const checkPassword = ref("");
 const showPassword = ref(false);
 const loading = ref(false);
 const error = ref("");
+const errorField = ref<"account" | "password" | "check" | "">("");
 const expanded = ref(false);
+
+watch([account, password, checkPassword], () => {
+  if (errorField.value) {
+    error.value = "";
+    errorField.value = "";
+  }
+});
 
 onMounted(() => {
   // 等待初始样式生效后展开确认密码字段
@@ -157,18 +186,22 @@ const handleSubmit = async () => {
     return;
   }
   error.value = "";
+  errorField.value = "";
   if (!account.value || account.value.length < 4) {
     error.value = "账号至少 4 位";
+    errorField.value = "account";
     document.getElementById("oslab-account-input")?.focus();
     return;
   }
   if (!password.value || password.value.length < 8) {
     error.value = "密码至少 8 位";
+    errorField.value = "password";
     document.getElementById("oslab-password-input")?.focus();
     return;
   }
   if (password.value !== checkPassword.value) {
     error.value = "两次输入的密码不一致";
+    errorField.value = "check";
     (
       document.getElementById("oslab-check-input") as HTMLInputElement | null
     )?.focus();
@@ -183,10 +216,8 @@ const handleSubmit = async () => {
       checkPassword: checkPassword.value,
     });
     if (res.code === 0) {
-      // 注册成功：知识流推进一小段后回到登录，账号通过共享状态保留
-      advanceFlow();
+      // 注册成功：回到登录，账号通过共享状态保留
       message.success("注册成功，请登录");
-      await new Promise((resolve) => setTimeout(resolve, 160));
       const query: Record<string, string> = {};
       const redirect = route.query.redirect;
       if (typeof redirect === "string" && redirect) {
@@ -195,8 +226,10 @@ const handleSubmit = async () => {
       await router.push({ path: "/user/login", query });
       return;
     }
+    errorField.value = "";
     error.value = `注册失败：${res.message || "请检查填写内容"}`;
   } catch {
+    errorField.value = "";
     error.value = "注册请求未完成，请检查网络连接后重试";
   } finally {
     loading.value = false;

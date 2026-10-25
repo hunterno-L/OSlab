@@ -14,6 +14,7 @@ public class MasteryChangeVO implements Serializable {
      * 知识节点业务键
      */
     private String nodeName;
+    private String nodeCode;
 
     /**
      * 事件前 pKnown

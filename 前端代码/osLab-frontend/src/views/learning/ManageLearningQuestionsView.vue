@@ -225,6 +225,12 @@
             placeholder="例如：进程管理"
           />
         </a-form-item>
+        <a-form-item label="所属小节代码">
+          <a-input
+            v-model:model-value="form.sectionCode"
+            placeholder="可选，例如 sec.memory.paging"
+          />
+        </a-form-item>
         <a-form-item label="难度">
           <a-input-number
             v-model:model-value="form.difficulty"
@@ -458,6 +464,7 @@ const emptyForm = () => ({
   analysis: "",
   misconception: "",
   chapter: "",
+  sectionCode: "",
   difficulty: 2,
   nodeNames: [] as string[],
   // 编辑回填的原始答案
@@ -480,6 +487,7 @@ const openEdit = async (record: any) => {
   form.value.analysis = record.analysis || "";
   form.value.misconception = record.misconception || "";
   form.value.chapter = record.chapter || "";
+  form.value.sectionCode = record.sectionCode || "";
   form.value.difficulty = record.difficulty || 2;
   form.value.nodeNames = [...(record.nodeNames || [])];
   const detail = await getManageQuestion(record.id);
@@ -561,6 +569,7 @@ const submitForm = async () => {
     analysis: form.value.analysis,
     misconception: form.value.misconception,
     chapter: form.value.chapter,
+    sectionCode: form.value.sectionCode,
     difficulty: form.value.difficulty,
     nodeNames: form.value.nodeNames,
   };

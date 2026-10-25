@@ -106,6 +106,7 @@ public class QuestionController {
         // 判断是否存在
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        requireShared(oldQuestion);
         // 仅本人或管理员可删除
         if (!oldQuestion.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -148,6 +149,7 @@ public class QuestionController {
         // 判断是否存在
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        requireShared(oldQuestion);
         boolean result = questionService.updateById(question);
         return ResultUtils.success(result);
     }
@@ -167,6 +169,7 @@ public class QuestionController {
         if (question == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
+        requireShared(question);
         User loginUser = userService.getLoginUser(request);
         // 不是本人或管理员，不能直接获取所有信息
         if (!question.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
@@ -190,6 +193,13 @@ public class QuestionController {
         if (question == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
+        requireShared(question);
+        if (!"PUBLISHED".equals(question.getPublicationStatus())) {
+            User loginUser = userService.getLoginUser(request);
+            if (!question.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+                throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+            }
+        }
         return ResultUtils.success(questionService.getQuestionVO(question, request));
     }
 
@@ -207,8 +217,11 @@ public class QuestionController {
         long size = questionQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Page<Question> questionPage = questionService.page(new Page<>(current, size),
-                questionService.getQueryWrapper(questionQueryRequest));
+        QueryWrapper<Question> wrapper = questionService.getQueryWrapper(questionQueryRequest);
+        if (!userService.isAdmin(request)) {
+            wrapper.eq("publicationStatus", "PUBLISHED");
+        }
+        Page<Question> questionPage = questionService.page(new Page<>(current, size), wrapper);
         return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
     }
 
@@ -245,6 +258,7 @@ public class QuestionController {
         User loginUser = userService.getLoginUser(request);
         questionQueryRequest.setUserId(loginUser.getId());
         QueryWrapper<Question> queryWrapper = questionService.getQueryWrapper(questionQueryRequest);
+        queryWrapper.eq("publicationStatus", "PUBLISHED");
         List<Question> list = questionService.list(queryWrapper);
         return ResultUtils.success(questionService.getQuestionVO(list));
 
@@ -303,6 +317,7 @@ public class QuestionController {
         // 判断是否存在
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        requireShared(oldQuestion);
         // 仅本人或管理员可编辑
         if (!oldQuestion.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -371,5 +386,12 @@ public class QuestionController {
 
         List<QuestionVO> questions=questionService.getQuestionBySets(setId);
         return ResultUtils.success(questions);
+    }
+
+    /** 任务私有执行副本只能通过任务上下文访问，旧通用接口一律视为不存在。 */
+    private void requireShared(Question question) {
+        if (com.yupi.springbootinit.task.TaskConstants.SCOPE_TASK.equals(question.getResourceScope())) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "题目不存在");
+        }
     }
 }

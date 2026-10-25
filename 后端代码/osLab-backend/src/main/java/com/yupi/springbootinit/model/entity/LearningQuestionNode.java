@@ -32,6 +32,8 @@ public class LearningQuestionNode implements Serializable {
      * 知识节点业务键（Neo4j EntityNode.name）
      */
     private String nodeName;
+    private String nodeCode;
+    private String role;
 
     /**
      * 对节点掌握度的权重 0-1

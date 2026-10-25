@@ -184,6 +184,35 @@ class LearningQuestionAssessmentTest {
     }
 
     @Test
+    void retryAfterQuestionRevisionUsesImmutableOriginalFeedback() {
+        request.setSubmissionKey("retry-key");
+        LearningAttempt prior=existingAttempt(101L,41L);
+        question.setAnalysis("original explanation");
+        question.setRevision(2);
+        prior.setQuestionSnapshot(cn.hutool.json.JSONUtil.toJsonStr(question));
+        prior.setQuestionRevision(2);
+        question.setAnalysis("new explanation");
+        question.setAnswer("\"false\"");
+        question.setRevision(3);
+        when(attemptMapper.selectOne(any())).thenReturn(prior);
+        LearningAnswerResultVO result=service.answerQuestion(request,user);
+        assertTrue(result.getCorrect());
+        assertEquals("original explanation",result.getAnalysis());
+        verify(attemptMapper,never()).insert(any());
+        verifyNoInteractions(eventService);
+    }
+
+    @Test
+    void sameKeyCannotAttachIndependentAttemptToCourseActivity() {
+        request.setSubmissionKey("retry-key");
+        request.setSourceUnitCode("unit.test");
+        request.setSourceActivityCode("act.test");
+        when(attemptMapper.selectOne(any())).thenReturn(existingAttempt(101L,41L));
+        assertThrows(BusinessException.class,()->service.answerQuestion(request,user));
+        verify(attemptMapper,never()).insert(any());
+    }
+
+    @Test
     void submissionKeyCannotReuseAnotherSessionsAttempt() {
         request.setSubmissionKey("retry-key");
         when(attemptMapper.selectOne(any())).thenReturn(existingAttempt(101L, 40L));

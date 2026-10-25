@@ -55,4 +55,7 @@ public class NodeWorkbenchVO implements Serializable {
     private String contentMd;
     /** 共享素材关联资料 JSON 数组 [{title,url}]（仅 PUBLISHED） */
     private String resourceLinks;
+    /** Published snapshots with sourceRef, assets and publication revision. */
+    private List<java.util.Map<String,Object>> textbookChunks;
+    private List<java.util.Map<String,Object>> learningUnits;
 }

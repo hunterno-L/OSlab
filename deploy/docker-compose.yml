@@ -24,6 +24,10 @@ services:
       - ../数据库文件/oslab_upgrade_v5_teaching.sql:/seed/oslab_upgrade_v5_teaching.sql:ro
       - ../数据库文件/oslab_demo_seed_v3.sql:/seed/oslab_demo_seed_v3.sql:ro
       - ../数据库文件/oslab_seed_v4_content.sql:/seed/oslab_seed_v4_content.sql:ro
+      - ../数据库文件/oslab_upgrade_v6_courses.sql:/seed/oslab_upgrade_v6_courses.sql:ro
+      - ../数据库文件/oslab_upgrade_v7_identity.sql:/seed/oslab_upgrade_v7_identity.sql:ro
+      - ../数据库文件/oslab_upgrade_v8_teaching_tasks.sql:/seed/oslab_upgrade_v8_teaching_tasks.sql:ro
+      - ../数据库文件/oslab_upgrade_v9_learning_activities.sql:/seed/oslab_upgrade_v9_learning_activities.sql:ro
       - ./mysql-init/10-load-oslab-db.sh:/docker-entrypoint-initdb.d/10-load-oslab-db.sh:ro
     networks:
       - oslab-network
@@ -188,8 +192,11 @@ services:
       CODESANDBOX_REMOTE_URL: http://sandbox:8090/executeCode
       CODESANDBOX_REMOTE_AUTH_SECRET: "${SANDBOX_AUTH_SECRET:?Set SANDBOX_AUTH_SECRET in deploy/.env}"
       CODESANDBOX_REMOTE_TIMEOUT_MS: "30000"
+      OSLAB_TASK_STORAGE_DIR: /app/data/task-files
       KNIFE4J_ENABLE: "false"
       KNIFE4J_BASIC_ENABLE: "false"
+    volumes:
+      - task_files:/app/data/task-files
     expose:
       - "8121"
     healthcheck:
@@ -227,3 +234,4 @@ volumes:
   neo4j_data:
   neo4j_logs:
   elasticsearch_data:
+  task_files:

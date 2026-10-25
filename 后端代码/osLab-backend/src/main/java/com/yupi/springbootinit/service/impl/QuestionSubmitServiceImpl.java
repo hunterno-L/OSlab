@@ -48,6 +48,14 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     @Resource
     private UserService userService;
     @Resource
+    private com.yupi.springbootinit.learning.ActivityContextService activityContext;
+    @Resource
+    private com.yupi.springbootinit.learning.ExperimentMappingService experimentMappings;
+    @Resource
+    private com.yupi.springbootinit.task.TaskExecutionContextService taskContext;
+    @Resource
+    private com.yupi.springbootinit.task.TaskAccessService taskAccess;
+    @Resource
     @Lazy
     private JudgeService judgeService;
 
@@ -81,6 +89,27 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         if (question == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
+        boolean taskScoped = com.yupi.springbootinit.task.TaskConstants.SCOPE_TASK.equals(question.getResourceScope());
+        com.yupi.springbootinit.task.TaskExecutionContextService.Context context = null;
+        if (taskScoped) {
+            if (StringUtils.isAnyBlank(questionSubmitAddRequest.getSourceTaskCode(),
+                    questionSubmitAddRequest.getSourceTaskItemCode())
+                    || questionSubmitAddRequest.getSourceTaskRound() == null) {
+                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "任务实验请从学习任务入口提交");
+            }
+            context = taskContext.validate(loginUser, questionSubmitAddRequest.getSourceTaskCode(),
+                    questionSubmitAddRequest.getSourceTaskItemCode(), questionId,
+                    questionSubmitAddRequest.getSourceTaskRound(), true);
+        } else {
+            if (StringUtils.isNotBlank(questionSubmitAddRequest.getSourceTaskCode())) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "共享实验不能携带任务上下文");
+            }
+            if (StringUtils.equalsAny(question.getPublicationStatus(), "DRAFT", "OFFLINE")) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "实验未发布，不可提交");
+            }
+        }
+        if (activityContext != null) activityContext.validate(questionSubmitAddRequest.getSourceUnitCode(),
+                questionSubmitAddRequest.getSourceActivityCode(), questionId, true);
         // 是否已提交题目
         long userId = loginUser.getId();
         // 每个用户串行提交题目
@@ -89,6 +118,13 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         questionSubmit.setQuestionId(questionId);
         questionSubmit.setCode(questionSubmitAddRequest.getCode());
         questionSubmit.setLanguage(language);
+        questionSubmit.setSourceUnitCode(questionSubmitAddRequest.getSourceUnitCode());
+        questionSubmit.setSourceActivityCode(questionSubmitAddRequest.getSourceActivityCode());
+        questionSubmit.setSourceTaskCode(questionSubmitAddRequest.getSourceTaskCode());
+        questionSubmit.setSourceTaskItemCode(questionSubmitAddRequest.getSourceTaskItemCode());
+        questionSubmit.setSourceTaskRound(questionSubmitAddRequest.getSourceTaskRound());
+        if (context != null) questionSubmit.setEvaluationIdentity(context.evaluationIdentity);
+        if (experimentMappings != null) questionSubmit.setExperimentMappingSnapshot(experimentMappings.snapshot(questionId));
         // 设置初始状态
         questionSubmit.setStatus(QuestionSubmitStatusEnum.WAITING.getValue());
         questionSubmit.setJudgeInfo("{}");
@@ -138,6 +174,8 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         queryWrapper.eq(ObjectUtils.isNotEmpty(questionId), "questionId", questionId);
         queryWrapper.eq(QuestionSubmitStatusEnum.getEnumByValue(status) != null, "status", status);
         queryWrapper.eq("isDelete", false);
+        // 任务私有执行副本只通过任务批阅接口访问，通用提交列表不返回。
+        queryWrapper.apply("NOT EXISTS (SELECT 1 FROM question q WHERE q.id = question_submit.questionId AND q.resourceScope = 'TASK')");
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), CommonConstant.SORT_ORDER_ASC.equals(sortOrder),
                 sortField);
         return queryWrapper;
@@ -145,6 +183,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
 
     @Override
     public QuestionSubmitVO getQuestionSubmitVO(QuestionSubmit questionSubmit, User loginUser) {
+        assertTaskSubmitVisible(questionSubmit, loginUser);
         QuestionSubmitVO questionSubmitVO = QuestionSubmitVO.objToVo(questionSubmit);
         // 脱敏：仅本人和管理员能看见自己（提交 userId 和登录用户 id 不同）提交的代码
         long userId = loginUser.getId();
@@ -173,7 +212,18 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         if (!questionSubmit.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "只能查看本人的提交详情");
         }
+        assertTaskSubmitVisible(questionSubmit, loginUser);
         return getQuestionSubmitVO(questionSubmit, loginUser);
+    }
+
+    /** 任务提交只对提交本人和任务创建者可见；其他管理员不能凭提交 ID 读取任务内容。 */
+    private void assertTaskSubmitVisible(QuestionSubmit submit, User user) {
+        if (StringUtils.isBlank(submit.getSourceTaskCode())) return;
+        if (submit.getUserId().equals(user.getId())) return;
+        com.yupi.springbootinit.model.entity.LearningTask task = taskAccess.task(submit.getSourceTaskCode());
+        if (!task.getCreatorId().equals(user.getId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "只能查看本人或本人创建任务的提交");
+        }
     }
 
     @Override

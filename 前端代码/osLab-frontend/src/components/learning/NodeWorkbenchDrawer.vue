@@ -52,9 +52,11 @@
             size="small"
             style="flex: 1"
           />
-          <span class="hint"
-            >{{ workbench.mastery.conceptEvidenceCount }} 条证据</span
-          >
+          <span class="hint">{{
+            workbench.mastery.conceptEvidenceCount
+              ? workbench.mastery.conceptEvidenceCount + " 条证据"
+              : "未评估"
+          }}</span>
         </div>
         <div class="score-row">
           <span class="score-label">实践应用</span>
@@ -63,9 +65,11 @@
             size="small"
             style="flex: 1"
           />
-          <span class="hint"
-            >{{ workbench.mastery.practiceEvidenceCount }} 条证据</span
-          >
+          <span class="hint">{{
+            workbench.mastery.practiceEvidenceCount
+              ? workbench.mastery.practiceEvidenceCount + " 条证据"
+              : "未评估"
+          }}</span>
         </div>
         <div
           v-if="workbench.mastery.recentReason"
@@ -77,6 +81,7 @@
       </template>
 
       <!-- 快速动作：完整工作台承载练习/实验/导师 -->
+      <NodeCourseLinks :node-code="workbench?.mastery?.nodeCode" />
       <a-button
         type="primary"
         long
@@ -95,6 +100,7 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { Message } from "@arco-design/web-vue";
 import { type NodeWorkbenchVO } from "@/api/learning";
+import NodeCourseLinks from "@/components/learning/NodeCourseLinks.vue";
 import {
   loadNodeWorkbench,
   peekNodeWorkbench,

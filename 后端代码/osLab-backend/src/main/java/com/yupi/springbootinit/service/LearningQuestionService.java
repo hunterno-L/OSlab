@@ -3,6 +3,7 @@ package com.yupi.springbootinit.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.yupi.springbootinit.model.dto.learning.LearningAnswerRequest;
+import com.yupi.springbootinit.model.dto.learning.LearningCatalogRequest;
 import com.yupi.springbootinit.model.dto.learning.LearningQuestionAddRequest;
 import com.yupi.springbootinit.model.dto.learning.LearningQuestionQueryRequest;
 import com.yupi.springbootinit.model.dto.learning.LearningQuestionReviewRequest;
@@ -92,4 +93,10 @@ public interface LearningQuestionService extends IService<LearningQuestion> {
      * 其余按章节原值精确匹配。学生与管理员同视图，均为本人数据口径。
      */
     LearningCatalogVO questionCatalog(String chapter, User user);
+
+    /**
+     * 教材目录口径的题目练习目录聚合：稳定 course/section/unit 范围 + 学习状态过滤，
+     * 返回小节树、已发布单元题量、范围内节点及本人状态统计。
+     */
+    LearningCatalogVO questionCatalog(LearningCatalogRequest request, User user);
 }

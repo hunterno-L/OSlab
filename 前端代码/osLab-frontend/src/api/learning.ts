@@ -69,6 +69,7 @@ export interface LearningQuestionVO {
   createTime?: string;
   updateTime?: string;
   nodeNames: string[];
+  nodeDisplayNames?: string[];
   hasAttempted: boolean;
   attemptCount?: number;
   latestResult?: "CORRECT" | "WRONG" | null;
@@ -92,6 +93,11 @@ export interface LearningAnswerResultVO {
 }
 
 export interface MasteryNodeVO {
+  displayName?: string;
+  nodeType?: string;
+  layer?: string;
+  homeSectionCode?: string;
+  nodeCode?: string;
   id: string;
   name: string;
   category: string;
@@ -146,6 +152,12 @@ export interface LearningEventVO {
   userId: number;
   anonymousName?: string | null;
   nodeName: string;
+  nodeCode?: string | null;
+  sourceUnitCode?: string | null;
+  sourceActivityCode?: string | null;
+  sourceTaskCode?: string | null;
+  sourceTaskItemCode?: string | null;
+  sourceTaskRound?: number | null;
   eventType: "ATTEMPT" | "JUDGE" | "SIMULATION" | "STATE_BASELINE";
   resourceType: string;
   resourceId: number;
@@ -168,6 +180,8 @@ export interface RecommendationVO {
 
 export interface NodeRefVO {
   name: string;
+  nodeCode?: string;
+  displayName?: string;
   status: MasteryStatus;
   chapter?: string | null;
 }
@@ -209,6 +223,15 @@ export interface SimulationEntryVO {
 }
 
 export interface NodeWorkbenchVO {
+  textbookChunks?: {
+    chunkCode: string;
+    title: string;
+    contentMd: string;
+    sourceRef?: Record<string, unknown>;
+    revision?: number;
+    sourceSectionTitle?: string;
+  }[];
+  learningUnits?: { unitCode: string; courseCode: string; title: string }[];
   mastery: MasteryNodeVO;
   prerequisiteNodes: string[];
   prerequisites?: NodeRefVO[];
@@ -374,6 +397,13 @@ export interface ChapterCoverageVO {
 }
 
 export interface TutorSourceVO {
+  actionType?: string;
+  targetId?: string;
+  targetUrl?: string;
+  parentChunkCode?: string;
+  revision?: number;
+  sourceRef?: Record<string, unknown>;
+  sourceSectionTitle?: string;
   sourceType: string;
   sourceId: string;
   title: string;
@@ -392,6 +422,10 @@ export interface TutorAnswerVO {
 export interface LearningQuestionQueryRequest {
   chapter?: string;
   nodeName?: string;
+  courseCode?: string;
+  sectionCode?: string;
+  unitCode?: string;
+  nodeCode?: string;
   type?: LearningQuestionType | "";
   difficulty?: number;
   studyState?: "ALL" | "UNANSWERED" | "NEEDS_REVIEW" | "CORRECT";
@@ -450,6 +484,8 @@ export function answerLearningQuestion(data: {
   answer: string | string[];
   /** 所属测评会话 id（测评流程作答时携带） */
   assessmentRunId?: number | string;
+  sourceUnitCode?: string;
+  sourceActivityCode?: string;
   /** 提交幂等键（同键重发返回既有结果；主动重试使用新键） */
   submissionKey?: string;
 }): Promise<LearningApiResponse<LearningAnswerResultVO>> {
@@ -467,7 +503,9 @@ export function answerLearningQuestion(data: {
 
 /** 知识点聚合（章节内局部口径；attempted/needsReview/correct 与 studyState 的"本人最新有效作答"同义） */
 export interface LearningCatalogNodeVO {
+  nodeCode?: string | null;
   nodeName: string;
+  displayName?: string | null;
   /** 该章节内映射到该知识点的去重题目数（按 questionId） */
   questionCount: number;
   /** 本人已有作答的题目数；未作答 = questionCount - attempted（后端不下发） */
@@ -486,15 +524,48 @@ export interface LearningCatalogChapterVO {
   nodes: LearningCatalogNodeVO[];
 }
 
-export interface LearningCatalogVO {
-  /** 去重后的题目总数（= 各章节 questionCount 之和） */
-  totalQuestions: number;
-  chapters: LearningCatalogChapterVO[];
+export interface LearningCatalogUnitVO {
+  unitCode: string;
+  sectionCode: string;
+  title: string;
+  sortOrder?: number;
+  questionCount: number;
 }
 
-/** 题目练习目录聚合：请求体可选 { chapter }，缺省/空体返回全部章节（仅 PUBLISHED 且未删除） */
+export interface LearningCatalogSectionVO {
+  sectionCode: string;
+  parentSectionCode?: string | null;
+  title: string;
+  textbookNumber?: string | null;
+  sectionType?: string | null;
+  sortOrder?: number;
+  questionCount: number;
+  units: LearningCatalogUnitVO[];
+  children: LearningCatalogSectionVO[];
+}
+
+export interface LearningCatalogVO {
+  /** 去重后的题目总数（当前教材范围 + 学习状态过滤后的口径） */
+  totalQuestions: number;
+  courseCode?: string | null;
+  /** 旧章节聚合（兼容旧入口；新学生目录使用 sections/units） */
+  chapters: LearningCatalogChapterVO[];
+  /** 教材小节树（稳定 sectionCode） */
+  sections?: LearningCatalogSectionVO[];
+  /** 当前范围内的知识节点 */
+  nodes?: LearningCatalogNodeVO[];
+  attempted?: number;
+  needsReview?: number;
+  correct?: number;
+}
+
+/** 题目练习目录聚合：目录范围与列表共用稳定代码谓词（仅 PUBLISHED 且未删除） */
 export function getLearningCatalog(params?: {
   chapter?: string;
+  courseCode?: string;
+  sectionCode?: string;
+  unitCode?: string;
+  studyState?: string;
 }): Promise<LearningApiResponse<LearningCatalogVO>> {
   return axios.post("/api/learning/questions/catalog", params || {});
 }
@@ -522,6 +593,10 @@ export interface AssessmentFinishResult {
 export function startAssessment(data: {
   chapter?: string;
   nodeName?: string;
+  courseCode?: string;
+  sectionCode?: string;
+  unitCode?: string;
+  nodeCode?: string;
   type?: string;
   difficulty?: number;
   studyState?: string;
@@ -652,7 +727,9 @@ export function masteryPath(
 export function nodeWorkbench(
   nodeName: string
 ): Promise<LearningApiResponse<NodeWorkbenchVO>> {
-  return axios.get("/api/learning/mastery/node", { params: { nodeName } });
+  return axios.get("/api/learning/mastery/node", {
+    params: nodeName.startsWith("os.") ? { nodeCode: nodeName } : { nodeName },
+  });
 }
 
 export function masteryRecommend(): Promise<
@@ -686,6 +763,79 @@ export interface WeakNodeVO {
   lastFailure?: LastFailureVO | null;
 }
 
+/** 活动中的一个知识节点证据 */
+export interface ActivityNodeRefVO {
+  nodeCode?: string | null;
+  nodeName: string;
+  masteryBefore?: number | null;
+  masteryAfter?: number | null;
+  result?: string | null;
+  independent?: boolean;
+  eventId?: number | string | null;
+}
+
+/** 一次学习活动（时间线主单位） */
+export interface LearningActivityVO {
+  activityId: string;
+  activityType: string;
+  title: string;
+  status?: string | null;
+  result?: string | null;
+  occurredAt: string;
+  courseCode?: string | null;
+  unitCode?: string | null;
+  activityCode?: string | null;
+  taskCode?: string | null;
+  taskItemCode?: string | null;
+  roundNo?: number | null;
+  resourceType?: string | null;
+  resourceId?: number | string | null;
+  algorithmKey?: string | null;
+  summary?: string | null;
+  inputSnapshot?: string | null;
+  resultSnapshot?: string | null;
+  nodeRefs?: ActivityNodeRefVO[];
+  evidenceRefs?: (number | string)[];
+  replayEventId?: number | string | null;
+  returnRoute?: string | null;
+}
+
+export interface LearningActivityPageVO {
+  total: number;
+  records: LearningActivityVO[];
+}
+
+export interface SimulationRunPayload {
+  algorithmKey: string;
+  title?: string;
+  courseCode?: string | null;
+  unitCode?: string | null;
+  activityCode?: string | null;
+  input?: Record<string, unknown> | null;
+  resultSummary?: Record<string, unknown> | null;
+}
+
+/** 按“一次学习活动”分页的记录查询；服务端只查当前登录用户 */
+export function learningActivities(params: {
+  type?: string;
+  courseCode?: string;
+  unitCode?: string;
+  nodeCode?: string;
+  startTime?: string;
+  endTime?: string;
+  current?: number;
+  pageSize?: number;
+}): Promise<LearningApiResponse<LearningActivityPageVO>> {
+  return axios.get("/api/learning/records/activities", { params });
+}
+
+/** 记录普通算法演示的一次完整运行（不写掌握证据） */
+export function recordSimulationRun(
+  payload: SimulationRunPayload
+): Promise<LearningApiResponse<number>> {
+  return axios.post("/api/learning/records/simulations", payload);
+}
+
 /** 本人学习时间线（只查当前登录用户；时间格式 yyyy-MM-dd HH:mm:ss） */
 export function masteryTimeline(params: {
   nodeName?: string;
@@ -716,6 +866,7 @@ export function masteryWeakness(): Promise<LearningApiResponse<WeakNodeVO[]>> {
 
 export function tutorAsk(data: {
   nodeName?: string;
+  nodeCode?: string;
   question: string;
 }): Promise<LearningApiResponse<TutorAnswerVO>> {
   return axios.post("/api/learning/tutor/ask", data, { timeout: 45000 });
@@ -846,6 +997,8 @@ export interface CpuProcessInput {
 }
 
 export function runCpuSimulation(data: {
+  sourceUnitCode?: string;
+  sourceActivityCode?: string;
   nodeName?: string;
   algorithm: "FCFS" | "SJF" | "RR";
   timeSlice?: number;
@@ -862,6 +1015,8 @@ export function runCpuSimulation(data: {
 }
 
 export function runPageSimulation(data: {
+  sourceUnitCode?: string;
+  sourceActivityCode?: string;
   nodeName?: string;
   algorithm: "FIFO" | "LRU" | "OPT";
   frames: number;

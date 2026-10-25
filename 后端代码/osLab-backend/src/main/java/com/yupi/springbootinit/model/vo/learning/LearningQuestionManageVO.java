@@ -15,6 +15,8 @@ import java.util.List;
 public class LearningQuestionManageVO extends LearningQuestionVO {
     /** 标准答案 JSON（JUDGE true/false；SINGLE "A"；MULTIPLE ["A","C"]；FILL_BLANK 数组） */
     private String correctAnswer;
+    private String activeStatus;
+    private Integer publishedRevision;
     /** 审核记录（时间升序） */
     private List<ReviewRecordVO> reviewHistory;
 

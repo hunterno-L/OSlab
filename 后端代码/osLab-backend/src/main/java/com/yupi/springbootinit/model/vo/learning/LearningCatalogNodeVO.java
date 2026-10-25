@@ -11,9 +11,19 @@ import java.io.Serializable;
 public class LearningCatalogNodeVO implements Serializable {
 
     /**
-     * 知识节点名（来自 learning_question_node 映射）
+     * 稳定知识节点代码（learning_question_node.nodeCode；旧映射可能为空）
+     */
+    private String nodeCode;
+
+    /**
+     * 知识节点存储键（来自 learning_question_node.nodeName）
      */
     private String nodeName;
+
+    /**
+     * 节点显示名（稳定代码解析；无绑定时退回 nodeName）
+     */
+    private String displayName;
 
     /**
      * 该章节内映射到该节点的去重题目数（按 questionId）

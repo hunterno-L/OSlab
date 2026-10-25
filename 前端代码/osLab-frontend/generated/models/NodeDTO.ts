@@ -3,6 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 export type NodeDTO = {
+    nodeCode?: string;
+    displayName?: string;
+    nodeType?: string;
+    layer?: string;
+    homeSectionCode?: string;
     category?: string;
     chapter?: string;
     description?: string;

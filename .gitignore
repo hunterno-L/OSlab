@@ -19,6 +19,12 @@ deploy/.env
 
 # Local databases, downloads, and test/runtime artifacts
 tmp/
+# Task attachment private storage (oslab.tasks.storage-dir)
+data/task-files/
+后端代码/osLab-backend/data/
+
+# 部署实录含公网地址与演示口令，禁止入库
+deploy/*部署实录*.md
 
 # Logs and local reports
 *.log

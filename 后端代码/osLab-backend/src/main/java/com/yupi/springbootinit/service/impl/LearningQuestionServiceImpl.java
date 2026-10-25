@@ -10,12 +10,14 @@ import com.yupi.springbootinit.constant.UserConstant;
 import com.yupi.springbootinit.exception.BusinessException;
 import com.yupi.springbootinit.exception.ThrowUtils;
 import com.yupi.springbootinit.learning.LearningQuestionGrader;
+import com.yupi.springbootinit.learning.LearningQuestionScopeService;
 import com.yupi.springbootinit.mapper.LearningAssessmentRunMapper;
 import com.yupi.springbootinit.mapper.LearningAttemptMapper;
 import com.yupi.springbootinit.mapper.LearningQuestionMapper;
 import com.yupi.springbootinit.mapper.LearningQuestionNodeMapper;
 import com.yupi.springbootinit.mapper.LearningReviewMapper;
 import com.yupi.springbootinit.model.dto.learning.LearningAnswerRequest;
+import com.yupi.springbootinit.model.dto.learning.LearningCatalogRequest;
 import com.yupi.springbootinit.model.dto.learning.LearningQuestionAddRequest;
 import com.yupi.springbootinit.model.dto.learning.LearningQuestionQueryRequest;
 import com.yupi.springbootinit.model.dto.learning.LearningQuestionReviewRequest;
@@ -34,6 +36,8 @@ import com.yupi.springbootinit.model.vo.learning.ImportResultVO;
 import com.yupi.springbootinit.model.vo.learning.LearningAnswerResultVO;
 import com.yupi.springbootinit.model.vo.learning.LearningCatalogChapterVO;
 import com.yupi.springbootinit.model.vo.learning.LearningCatalogNodeVO;
+import com.yupi.springbootinit.model.vo.learning.LearningCatalogSectionVO;
+import com.yupi.springbootinit.model.vo.learning.LearningCatalogUnitVO;
 import com.yupi.springbootinit.model.vo.learning.LearningCatalogVO;
 import com.yupi.springbootinit.model.vo.learning.LearningQuestionVO;
 import com.yupi.springbootinit.model.vo.learning.LearningQuestionManageVO;
@@ -90,6 +94,18 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
 
     @Resource
     private UserService userService;
+    @Resource
+    private com.yupi.springbootinit.learning.TeachingAssessmentService teachingAssessments;
+    @Resource
+    private com.yupi.springbootinit.learning.ActivityContextService activityContext;
+    @Resource
+    private com.yupi.springbootinit.learning.NodeIdentityService nodeIdentities;
+
+    @Resource
+    private com.yupi.springbootinit.learning.LearningQuestionScopeService questionScope;
+
+    @Resource
+    private com.yupi.springbootinit.task.TaskExecutionContextService taskContext;
 
     // region CRUD
 
@@ -107,6 +123,10 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         question.setIsDelete(0);
         boolean saved = this.save(question);
         ThrowUtils.throwIf(!saved, ErrorCode.SYSTEM_ERROR, "题目保存失败");
+        LearningQuestion stableIdentity = new LearningQuestion();
+        stableIdentity.setId(question.getId());
+        stableIdentity.setQuestionCode("q.legacy." + question.getId());
+        this.updateById(stableIdentity);
         saveNodeMappings(question.getId(), request.getNodeNames());
         return question.getId();
     }
@@ -117,7 +137,15 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         ThrowUtils.throwIf(request == null || request.getId() == null, ErrorCode.PARAMS_ERROR);
         LearningQuestion old = this.getById(request.getId());
         ThrowUtils.throwIf(old == null || old.getIsDelete() == 1, ErrorCode.NOT_FOUND_ERROR, "题目不存在");
+        ThrowUtils.throwIf(com.yupi.springbootinit.task.TaskConstants.SCOPE_TASK.equals(old.getResourceScope()),
+                ErrorCode.NOT_FOUND_ERROR, "题目不存在");
         checkOwnerOrAdmin(old, user);
+        if (teachingAssessments != null && (LearningReviewStatusEnum.PUBLISHED.name().equals(old.getReviewStatus())
+                || teachingAssessments.draft(old.getId()) != null)) {
+            validateRequest(request);
+            teachingAssessments.saveEditorRevision(request, old, user.getId());
+            return true;
+        }
         // 仅 DRAFT/REJECTED/OFFLINE 可编辑；编辑后回到 DRAFT
         String status = old.getReviewStatus();
         boolean editable = LearningReviewStatusEnum.DRAFT.name().equals(status)
@@ -149,6 +177,8 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
     public LearningQuestionVO getQuestionVO(long questionId, User user) {
         LearningQuestion question = this.getById(questionId);
         ThrowUtils.throwIf(question == null || question.getIsDelete() == 1, ErrorCode.NOT_FOUND_ERROR, "题目不存在");
+        ThrowUtils.throwIf(com.yupi.springbootinit.task.TaskConstants.SCOPE_TASK.equals(question.getResourceScope()),
+                ErrorCode.NOT_FOUND_ERROR, "题目不存在");
         boolean owner = question.getUserId().equals(user.getId());
         boolean admin = userService.isAdmin(user);
         boolean published = LearningReviewStatusEnum.isStudentVisible(question.getReviewStatus());
@@ -165,6 +195,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
                 .in(LearningQuestion::getId, questionIds)
                 .eq(LearningQuestion::getReviewStatus, LearningReviewStatusEnum.PUBLISHED.name())
                 .eq(LearningQuestion::getIsDelete, 0)
+                .eq(LearningQuestion::getResourceScope, com.yupi.springbootinit.task.TaskConstants.SCOPE_SHARED)
                 .orderByAsc(LearningQuestion::getDifficulty)
                 .orderByAsc(LearningQuestion::getId));
         if (CollectionUtils.isEmpty(questions)) {
@@ -196,6 +227,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
             vo.setAnalysis(null);
             vo.setMisconception(null);
             vo.setNodeNames(nodeNamesByQuestion.getOrDefault(question.getId(), Collections.emptyList()));
+            if(nodeIdentities!=null)vo.setNodeDisplayNames(nodeIdentities.displayNames(vo.getNodeNames()));
             List<LearningAttempt> attempts = attemptsByQuestion.getOrDefault(question.getId(), Collections.emptyList());
             vo.setHasAttempted(!attempts.isEmpty());
             vo.setAttemptCount(attempts.size());
@@ -223,6 +255,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         ThrowUtils.throwIf(reviewQueue && !admin, ErrorCode.NO_AUTH_ERROR, "仅管理员可查看审核队列");
 
         LambdaQueryWrapper<LearningQuestion> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(LearningQuestion::getResourceScope, com.yupi.springbootinit.task.TaskConstants.SCOPE_SHARED);
         if (reviewQueue) {
             // 审核队列：全部非删除题目（可按状态筛选）
             if (StringUtils.isNotBlank(request.getReviewStatus())) {
@@ -259,6 +292,16 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
                 return new Page<>(current, size, 0);
             }
             wrapper.in(LearningQuestion::getId, ids);
+        }
+        // 稳定目录/节点范围：与 catalog、测评候选共用同一解析器（空集直接返回空页）
+        LearningQuestionScopeService.Scope scope = questionScope == null ? null : questionScope.resolve(
+                request.getCourseCode(), request.getSectionCode(), request.getUnitCode(), request.getNodeCode());
+        if (scope != null && scope.isConstrained()) {
+            Set<Long> scopedIds = scope.getQuestionIds();
+            if (CollectionUtils.isEmpty(scopedIds)) {
+                return new Page<>(current, size, 0);
+            }
+            wrapper.in(LearningQuestion::getId, scopedIds);
         }
         wrapper.orderByDesc(LearningQuestion::getCreateTime);
 
@@ -352,6 +395,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         // 测评为学生功能：固定学生口径（仅已发布），不开放审核队列/我的题目范围
         wrapper.eq(LearningQuestion::getReviewStatus, LearningReviewStatusEnum.PUBLISHED.name());
         wrapper.eq(LearningQuestion::getIsDelete, 0);
+        wrapper.eq(LearningQuestion::getResourceScope, com.yupi.springbootinit.task.TaskConstants.SCOPE_SHARED);
         if (StringUtils.isNotBlank(request.getType())) {
             wrapper.eq(LearningQuestion::getType, request.getType());
         }
@@ -367,6 +411,15 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
                 return Collections.emptyList();
             }
             wrapper.in(LearningQuestion::getId, ids);
+        }
+        LearningQuestionScopeService.Scope scope = questionScope == null ? null : questionScope.resolve(
+                request.getCourseCode(), request.getSectionCode(), request.getUnitCode(), request.getNodeCode());
+        if (scope != null && scope.isConstrained()) {
+            Set<Long> scopedIds = scope.getQuestionIds();
+            if (CollectionUtils.isEmpty(scopedIds)) {
+                return Collections.emptyList();
+            }
+            wrapper.in(LearningQuestion::getId, scopedIds);
         }
         // 服务端稳定顺序：id 升序（抽样 = 取前 count，确定性可复算）
         wrapper.orderByAsc(LearningQuestion::getId);
@@ -457,6 +510,25 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
             history.add(record);
         }
         vo.setReviewHistory(history);
+        if (teachingAssessments != null) {
+            Map<String,Object> draft = teachingAssessments.draft(question.getId());
+            if (draft != null) {
+                com.fasterxml.jackson.databind.JsonNode content = (com.fasterxml.jackson.databind.JsonNode) draft.get("content");
+                vo.setActiveStatus(question.getReviewStatus());
+                vo.setPublishedRevision(question.getRevision());
+                vo.setReviewStatus(draft.get("reviewStatus").toString());
+                vo.setRevision(((Number)draft.get("revision")).intValue());
+                vo.setTitle(content.path("title").asText());
+                vo.setContent(content.path("content").asText());
+                vo.setType(content.path("type").asText());
+                vo.setOptions(content.path("options").toString());
+                vo.setCorrectAnswer(content.path("answer").toString());
+                vo.setAnalysis(content.path("analysis").asText());
+                vo.setMisconception(content.path("misconception").asText());
+                vo.setDifficulty(content.path("difficulty").asInt());
+                vo.setChapter(content.path("sectionCode").asText());
+            }
+        }
         return vo;
     }
 
@@ -464,6 +536,8 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
     public LearningQuestionManageVO getManageQuestionVO(long questionId, User user) {
         LearningQuestion question = this.getById(questionId);
         ThrowUtils.throwIf(question == null || question.getIsDelete() == 1,
+                ErrorCode.NOT_FOUND_ERROR, "题目不存在");
+        ThrowUtils.throwIf(com.yupi.springbootinit.task.TaskConstants.SCOPE_TASK.equals(question.getResourceScope()),
                 ErrorCode.NOT_FOUND_ERROR, "题目不存在");
         return toManageVO(question);
     }
@@ -475,11 +549,19 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         long size = request.getPageSize();
         ThrowUtils.throwIf(size > 50, ErrorCode.PARAMS_ERROR, "每页最多 50 条");
         LambdaQueryWrapper<LearningQuestion> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(LearningQuestion::getResourceScope, com.yupi.springbootinit.task.TaskConstants.SCOPE_SHARED);
         if (Boolean.TRUE.equals(request.getMyOnly())) {
             wrapper.eq(LearningQuestion::getUserId, user.getId());
         }
         if (StringUtils.isNotBlank(request.getReviewStatus())) {
-            wrapper.eq(LearningQuestion::getReviewStatus, request.getReviewStatus());
+            if (teachingAssessments == null) wrapper.eq(LearningQuestion::getReviewStatus, request.getReviewStatus());
+            else {
+                List<Long> revisedIds = teachingAssessments.questionIdsByDraftStatus(request.getReviewStatus());
+                wrapper.and(w -> {
+                    w.eq(LearningQuestion::getReviewStatus, request.getReviewStatus());
+                    if (!revisedIds.isEmpty()) w.or().in(LearningQuestion::getId, revisedIds);
+                });
+            }
         }
         if (StringUtils.isNotBlank(request.getTitle())) {
             wrapper.like(LearningQuestion::getTitle, request.getTitle());
@@ -554,55 +636,143 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
      */
     @Override
     public LearningCatalogVO questionCatalog(String chapter, User user) {
-        String chapterFilter = StringUtils.trimToNull(chapter);
-        // 1) 题目：仅 PUBLISHED 且未逻辑删除（与 list/page 学生口径一致），按 questionId 去重
-        List<LearningQuestion> questions = this.list(new LambdaQueryWrapper<LearningQuestion>()
-                .eq(LearningQuestion::getReviewStatus, LearningReviewStatusEnum.PUBLISHED.name())
-                .eq(LearningQuestion::getIsDelete, 0));
-        Map<Long, LearningQuestion> visibleQuestions = new LinkedHashMap<>();
-        for (LearningQuestion question : questions) {
-            if (question.getId() == null || visibleQuestions.containsKey(question.getId())) {
-                continue;
-            }
-            if (matchesChapter(question.getChapter(), chapterFilter)) {
-                visibleQuestions.put(question.getId(), question);
+        LearningCatalogRequest request = new LearningCatalogRequest();
+        request.setChapter(chapter);
+        return questionCatalog(request, user);
+    }
+
+    @Override
+    public LearningCatalogVO questionCatalog(LearningCatalogRequest request, User user) {
+        LearningCatalogRequest req = request == null ? new LearningCatalogRequest() : request;
+        String chapterFilter = StringUtils.trimToNull(req.getChapter());
+        String studyState = StringUtils.trimToNull(req.getStudyState());
+
+        // 目录范围：列表/catalog/测评共用同一稳定代码解析器
+        LearningQuestionScopeService.Scope scope = questionScope == null ? null : questionScope.resolve(
+                req.getCourseCode(), req.getSectionCode(), req.getUnitCode(), null);
+        boolean hasDirectoryScope = scope != null && scope.isDirectoryConstrained();
+        boolean narrowed = StringUtils.isNotBlank(req.getSectionCode())
+                || StringUtils.isNotBlank(req.getUnitCode());
+        // 目录树题量按完整课程统计；当前 section/unit 只收窄“当前范围”的节点与总数
+        LearningQuestionScopeService.Scope treeScope = scope;
+        if (hasDirectoryScope && narrowed && scope.getCourseCode() != null) {
+            treeScope = questionScope.resolve(scope.getCourseCode(), null, null, null);
+        }
+
+        List<LearningQuestion> candidates;
+        if (hasDirectoryScope) {
+            Set<Long> ids = scope.getQuestionIds();
+            candidates = CollectionUtils.isEmpty(ids)
+                    ? Collections.emptyList()
+                    : this.list(studentQuestionWrapper().in(LearningQuestion::getId, ids));
+        } else {
+            candidates = this.list(studentQuestionWrapper());
+        }
+        List<LearningQuestion> treeCandidates;
+        if (treeScope == scope) {
+            treeCandidates = candidates;
+        } else if (treeScope.isDirectoryConstrained()) {
+            Set<Long> ids = treeScope.getQuestionIds();
+            treeCandidates = CollectionUtils.isEmpty(ids)
+                    ? Collections.emptyList()
+                    : this.list(studentQuestionWrapper().in(LearningQuestion::getId, ids));
+        } else {
+            treeCandidates = Collections.emptyList();
+        }
+
+        Set<Long> candidateIds = candidates.stream().map(LearningQuestion::getId)
+                .filter(Objects::nonNull).collect(Collectors.toCollection(LinkedHashSet::new));
+        Set<Long> treeIds = treeCandidates.stream().map(LearningQuestion::getId)
+                .filter(Objects::nonNull).collect(Collectors.toCollection(LinkedHashSet::new));
+        Set<Long> allIds = new LinkedHashSet<>(candidateIds);
+        allIds.addAll(treeIds);
+
+        Map<Long, List<LearningQuestionNode>> mappingsByQuestion = new LinkedHashMap<>();
+        if (!allIds.isEmpty()) {
+            for (LearningQuestionNode mapping : learningQuestionNodeMapper.selectList(
+                    new LambdaQueryWrapper<LearningQuestionNode>()
+                            .in(LearningQuestionNode::getQuestionId, allIds))) {
+                if (mapping.getQuestionId() == null) continue;
+                mappingsByQuestion.computeIfAbsent(mapping.getQuestionId(), ignored -> new ArrayList<>())
+                        .add(mapping);
             }
         }
+        Map<Long, LearningAttempt> latestAttemptByQuestion = latestAttempts(allIds, user.getId());
+
+        List<LearningQuestion> visible = filterCatalogQuestions(candidates, chapterFilter, studyState,
+                latestAttemptByQuestion);
+        Set<Long> visibleIds = visible.stream().map(LearningQuestion::getId)
+                .filter(Objects::nonNull).collect(Collectors.toCollection(LinkedHashSet::new));
+        Set<Long> treeVisibleIds = treeScope == scope
+                ? visibleIds
+                : filterCatalogQuestions(treeCandidates, chapterFilter, studyState, latestAttemptByQuestion)
+                .stream().map(LearningQuestion::getId).filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
         LearningCatalogVO vo = new LearningCatalogVO();
-        vo.setTotalQuestions(visibleQuestions.size());
-        vo.setChapters(new ArrayList<>());
-        if (visibleQuestions.isEmpty()) {
-            return vo;
+        vo.setCourseCode(scope == null ? null : scope.getCourseCode());
+        vo.setTotalQuestions(visible.size());
+        vo.setChapters(buildLegacyChapters(visible, mappingsByQuestion, latestAttemptByQuestion));
+        vo.setNodes(buildCatalogNodes(visible, mappingsByQuestion, latestAttemptByQuestion));
+        vo.setSections(buildCatalogSections(treeScope, treeVisibleIds));
+        int attempted = 0, needsReview = 0, correct = 0;
+        for (LearningQuestion question : visible) {
+            LearningAttempt latest = latestAttemptByQuestion.get(question.getId());
+            if (latest == null) continue;
+            attempted++;
+            if (latest.getIsCorrect() != null && latest.getIsCorrect() == 1) correct++;
+            else needsReview++;
         }
+        vo.setAttempted(attempted);
+        vo.setNeedsReview(needsReview);
+        vo.setCorrect(correct);
+        return vo;
+    }
 
-        // 2) 节点映射：一次批量查询，按 questionId 归组（同题同节点的重复映射行只计一次）
-        List<Long> visibleIds = new ArrayList<>(visibleQuestions.keySet());
-        Map<Long, Set<String>> nodeNamesByQuestion = new HashMap<>();
-        for (LearningQuestionNode mapping : learningQuestionNodeMapper.selectList(
-                new LambdaQueryWrapper<LearningQuestionNode>()
-                        .in(LearningQuestionNode::getQuestionId, visibleIds))) {
-            if (mapping.getQuestionId() == null || StringUtils.isBlank(mapping.getNodeName())) {
-                continue;
-            }
-            nodeNamesByQuestion.computeIfAbsent(mapping.getQuestionId(), ignored -> new LinkedHashSet<>())
-                    .add(mapping.getNodeName());
-        }
+    private LambdaQueryWrapper<LearningQuestion> studentQuestionWrapper() {
+        return new LambdaQueryWrapper<LearningQuestion>()
+                .eq(LearningQuestion::getReviewStatus, LearningReviewStatusEnum.PUBLISHED.name())
+                .eq(LearningQuestion::getIsDelete, 0)
+                .eq(LearningQuestion::getResourceScope, com.yupi.springbootinit.task.TaskConstants.SCOPE_SHARED);
+    }
 
-        // 3) 本人作答：一次批量查询；排序与 studyState 过滤一致（createTime asc, id asc），末位即"最新有效作答"
-        Map<Long, LearningAttempt> latestAttemptByQuestion = new HashMap<>();
+    private Map<Long, LearningAttempt> latestAttempts(Set<Long> questionIds, Long userId) {
+        Map<Long, LearningAttempt> latest = new HashMap<>();
+        if (CollectionUtils.isEmpty(questionIds)) return latest;
         for (LearningAttempt attempt : learningAttemptMapper.selectList(
                 new LambdaQueryWrapper<LearningAttempt>()
-                        .eq(LearningAttempt::getUserId, user.getId())
-                        .in(LearningAttempt::getQuestionId, visibleIds)
+                        .eq(LearningAttempt::getUserId, userId)
+                        .in(LearningAttempt::getQuestionId, questionIds)
                         .orderByAsc(LearningAttempt::getCreateTime)
                         .orderByAsc(LearningAttempt::getId))) {
-            latestAttemptByQuestion.put(attempt.getQuestionId(), attempt);
+            latest.put(attempt.getQuestionId(), attempt);
         }
+        return latest;
+    }
 
-        // 4) 章节分组：按共享谓词归一化分组（null/空白/字面值"未归类"同桶），
-        // 随后排序（"未归类"恒排最后，其余中文序）
+    private List<LearningQuestion> filterCatalogQuestions(List<LearningQuestion> questions,
+                                                          String chapterFilter,
+                                                          String studyState,
+                                                          Map<Long, LearningAttempt> latestAttemptByQuestion) {
+        return questions.stream()
+                .filter(question -> matchesChapter(question.getChapter(), chapterFilter))
+                .filter(question -> StringUtils.isBlank(studyState)
+                        || "ALL".equalsIgnoreCase(studyState)
+                        || matchesStudyState(
+                        latestAttemptByQuestion.containsKey(question.getId())
+                                ? Collections.singletonList(latestAttemptByQuestion.get(question.getId()))
+                                : null,
+                        studyState))
+                .collect(Collectors.toList());
+    }
+
+    /** 旧章节→知识点聚合：兼容旧入口，保持原排序与“未归类”语义。 */
+    private List<LearningCatalogChapterVO> buildLegacyChapters(
+            List<LearningQuestion> visible,
+            Map<Long, List<LearningQuestionNode>> mappingsByQuestion,
+            Map<Long, LearningAttempt> latestAttemptByQuestion) {
         Map<String, List<LearningQuestion>> questionsByChapter = new LinkedHashMap<>();
-        for (LearningQuestion question : visibleQuestions.values()) {
+        for (LearningQuestion question : visible) {
             String key = chapterKey(question.getChapter());
             questionsByChapter.computeIfAbsent(key, ignored -> new ArrayList<>()).add(question);
         }
@@ -611,13 +781,15 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
             LearningCatalogChapterVO chapterVo = new LearningCatalogChapterVO();
             chapterVo.setChapter(entry.getKey());
             chapterVo.setQuestionCount(entry.getValue().size());
-            // 节点局部口径计数：一题映射多节点时每个节点各计一次；未作答数由前端用 questionCount - attempted 计算
             Map<String, LearningCatalogNodeVO> nodeVos = new LinkedHashMap<>();
             for (LearningQuestion question : entry.getValue()) {
                 LearningAttempt latest = latestAttemptByQuestion.get(question.getId());
                 boolean attempted = latest != null;
                 boolean latestCorrect = attempted && latest.getIsCorrect() != null && latest.getIsCorrect() == 1;
-                for (String nodeName : nodeNamesByQuestion.getOrDefault(question.getId(), Collections.emptySet())) {
+                Set<String> seenNodes = new LinkedHashSet<>();
+                for (LearningQuestionNode mapping : mappingsByQuestion.getOrDefault(question.getId(), Collections.emptyList())) {
+                    String nodeName = StringUtils.trimToEmpty(mapping.getNodeName());
+                    if (nodeName.isEmpty() || !seenNodes.add(nodeName)) continue;
                     LearningCatalogNodeVO nodeVo = nodeVos.computeIfAbsent(nodeName, ignored -> {
                         LearningCatalogNodeVO created = new LearningCatalogNodeVO();
                         created.setNodeName(nodeName);
@@ -627,14 +799,12 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
                         created.setCorrect(0);
                         return created;
                     });
+                    if (StringUtils.isBlank(nodeVo.getNodeCode())) nodeVo.setNodeCode(mapping.getNodeCode());
                     nodeVo.setQuestionCount(nodeVo.getQuestionCount() + 1);
                     if (attempted) {
                         nodeVo.setAttempted(nodeVo.getAttempted() + 1);
-                        if (latestCorrect) {
-                            nodeVo.setCorrect(nodeVo.getCorrect() + 1);
-                        } else {
-                            nodeVo.setNeedsReview(nodeVo.getNeedsReview() + 1);
-                        }
+                        if (latestCorrect) nodeVo.setCorrect(nodeVo.getCorrect() + 1);
+                        else nodeVo.setNeedsReview(nodeVo.getNeedsReview() + 1);
                     }
                 }
             }
@@ -648,8 +818,157 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
                 .comparing((LearningCatalogChapterVO c) -> UNCATEGORIZED_CHAPTER.equals(c.getChapter()))
                 .thenComparing(LearningCatalogChapterVO::getChapter, NAME_COLLATOR)
                 .thenComparing(LearningCatalogChapterVO::getChapter));
-        vo.setChapters(chapters);
-        return vo;
+        return chapters;
+    }
+
+    /** 当前范围内节点聚合（稳定 nodeCode 优先；旧行回退 nodeName）。 */
+    private List<LearningCatalogNodeVO> buildCatalogNodes(
+            List<LearningQuestion> visible,
+            Map<Long, List<LearningQuestionNode>> mappingsByQuestion,
+            Map<Long, LearningAttempt> latestAttemptByQuestion) {
+        Map<String, LearningCatalogNodeVO> nodeVos = new LinkedHashMap<>();
+        Set<String> storageNames = new LinkedHashSet<>();
+        for (LearningQuestion question : visible) {
+            LearningAttempt latest = latestAttemptByQuestion.get(question.getId());
+            boolean attempted = latest != null;
+            boolean latestCorrect = attempted && latest.getIsCorrect() != null && latest.getIsCorrect() == 1;
+            Set<String> seenNodes = new LinkedHashSet<>();
+            for (LearningQuestionNode mapping : mappingsByQuestion.getOrDefault(question.getId(), Collections.emptyList())) {
+                String nodeName = StringUtils.trimToEmpty(mapping.getNodeName());
+                String nodeCode = StringUtils.trimToEmpty(mapping.getNodeCode());
+                if (nodeName.isEmpty() && nodeCode.isEmpty()) continue;
+                String key = nodeCode.isEmpty() ? "n:" + nodeName : "c:" + nodeCode;
+                if (!seenNodes.add(key)) continue;
+                LearningCatalogNodeVO nodeVo = nodeVos.computeIfAbsent(key, ignored -> {
+                    LearningCatalogNodeVO created = new LearningCatalogNodeVO();
+                    created.setNodeCode(nodeCode.isEmpty() ? null : nodeCode);
+                    created.setNodeName(nodeName.isEmpty() ? null : nodeName);
+                    created.setQuestionCount(0);
+                    created.setAttempted(0);
+                    created.setNeedsReview(0);
+                    created.setCorrect(0);
+                    return created;
+                });
+                if (StringUtils.isBlank(nodeVo.getNodeCode()) && !nodeCode.isEmpty()) nodeVo.setNodeCode(nodeCode);
+                if (StringUtils.isBlank(nodeVo.getNodeName()) && !nodeName.isEmpty()) nodeVo.setNodeName(nodeName);
+                if (!nodeName.isEmpty()) storageNames.add(nodeName);
+                nodeVo.setQuestionCount(nodeVo.getQuestionCount() + 1);
+                if (attempted) {
+                    nodeVo.setAttempted(nodeVo.getAttempted() + 1);
+                    if (latestCorrect) nodeVo.setCorrect(nodeVo.getCorrect() + 1);
+                    else nodeVo.setNeedsReview(nodeVo.getNeedsReview() + 1);
+                }
+            }
+        }
+        Map<String, String> displayByStorage = displayNames(storageNames);
+        for (LearningCatalogNodeVO nodeVo : nodeVos.values()) {
+            String storage = nodeVo.getNodeName();
+            String display = storage == null ? null : displayByStorage.getOrDefault(storage, storage);
+            if (StringUtils.isBlank(display)) display = nodeVo.getNodeCode();
+            nodeVo.setDisplayName(display);
+        }
+        List<LearningCatalogNodeVO> nodes = new ArrayList<>(nodeVos.values());
+        nodes.sort(Comparator
+                .comparing((LearningCatalogNodeVO node) -> StringUtils.defaultIfBlank(node.getDisplayName(), node.getNodeName()), NAME_COLLATOR)
+                .thenComparing(node -> StringUtils.defaultIfBlank(node.getDisplayName(), node.getNodeName()))
+                .thenComparing(node -> StringUtils.defaultIfBlank(node.getNodeCode(), "")));
+        return nodes;
+    }
+
+    private Map<String, String> displayNames(Set<String> storageNames) {
+        Map<String, String> result = new LinkedHashMap<>();
+        if (CollectionUtils.isEmpty(storageNames)) return result;
+        List<String> names = new ArrayList<>(storageNames);
+        if (nodeIdentities == null) {
+            for (String name : names) result.put(name, name);
+            return result;
+        }
+        List<String> displays = nodeIdentities.displayNames(names);
+        for (int i = 0; i < names.size(); i++) {
+            result.put(names.get(i), displays.size() > i ? displays.get(i) : names.get(i));
+        }
+        return result;
+    }
+
+    /** 教材小节树 + 已发布单元题量；题量按 distinct questionId 汇总到祖先小节。 */
+    private List<LearningCatalogSectionVO> buildCatalogSections(
+            LearningQuestionScopeService.Scope treeScope,
+            Set<Long> treeVisibleIds) {
+        if (treeScope == null || CollectionUtils.isEmpty(treeScope.getSections())) {
+            return new ArrayList<>();
+        }
+        Map<String, LearningCatalogSectionVO> sectionVos = new LinkedHashMap<>();
+        List<LearningCatalogSectionVO> roots = new ArrayList<>();
+        for (Map<String, Object> row : treeScope.getSections()) {
+            LearningCatalogSectionVO section = new LearningCatalogSectionVO();
+            section.setSectionCode(stringValue(row.get("sectionCode")));
+            section.setParentSectionCode(stringValue(row.get("parentSectionCode")));
+            section.setTitle(stringValue(row.get("title")));
+            section.setTextbookNumber(stringValue(row.get("textbookNumber")));
+            section.setSectionType(stringValue(row.get("sectionType")));
+            section.setSortOrder(intValue(row.get("sortOrder")));
+            section.setQuestionCount(0);
+            sectionVos.put(section.getSectionCode(), section);
+        }
+        Map<String, Set<Long>> unitQuestionIds = new LinkedHashMap<>();
+        for (LearningQuestionScopeService.UnitQuestions unit : treeScope.getAllUnits()) {
+            unitQuestionIds.put(unit.getUnitCode(), unit.getQuestionIds());
+            LearningCatalogSectionVO section = sectionVos.get(unit.getSectionCode());
+            if (section == null) continue;
+            LearningCatalogUnitVO unitVo = new LearningCatalogUnitVO();
+            unitVo.setUnitCode(unit.getUnitCode());
+            unitVo.setSectionCode(unit.getSectionCode());
+            unitVo.setTitle(unit.getTitle());
+            unitVo.setSortOrder(unit.getSortOrder());
+            unitVo.setQuestionCount((int) unit.getQuestionIds().stream()
+                    .filter(treeVisibleIds::contains).count());
+            section.getUnits().add(unitVo);
+        }
+        for (LearningCatalogSectionVO section : sectionVos.values()) {
+            section.getUnits().sort(Comparator
+                    .comparing(LearningCatalogUnitVO::getSortOrder,
+                            Comparator.nullsLast(Comparator.naturalOrder()))
+                    .thenComparing(LearningCatalogUnitVO::getUnitCode));
+            LearningCatalogSectionVO parent = sectionVos.get(section.getParentSectionCode());
+            if (parent == null) roots.add(section);
+            else parent.getChildren().add(section);
+        }
+        Comparator<LearningCatalogSectionVO> sectionComparator = Comparator
+                .comparing(LearningCatalogSectionVO::getSortOrder,
+                        Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(LearningCatalogSectionVO::getSectionCode);
+        roots.sort(sectionComparator);
+        for (LearningCatalogSectionVO section : sectionVos.values()) {
+            section.getChildren().sort(sectionComparator);
+        }
+        for (LearningCatalogSectionVO root : roots) {
+            fillSectionQuestionCount(root, unitQuestionIds, treeVisibleIds);
+        }
+        return roots;
+    }
+
+    private Set<Long> fillSectionQuestionCount(LearningCatalogSectionVO section,
+                                                Map<String, Set<Long>> unitQuestionIds,
+                                                Set<Long> treeVisibleIds) {
+        Set<Long> ids = new LinkedHashSet<>();
+        for (LearningCatalogUnitVO unit : section.getUnits()) {
+            Set<Long> unitIds = unitQuestionIds.get(unit.getUnitCode());
+            if (unitIds == null) continue;
+            for (Long id : unitIds) if (treeVisibleIds.contains(id)) ids.add(id);
+        }
+        for (LearningCatalogSectionVO child : section.getChildren()) {
+            ids.addAll(fillSectionQuestionCount(child, unitQuestionIds, treeVisibleIds));
+        }
+        section.setQuestionCount(ids.size());
+        return ids;
+    }
+
+    private static String stringValue(Object value) {
+        return value == null ? null : String.valueOf(value);
+    }
+
+    private static Integer intValue(Object value) {
+        return value == null ? null : ((Number) value).intValue();
     }
 
     // endregion
@@ -662,8 +981,33 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         ThrowUtils.throwIf(request == null || request.getQuestionId() == null, ErrorCode.PARAMS_ERROR);
         LearningQuestion question = this.getById(request.getQuestionId());
         ThrowUtils.throwIf(question == null || question.getIsDelete() == 1, ErrorCode.NOT_FOUND_ERROR, "题目不存在");
+        boolean taskScoped = com.yupi.springbootinit.task.TaskConstants.SCOPE_TASK.equals(question.getResourceScope());
+        com.yupi.springbootinit.task.TaskExecutionContextService.Context context = null;
+        Long sourceOriginalId = null;
+        String evaluationIdentity;
+        if (taskScoped) {
+            ThrowUtils.throwIf(StringUtils.isAnyBlank(request.getSourceTaskCode(), request.getSourceTaskItemCode())
+                            || request.getSourceTaskRound() == null,
+                    ErrorCode.NO_AUTH_ERROR, "任务题目请从学习任务入口作答");
+            context = taskContext.validate(user, request.getSourceTaskCode(), request.getSourceTaskItemCode(),
+                    question.getId(), request.getSourceTaskRound(), false);
+            evaluationIdentity = context.evaluationIdentity;
+            sourceOriginalId = context.sourceQuestionId;
+            if (StringUtils.isBlank(evaluationIdentity)) {
+                evaluationIdentity = com.yupi.springbootinit.task.EvaluationIdentity.forLearningQuestion(
+                        question, nodeCodesFor(question.getId()));
+            }
+        } else {
+            ThrowUtils.throwIf(StringUtils.isNotBlank(request.getSourceTaskCode()),
+                    ErrorCode.PARAMS_ERROR, "共享题目不能携带任务上下文");
+            evaluationIdentity = com.yupi.springbootinit.task.EvaluationIdentity.forLearningQuestion(
+                    question, nodeCodesFor(question.getId()));
+            sourceOriginalId = question.getId();
+        }
         ThrowUtils.throwIf(!LearningReviewStatusEnum.isStudentVisible(question.getReviewStatus()),
                 ErrorCode.OPERATION_ERROR, "题目未发布，不可作答");
+        if (activityContext != null) activityContext.validate(request.getSourceUnitCode(),
+                request.getSourceActivityCode(), question.getId(), false);
         if (request.getAssessmentRunId() != null) {
             LearningAssessmentRun run = learningAssessmentRunMapper.selectById(request.getAssessmentRunId());
             ThrowUtils.throwIf(run == null, ErrorCode.NOT_FOUND_ERROR, "测评会话不存在");
@@ -683,16 +1027,30 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
                             .last("limit 1"));
             if (existing != null) {
                 ThrowUtils.throwIf(!Objects.equals(existing.getQuestionId(), question.getId())
-                                || !Objects.equals(existing.getAssessmentRunId(), request.getAssessmentRunId()),
+                                || !Objects.equals(existing.getAssessmentRunId(), request.getAssessmentRunId())
+                                || !Objects.equals(existing.getSourceUnitCode(), request.getSourceUnitCode())
+                                || !Objects.equals(existing.getSourceActivityCode(), request.getSourceActivityCode())
+                                || !Objects.equals(existing.getSourceTaskCode(), request.getSourceTaskCode())
+                                || !Objects.equals(existing.getSourceTaskItemCode(), request.getSourceTaskItemCode())
+                                || !Objects.equals(existing.getSourceTaskRound(), request.getSourceTaskRound()),
                         ErrorCode.PARAMS_ERROR, "提交标识与本次作答不匹配");
                 return rebuildResultFromAttempt(existing, question);
             }
         }
         boolean correct = LearningQuestionGrader.grade(question.getType(), question.getAnswer(), request.getAnswer());
 
-        boolean isFirst = learningAttemptMapper.selectCount(new LambdaQueryWrapper<LearningAttempt>()
+        Long identityAttempts = learningAttemptMapper.selectCount(new LambdaQueryWrapper<LearningAttempt>()
                 .eq(LearningAttempt::getUserId, user.getId())
-                .eq(LearningAttempt::getQuestionId, question.getId())) == 0;
+                .eq(LearningAttempt::getEvaluationIdentity, evaluationIdentity));
+        Long legacyAttempts = 0L;
+        if (sourceOriginalId != null) {
+            legacyAttempts = learningAttemptMapper.selectCount(new LambdaQueryWrapper<LearningAttempt>()
+                    .eq(LearningAttempt::getUserId, user.getId())
+                    .eq(LearningAttempt::getQuestionId, sourceOriginalId)
+                    .isNull(LearningAttempt::getEvaluationIdentity));
+        }
+        boolean isFirst = (identityAttempts == null || identityAttempts == 0)
+                && (legacyAttempts == null || legacyAttempts == 0);
 
         LearningAttempt attempt = new LearningAttempt();
         attempt.setQuestionId(question.getId());
@@ -703,6 +1061,14 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         attempt.setHasViewedAnalysis(1);
         attempt.setAssessmentRunId(request.getAssessmentRunId());
         attempt.setSubmissionKey(request.getSubmissionKey());
+        attempt.setSourceUnitCode(request.getSourceUnitCode());
+        attempt.setSourceActivityCode(request.getSourceActivityCode());
+        attempt.setSourceTaskCode(request.getSourceTaskCode());
+        attempt.setSourceTaskItemCode(request.getSourceTaskItemCode());
+        attempt.setSourceTaskRound(request.getSourceTaskRound());
+        attempt.setEvaluationIdentity(evaluationIdentity);
+        attempt.setQuestionRevision(question.getRevision());
+        attempt.setQuestionSnapshot(JSONUtil.toJsonStr(question));
         learningAttemptMapper.insert(attempt);
 
         List<MasteryChangeVO> changes = learningEventService.recordAttemptEvents(
@@ -711,8 +1077,10 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         LearningAnswerResultVO result = new LearningAnswerResultVO();
         result.setAttemptId(attempt.getId());
         result.setCorrect(correct);
-        result.setAnalysis(question.getAnalysis());
-        result.setMisconception(question.getMisconception());
+        LearningQuestion snapshot = StringUtils.isBlank(attempt.getQuestionSnapshot()) ? question
+                : JSONUtil.toBean(attempt.getQuestionSnapshot(), LearningQuestion.class);
+        result.setAnalysis(snapshot.getAnalysis());
+        result.setMisconception(snapshot.getMisconception());
         result.setIsFirst(isFirst);
         result.setMasteryChanges(changes);
         return result;
@@ -724,8 +1092,10 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         LearningAnswerResultVO result = new LearningAnswerResultVO();
         result.setAttemptId(attempt.getId());
         result.setCorrect(attempt.getIsCorrect() == 1);
-        result.setAnalysis(question.getAnalysis());
-        result.setMisconception(question.getMisconception());
+        LearningQuestion snapshot = StringUtils.isBlank(attempt.getQuestionSnapshot()) ? question
+                : JSONUtil.toBean(attempt.getQuestionSnapshot(), LearningQuestion.class);
+        result.setAnalysis(snapshot.getAnalysis());
+        result.setMisconception(snapshot.getMisconception());
         result.setIsFirst(attempt.getIsFirst() == 1);
         result.setMasteryChanges(Collections.emptyList());
         return result;
@@ -742,8 +1112,26 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         ReviewActionEnum action = parseAction(request.getAction());
         LearningQuestion question = this.getById(request.getQuestionId());
         ThrowUtils.throwIf(question == null || question.getIsDelete() == 1, ErrorCode.NOT_FOUND_ERROR, "题目不存在");
+        ThrowUtils.throwIf(com.yupi.springbootinit.task.TaskConstants.SCOPE_TASK.equals(question.getResourceScope()),
+                ErrorCode.NOT_FOUND_ERROR, "题目不存在");
         boolean admin = userService.isAdmin(operator);
         boolean owner = question.getUserId().equals(operator.getId());
+        if (teachingAssessments != null) {
+            // 已有修订账本的题目，活动行状态必须与最新修订保持一致
+            if (teachingAssessments.draft(question.getId()) != null) {
+                if (action == ReviewActionEnum.SUBMIT) {
+                    ThrowUtils.throwIf(!owner, ErrorCode.NO_AUTH_ERROR, "仅作者可提交审核");
+                } else {
+                    requireAdmin(admin);
+                }
+                ThrowUtils.throwIf(!teachingAssessments.review(question.getId(), action.name(),
+                                request.getReason(), operator.getId()),
+                        ErrorCode.OPERATION_ERROR, "当前状态（" + action.name() + "）不可执行");
+                return true;
+            }
+            if (admin && teachingAssessments.review(request.getQuestionId(), request.getAction(),
+                    request.getReason(), operator.getId())) return true;
+        }
 
         String from = question.getReviewStatus();
         String to;
@@ -984,6 +1372,16 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         return keys;
     }
 
+    private List<String> nodeCodesFor(Long questionId) {
+        List<String> codes = new ArrayList<>();
+        for (LearningQuestionNode mapping : learningQuestionNodeMapper.selectList(
+                new LambdaQueryWrapper<LearningQuestionNode>()
+                        .eq(LearningQuestionNode::getQuestionId, questionId))) {
+            codes.add(mapping.getNodeCode() == null ? mapping.getNodeName() : mapping.getNodeCode());
+        }
+        return codes;
+    }
+
     private void saveNodeMappings(Long questionId, List<String> nodeNames) {
         if (CollectionUtils.isEmpty(nodeNames)) {
             return;
@@ -995,7 +1393,10 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
             }
             LearningQuestionNode mapping = new LearningQuestionNode();
             mapping.setQuestionId(questionId);
-            mapping.setNodeName(nodeName);
+            com.yupi.springbootinit.learning.NodeIdentityService.Identity identity = nodeIdentities == null ? null : nodeIdentities.resolve(nodeName);
+            mapping.setNodeName(identity == null ? nodeName : identity.storageKey);
+            mapping.setNodeCode(identity == null ? null : identity.nodeCode);
+            mapping.setRole("PRIMARY");
             learningQuestionNodeMapper.insert(mapping);
         }
     }
@@ -1058,6 +1459,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
                         .eq(LearningQuestionNode::getQuestionId, question.getId()))
                 .stream().map(LearningQuestionNode::getNodeName).collect(Collectors.toList());
         vo.setNodeNames(nodeNames);
+        if(nodeIdentities!=null)vo.setNodeDisplayNames(nodeIdentities.displayNames(nodeNames));
         boolean attempted = hasAttempted != null ? hasAttempted : learningAttemptMapper.selectCount(new LambdaQueryWrapper<LearningAttempt>()
                 .eq(LearningAttempt::getUserId, user.getId())
                 .eq(LearningAttempt::getQuestionId, question.getId())) > 0;

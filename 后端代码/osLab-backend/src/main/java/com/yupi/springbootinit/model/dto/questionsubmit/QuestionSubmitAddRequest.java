@@ -9,6 +9,12 @@ import java.io.Serializable;
  */
 @Data
 public class QuestionSubmitAddRequest implements Serializable {
+    private String sourceUnitCode;
+    private String sourceActivityCode;
+    /** 任务上下文；由任务接口服务端补齐，普通实验提交保持为空。 */
+    private String sourceTaskCode;
+    private String sourceTaskItemCode;
+    private Integer sourceTaskRound;
     /**
      * 编程语言
      */

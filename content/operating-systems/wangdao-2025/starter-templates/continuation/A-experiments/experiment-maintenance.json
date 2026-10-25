@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "oslab-experiment-maintenance/1.0",
+  "batchCode": "batch.a.experiments.process.001",
+  "contributor": "A",
+  "note": "第二章实验实际维护包，保留原ID；originalCode提交starter源码，answer提交reference，judgeCase提交真实输入输出；不能仅交盘点。",
+  "experiments": []
+}

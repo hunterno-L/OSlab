@@ -22,6 +22,13 @@ public class LearningQuestion implements Serializable {
      */
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
+    private String questionCode;
+    private String sectionCode;
+    private Integer revision;
+    /** SHARED（资源库）| TASK（任务私有执行副本） */
+    private String resourceScope;
+    private String ownerTaskCode;
+    private String ownerTaskItemCode;
 
     /**
      * 标题

@@ -1,5 +1,5 @@
 <template>
-  <main class="profile-view">
+  <div class="profile-view">
     <section class="profile-header">
       <div>
         <p class="eyebrow">账户</p>
@@ -85,7 +85,7 @@
         </a-space>
       </a-form>
     </section>
-  </main>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -208,7 +208,7 @@ const formatDate = (value?: string) => {
 
 .eyebrow {
   margin: 0 0 8px;
-  color: var(--oslab-primary, #165dff);
+  color: var(--oslab-primary, #2447d8);
   font-size: 12px;
   font-weight: 600;
 }
@@ -256,6 +256,40 @@ h2 {
   margin: 0 0 12px;
   color: var(--oslab-danger, #f53f3f);
   font-size: 13px;
+}
+
+/* C+B 学习图册 */
+.profile-header h1 {
+  display: inline;
+  padding: 0 4px;
+  font-family: var(--oslab-font-display);
+  font-size: 34px;
+  background: linear-gradient(
+    transparent 56%,
+    var(--oslab-highlight) 56%,
+    var(--oslab-highlight) 92%,
+    transparent 92%
+  );
+}
+.profile-subtitle {
+  color: var(--oslab-muted-strong);
+}
+.profile-panel {
+  padding: 20px;
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.profile-summary {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--oslab-line-soft);
+}
+.profile-summary h2 {
+  font-family: var(--oslab-font-display);
+}
+.profile-summary :deep(.arco-avatar) {
+  box-shadow: 0 0 0 3px var(--oslab-highlight-soft);
 }
 
 @media (max-width: 640px) {

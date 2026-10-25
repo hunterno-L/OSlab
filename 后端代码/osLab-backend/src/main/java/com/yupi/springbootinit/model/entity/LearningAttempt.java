@@ -62,6 +62,15 @@ public class LearningAttempt implements Serializable {
      * 提交幂等键（userId 维度唯一；主动重试使用新键）
      */
     private String submissionKey;
+    private String sourceUnitCode;
+    private String sourceActivityCode;
+    private Integer questionRevision;
+    private String questionSnapshot;
+    private String sourceTaskCode;
+    private String sourceTaskItemCode;
+    private Integer sourceTaskRound;
+    /** 跨执行副本的稳定题目身份，用于重复观测去重 */
+    private String evaluationIdentity;
 
     /**
      * 创建时间

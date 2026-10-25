@@ -1,410 +1,397 @@
 <template>
-  <div id="addQuestionView">
+  <div class="experiment-editor">
     <a-card>
-      <div class="form-container">
-        <a-form :model="form" label-align="left" class="centered-form">
-          <a-form-item field="title" label="标题">
-            <a-input
-              v-model="form.title"
-              placeholder="请输入标题"
-              class="form-item-width"
-            />
-          </a-form-item>
-          <a-form-item field="content" label="题目内容">
-            <MdEditor
-              :value="form.content"
-              :handle-change="onContentChange"
-              class="form-item-width"
-            />
-          </a-form-item>
-          <a-form-item field="tags" label="关联知识点">
-            <a-input-tag
-              v-model="form.tags"
-              placeholder="请选择关联知识点"
-              allow-clear
-              class="form-item-width"
-            />
-          </a-form-item>
-          <a-form-item>
-            <a-collapse :default-active-key="[1]" accordion>
-              <a-collapse-item header="从全部知识点中选择" key="1">
-                <div>
-                  <a-checkbox-group v-model="form.tags">
-                    <a-checkbox v-for="tag in tags" :key="tag" :value="tag">
-                      {{ tag }}</a-checkbox
-                    >
-                  </a-checkbox-group>
-                </div>
-              </a-collapse-item>
-            </a-collapse>
-          </a-form-item>
-          <a-form-item field="setId" label="题目集">
-            <a-select
-              v-model="form.setId"
-              placeholder="请选择题目集"
-              allow-clear
-              :loading="setsLoading"
-              class="form-item-width"
-              style="width: 80%"
+      <template #title>
+        <div class="head">
+          <span>{{ form.id ? "编辑编程实验" : "新建编程实验" }}</span>
+          <a-space>
+            <a-tag v-if="experiment?.publicationStatus" :color="statusColor">
+              {{ statusText }}
+            </a-tag>
+            <a-button size="small" @click="router.push('/teaching/experiments')"
+              >返回列表</a-button
             >
-              <a-option
-                v-for="set in questionSets"
-                :key="set.id"
-                :value="set.id"
-                :label="set.setName"
-              >
-                {{ set.setName }}
-              </a-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item field="originalCode" label="初始框架代码">
-            <div class="code-editor-wrapper">
-              <CodeEditor
-                :value="form.originalCode"
-                :language="form.language"
-                :handle-change="onOriginalCodeChange"
-              />
-            </div>
-          </a-form-item>
-          <a-form-item field="answer" label="答案">
-            <div class="answer-editor">
-              <CodeEditor
-                :value="form.answer"
-                :language="form.language"
-                :handle-change="onAnswerChange"
-              />
-            </div>
-            <!--        <MdEditor :value="form.answer" :handle-change="onAnswerChange" />-->
-          </a-form-item>
-          <!--      <a-form-item label="判题配置" :content-flex="false" :merge-props="false">
-          <a-space direction="vertical" style="min-width: 480px">
-            <a-form-item field="judgeConfig.timeLimit" label="时间限制">
-              <a-input-number
-                v-model="form.judgeConfig.timeLimit"
-                placeholder="请输入时间限制"
-                mode="button"
-                min="0"
-                size="large"
-              />
-            </a-form-item>
-            <a-form-item field="judgeConfig.memoryLimit" label="内存限制">
-              <a-input-number
-                v-model="form.judgeConfig.memoryLimit"
-                placeholder="请输入内存限制"
-                mode="button"
-                min="0"
-                size="large"
-              />
-            </a-form-item>
-            <a-form-item field="judgeConfig.stackLimit" label="堆栈限制">
-              <a-input-number
-                v-model="form.judgeConfig.stackLimit"
-                placeholder="请输入堆栈限制"
-                mode="button"
-                min="0"
-                size="large"
-              />
-            </a-form-item>
           </a-space>
-        </a-form-item>-->
-          <!--      <a-form-item
-          label="测试用例配置"
-          :content-flex="false"
-          :merge-props="false"
+        </div>
+      </template>
+
+      <a-alert v-if="experiment?.pendingRevision" type="warning" class="notice">
+        已有待应用修订（第
+        {{ experiment.pendingRevision }} 版）。学生当前仍使用已发布版本；
+        点击“应用修订”后才会生效。
+        <a-button
+          size="mini"
+          type="primary"
+          style="margin-left: 10px"
+          @click="applyRevision"
         >
-          <a-form-item
-            v-for="(judgeCaseItem, index) of form.judgeCase"
-            :key="index"
-            no-style
-          >
-            <a-space direction="vertical" style="min-width: 640px">
-              <a-form-item
-                :field="`form.judgeCase[${index}].input`"
-                :label="`输入用例-${index}`"
-                :key="index"
-              >
-                <a-input
-                  v-model="judgeCaseItem.input"
-                  placeholder="请输入测试输入用例"
-                />
-              </a-form-item>
-              <a-form-item
-                :field="`form.judgeCase[${index}].output`"
-                :label="`输出用例-${index}`"
-                :key="index"
-              >
-                <a-input
-                  v-model="judgeCaseItem.output"
-                  placeholder="请输入测试输出用例"
-                />
-              </a-form-item>
-              <a-button status="danger" @click="handleDelete(index)">
-                删除
-              </a-button>
-            </a-space>
-          </a-form-item>
-          <div style="margin-top: 32px">
-            <a-button @click="handleAdd" type="outline" status="success"
-              >新增测试用例
-            </a-button>
-          </div>
-        </a-form-item>-->
-          <div style="margin-top: 16px" />
-        </a-form>
-      </div>
-      <div class="button-contain">
-        <a-button type="primary" style="min-width: 200px" @click="doSubmit"
-          >提交
+          应用修订
         </a-button>
+      </a-alert>
+
+      <a-form :model="form" layout="vertical">
+        <a-form-item label="标题" required>
+          <a-input v-model="form.title" maxlength="80" />
+        </a-form-item>
+        <a-form-item label="实验说明（Markdown）" required>
+          <MdEditor
+            :value="form.content"
+            :handle-change="(v: string) => (form.content = v)"
+          />
+        </a-form-item>
+        <a-form-item label="关联知识点（图谱节点，可选）">
+          <a-select
+            v-model="form.nodeCodes"
+            multiple
+            allow-search
+            placeholder="选择知识节点"
+          >
+            <a-option
+              v-for="node in nodes"
+              :key="node.nodeCode"
+              :value="node.nodeCode"
+            >
+              {{ node.name }}（{{ node.nodeCode }}）
+            </a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="标签">
+          <a-input-tag v-model="form.tags" placeholder="输入后回车添加" />
+        </a-form-item>
+        <a-form-item label="初始框架代码">
+          <div class="code-editor-wrap">
+            <CodeEditor
+              :value="form.originalCode"
+              :language="form.language"
+              :handle-change="(v: string) => (form.originalCode = v)"
+            />
+          </div>
+        </a-form-item>
+        <a-form-item label="参考解">
+          <a-textarea
+            v-model="form.answer"
+            class="mono"
+            :auto-size="{ minRows: 4 }"
+          />
+        </a-form-item>
+
+        <a-divider>判题配置</a-divider>
+        <div class="grid-3">
+          <a-form-item label="时间限制 (ms)">
+            <a-input-number v-model="form.judgeConfig.timeLimit" :min="1" />
+          </a-form-item>
+          <a-form-item label="内存限制 (MB)">
+            <a-input-number v-model="form.judgeConfig.memoryLimit" :min="1" />
+          </a-form-item>
+          <a-form-item label="堆栈限制">
+            <a-input-number v-model="form.judgeConfig.stackLimit" :min="1" />
+          </a-form-item>
+        </div>
+
+        <a-form-item label="测试用例（隐藏于学生）">
+          <div
+            v-for="(testCase, index) in form.judgeCase"
+            :key="index"
+            class="case-row"
+          >
+            <a-input v-model="testCase.input" placeholder="输入" />
+            <a-input v-model="testCase.output" placeholder="期望输出" />
+            <a-button size="small" @click="form.judgeCase.splice(index, 1)"
+              >删除</a-button
+            >
+          </div>
+          <a-button
+            size="small"
+            @click="form.judgeCase.push({ input: '', output: '' })"
+          >
+            添加测试用例
+          </a-button>
+        </a-form-item>
+      </a-form>
+
+      <div class="actions">
+        <a-space>
+          <a-button
+            v-if="!form.id"
+            type="primary"
+            :loading="saving"
+            @click="save"
+          >
+            创建草稿
+          </a-button>
+          <template v-else>
+            <a-button type="primary" :loading="saving" @click="save">
+              {{
+                experiment?.publicationStatus === "DRAFT"
+                  ? "保存草稿"
+                  : "保存改稿"
+              }}
+            </a-button>
+            <a-button
+              v-if="experiment?.publicationStatus === 'PUBLISHED'"
+              type="success"
+              :loading="saving"
+              @click="save(true)"
+            >
+              保存并应用
+            </a-button>
+            <a-button
+              v-if="experiment?.publicationStatus === 'DRAFT'"
+              type="success"
+              :loading="publishing"
+              @click="publish"
+            >
+              发布实验
+            </a-button>
+            <a-button
+              v-if="experiment?.publicationStatus === 'PUBLISHED'"
+              status="warning"
+              @click="offline"
+            >
+              下线实验
+            </a-button>
+          </template>
+        </a-space>
+        <span class="hint">
+          共享实验始终保留原 ID
+          与历史提交；新实验在发布前不会出现在学生实验列表。
+        </span>
       </div>
     </a-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import MdEditor from "@/components/MdEditor.vue";
-import {
-  KnowledgeGraphControllerService,
-  QuestionControllerService,
-  QuestionSets,
-} from "../../../generated";
-import message from "@arco-design/web-vue/es/message";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { Message } from "@arco-design/web-vue";
+import MdEditor from "@/components/MdEditor.vue";
 import CodeEditor from "@/components/CodeEditor.vue";
-import { debounce } from "@arco-design/web-vue/es/_utils/debounce";
+import {
+  applyExperimentDraft,
+  createExperimentDraft,
+  getExperimentDraft,
+  getTeachingCatalog,
+  offlineExperiment,
+  publishExperimentDraft,
+  saveExperimentDraft,
+} from "@/api/tasks";
 
 const route = useRoute();
-// 如果页面地址包含 update，视为更新页面
-const updatePage = route.path.includes("update");
 const router = useRouter();
+const experiment = ref<any>(null);
+const nodes = ref<any[]>([]);
+const saving = ref(false);
+const publishing = ref(false);
 
-let form = ref({
-  setId: undefined,
+const form = reactive({
+  id: "",
   title: "",
-  tags: [] as string[],
-  answer: "",
   content: "",
-  judgeConfig: {
-    memoryLimit: 1000,
-    stackLimit: 1000,
-    timeLimit: 1000,
-  },
-  judgeCase: [
-    {
-      input: "",
-      output: "",
-    },
-  ],
   originalCode: "",
+  answer: "",
+  tags: [] as string[],
+  nodeCodes: [] as string[],
   language: "c",
+  judgeConfig: { timeLimit: 1000, memoryLimit: 256, stackLimit: 128 },
+  judgeCase: [{ input: "", output: "" }] as { input: string; output: string }[],
 });
 
-// Add these new refs
-const questionSets = ref<QuestionSets[]>([]);
-const setsLoading = ref(false);
+const statusText = computed(() => {
+  const status = experiment.value?.publicationStatus;
+  return status === "DRAFT"
+    ? "草稿"
+    : status === "OFFLINE"
+    ? "已下线"
+    : "已发布";
+});
+const statusColor = computed(() => {
+  const status = experiment.value?.publicationStatus;
+  return status === "DRAFT"
+    ? "gray"
+    : status === "OFFLINE"
+    ? "orange"
+    : "green";
+});
 
-const isOpen = ref<boolean>(false); // 控制面板是否展开
+const payload = (apply = false) => ({
+  title: form.title,
+  content: form.content,
+  originalCode: form.originalCode,
+  answer: form.answer,
+  tags: form.tags,
+  nodeCodes: form.nodeCodes,
+  judgeConfig: form.judgeConfig,
+  judgeCase: form.judgeCase,
+  apply,
+});
 
-const toggle = () => {
-  isOpen.value = !isOpen.value; // 切换面板状态
-};
-
-const tags = ref<string[]>([]);
-const fetchTags = async () => {
-  const res =
-    await KnowledgeGraphControllerService.getAllKnowledgeGraphNameUsingGet();
-  tags.value = res.data || [];
-};
-
-// 新增事件处理函数
-const onOriginalCodeChange = (value: string) => {
-  form.value.originalCode = value;
-};
-
-/**
- * 获取题目集列表
- */
-const loadQuestionSets = async () => {
-  setsLoading.value = true;
-  try {
-    const res = await QuestionControllerService.getQuestionSetsUsingGet();
-    if (res.code === 0) {
-      questionSets.value = res.data || [];
-    } else {
-      message.error("获取题目集失败: " + res.message);
+const validate = () => {
+  if (!form.title.trim() || !form.content.trim()) {
+    Message.warning("标题和实验说明不能为空");
+    return false;
+  }
+  for (const testCase of form.judgeCase) {
+    if (!testCase.input.trim() && !testCase.output.trim()) continue;
+    if (!testCase.input.trim() || !testCase.output.trim()) {
+      Message.warning("测试用例需同时填写输入和期望输出");
+      return false;
     }
-  } catch (e) {
-    message.error("获取题目集失败");
+  }
+  return true;
+};
+
+const save = async (apply = false) => {
+  if (!validate()) return;
+  saving.value = true;
+  try {
+    const res = form.id
+      ? await saveExperimentDraft(form.id, payload(apply))
+      : await createExperimentDraft(payload());
+    if (res.data?.code === 0) {
+      Message.success(apply ? "已应用修订" : "已保存");
+      if (!form.id) {
+        await router.replace(
+          `/teaching/experiments/update?id=${res.data.data.id}`
+        );
+        form.id = String(res.data.data.id);
+      }
+      await load();
+    } else {
+      Message.error(res.data?.message || "保存失败");
+    }
   } finally {
-    setsLoading.value = false;
+    saving.value = false;
   }
 };
 
-/**
- * 根据题目 id 获取老的数据
- */
-const loadData = async () => {
-  const id = route.query.id;
+const publish = async () => {
+  if (!form.id) return;
+  publishing.value = true;
+  try {
+    const res = await publishExperimentDraft(form.id);
+    if (res.data?.code === 0) {
+      Message.success("实验已发布");
+      await load();
+    } else {
+      Message.error(res.data?.message || "发布失败");
+    }
+  } finally {
+    publishing.value = false;
+  }
+};
+
+const applyRevision = async () => {
+  const res = await applyExperimentDraft(form.id);
+  if (res.data?.code === 0) {
+    Message.success("修订已应用");
+    await load();
+  } else {
+    Message.error(res.data?.message || "应用失败");
+  }
+};
+
+const offline = async () => {
+  const res = await offlineExperiment(form.id);
+  if (res.data?.code === 0) {
+    Message.success("实验已下线");
+    await load();
+  } else {
+    Message.error(res.data?.message || "下线失败");
+  }
+};
+
+const load = async () => {
+  const id = String(route.query.id || form.id || "");
   if (!id) {
+    experiment.value = null;
     return;
   }
-  const res = await QuestionControllerService.getQuestionVoByIdUsingGet(
-    id as any
-  );
-  if (res.code === 0) {
-    form.value = res.data as any;
-    // json 转 js 对象
-    /*if (!form.value.judgeCase) {
-      form.value.judgeCase = [
-        {
-          input: "",
-          output: "",
-        },
-      ];
-    } else {
-      form.value.judgeCase = JSON.parse(form.value.judgeCase as any);
-    }
-    if (!form.value.judgeConfig) {
-      form.value.judgeConfig = {
-        memoryLimit: 1000,
-        stackLimit: 1000,
+  form.id = id;
+  const res = await getExperimentDraft(id);
+  if (res.data?.code === 0) {
+    const data = res.data.data;
+    const pending = data.pending || data;
+    experiment.value = data;
+    form.title = pending.title || data.title || "";
+    form.content = pending.content || data.content || "";
+    form.originalCode = pending.originalCode || data.originalCode || "";
+    form.answer = pending.answer || data.answer || "";
+    form.tags = Array.isArray(pending.tags) ? pending.tags : [];
+    form.nodeCodes = data.nodeCodes || [];
+    form.judgeConfig = pending.judgeConfig ||
+      data.judgeConfig || {
         timeLimit: 1000,
+        memoryLimit: 256,
+        stackLimit: 128,
       };
-    } else {
-      form.value.judgeConfig = JSON.parse(form.value.judgeConfig as any);
-    }*/
-    /*if (!form.value.tags) {
-      form.value.tags = [];
-    } else {
-      form.value.tags = JSON.parse(form.value.tags as any);
-    }*/
+    form.judgeCase =
+      Array.isArray(pending.judgeCase) && pending.judgeCase.length
+        ? pending.judgeCase
+        : [{ input: "", output: "" }];
   } else {
-    message.error("加载失败，" + res.message);
+    Message.error(res.data?.message || "实验加载失败");
   }
 };
 
-onMounted(() => {
-  loadQuestionSets();
-  loadData();
-  fetchTags();
+const loadNodes = async () => {
+  try {
+    const res = await getTeachingCatalog();
+    if (res.data?.code === 0) nodes.value = res.data.data?.nodes || [];
+  } catch {
+    // 节点不可用时仍可保存实验本身
+  }
+};
+
+onMounted(async () => {
+  await loadNodes();
+  await load();
 });
-const doSubmit = async () => {
-  console.log(form.value);
-  // 区分更新还是创建
-  if (updatePage) {
-    const res = await QuestionControllerService.updateQuestionUsingPost(
-      form.value
-    );
-    if (res.code === 0) {
-      message.success("更新成功");
-      await router.push({
-        path: `/manage/question/`,
-      });
-    } else {
-      message.error("更新失败，" + res.message);
-    }
-  } else {
-    const res = await QuestionControllerService.addQuestionUsingPost(
-      form.value
-    );
-    if (res.code === 0) {
-      message.success("创建成功");
-      await router.push({
-        path: `/manage/question/`,
-      });
-    } else {
-      message.error("创建失败，" + res.message);
-    }
-  }
-};
-
-/**
- * 新增判题用例
- */
-const handleAdd = () => {
-  form.value.judgeCase.push({
-    input: "",
-    output: "",
-  });
-};
-
-/**
- * 删除判题用例
- */
-const handleDelete = (index: number) => {
-  form.value.judgeCase.splice(index, 1);
-};
-
-const onContentChange = (value: string) => {
-  form.value.content = value;
-  // 匹配 value 中包含的 tags
-  /*// 将匹配到的标签赋值给 form 的 tags 属性
-  form.value.tags = tags.value.filter((tag) => value.includes(tag));*/
-  updateTagsDebounced(value);
-};
-const updateTagsDebounced = debounce((val: string) => {
-  form.value.tags = tags.value.filter((tag) => val.includes(tag));
-}, 2000); // 500ms 不输入就认为“输入完毕”
-
-const onAnswerChange = (value: string) => {
-  form.value.answer = value;
-};
 </script>
 
 <style scoped>
-#addQuestionView {
-  max-width: 90%;
+.experiment-editor {
+  max-width: 1100px;
   margin: 0 auto;
 }
-/* 父组件中定义高度 */
-.code-editor-wrapper {
-  height: 500px;
-  width: 80%;
-}
-.answer-editor {
-  height: 500px;
-  width: 80%;
-}
-.collapsible-panel {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  width: 80%;
-  max-width: 80%;
-}
-
-.panel-header {
+.head {
   display: flex;
-  align-items: center; /* 垂直居中 */
-  justify-content: flex-start; /* 水平起始对齐 */
-  padding: 10px;
-  cursor: pointer;
-  text-align: center;
-  background-color: #007bff; /* 蓝色背景 */
-  color: white; /* 白色文字 */
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
-
-.panel-body {
-  padding: 10px;
-  background-color: #f9f9f9;
-  border: 1px solid #007bff;
+.notice {
+  margin-bottom: 12px;
 }
-.form-item-width {
-  width: 80%; /* 或者设置为具体的宽度，如 300px */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
-.form-container {
+.case-row {
   display: flex;
-  justify-content: center; /* 水平居中 */
-  align-items: center; /* 垂直居中 */
-  height: 100%; /* 确保容器占满整个卡片高度 */
+  gap: 8px;
+  margin-bottom: 8px;
 }
-.centered-form {
-  width: 80%; /* 设置表单的宽度 */
-  margin: auto; /* 水平居中 */
+.code-editor-wrap {
+  height: 360px;
+  border-radius: 8px;
+  overflow: hidden;
 }
-.button-contain {
+.mono :deep(textarea) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+.actions {
   display: flex;
-  justify-content: center; /* 水平居中 */
-  margin-top: 16px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.hint {
+  color: var(--oslab-muted-strong, #757069);
+  font-size: 12px;
 }
 </style>

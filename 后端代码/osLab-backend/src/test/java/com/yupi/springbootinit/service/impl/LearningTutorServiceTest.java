@@ -60,6 +60,7 @@ class LearningTutorServiceTest {
     private final LearningEventMapper eventMapper = mock(LearningEventMapper.class);
     private final QuestionService questionService = mock(QuestionService.class);
     private final LearningPathService pathService = mock(LearningPathService.class);
+    private final com.yupi.springbootinit.learning.ExperimentMappingService experiments = mock(com.yupi.springbootinit.learning.ExperimentMappingService.class);
     private final LearningTutorServiceImpl service = new LearningTutorServiceImpl();
     private final User user = new User();
 
@@ -80,6 +81,7 @@ class LearningTutorServiceTest {
         ReflectionTestUtils.setField(service, "learningEventMapper", eventMapper);
         ReflectionTestUtils.setField(service, "questionService", questionService);
         ReflectionTestUtils.setField(service, "learningPathService", pathService);
+        ReflectionTestUtils.setField(service, "experimentMappings", experiments);
         // 不配置 AI key：arkService 保持 null，ask() 走规则降级（测试不依赖外部 AI）
 
         user.setId(7L);
@@ -123,6 +125,7 @@ class LearningTutorServiceTest {
         experiment.setContent("按时间片轮转实现调度器");
         experiment.setTags("[\"" + SEED + "\"]");
         when(questionService.list()).thenReturn(List.of(experiment));
+        when(experiments.experiments(SEED)).thenReturn(List.of(experiment));
         when(pathService.buildPath(eq(user), eq(SEED))).thenReturn(nextStepPath());
     }
 
@@ -250,6 +253,23 @@ class LearningTutorServiceTest {
                 LearningTutorServiceImpl.classifyIntent("为什么总是错误？"));
         assertEquals(LearningTutorServiceImpl.TutorIntent.NEXT_STEP,
                 LearningTutorServiceImpl.classifyIntent("下一步先学什么？"));
+    }
+
+    @Test void textbookSourceRetainsRealProvenanceAndUsesCodeForSeedLookup() {
+        com.yupi.springbootinit.learning.NodeIdentityService identities=mock(com.yupi.springbootinit.learning.NodeIdentityService.class);
+        com.yupi.springbootinit.learning.PublishedLearningContentService published=mock(com.yupi.springbootinit.learning.PublishedLearningContentService.class);
+        ReflectionTestUtils.setField(service,"nodeIdentities",identities);ReflectionTestUtils.setField(service,"publishedContent",published);
+        when(identities.storageKey("os.cpu.scheduler")).thenReturn(SEED);
+        when(identities.byStorageKey(SEED)).thenReturn(new com.yupi.springbootinit.learning.NodeIdentityService.Identity("os.cpu.scheduler","处理机调度",SEED));
+        when(knowledgeGraphService.findByName("os.cpu.scheduler")).thenReturn(List.of(graphNode(SEED,"节点概要")));
+        when(knowledgeGraphService.getAllRelatedNames("os.cpu.scheduler")).thenReturn(List.of(SEED));
+        TutorSourceVO real=new TutorSourceVO();real.setSourceType("TEXTBOOK");real.setActionType("RESOURCE");real.setParentChunkCode("chunk.scheduler");real.setSourceId("chunk.scheduler");real.setTargetId("chunk.scheduler");real.setTitle("教材调度机制");real.setRevision(2);real.setSnippet("正文事实片段");real.setSourceRef(java.util.Map.of("pageStart",42,"locator","2.2.5"));
+        when(published.sources(eq(List.of("os.cpu.scheduler")),any(String.class),eq(2))).thenReturn(List.of(real));
+        TutorAskRequest request=ask("什么是调度？");request.setNodeCode("os.cpu.scheduler");TutorAnswerVO answer=service.ask(request,user);
+        assertTrue(answer.getSources().contains(real));assertTrue(answer.getAnswer().contains("正文事实片段"));
+        assertEquals(42,answer.getSources().stream().filter(s->s.getParentChunkCode()!=null).findFirst().get().getSourceRef().get("pageStart"));
+        org.mockito.Mockito.verify(knowledgeGraphService).findByName("os.cpu.scheduler");
+        org.mockito.Mockito.verify(questionService,org.mockito.Mockito.never()).list();
     }
 
     // region fixtures

@@ -98,8 +98,7 @@ public class LearningQuestionController {
             @RequestBody(required = false) LearningCatalogRequest request,
             HttpServletRequest servletRequest) {
         User user = userService.getLoginUser(servletRequest);
-        String chapter = request == null ? null : request.getChapter();
-        return ResultUtils.success(learningQuestionService.questionCatalog(chapter, user));
+        return ResultUtils.success(learningQuestionService.questionCatalog(request, user));
     }
 
     /**

@@ -34,9 +34,29 @@ public class LearningQuestionQueryRequest extends PageRequest {
     private String reviewStatus;
 
     /**
-     * 知识节点业务键
+     * 知识节点业务键（旧字段，供管理页/兼容路由使用）
      */
     private String nodeName;
+
+    /**
+     * 稳定课程代码
+     */
+    private String courseCode;
+
+    /**
+     * 稳定小节代码（含后代小节）
+     */
+    private String sectionCode;
+
+    /**
+     * 稳定学习单元代码（与小节同时存在时取交集）
+     */
+    private String unitCode;
+
+    /**
+     * 稳定知识节点代码（learning_question_node.nodeCode，PRIMARY/SECONDARY 均可）
+     */
+    private String nodeCode;
 
     /**
      * 难度

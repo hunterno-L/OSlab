@@ -1542,15 +1542,15 @@ loadClasses();
 }
 
 .tone-mastered {
-  color: var(--oslab-mastered);
+  color: var(--oslab-mastered-text);
 }
 
 .tone-review {
-  color: var(--oslab-review);
+  color: var(--oslab-review-text);
 }
 
 .tone-weak {
-  color: var(--oslab-weak);
+  color: var(--oslab-weak-text);
 }
 
 .heat-bar {
@@ -1611,22 +1611,22 @@ loadClasses();
 /* 图例与节点实际颜色一致：浅底（fillByStatus 底色）+ 强色描边（状态条/圆点色） */
 .swatch-mastered {
   background: var(--oslab-mastered-soft);
-  border-color: var(--oslab-mastered);
+  border-color: var(--oslab-mastered-text);
 }
 
 .swatch-review {
   background: var(--oslab-review-soft);
-  border-color: var(--oslab-review);
+  border-color: var(--oslab-review-text);
 }
 
 .swatch-weak {
   background: var(--oslab-weak-soft);
-  border-color: var(--oslab-weak);
+  border-color: var(--oslab-weak-text);
 }
 
 .swatch-unseen {
   background: var(--oslab-unseen-soft);
-  border-color: var(--oslab-unseen);
+  border-color: var(--oslab-unseen-text);
 }
 
 .heat-empty {
@@ -1894,7 +1894,7 @@ loadClasses();
 }
 
 .fact-weak {
-  color: var(--oslab-weak);
+  color: var(--oslab-weak-text);
 }
 
 .fact-wide {

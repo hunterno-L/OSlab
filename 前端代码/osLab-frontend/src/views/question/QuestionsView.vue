@@ -1,16 +1,5 @@
 <template>
   <div class="experiments-catalog">
-    <div class="page-intro">
-      <div>
-        <div class="eyebrow">EXPERIMENTS</div>
-        <h1>实验中心</h1>
-      </div>
-      <div class="intro-metric">
-        <strong>{{ total }}</strong>
-        <span>{{ selectedChapter ? "本章实验" : "当前结果" }}</span>
-      </div>
-    </div>
-
     <a-alert v-if="nodeFilter" class="context-alert">
       当前节点：<b>{{ nodeFilter }}</b>
       <a-button type="text" size="small" @click="clearNodeFilter"
@@ -56,6 +45,10 @@
               <h2>{{ selectedChapter || "编程实验" }}</h2>
               <span v-if="selectedChapter" class="side-hint">本章实验列表</span>
             </div>
+            <div class="intro-metric">
+              <strong>{{ total }}</strong>
+              <span>{{ selectedChapter ? "本章实验" : "当前结果" }}</span>
+            </div>
           </div>
           <a-form
             :model="searchParams"
@@ -94,6 +87,7 @@
           </a-form>
           <a-table
             row-key="id"
+            size="small"
             :columns="columns"
             :data="dataList"
             :loading="experimentsLoading"
@@ -109,7 +103,9 @@
               <span v-else class="side-hint">未标注</span>
             </template>
             <template #acceptedRate="{ record }">
-              {{ acceptedRate(record) }}
+              <span :class="['rate', rateClass(record)]">{{
+                acceptedRate(record)
+              }}</span>
             </template>
             <template #createTime="{ record }">
               {{ formatDate(record.createTime) }}
@@ -141,6 +137,7 @@
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { Message } from "@arco-design/web-vue";
 import { useRoute, useRouter } from "vue-router";
+import { formatDate } from "@/utils/dateTime";
 import {
   QuestionControllerService,
   type QuestionQueryRequest,
@@ -316,12 +313,35 @@ const loadData = async () => {
 
 const syncRouteQuery = () => {
   nodeFilter.value = routeValue(route.query.nodeName);
+  searchParams.value.title = routeValue(route.query.title);
+  searchParams.value.tags = routeValue(route.query.tags)
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+  const requestedPage = Number(routeValue(route.query.current));
+  searchParams.value.current =
+    Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const requestedChapter = routeValue(route.query.chapter);
   const matched = chapters.value.find(
     (chapter) => chapter.setName === requestedChapter
   );
   selectedChapterId.value = matched?.id ?? null;
   void loadData();
+};
+
+const replaceQuery = (patch: Record<string, string | undefined>) => {
+  const next: Record<string, string> = {};
+  for (const [key, value] of Object.entries({ ...route.query, ...patch })) {
+    const text = Array.isArray(value)
+      ? value.join(",")
+      : typeof value === "string"
+      ? value
+      : "";
+    if (text) next[key] = text;
+  }
+  const changed = JSON.stringify(next) !== JSON.stringify(route.query);
+  if (changed) void router.replace({ query: next });
+  else void loadData();
 };
 
 const selectChapter = (id: number | null) => {
@@ -342,7 +362,13 @@ const clearNodeFilter = () => {
 
 const doSearch = () => {
   searchParams.value.current = 1;
-  void loadData();
+  replaceQuery({
+    title: searchParams.value.title.trim() || undefined,
+    tags: searchParams.value.tags.length
+      ? searchParams.value.tags.join(",")
+      : undefined,
+    current: undefined,
+  });
 };
 
 const clearSearch = () => {
@@ -352,12 +378,12 @@ const clearSearch = () => {
     tags: [],
     current: 1,
   };
-  void loadData();
+  replaceQuery({ title: undefined, tags: undefined, current: undefined });
 };
 
 const onPageChange = (page: number) => {
   searchParams.value.current = page;
-  void loadData();
+  replaceQuery({ current: page > 1 ? String(page) : undefined });
 };
 
 const toQuestionPage = (question: QuestionVO) => {
@@ -380,7 +406,14 @@ const acceptedRate = (question: QuestionVO) => {
   return `${Math.round(((question.acceptedNum || 0) / submits) * 100)}%`;
 };
 
-const formatDate = (value?: string) => (value ? value.slice(0, 10) : "—");
+const rateClass = (question: QuestionVO) => {
+  const submits = question.submitNum || 0;
+  if (!submits) return "is-empty";
+  const rate = Math.round(((question.acceptedNum || 0) / submits) * 100);
+  if (rate >= 95) return "is-full";
+  if (rate >= 60) return "is-mid";
+  return "is-low";
+};
 
 watch(
   () => route.query,
@@ -396,47 +429,21 @@ onMounted(async () => {
 
 <style scoped>
 .experiments-catalog {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 4px 0 28px;
-}
-.page-intro {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 24px;
-  margin-bottom: 18px;
-}
-.eyebrow {
-  color: var(--oslab-primary, #165dff);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0;
-}
-.page-intro h1 {
-  margin: 4px 0 6px;
-  color: var(--oslab-text-title, #1d2129);
-  font-size: 24px;
-}
-.page-intro p {
+  max-width: none;
   margin: 0;
-  color: var(--oslab-text-secondary, #86909c);
-  font-size: 13px;
+  padding: 4px 0 28px;
 }
 .intro-metric {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: baseline;
+  gap: 6px;
   color: var(--oslab-text-secondary, #86909c);
   font-size: 12px;
 }
 .intro-metric strong {
   color: var(--oslab-text-title, #1d2129);
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1;
-}
-.context-alert {
-  margin-bottom: 14px;
 }
 .experiment-grid {
   display: grid;
@@ -477,7 +484,7 @@ onMounted(async () => {
 .chapter-item:hover,
 .chapter-item.active {
   background: #f2f7ff;
-  color: var(--oslab-primary, #165dff);
+  color: var(--oslab-primary, #2447d8);
 }
 .chapter-count {
   color: var(--oslab-text-secondary, #86909c);
@@ -533,7 +540,79 @@ onMounted(async () => {
   font-size: 12px;
   line-height: 1.6;
 }
-@media (max-width: 880px) {
+/* C+B 学习图册 */
+.experiment-grid {
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 12px;
+}
+.chapter-nav {
+  padding: 12px;
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.chapter-item {
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: var(--oslab-radius-control);
+  color: var(--oslab-ink-soft);
+}
+.chapter-item.active {
+  background: var(--oslab-highlight-soft);
+  color: var(--oslab-ink);
+  font-weight: 600;
+}
+.experiment-section {
+  padding: 16px;
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.section-heading h2 {
+  font-family: var(--oslab-font-display);
+  font-size: 24px;
+}
+.table-footer {
+  border-top: 1px solid var(--oslab-line-soft);
+}
+.experiment-section :deep(.arco-table-td) {
+  padding: 6px 14px;
+  white-space: nowrap;
+}
+.experiment-section :deep(.arco-table-th) {
+  padding: 7px 14px;
+}
+.experiment-section :deep(.arco-table-td:first-child) {
+  white-space: normal;
+}
+.rate {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: var(--oslab-radius-pill);
+  font-family: var(--oslab-font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+.rate.is-full {
+  background: var(--oslab-mastered-soft);
+  color: var(--oslab-mastered-text);
+}
+.rate.is-mid {
+  background: var(--oslab-review-soft);
+  color: var(--oslab-review-text);
+}
+.rate.is-low {
+  background: var(--oslab-weak-soft);
+  color: var(--oslab-weak-text);
+}
+.rate.is-empty {
+  color: var(--oslab-muted-strong);
+}
+
+/* 与壳层同断点：<=1024 直接单列，避免 881–1024 的两栏挤压 */
+@media (max-width: 1024px) {
   .experiment-grid {
     grid-template-columns: 1fr;
   }
@@ -542,14 +621,10 @@ onMounted(async () => {
   }
 }
 @media (max-width: 640px) {
-  .page-intro,
   .section-heading,
   .table-footer {
     align-items: flex-start;
     flex-direction: column;
-  }
-  .intro-metric {
-    align-items: flex-start;
   }
 }
 </style>

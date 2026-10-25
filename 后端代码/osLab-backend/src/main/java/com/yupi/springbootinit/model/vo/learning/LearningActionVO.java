@@ -20,6 +20,9 @@ public class LearningActionVO implements Serializable {
      * 目标节点（所有行动都携带节点上下文）
      */
     private String nodeName;
+    private String nodeCode;
+    private String unitCode;
+    private String courseCode;
 
     /**
      * 资源 id：EXPERIMENT=questionId；其余为空
@@ -27,7 +30,7 @@ public class LearningActionVO implements Serializable {
     private Long resourceId;
 
     /**
-     * SIMULATION 的可选算法（FIFO/LRU/OPT 或 FCFS/SJF/RR）
+     * SIMULATION 的可选算法键（与前端 simulation/catalog.ts 一致）
      */
     private List<String> algorithms;
 

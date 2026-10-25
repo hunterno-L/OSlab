@@ -63,19 +63,29 @@ public class LearningPathServiceImpl implements LearningPathService {
 
     @Resource
     private LearningResourceResolver resourceResolver;
+    @Resource
+    private com.yupi.springbootinit.learning.NodeIdentityService nodeIdentities;
+    @Resource
+    private com.yupi.springbootinit.course.CourseService courseService;
 
     @Override
     public LearningPathVO buildPath(User user, String targetNodeName) {
         if (StringUtils.isBlank(targetNodeName)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "目标节点不能为空");
         }
+        com.yupi.springbootinit.learning.NodeIdentityService.Identity identity=nodeIdentities==null?null:nodeIdentities.resolve(targetNodeName);
+        if(identity!=null)targetNodeName=identity.storageKey;
         GraphDataDTO graph = knowledgeGraphService.getGraphSnapshot();
+        NodeDTO selected=KnowledgeGraphService.resolveNode(graph,identity==null?null:identity.nodeCode,targetNodeName);
+        if(selected==null)throw new BusinessException(ErrorCode.NOT_FOUND_ERROR,"知识节点不存在："+targetNodeName);
         Map<String, NodeDTO> nodeByName = new HashMap<>();
+        Set<String> ambiguous=new HashSet<>();
         Map<String, String> idToName = new HashMap<>();
         for (NodeDTO node : graph.getNodes() == null ? new ArrayList<NodeDTO>() : graph.getNodes()) {
-            nodeByName.put(node.getName(), node);
+            String key=storageKey(node);
+            if(nodeByName.putIfAbsent(key,node)!=null)ambiguous.add(key);
             if (node.getId() != null) {
-                idToName.put(node.getId(), node.getName());
+                idToName.put(node.getId(), key);
             }
         }
         if (!nodeByName.containsKey(targetNodeName)) {
@@ -85,7 +95,7 @@ public class LearningPathServiceImpl implements LearningPathService {
         // 1. 多前置邻接表：dependsOn[A] = A 的直接前置集合（保序去重）
         Map<String, LinkedHashSet<String>> dependsOn = new HashMap<>();
         for (LinkDTO link : graph.getLinks() == null ? new ArrayList<LinkDTO>() : graph.getLinks()) {
-            if (!RelationType.DEPENDENT.equals(link.getRelationType())) {
+            if (!KnowledgeGraphService.isPrerequisiteRelation(link.getRelationType())) {
                 continue;
             }
             String source = idToName.get(link.getSource());
@@ -110,6 +120,7 @@ public class LearningPathServiceImpl implements LearningPathService {
         }
         Set<String> scope = new LinkedHashSet<>(closure);
         scope.add(targetNodeName);
+        for(String key:scope)if(ambiguous.contains(key))throw new BusinessException(ErrorCode.PARAMS_ERROR,"图谱节点身份冲突，请先确认稳定代码："+key);
 
         // 3. 依赖环检测（Tarjan SCC，scope 内）
         List<String> cycleNodes = findCycleNodes(dependsOn, scope);
@@ -131,6 +142,7 @@ public class LearningPathServiceImpl implements LearningPathService {
             PathItemVO item = buildItem(name, targetNodeName, dependsOn, scope,
                     masteryMap.get(name), nodeByName.get(name));
             item.setOrder(order);
+            attachUnit(item,user.getId());
             orderIndex.put(name, order);
             order++;
             items.add(item);
@@ -141,6 +153,7 @@ public class LearningPathServiceImpl implements LearningPathService {
                 PathItemVO item = buildItem(name, targetNodeName, dependsOn, scope,
                         masteryMap.get(name), nodeByName.get(name));
                 item.setOrder(order);
+                attachUnit(item,user.getId());
                 item.setReason("该节点位于依赖环中，请管理员检查知识图谱依赖关系（" + item.getReason() + "）");
                 order++;
                 items.add(item);
@@ -323,6 +336,7 @@ public class LearningPathServiceImpl implements LearningPathService {
                                  LearningMastery mastery, NodeDTO node) {
         PathItemVO item = new PathItemVO();
         item.setNodeName(name);
+        if(node!=null){item.setNodeCode(node.getNodeCode());item.setDisplayName(node.getDisplayName());}
         String status = statusOf(mastery);
         item.setStatus(status);
         // 路径内直接前置
@@ -360,6 +374,7 @@ public class LearningPathServiceImpl implements LearningPathService {
     private LearningActionVO actionOf(String nodeName, String status, NodeDTO node) {
         LearningActionVO action = new LearningActionVO();
         action.setNodeName(nodeName);
+        action.setNodeCode(node==null?null:node.getNodeCode());
         action.setChapter(node == null ? null : node.getChapter());
         boolean mastered = MasteryStatusEnum.GREEN.name().equals(status);
         SimulationEntryVO simulation = resourceResolver.simulationEntryOf(nodeName);
@@ -383,6 +398,17 @@ public class LearningPathServiceImpl implements LearningPathService {
 
     private double pKnownOf(LearningMastery mastery) {
         return mastery == null || mastery.getPKnown() == null ? 0.0 : mastery.getPKnown();
+    }
+    private void attachUnit(PathItemVO item,Long userId) {
+        if(courseService==null||item.getNodeCode()==null||item.getAction()==null)return;
+        List<Map<String,Object>> units=courseService.nodeUnits(item.getNodeCode(),userId);
+        for(Map<String,Object> unit:units)if("TEACHES".equals(unit.get("role"))){
+            item.getAction().setUnitCode(String.valueOf(unit.get("unitCode")));
+            item.getAction().setCourseCode(String.valueOf(unit.get("courseCode")));return;
+        }
+    }
+    private String storageKey(NodeDTO node){
+        return nodeIdentities!=null&&node.getNodeCode()!=null?nodeIdentities.requireCode(node.getNodeCode()).storageKey:node.getName();
     }
 
     private String statusText(LearningMastery mastery) {

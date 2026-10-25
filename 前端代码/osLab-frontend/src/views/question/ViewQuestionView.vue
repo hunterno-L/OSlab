@@ -1,5 +1,12 @@
 <template>
-  <div id="experimentWorkbench" class="experiment-workbench">
+  <div id="experimentWorkbench" class="experiment-workbench oslab-lab-b">
+    <CourseReturnBar />
+    <p v-if="courseProgressError" role="alert">
+      {{ courseProgressError }}
+      <a-button size="small" @click="saveCourseProgress"
+        >重试保存活动进度</a-button
+      >
+    </p>
     <div class="workbench-crumb">
       <a-button type="text" size="small" @click="returnToCatalog">
         <template #icon><icon-arrow-left /></template>
@@ -10,7 +17,10 @@
     <!-- 顶部：实验名 / 章节 / 关联节点 / 语言选择 / 提交主按钮 -->
     <div class="workbench-header">
       <div class="workbench-title">
-        <h2 class="title">{{ question?.title || "编程实验" }}</h2>
+        <div class="lab-title-line">
+          <span class="lab-fig">{{ labFigure }}</span>
+          <h2 class="title">{{ question?.title || "编程实验" }}</h2>
+        </div>
         <div class="meta">
           <a-tag v-if="chapter" color="arcoblue">章节：{{ chapter }}</a-tag>
           <a-tag
@@ -23,6 +33,7 @@
             {{ tag }}
           </a-tag>
         </div>
+        <p class="lab-spec">{{ labSpec }}</p>
       </div>
       <a-space wrap>
         <a-select
@@ -56,6 +67,9 @@
             <a-spin :loading="loading" style="width: 100%">
               <MdViewer :value="question?.content || '暂无实验说明'" />
             </a-spin>
+            <aside class="lab-margin-note">
+              草稿自动保存；提交后可在右侧查看判题进度与结果。
+            </aside>
           </a-tab-pane>
           <a-tab-pane key="graph" title="关联图谱">
             <a-spin :loading="graphLoading" style="width: 100%">
@@ -174,7 +188,7 @@
       <!-- 中：代码编辑器 -->
       <div class="panel panel-editor">
         <div class="editor-heading">
-          <span>代码编辑器</span>
+          <span class="panel-kicker">CODE / EDITOR</span>
           <span class="hint">草稿自动保存</span>
         </div>
         <CodeEditor
@@ -187,6 +201,7 @@
       <!-- 右：提交结果与诊断（窄屏时置底） -->
       <div class="panel panel-result">
         <section class="status-card">
+          <span class="panel-kicker">EVALUATION</span>
           <h3>评测结果</h3>
           <template v-if="phase === 'idle' && !submitDetail">
             <a-empty description="提交评测后，在此查看判题进度与结果" />
@@ -311,6 +326,8 @@ import MdViewer from "@/components/MdViewer.vue";
 import KnowledgeGraph from "@/components/KnowledgeGraph.vue";
 import { tutorAsk, type TutorSourceVO } from "@/api/learning";
 import { useRoute, useRouter } from "vue-router";
+import CourseReturnBar from "@/components/learning/CourseReturnBar.vue";
+import { courseContext, completeCourseActivity } from "@/api/course";
 import store from "@/store";
 import {
   registerAiPageContext,
@@ -376,6 +393,18 @@ const contextNode = computed(() => routeValue(route.query.nodeName));
 const form = ref<QuestionSubmitAddRequest>({
   language: "c",
   code: "",
+});
+
+const labFigure = computed(() => {
+  const title = question.value?.title || "";
+  const match = /实验\s*([\d.]+)/.exec(title);
+  return match ? `FIG. ${match[1]}` : "LAB";
+});
+
+const labSpec = computed(() => {
+  const language = String(form.value.language || "c").toUpperCase();
+  const tags = (question.value?.tags || []).slice(0, 2).join(" / ");
+  return tags ? `${language} · ${tags}` : `${language} · 判题由后端执行`;
 });
 
 const currentUserId = () => store.state.user.loginUser?.id ?? "guest";
@@ -463,6 +492,23 @@ const loadRelatedGraph = async (key: string | number) => {
 const submitting = ref(false);
 const submitId = ref<number | null>(null);
 const submitDetail = ref<QuestionSubmitVO | null>(null);
+const courseProgressError = ref("");
+const saveCourseProgress = async () => {
+  const context = courseContext(route.query);
+  if (!context.sourceUnitCode || !context.sourceActivityCode || !submitId.value)
+    return;
+  courseProgressError.value = "";
+  try {
+    await completeCourseActivity(context.sourceActivityCode, {
+      sourceUnitCode: context.sourceUnitCode,
+      mode: route.query.courseMode === "REVIEW" ? "REVIEW" : "MAINLINE",
+      submissionId: String(submitId.value),
+    });
+  } catch (e) {
+    courseProgressError.value =
+      e instanceof Error ? e.message : "活动进度保存失败";
+  }
+};
 /** idle：未提交 / polling：轮询中 / timeout：超时可继续 / terminal：终态 */
 const phase = ref<"idle" | "polling" | "timeout" | "terminal">("idle");
 
@@ -534,6 +580,7 @@ const pollOnce = async (token: number) => {
       const status = res.data.status;
       if (status === 2 || status === 3) {
         phase.value = "terminal";
+        await saveCourseProgress();
         window.dispatchEvent(new Event("oslab:learning-changed"));
         return;
       }
@@ -581,6 +628,7 @@ const doSubmit = async () => {
   try {
     const res = await QuestionControllerService.doQuestionSubmitUsingPost({
       ...form.value,
+      ...courseContext(route.query),
       questionId: question.value.id,
     });
     if (!isCurrentRequest()) return;
@@ -1066,7 +1114,7 @@ onBeforeUnmount(() => {
   vertical-align: 1px;
 }
 .tutor-mode.is-ai {
-  color: var(--oslab-primary, #2059c9);
+  color: var(--oslab-primary, #2447d8);
   background: var(--oslab-primary-soft, #eaf0fd);
 }
 .tutor-mode.is-fallback {
@@ -1085,7 +1133,7 @@ onBeforeUnmount(() => {
   padding: 0;
   font: inherit;
   font-size: 12px;
-  color: var(--oslab-primary, #2059c9);
+  color: var(--oslab-primary, #2447d8);
   cursor: pointer;
   text-align: left;
   overflow-wrap: anywhere;
@@ -1122,6 +1170,169 @@ onBeforeUnmount(() => {
 }
 
 /* 1024px 以下：两栏纵向堆叠，评测结果置底 */
+/* C+B 学习图册 */
+.experiment-workbench {
+  gap: 16px;
+}
+.workbench-header {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--oslab-line);
+}
+.workbench-title .title {
+  font-family: var(--oslab-font-display);
+  font-size: 28px;
+}
+.workbench-crumb {
+  font-family: var(--oslab-font-mono);
+  font-size: 10px;
+}
+.panel {
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.status-card,
+.remediation {
+  border-radius: var(--oslab-radius-md);
+}
+.node-tag {
+  border-radius: var(--oslab-radius-pill);
+}
+
+/* 2026-10-24 实验页 B：蓝图底、墨线方角、红批注 */
+.oslab-lab-b.experiment-workbench {
+  padding: 14px;
+  background: linear-gradient(rgba(31, 95, 191, 0.055) 1px, transparent 1px) 0 0 /
+      24px 24px,
+    linear-gradient(90deg, rgba(31, 95, 191, 0.055) 1px, transparent 1px) 0 0 /
+      24px 24px,
+    linear-gradient(rgba(31, 95, 191, 0.1) 1px, transparent 1px) 0 0 / 120px
+      120px,
+    linear-gradient(90deg, rgba(31, 95, 191, 0.1) 1px, transparent 1px) 0 0 /
+      120px 120px,
+    var(--oslab-lab-bg);
+}
+.oslab-lab-b .workbench-crumb {
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--oslab-lab-line-strong);
+  color: var(--oslab-lab-muted);
+  font-family: var(--oslab-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+.oslab-lab-b .workbench-header {
+  padding: 10px 0 8px;
+  border-bottom: 1px solid var(--oslab-lab-ink);
+}
+.oslab-lab-b .lab-title-line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.oslab-lab-b .lab-fig {
+  padding: 1px 5px;
+  border: 1px solid var(--oslab-lab-red);
+  color: var(--oslab-lab-red);
+  font-family: var(--oslab-font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+}
+.oslab-lab-b .workbench-title .title {
+  margin: 0;
+  font-family: var(--oslab-font-tech);
+  font-size: 26px;
+  letter-spacing: 0.04em;
+}
+.oslab-lab-b .lab-spec {
+  margin: 4px 0 0;
+  color: var(--oslab-lab-muted);
+  font-family: var(--oslab-font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
+}
+.oslab-lab-b .panel {
+  border-color: var(--oslab-lab-line-strong);
+  border-radius: 0;
+  background: var(--oslab-lab-panel);
+  box-shadow: none;
+}
+.oslab-lab-b .panel-editor {
+  border-color: var(--oslab-lab-ink);
+  background: #10141a;
+}
+.oslab-lab-b .editor-heading,
+.oslab-lab-b .status-card h3 {
+  font-family: var(--oslab-font-tech);
+}
+.oslab-lab-b .editor-heading {
+  border-bottom: 1px solid var(--oslab-lab-ink);
+  background: var(--oslab-lab-panel);
+  color: var(--oslab-lab-ink);
+}
+.oslab-lab-b .panel-kicker {
+  color: var(--oslab-lab-red);
+  font-family: var(--oslab-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+.oslab-lab-b .status-card {
+  padding: 14px;
+  border-bottom: 1px solid var(--oslab-lab-line-strong);
+  background: var(--oslab-lab-panel);
+}
+.oslab-lab-b .status-card h3 {
+  margin-bottom: 10px;
+  color: var(--oslab-lab-ink);
+}
+.oslab-lab-b .lab-margin-note {
+  margin: 12px 0 0 24px;
+  padding-left: 9px;
+  border-left: 2px solid var(--oslab-lab-red);
+  color: var(--oslab-lab-red);
+  font-family: var(--oslab-font-display);
+  font-size: 11px;
+  line-height: 1.55;
+  transform: rotate(-1deg);
+}
+.oslab-lab-b :deep(.arco-tabs-tab-active .arco-tabs-tab-title) {
+  color: var(--oslab-lab-red);
+}
+.oslab-lab-b :deep(.arco-tabs-ink-bar) {
+  background: var(--oslab-lab-red);
+}
+.oslab-lab-b :deep(.markdown-body h2) {
+  padding-left: 8px;
+  border-left: 2px solid var(--oslab-lab-red);
+  font-family: var(--oslab-font-tech);
+  font-size: 14px;
+}
+.oslab-lab-b :deep(.markdown-body h3) {
+  padding-left: 8px;
+  border-left: 2px solid var(--oslab-lab-red);
+  font-family: var(--oslab-font-tech);
+}
+.oslab-lab-b :deep(.arco-btn-primary) {
+  border-radius: 0;
+  background: var(--oslab-lab-ink);
+}
+.oslab-lab-b :deep(.arco-select-view) {
+  border-radius: 0;
+  background: var(--oslab-lab-panel);
+}
+.oslab-lab-b .node-tag {
+  border: 1px solid var(--oslab-lab-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--oslab-lab-ink-soft);
+}
+.oslab-lab-b .status-card,
+.oslab-lab-b .remediation {
+  border-radius: 0;
+}
+.oslab-lab-b .status-card :deep(.arco-empty) {
+  color: var(--oslab-lab-muted);
+}
+
 @media (max-width: 1024px) {
   .workbench-body {
     grid-template-columns: 1fr;

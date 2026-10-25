@@ -6,14 +6,25 @@
       <div class="qa-meta">
         <span v-if="typeText" class="qa-tag qa-tag-type">{{ typeText }}</span>
         <span class="qa-tag">{{ difficultyText }}</span>
+        <span v-if="contextLabel" class="qa-tag">{{ contextLabel }}</span>
         <span v-if="question.chapter" class="qa-tag">{{
           question.chapter
         }}</span>
         <span
-          v-for="node in question.nodeNames || []"
+          v-for="node in question.nodeDisplayNames || question.nodeNames || []"
           :key="node"
           class="qa-tag"
           >{{ node }}</span
+        >
+        <span
+          v-if="question.hasAttempted"
+          class="qa-tag qa-tag-state"
+          :class="
+            question.latestResult === 'CORRECT'
+              ? 'qa-tag-state--correct'
+              : 'qa-tag-state--review'
+          "
+          >最近{{ question.latestResult === "CORRECT" ? "答对" : "答错" }}</span
         >
       </div>
     </header>
@@ -21,7 +32,7 @@
     <div v-if="unavailableReason" class="qa-unavailable" role="alert">
       {{ unavailableReason }}
     </div>
-    <p class="qa-content">{{ question.content }}</p>
+    <MdViewer class="qa-content" :value="question.content" />
 
     <!-- 判断题：JUDGE 提交 "true"/"false" -->
     <a-radio-group
@@ -49,7 +60,8 @@
         class="qa-option"
         :value="opt.key"
       >
-        {{ opt.key }}. {{ opt.value }}
+        <span class="qa-option-key">{{ opt.key }}</span>
+        <MdViewer class="qa-option-text" :value="opt.value" />
       </a-radio>
     </a-radio-group>
 
@@ -67,7 +79,8 @@
         class="qa-option"
         :value="opt.key"
       >
-        {{ opt.key }}. {{ opt.value }}
+        <span class="qa-option-key">{{ opt.key }}</span>
+        <MdViewer class="qa-option-text" :value="opt.value" />
       </a-checkbox>
     </a-checkbox-group>
 
@@ -119,9 +132,11 @@
 
       <div class="qa-feedback-block">
         <h3 class="qa-feedback-title">解析</h3>
-        <p v-if="result.analysis" class="qa-feedback-text">
-          {{ result.analysis }}
-        </p>
+        <MdViewer
+          v-if="result.analysis"
+          class="qa-feedback-text"
+          :value="result.analysis"
+        />
         <p v-else class="qa-feedback-text qa-hint">本题暂无解析</p>
       </div>
 
@@ -168,6 +183,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import MdViewer from "@/components/MdViewer.vue";
 import { Message } from "@arco-design/web-vue";
 import {
   answerLearningQuestion,
@@ -180,8 +196,12 @@ import {
 const props = defineProps<{
   question: LearningQuestionVO;
   assessmentRunId?: string | number;
+  sourceUnitCode?: string;
+  sourceActivityCode?: string;
   disabled?: boolean;
   disabledReason?: string;
+  /** 列表流中的真实目录上下文（如“单元 · 小节”） */
+  contextLabel?: string;
 }>();
 
 // eslint-disable-next-line no-undef
@@ -301,6 +321,8 @@ const submit = async () => {
       questionId: props.question.id,
       answer,
       assessmentRunId: props.assessmentRunId,
+      sourceUnitCode: props.sourceUnitCode,
+      sourceActivityCode: props.sourceActivityCode,
       submissionKey: newSubmissionKey(),
     });
     if (res.data?.code === 0) {
@@ -378,6 +400,16 @@ const statusTagClass = (status: string) =>
   border-color: transparent;
   background: var(--oslab-primary-soft);
   color: var(--oslab-primary);
+}
+.qa-tag-state--correct {
+  border-color: transparent;
+  background: var(--oslab-mastered-soft, #e9f1ed);
+  color: var(--oslab-mastered, #2f6b53);
+}
+.qa-tag-state--review {
+  border-color: transparent;
+  background: var(--oslab-review-soft);
+  color: var(--oslab-review-text);
 }
 .qa-unavailable {
   margin-bottom: var(--oslab-space-3);
@@ -497,10 +529,10 @@ const statusTagClass = (status: string) =>
   font-weight: 600;
 }
 .qa-feedback.is-correct .qa-result-badge {
-  color: var(--oslab-mastered);
+  color: var(--oslab-mastered-text);
 }
 .qa-feedback.is-wrong .qa-result-badge {
-  color: var(--oslab-weak);
+  color: var(--oslab-weak-text);
 }
 .qa-result-hint {
   color: var(--oslab-muted-strong);
@@ -550,7 +582,107 @@ const statusTagClass = (status: string) =>
   background: var(--oslab-panel-soft);
 }
 .qa-unsupported {
-  color: var(--oslab-weak);
+  color: var(--oslab-weak-text);
   font-size: var(--oslab-font-body);
+}
+
+/* C+B 学习图册 */
+.qa-card {
+  padding: 16px;
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.qa-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--oslab-ink);
+}
+.qa-tag {
+  border: 0;
+  border-radius: var(--oslab-radius-pill);
+  background: var(--oslab-panel-muted);
+  color: var(--oslab-ink-soft);
+}
+.qa-content {
+  max-width: 72ch;
+}
+.qa-options :deep(.arco-radio),
+.qa-options :deep(.arco-checkbox) {
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: 10px 12px;
+  border-radius: var(--oslab-radius-md);
+  background: var(--oslab-panel);
+  touch-action: manipulation;
+}
+.qa-options :deep(.arco-radio:hover),
+.qa-options :deep(.arco-checkbox:hover) {
+  background: var(--oslab-panel-soft);
+}
+.qa-options :deep(.arco-radio-checked),
+.qa-options :deep(.arco-checkbox-checked) {
+  border-color: var(--oslab-primary);
+  background: var(--oslab-primary-soft);
+}
+.qa-options :deep(.arco-radio-label),
+.qa-options :deep(.arco-checkbox-label) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.qa-option-key {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  border-radius: 6px;
+  background: var(--oslab-panel-muted);
+  color: var(--oslab-ink);
+  font-family: var(--oslab-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+.qa-options :deep(.arco-radio-checked) .qa-option-key,
+.qa-options :deep(.arco-checkbox-checked) .qa-option-key {
+  background: var(--oslab-primary);
+  color: var(--oslab-on-primary);
+}
+.qa-option-text {
+  display: inline;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  color: var(--oslab-ink-soft);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.qa-option-text :deep(p) {
+  display: inline;
+  margin: 0;
+}
+.qa-feedback.is-correct,
+.qa-feedback.is-wrong {
+  padding: 12px;
+  border-left: 2px solid var(--oslab-line-strong);
+  border-radius: var(--oslab-radius-md);
+}
+.qa-feedback.is-correct {
+  border-left-color: var(--oslab-mastered-text);
+  background: var(--oslab-mastered-soft);
+}
+.qa-feedback.is-wrong {
+  border-left-color: var(--oslab-weak-text);
+  background: var(--oslab-weak-soft);
+}
+.qa-feedback-title {
+  font-weight: 600;
+}
+.qa-submit-row :deep(.arco-btn-primary) {
+  border-radius: var(--oslab-radius-pill);
 }
 </style>

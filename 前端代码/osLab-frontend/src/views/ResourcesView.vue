@@ -21,6 +21,8 @@
     <section class="filter-panel">
       <a-input-search
         v-model="keyword"
+        aria-label="搜索学习资源"
+        :input-attrs="{ 'aria-label': '搜索学习资源' }"
         allow-clear
         placeholder="搜索资料标题或简介"
         search-button
@@ -28,6 +30,7 @@
       />
       <a-select
         v-model="chapter"
+        aria-label="按章节筛选"
         placeholder="全部章节"
         allow-clear
         @change="syncQuery"
@@ -38,6 +41,7 @@
       </a-select>
       <a-select
         v-model="nodeName"
+        aria-label="按节点筛选"
         placeholder="全部节点"
         allow-clear
         allow-search
@@ -49,6 +53,7 @@
       </a-select>
       <a-select
         v-model="type"
+        aria-label="按类型筛选"
         placeholder="全部类型"
         allow-clear
         @change="syncQuery"
@@ -246,7 +251,7 @@ watch(
   margin-bottom: 18px;
 }
 .eyebrow {
-  color: var(--oslab-primary, #165dff);
+  color: var(--oslab-primary, #2447d8);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0;
@@ -307,7 +312,7 @@ watch(
 }
 .resource-kicker {
   margin-bottom: 4px;
-  color: var(--oslab-primary, #165dff);
+  color: var(--oslab-primary, #2447d8);
   font-size: 12px;
 }
 .resource-card h2 {
@@ -343,6 +348,47 @@ watch(
   border: 1px solid var(--oslab-border, #e5e6eb);
   border-radius: var(--oslab-radius-md, 6px);
 }
+/* C+B 学习图册 */
+.page-intro h1 {
+  display: inline;
+  padding: 0 4px;
+  font-family: var(--oslab-font-display);
+  font-size: 34px;
+  background: linear-gradient(
+    transparent 56%,
+    var(--oslab-highlight) 56%,
+    var(--oslab-highlight) 92%,
+    transparent 92%
+  );
+}
+.filter-panel {
+  padding: 12px;
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.resource-card {
+  padding: 16px;
+  background: var(--oslab-panel);
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-container);
+  box-shadow: var(--oslab-shadow-card);
+}
+.resource-kicker {
+  font-family: var(--oslab-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--oslab-muted-strong);
+}
+.resource-card h2 {
+  font-family: var(--oslab-font-display);
+}
+.resource-description {
+  color: var(--oslab-ink-soft);
+}
+
 @media (max-width: 820px) {
   .filter-panel {
     grid-template-columns: 1fr 1fr;

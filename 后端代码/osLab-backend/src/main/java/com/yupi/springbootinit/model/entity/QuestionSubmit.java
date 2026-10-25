@@ -13,6 +13,13 @@ import lombok.Data;
 @TableName(value ="question_submit")
 @Data
 public class QuestionSubmit implements Serializable {
+    private String sourceUnitCode;
+    private String sourceActivityCode;
+    private String experimentMappingSnapshot;
+    private String sourceTaskCode;
+    private String sourceTaskItemCode;
+    private Integer sourceTaskRound;
+    private String evaluationIdentity;
     /**
      * id
      */

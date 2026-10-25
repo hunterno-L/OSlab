@@ -38,7 +38,12 @@
       <template #optional="{ record }">
         <a-space>
           <a-button type="primary" @click="doUpdate(record)"> 修改</a-button>
-          <a-button status="danger" @click="doDelete(record)">删除</a-button>
+          <a-popconfirm
+            content="删除实验后无法恢复，确定继续吗？"
+            @ok="doDelete(record)"
+          >
+            <a-button status="danger">删除</a-button>
+          </a-popconfirm>
         </a-space>
       </template>
       <template #tags="{ record }">
@@ -65,7 +70,26 @@
         </a-descriptions>
       </template>
       <template #createTime="{ record }">
-        {{ moment(record.createTime).format("YYYY-MM-DD HH:mm:ss") }}
+        {{ formatDateTime(record.createTime) }}
+      </template>
+      <template #publicationStatus="{ record }">
+        <a-tag
+          :color="
+            record.publicationStatus === 'DRAFT'
+              ? 'gray'
+              : record.publicationStatus === 'OFFLINE'
+              ? 'orange'
+              : 'green'
+          "
+        >
+          {{
+            record.publicationStatus === "DRAFT"
+              ? "草稿"
+              : record.publicationStatus === "OFFLINE"
+              ? "已下线"
+              : "已发布"
+          }}
+        </a-tag>
       </template>
       <template #judgeCase="{ record }">
         <a-descriptions style="margin-top: 20px" :size="'mini'" :column="1">
@@ -91,7 +115,7 @@ import {
 import message from "@arco-design/web-vue/es/message";
 import * as querystring from "querystring";
 import { useRouter } from "vue-router";
-import moment from "moment/moment";
+import { formatDateTime } from "@/utils/dateTime";
 
 const show = ref(true);
 const tableRef = ref();
@@ -176,6 +200,10 @@ const columns = [
     title: "创建用户id",
     dataIndex: "userId",
   },*/
+  {
+    title: "发布状态",
+    slotName: "publicationStatus",
+  },
   {
     title: "创建时间",
     slotName: "createTime",

@@ -15,6 +15,11 @@ public class MasteryNodeVO implements Serializable {
      * 节点 id（Neo4j 内部 id 字符串）
      */
     private String id;
+    private String nodeCode;
+    private String displayName;
+    private String nodeType;
+    private String layer;
+    private String homeSectionCode;
 
     /**
      * 节点业务键（EntityNode.name）
