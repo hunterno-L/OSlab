@@ -1,6 +1,11 @@
 <template>
   <section class="legacy-demo" aria-label="原版算法演示">
-    <div class="legacy-grid">
+    <div
+      ref="gridRef"
+      class="legacy-grid"
+      :class="{ resizing }"
+      :style="{ '--source-width': requestedSourceWidth }"
+    >
       <div class="legacy-stage" aria-label="原算法参数、动画舞台与结果表">
         <a-alert v-if="initialInputError" type="error" class="entry-error">
           {{ initialInputError }}
@@ -8,23 +13,46 @@
         <a-alert v-if="runtimeError" type="error" class="entry-error">
           {{ runtimeError }}
         </a-alert>
-        <iframe
-          :key="resource.route"
-          ref="frameRef"
-          class="legacy-frame"
-          :style="{ height: `${frameHeight}px` }"
-          :src="frameUrl"
-          :title="`${definition.title}原版演示`"
-          @load="onFrameLoad"
-        />
+        <div class="stage-viewport">
+          <iframe
+            :key="resource.route"
+            ref="frameRef"
+            class="legacy-frame"
+            :style="{ height: `${frameHeight}px` }"
+            :src="frameUrl"
+            :title="`${definition.title}原版演示`"
+            @load="onFrameLoad"
+          />
+        </div>
       </div>
 
-      <section class="source-panel" aria-label="原始算法源代码">
+      <div
+        class="source-resize-handle"
+        role="separator"
+        tabindex="0"
+        aria-label="调整算法源码宽度"
+        aria-orientation="vertical"
+        :aria-valuemin="MIN_SOURCE_WIDTH"
+        :aria-valuemax="maxSourceWidth"
+        :aria-valuenow="Math.round(actualSourceWidth)"
+        @pointerdown="startResize"
+        @pointermove="resizeFromPointer"
+        @pointerup="stopResize"
+        @pointercancel="stopResize"
+        @lostpointercapture="stopResize"
+        @keydown="resizeFromKeyboard"
+      />
+
+      <section
+        ref="sourcePanelRef"
+        class="source-panel"
+        aria-label="C++ 算法源代码"
+      >
         <header class="source-head">
           <div>
             <h3>算法源代码</h3>
             <span class="source-path oslab-mono">{{
-              resource.sourceFile
+              `${definition.key}.cpp`
             }}</span>
           </div>
           <span class="source-state" :class="{ running }" aria-live="polite">
@@ -35,17 +63,13 @@
         <div v-else-if="sourceError" class="source-error">
           {{ sourceError }}
         </div>
-        <pre
-          v-else
-          class="source-code"
-          aria-label="原始 Vue 组件中的算法实现"
-        ><code><span
+        <pre v-else class="source-code" aria-label="C++ 算法源代码"><code><span
           v-for="row in sourceRows"
           :key="row.number"
           :id="`legacy-line-${row.number}`"
           class="source-line"
-          :class="{ active: activeLine === row.number }"
-        ><span class="line-number oslab-mono">{{ row.number }}</span><span>{{ row.text || " " }}</span></span></code></pre>
+          :class="{ active: activeLines.includes(row.number) }"
+        ><span class="line-number oslab-mono">{{ row.number }}</span><span><span v-for="(token, index) in row.tokens" :key="index" :class="`cpp-${token.kind}`">{{ token.text }}</span></span></span></code></pre>
       </section>
     </div>
   </section>
@@ -58,11 +82,7 @@ import {
   LEGACY_DEMO_RESOURCES,
   serializeLegacyInput,
 } from "@/simulation/legacy";
-
-interface SourceRow {
-  number: number;
-  text: string;
-}
+import { parseCppSource, type CppSourceRow } from "@/simulation/cppSource";
 
 // eslint-disable-next-line no-undef
 const props = defineProps<{
@@ -85,8 +105,14 @@ const emit = defineEmits<{
 }>();
 
 const TRACE_CHANNEL = "oslab-legacy-simulation";
+const MIN_SOURCE_WIDTH = 360;
+const MIN_STAGE_WIDTH = 560;
+const HANDLE_WIDTH = 12;
 const frameRef = ref<HTMLIFrameElement | null>(null);
-const sourceRows = ref<SourceRow[]>([]);
+const gridRef = ref<HTMLElement | null>(null);
+const sourcePanelRef = ref<HTMLElement | null>(null);
+const sourceRows = ref<CppSourceRow[]>([]);
+const phaseLines = ref<Record<string, number[]>>({});
 const sourceLoading = ref(true);
 const sourceError = ref("");
 const runtimeError = ref("");
@@ -95,11 +121,72 @@ const legacyReady = ref(false);
 const running = ref(false);
 const paused = ref(false);
 const frameHeight = ref(920);
+const sourceWidth = ref<number | null>(null);
+const actualSourceWidth = ref(0);
+const gridWidth = ref(0);
+const resizing = ref(false);
+const requestedSourceWidth = computed(() =>
+  sourceWidth.value === null ? "36%" : `${sourceWidth.value}px`
+);
+const maxSourceWidth = computed(() =>
+  Math.max(MIN_SOURCE_WIDTH, gridWidth.value - MIN_STAGE_WIDTH - HANDLE_WIDTH)
+);
 const complete = ref(false);
-const activeLine = ref<number | null>(null);
-const pendingLine = ref<number | null>(null);
+const activeLines = ref<number[]>([]);
+const pendingPhase = ref("");
 let pendingFlush = 0;
 let sourceRequest = 0;
+let layoutObserver: ResizeObserver | null = null;
+let scrollFrame = 0;
+let currentRunId = -1;
+let lastSequence = 0;
+let resizePointer: { id: number; startX: number; startWidth: number } | null =
+  null;
+
+const setSourceWidth = (width: number) => {
+  sourceWidth.value = Math.min(
+    maxSourceWidth.value,
+    Math.max(MIN_SOURCE_WIDTH, width)
+  );
+};
+
+const startResize = (event: PointerEvent) => {
+  if (event.button !== 0 || !sourcePanelRef.value) return;
+  event.preventDefault();
+  resizePointer = {
+    id: event.pointerId,
+    startX: event.clientX,
+    startWidth: sourcePanelRef.value.getBoundingClientRect().width,
+  };
+  resizing.value = true;
+  (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+};
+
+const resizeFromPointer = (event: PointerEvent) => {
+  if (!resizePointer || resizePointer.id !== event.pointerId) return;
+  setSourceWidth(
+    resizePointer.startWidth + resizePointer.startX - event.clientX
+  );
+};
+
+const stopResize = (event: PointerEvent) => {
+  if (!resizePointer || resizePointer.id !== event.pointerId) return;
+  resizePointer = null;
+  resizing.value = false;
+};
+
+const resizeFromKeyboard = (event: KeyboardEvent) => {
+  const width = sourcePanelRef.value?.getBoundingClientRect().width;
+  if (width === undefined) return;
+  let next: number;
+  if (event.key === "ArrowLeft") next = width + 24;
+  else if (event.key === "ArrowRight") next = width - 24;
+  else if (event.key === "Home") next = maxSourceWidth.value;
+  else if (event.key === "End") next = MIN_SOURCE_WIDTH;
+  else return;
+  event.preventDefault();
+  setSourceWidth(next);
+};
 
 const resource = computed(() => {
   const found = LEGACY_DEMO_RESOURCES[props.definition.key];
@@ -117,27 +204,35 @@ const sourceState = computed(() => {
   return "待运行";
 });
 
-const showActiveLine = (line: number) => {
-  activeLine.value = line;
-  if (!line) return;
-  requestAnimationFrame(() => {
-    document.getElementById(`legacy-line-${line}`)?.scrollIntoView({
-      block: "nearest",
-      behavior: "smooth",
-    });
+const showPhase = (phase: string) => {
+  const lines = phaseLines.value[phase];
+  if (!lines?.length) return;
+  activeLines.value = lines;
+  if (scrollFrame) cancelAnimationFrame(scrollFrame);
+  scrollFrame = requestAnimationFrame(() => {
+    scrollFrame = 0;
+    const row = document.getElementById(`legacy-line-${lines[0]}`);
+    const panel = row?.closest(".source-code");
+    if (!row || !panel) return;
+    const rect = row.getBoundingClientRect();
+    const bounds = panel.getBoundingClientRect();
+    if (rect.top < bounds.top + 24 || rect.bottom > bounds.bottom - 24)
+      panel.scrollTop += rect.top - bounds.top - bounds.height / 3;
   });
 };
 
 const flushLine = () => {
   pendingFlush = 0;
-  if (pendingLine.value !== null) showActiveLine(pendingLine.value);
+  if (pendingPhase.value) showPhase(pendingPhase.value);
 };
 
 const clearTrace = () => {
   if (pendingFlush) window.clearTimeout(pendingFlush);
   pendingFlush = 0;
-  pendingLine.value = null;
-  activeLine.value = null;
+  pendingPhase.value = "";
+  activeLines.value = [];
+  if (scrollFrame) cancelAnimationFrame(scrollFrame);
+  scrollFrame = 0;
 };
 
 const send = (type: string) => {
@@ -164,31 +259,21 @@ const loadSource = async () => {
   const request = ++sourceRequest;
   sourceLoading.value = true;
   sourceError.value = "";
-  activeLine.value = null;
+  activeLines.value = [];
   sourceRows.value = [];
+  phaseLines.value = {};
   try {
     const response = await fetch(
-      resource.value.sourceFile
-        ? `/legacy-simulation/source/${resource.value.sourceFile}`
-        : ""
+      `/algorithm-code/${encodeURIComponent(props.definition.key)}.cpp`,
+      { cache: "no-cache" }
     );
     if (!response.ok)
       throw new Error(`源码加载失败（HTTP ${response.status}）`);
     const source = await response.text();
-    const open = source.match(/<script\b[^>]*>/m);
-    if (!open || open.index === undefined)
-      throw new Error("原组件没有可展示的 script 段");
-    const start = open.index + open[0].length;
-    const end = source.indexOf("<" + "/script>", start);
-    if (end < 0) throw new Error("原组件 script 段不完整");
-    const offset = source.slice(0, start).split(/\r?\n/).length - 1;
-    const script = source.slice(start, end).replace(/^\r?\n/, "");
-    const trimmedOffset = script.length !== source.slice(start, end).length;
     if (request !== sourceRequest) return;
-    sourceRows.value = script.split(/\r?\n/).map((text, index) => ({
-      number: offset + (trimmedOffset ? 2 : 1) + index,
-      text,
-    }));
+    const parsed = parseCppSource(source);
+    sourceRows.value = parsed.rows;
+    phaseLines.value = parsed.phases;
   } catch (error) {
     if (request === sourceRequest) {
       sourceError.value =
@@ -230,24 +315,32 @@ const onMessage = (event: MessageEvent) => {
     return;
   }
   if (message.type === "run-start") {
+    currentRunId = Number(message.runId);
+    lastSequence = 0;
     running.value = true;
     paused.value = false;
     complete.value = false;
     clearTrace();
     runtimeError.value = "";
+    showPhase("initialize");
     emit("progress", false);
     return;
   }
   if (message.type === "trace") {
+    if (!running.value || Number(message.runId) !== currentRunId) return;
     if (message.file !== `src/views/${resource.value.sourceFile}`) return;
-    const line = Number(message.line);
-    if (Number.isInteger(line) && line > 0) {
-      pendingLine.value = line;
+    const sequence = Number(message.sequence);
+    if (Number.isFinite(sequence) && sequence <= lastSequence) return;
+    lastSequence = sequence;
+    const phase = String(message.phase || "");
+    if (phaseLines.value[phase]?.length) {
+      pendingPhase.value = phase;
       if (!pendingFlush) pendingFlush = window.setTimeout(flushLine, 24);
     }
     return;
   }
   if (message.type === "reset") {
+    currentRunId = Number(message.runId);
     running.value = false;
     complete.value = false;
     paused.value = false;
@@ -262,10 +355,15 @@ const onMessage = (event: MessageEvent) => {
   if (message.type === "resize") {
     const height = Number(message.height);
     if (Number.isFinite(height) && height > 0)
-      frameHeight.value = Math.max(720, Math.min(4000, height + 8));
+      frameHeight.value = Math.max(560, height + 8);
     return;
   }
   if (message.type === "completed") {
+    if (Number(message.runId) !== currentRunId) return;
+    if (pendingFlush) window.clearTimeout(pendingFlush);
+    pendingFlush = 0;
+    pendingPhase.value = "";
+    showPhase("result");
     running.value = false;
     paused.value = false;
     complete.value = true;
@@ -281,6 +379,7 @@ const onMessage = (event: MessageEvent) => {
   if (message.type === "error") {
     running.value = false;
     complete.value = false;
+    paused.value = false;
     runtimeError.value = String(message.message || "原演示执行失败");
   }
 };
@@ -295,17 +394,35 @@ watch(
     runtimeError.value = "";
     paused.value = false;
     clearTrace();
+    currentRunId = -1;
+    lastSequence = 0;
     emit("progress", false);
     void loadSource();
   },
   { immediate: true }
 );
 
-onMounted(() => window.addEventListener("message", onMessage));
+onMounted(() => {
+  window.addEventListener("message", onMessage);
+  layoutObserver = new ResizeObserver(() => {
+    gridWidth.value = gridRef.value?.getBoundingClientRect().width || 0;
+    actualSourceWidth.value =
+      sourcePanelRef.value?.getBoundingClientRect().width || 0;
+    if (sourceWidth.value !== null && sourceWidth.value > maxSourceWidth.value)
+      setSourceWidth(maxSourceWidth.value);
+  });
+  gridWidth.value = gridRef.value?.getBoundingClientRect().width || 0;
+  actualSourceWidth.value =
+    sourcePanelRef.value?.getBoundingClientRect().width || 0;
+  if (gridRef.value) layoutObserver.observe(gridRef.value);
+  if (sourcePanelRef.value) layoutObserver.observe(sourcePanelRef.value);
+});
 onBeforeUnmount(() => {
   window.removeEventListener("message", onMessage);
   if (pendingFlush) window.clearTimeout(pendingFlush);
   sourceRequest += 1;
+  layoutObserver?.disconnect();
+  if (scrollFrame) cancelAnimationFrame(scrollFrame);
 });
 </script>
 
@@ -316,9 +433,10 @@ onBeforeUnmount(() => {
 }
 .legacy-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(330px, 0.85fr);
+  grid-template-columns:
+    minmax(0, 1fr) 12px
+    clamp(360px, var(--source-width), calc(100% - 572px));
   align-items: start;
-  gap: 12px;
 }
 .legacy-stage {
   min-width: 0;
@@ -326,12 +444,44 @@ onBeforeUnmount(() => {
   border: 1px solid var(--oslab-line);
   background: #fff;
 }
+.stage-viewport {
+  width: 100%;
+  overflow: hidden;
+}
 .legacy-frame {
   display: block;
   width: 100%;
-  min-height: 920px;
   border: 0;
   background: #fff;
+}
+.legacy-grid.resizing .legacy-frame {
+  pointer-events: none;
+}
+.source-resize-handle {
+  position: sticky;
+  top: 12px;
+  align-self: start;
+  height: calc(100vh - 24px);
+  cursor: col-resize;
+  touch-action: none;
+}
+.source-resize-handle::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 5px;
+  width: 2px;
+  background: var(--oslab-line);
+  content: "";
+}
+.source-resize-handle:hover::before,
+.source-resize-handle:focus-visible::before,
+.legacy-grid.resizing .source-resize-handle::before {
+  background: var(--oslab-primary);
+}
+.source-resize-handle:focus-visible {
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: -2px;
 }
 .entry-error {
   margin: 8px;
@@ -376,38 +526,62 @@ onBeforeUnmount(() => {
 .source-code {
   max-height: calc(100vh - 78px);
   margin: 0;
-  overflow: auto;
-  color: #282c34;
-  background: #fafbfc;
-  font: 12px/1.55 Consolas, "SFMono-Regular", Menlo, monospace;
-  tab-size: 2;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  color: #24292f;
+  background: #fbfcfe;
+  font: 14px/1.75 "Cascadia Code", "Cascadia Mono", Consolas, "Microsoft YaHei",
+    monospace;
+  font-variant-ligatures: none;
+  tab-size: 4;
 }
 .source-code code {
   display: block;
-  min-width: max-content;
-  padding: 8px 0;
+  min-width: 0;
+  padding: 10px 0;
 }
 .source-line {
   display: grid;
-  grid-template-columns: 44px auto;
-  min-height: 18px;
-  padding-right: 12px;
-  white-space: pre;
+  grid-template-columns: 48px minmax(0, 1fr);
+  min-height: 24px;
+  padding-right: 14px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .source-line.active {
-  color: #162022;
-  background: #d8eee8;
+  color: #10201c;
+  background: #e3f2ec;
   box-shadow: inset 3px 0 #167b67;
 }
 .line-number {
-  padding-right: 9px;
-  color: #8a9198;
+  padding-right: 11px;
+  color: #9aa0a6;
+  font-size: 12px;
   text-align: right;
   user-select: none;
 }
 .source-line.active .line-number {
   color: #167b67;
   font-weight: 700;
+}
+.cpp-keyword {
+  color: #af00db;
+}
+.cpp-directive {
+  color: #6b7280;
+}
+.cpp-header {
+  color: #af00db;
+}
+.cpp-string {
+  color: #a31515;
+}
+.cpp-number {
+  color: #098658;
+}
+.cpp-comment {
+  color: #008000;
 }
 .source-loading,
 .source-error {
@@ -418,9 +592,13 @@ onBeforeUnmount(() => {
   color: var(--oslab-weak);
   font-size: 13px;
 }
-@media (max-width: 1050px) {
+@media (max-width: 1180px) {
   .legacy-grid {
     grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .source-resize-handle {
+    display: none;
   }
   .source-panel {
     position: static;
