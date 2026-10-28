@@ -49,7 +49,8 @@ load_required_seed /seed/oslab_upgrade_v7_identity.sql   "8/11 v7 稳定身份/�
 load_required_seed /seed/oslab_upgrade_v8_teaching_tasks.sql "9/11 v8 学习任务/执行副本/任务附件"
 load_required_seed /seed/oslab_upgrade_v9_learning_activities.sql "10/11 v9 普通演示运行记录"
 load_required_seed /seed/oslab_upgrade_v10_classes.sql "11/12 v10 班级与成员管理"
-load_required_seed /seed/oslab_upgrade_v11_experiment_nodes.sql "12/12 v11 实验节点与清理"
+load_required_seed /seed/oslab_upgrade_v11_experiment_nodes.sql "12/13 v11 实验节点与清理"
+load_required_seed /seed/oslab_upgrade_v12_practice_units.sql "13/13 v12 练习单元与题目挂载"
 
 # ---------------------------------------------------------------------
 # 加载后契约校验（§6.1.2-6）：逐项核对 information_schema，任一不符即整体失败。
