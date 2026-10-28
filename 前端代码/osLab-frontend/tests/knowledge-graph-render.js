@@ -1070,7 +1070,7 @@ test("animated force layout settles and fits without moving the camera afterward
   }
 });
 
-test("dragging keeps the card and stabilizes connected nodes", () => {
+test("dragging reheats the solver and moves connected cards without overlaps", () => {
   const harness = createHarness(makeGraph(13), 1120, 620, true);
   const nativeSetTimeout = global.setTimeout;
   const nativeClearTimeout = global.clearTimeout;
@@ -1088,6 +1088,10 @@ test("dragging keeps the card and stabilizes connected nodes", () => {
     element.attr({ x: element.x + 180, y: element.y + 100 });
     element.trigger("drag", { offsetX: element.x, offsetY: element.y });
     assert.equal(series.__oslabForceSettled, false);
+    // A pointer drag supplies multiple moves. The first move starts ECharts'
+    // synchronous force tick; the following move supplies the held position.
+    element.attr({ x: before[5][0] + 180, y: before[5][1] + 100 });
+    element.trigger("drag", { offsetX: element.x, offsetY: element.y });
     element.trigger("dragend", {});
     harness.flush();
     const after = nodePositions(harness.graph);
@@ -1098,15 +1102,14 @@ test("dragging keeps the card and stabilizes connected nodes", () => {
       "dragged card must retain its new area"
     );
     assert.ok(
-      after.every(
-        (point, index) =>
-          index === 5 ||
+      [4, 6].some(
+        (index) =>
           Math.hypot(
-            point[0] - before[index][0],
-            point[1] - before[index][1]
-          ) <= 1
+            after[index][0] - before[index][0],
+            after[index][1] - before[index][1]
+          ) > 1
       ),
-      "other cards must stay stable after a drag"
+      "connected cards must respond to the force after dragging"
     );
     assertNodeCardsDoNotOverlap(harness.graph, 0.5);
     assertRelationLabelsDoNotCoverNodes(harness.graph);

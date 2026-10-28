@@ -12,11 +12,7 @@ const originalRoot =
     "demo_operatingsystem 2025.5.26",
     "demo_operatingsystem"
   );
-const outputRoot = path.join(
-  projectRoot,
-  "public",
-  "legacy-simulation"
-);
+const outputRoot = path.join(projectRoot, "public", "legacy-simulation");
 const stageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "oslab-legacy-sim-"));
 const buildOutput = path.join(stageRoot, "dist");
 const componentFolders = ["unit3", "unit4", "unit5"];
@@ -42,7 +38,9 @@ function removePreviousOutput() {
   fs.rmSync(outputRoot, { recursive: true, force: true });
 }
 
-if (!fs.existsSync(path.join(originalRoot, "node_modules", "@vue", "cli-service"))) {
+if (
+  !fs.existsSync(path.join(originalRoot, "node_modules", "@vue", "cli-service"))
+) {
   throw new Error(
     `Legacy build dependencies were not found under ${originalRoot}. Set OSLAB_LEGACY_DEMO_ROOT to the Vue 2 demo checkout.`
   );
@@ -55,7 +53,10 @@ try {
   fs.cpSync(path.join(originalRoot, "public"), path.join(stageRoot, "public"), {
     recursive: true,
   });
-  fs.copyFileSync(path.join(originalRoot, "package.json"), path.join(stageRoot, "package.json"));
+  fs.copyFileSync(
+    path.join(originalRoot, "package.json"),
+    path.join(stageRoot, "package.json")
+  );
   for (const folder of componentFolders) {
     if (!fs.existsSync(path.join(stageRoot, "src", "views", folder))) {
       throw new Error(`Missing original algorithm folder: src/views/${folder}`);
@@ -64,7 +65,19 @@ try {
 
   fs.writeFileSync(
     path.join(stageRoot, "src", "App.vue"),
-    '<template><router-view /></template>\n<style>body{margin:0}</style>\n'
+    "<template><router-view /></template>\n<style>html,body{margin:0;overflow:hidden}body{min-width:0}</style>\n"
+  );
+  // The original call passes the step index, but C-SCAN's callback forgot to
+  // declare it. Preserve the original route and animation; repair only the
+  // missing parameter in this staged copy so the wrap callback can run.
+  const cscanPath = path.join(stageRoot, "src", "views", "unit5", "CSCAN.vue");
+  const cscan = fs.readFileSync(cscanPath, "utf8");
+  fs.writeFileSync(
+    cscanPath,
+    cscan.replace(
+      "drawArrow0(len,start,no,last){",
+      "drawArrow0(len,start,no,last,pos){"
+    )
   );
   const mainPath = path.join(stageRoot, "src", "main.js");
   const main = fs.readFileSync(mainPath, "utf8");
@@ -75,13 +88,14 @@ try {
     mainPath,
     main.replace(
       "Vue.config.productionTip = false",
-      'Vue.config.productionTip = false\nif (window.__oslabLegacyAttachVue) window.__oslabLegacyAttachVue(Vue);'
+      "Vue.config.productionTip = false\nif (window.__oslabLegacyAttachVue) window.__oslabLegacyAttachVue(Vue);"
     )
   );
 
   const indexPath = path.join(stageRoot, "public", "index.html");
   const html = fs.readFileSync(indexPath, "utf8");
-  if (!html.includes("</body>")) throw new Error("Legacy index.html has no body end.");
+  if (!html.includes("</body>"))
+    throw new Error("Legacy index.html has no body end.");
   fs.writeFileSync(
     indexPath,
     html.replace(
@@ -106,7 +120,11 @@ try {
     path.join(stageRoot, "vue.config.js"),
     'module.exports = { publicPath: "/legacy-simulation/", productionSourceMap: false, parallel: false };\n'
   );
-  fs.symlinkSync(path.join(originalRoot, "node_modules"), path.join(stageRoot, "node_modules"), "junction");
+  fs.symlinkSync(
+    path.join(originalRoot, "node_modules"),
+    path.join(stageRoot, "node_modules"),
+    "junction"
+  );
 
   const cliPath = path.join(
     originalRoot,
@@ -118,16 +136,12 @@ try {
   );
   const build = spawnSync(
     process.execPath,
-    [
-      cliPath,
-      "build",
-      "--dest",
-      buildOutput,
-    ],
+    [cliPath, "build", "--dest", buildOutput],
     { cwd: stageRoot, stdio: "inherit", env: process.env }
   );
   if (build.error) throw build.error;
-  if (build.status !== 0) throw new Error(`Legacy Vue build exited with ${build.status}.`);
+  if (build.status !== 0)
+    throw new Error(`Legacy Vue build exited with ${build.status}.`);
 
   fs.writeFileSync(
     path.join(buildOutput, ".generated-by-oslab-legacy-build"),

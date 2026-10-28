@@ -5,3 +5,10 @@ deploy/mysql-init/*.sh text eol=lf
 *.sh text eol=lf
 *.sql text eol=lf
 *.mjs text eol=lf
+
+# 部署包内文本固定 LF，保证 SHA256SUMS 在 Windows 检出后仍可校验
+deploy/database-20261028/*.cypher text eol=lf
+deploy/database-20261028/*.md text eol=lf
+deploy/database-20261028/*.json text eol=lf
+deploy/database-20261028/SHA256SUMS text eol=lf
+deploy/database-20261028/*.gz binary
