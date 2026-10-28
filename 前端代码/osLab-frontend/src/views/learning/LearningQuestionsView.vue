@@ -64,8 +64,27 @@
         <div class="filter-panel-head">
           <span class="filter-label">知识节点</span>
           <span class="filter-hint">按稳定 nodeCode 过滤</span>
+          <span v-if="catalogNodes.length" class="filter-count">{{
+            catalogNodes.length
+          }}</span>
+          <button
+            v-if="catalogNodes.length > NODE_COLLAPSE_LIMIT"
+            type="button"
+            class="node-toggle"
+            :aria-expanded="nodesExpanded"
+            @click="nodesExpanded = !nodesExpanded"
+          >
+            {{ nodesExpanded ? "收起" : "展开全部" }}
+            <span
+              class="node-toggle-icon"
+              :class="{ open: nodesExpanded }"
+            />
+          </button>
         </div>
-        <div class="chip-row">
+        <div
+          class="chip-row"
+          :class="{ collapsed: !nodesExpanded && hiddenNodeCount > 0 }"
+        >
           <button
             type="button"
             class="filter-chip"
@@ -79,7 +98,7 @@
             }}</span>
           </button>
           <button
-            v-for="node in catalogNodes"
+            v-for="node in visibleCatalogNodes"
             :key="nodeKeyOf(node)"
             type="button"
             class="filter-chip"
@@ -462,6 +481,26 @@ const catalogNodes = computed<LearningCatalogNodeVO[]>(
 const nodeKeyOf = (node: LearningCatalogNodeVO) =>
   node.nodeCode || node.nodeName;
 
+// 节点过多时默认收起：保留前 12 个，当前选中的节点始终可见
+const NODE_COLLAPSE_LIMIT = 12;
+const nodesExpanded = ref(false);
+const visibleCatalogNodes = computed<LearningCatalogNodeVO[]>(() => {
+  const nodes = catalogNodes.value;
+  if (nodesExpanded.value || nodes.length <= NODE_COLLAPSE_LIMIT) return nodes;
+  const head = nodes.slice(0, NODE_COLLAPSE_LIMIT);
+  const selected = nodes.find(
+    (node) => nodeKeyOf(node) === nodeParam.value
+  );
+  if (selected && !head.includes(selected)) head.push(selected);
+  return head;
+});
+const hiddenNodeCount = computed(
+  () => catalogNodes.value.length - visibleCatalogNodes.value.length
+);
+watch([selectedSectionCode, selectedUnitCode], () => {
+  nodesExpanded.value = false;
+});
+
 const pageCount = computed(() =>
   Math.max(1, Math.ceil(total.value / PAGE_SIZE))
 );
@@ -820,8 +859,51 @@ onMounted(async () => {
 }
 .filter-panel-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--oslab-space-2);
+}
+.filter-count {
+  padding: 0 7px;
+  border-radius: var(--oslab-radius-pill);
+  background: var(--oslab-weak-soft);
+  color: var(--oslab-muted-strong);
+  font-size: 11px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.node-toggle {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-pill);
+  background: var(--oslab-panel);
+  color: var(--oslab-ink-soft);
+  font: inherit;
+  font-size: var(--oslab-text-small);
+  line-height: 1.5;
+  cursor: pointer;
+  transition: border-color var(--oslab-duration-fast) var(--oslab-ease),
+    color var(--oslab-duration-fast) var(--oslab-ease),
+    background var(--oslab-duration-fast) var(--oslab-ease);
+}
+.node-toggle:hover {
+  border-color: var(--oslab-primary);
+  color: var(--oslab-primary);
+  background: var(--oslab-primary-soft);
+}
+.node-toggle-icon {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  transition: transform var(--oslab-duration-fast) var(--oslab-ease);
+}
+.node-toggle-icon.open {
+  transform: rotate(180deg);
 }
 .filter-label {
   color: var(--oslab-ink-soft);
@@ -838,6 +920,18 @@ onMounted(async () => {
   align-items: center;
   flex-wrap: wrap;
   gap: var(--oslab-space-2);
+  max-height: 2000px;
+  transition: max-height 0.32s var(--oslab-ease);
+}
+.chip-row.collapsed {
+  max-height: 140px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 72%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
 }
 .filter-chip {
   display: inline-flex;
