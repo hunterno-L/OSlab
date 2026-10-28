@@ -12,11 +12,10 @@
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, watch, onMounted, onBeforeUnmount } from "vue";
+<script>
 import * as echarts from "echarts";
 
-// 仅刷新节点/关系样式；布局为确定性坐标，不经过布局流水线。
+// 样式更新不重启力布局，缩放和选中保留当前坐标。
 // 视野缩放/居中一律使用 ECharts 公开的 graphRoam（zoom + dx/dy），
 // 不直接访问 graph view 的私有字段。
 echarts.registerAction(
@@ -39,8 +38,179 @@ echarts.registerAction(
   }
 );
 
+// Native force handles animation, cooling and drag reheating. Add rectangular
+// collision projection because its point repulsion alone cannot protect cards.
+echarts.registerLayout(
+  echarts.PRIORITY.VISUAL.POST_CHART_LAYOUT + 1,
+  (model) => {
+    model.eachSeriesByType("graph", (series) => {
+      const solver = series.forceLayout;
+      if (series.id !== "oslab-knowledge-graph" || !solver) return;
+      if (solver.__oslabWrapped) return;
+      solver.__oslabWrapped = true;
+      const data = series.getData();
+      const graph = series.getGraph();
+      const fixed = new Set();
+      const syncEdges = () => {
+        graph.eachEdge((edge) => {
+          const a = edge.node1.getLayout();
+          const b = edge.node2.getLayout();
+          const points = [a.slice(), b.slice()];
+          const curve = Number(edge.getModel().get("lineStyle.curveness")) || 0;
+          if (curve)
+            points.push([
+              (a[0] + b[0]) / 2 - (a[1] - b[1]) * curve,
+              (a[1] + b[1]) / 2 - (b[0] - a[0]) * curve,
+            ]);
+          edge.setLayout(points);
+        });
+      };
+      const restore = () => {
+        data.each((index) => {
+          const saved = series.__oslabSettledPoints?.get(data.getId(index));
+          const point = data.getItemLayout(index);
+          if (saved && point) {
+            point[0] = saved[0];
+            point[1] = saved[1];
+          }
+        });
+        syncEdges();
+      };
+      // resize runs the native layout stage again; restore the settled geometry
+      // instead of nudging every node and restarting it on a viewport change.
+      if (series.__oslabForceSettled) restore();
+      const boxes = data.mapArray((index) => {
+        const size = data.getItemModel(index).get("symbolSize");
+        return { index, width: Number(size[0]), height: Number(size[1]) };
+      });
+      const anchors = data.mapArray((index) => {
+        const item = data.getItemModel(index);
+        return [Number(item.get("x")), Number(item.get("y"))];
+      });
+      const separate = (passes) => {
+        for (let pass = 0; pass < passes; pass += 1) {
+          for (let i = 0; i < boxes.length; i += 1) {
+            const a = boxes[i],
+              pa = data.getItemLayout(a.index);
+            for (let j = i + 1; j < boxes.length; j += 1) {
+              const b = boxes[j],
+                pb = data.getItemLayout(b.index);
+              const dx = pb[0] - pa[0],
+                dy = pb[1] - pa[1];
+              const ox = (a.width + b.width) / 2 + 28 - Math.abs(dx);
+              const oy = (a.height + b.height) / 2 + 28 - Math.abs(dy);
+              if (
+                ox <= 0 ||
+                oy <= 0 ||
+                (fixed.has(a.index) && fixed.has(b.index))
+              )
+                continue;
+              const axis = ox < oy ? 0 : 1;
+              const amount =
+                ((axis === 0 ? ox : oy) + 0.1) *
+                ((axis === 0 ? dx : dy) < 0 ? -1 : 1);
+              const aWeight = fixed.has(a.index)
+                ? 0
+                : fixed.has(b.index)
+                ? 1
+                : 0.5;
+              pa[axis] -= amount * aWeight;
+              pb[axis] += amount * (1 - aWeight);
+            }
+          }
+        }
+      };
+      const step = solver.step.bind(solver);
+      solver.step = (callback) => {
+        if (series.__oslabForceSettled) {
+          restore();
+          callback?.(true);
+          return;
+        }
+        step(callback);
+      };
+      solver.afterStep((particles, edges, stopped) => {
+        const before = particles.map((particle) => particle.p.slice());
+        particles.forEach((particle, index) => {
+          if (fixed.has(index)) return;
+          particle.p[0] += (anchors[index][0] - particle.p[0]) * 0.08;
+          particle.p[1] += (anchors[index][1] - particle.p[1]) * 0.08;
+        });
+        particles.forEach((particle, index) =>
+          data.setItemLayout(index, particle.p)
+        );
+        separate(stopped ? 80 : 3);
+        if (stopped) {
+          const occupied = [];
+          for (const box of boxes) {
+            const point = data.getItemLayout(box.index);
+            const neighbors = occupied.filter(
+              (other) =>
+                Math.abs(point[0] - other.point[0]) <
+                (box.width + other.width) / 2 + 28
+            );
+            const clear = (y) =>
+              neighbors.every(
+                (other) =>
+                  Math.abs(y - other.point[1]) >=
+                  (box.height + other.height) / 2 + 28
+              );
+            if (!clear(point[1]) && !fixed.has(box.index)) {
+              const candidates = neighbors
+                .flatMap((other) => {
+                  const gap = (box.height + other.height) / 2 + 29;
+                  return [other.point[1] - gap, other.point[1] + gap];
+                })
+                .sort(
+                  (a, b) => Math.abs(a - point[1]) - Math.abs(b - point[1])
+                );
+              point[1] = candidates.find(clear);
+            }
+            occupied.push({ ...box, point });
+          }
+        }
+        particles.forEach((particle, index) => {
+          particle.pp[0] += particle.p[0] - before[index][0];
+          particle.pp[1] += particle.p[1] - before[index][1];
+          series.preservedPoints[data.getId(index)] = particle.p;
+        });
+        syncEdges();
+        if (stopped) {
+          series.__oslabForceSettled = true;
+          series.__oslabSettledPoints = new Map(
+            data.mapArray((index) => [
+              data.getId(index),
+              data.getItemLayout(index).slice(),
+            ])
+          );
+        }
+      });
+      const warmUp = solver.warmUp.bind(solver);
+      solver.warmUp = () => {
+        series.__oslabForceSettled = false;
+        warmUp();
+      };
+      const setFixed = solver.setFixed.bind(solver);
+      const setUnfixed = solver.setUnfixed.bind(solver);
+      solver.setFixed = (index) => {
+        fixed.add(index);
+        setFixed(index);
+      };
+      solver.setUnfixed = (index) => {
+        anchors[index] = data.getItemLayout(index).slice();
+        fixed.delete(index);
+        setUnfixed(index);
+      };
+    });
+  }
+);
+</script>
+
+<script setup>
+import { ref, reactive, watch, onMounted, onBeforeUnmount } from "vue";
+
 // 类别底色和掌握状态独立表达；dependent 连线反向绘制为学习顺序。
-// 确定性分组布局，拓扑变化才重建；节点、标签与边按同一缩放比例变换。
+// 章节播种后运行力布局；拖动重新加热，选中和缩放保留布局。
 // 不使用 labelLayout：其绝对标签定位会与确定性坐标、边标签缩放冲突。
 
 // eslint-disable-next-line no-undef
@@ -92,7 +262,10 @@ const CLICK_DELAY = 220;
 // 当前缩放级别（由 graphRoam / fit 同步）与悬停节点（关系标签按需显示）
 const currentZoom = ref(1);
 const hoveredNodeId = ref("");
-let lastZoomBand = 1;
+let zoomFrame = 0;
+let layoutFrame = 0;
+let labelRefresh = 0;
+let fittedSeries = null;
 
 // ---------- 设计令牌（learning-theme.css 图谱 token 的逐项镜像） ----------
 // ECharts 画布/SSR 字符串无法读取 CSS 变量，因此在这里保留唯一一份
@@ -313,9 +486,8 @@ watch(
 );
 
 // ---------- 节点几何与富文本标签 ----------
-// 节点只识别概念并表达掌握状态：固定三档尺寸（小图 132–156，大图 112–128），
-// 名称最多两行、超出省略；类型说明交给图例和右侧详情。尺寸只由稳定的
-// nodeType 决定，不随名称长度或每次渲染抖动。
+// 小图按名称长度分档；章节图减少卡片占地，大图使用稳定的类型尺寸。
+// 名称超出省略，完整名称保留在 tooltip 和详情中；尺寸不随缩放/选中变化。
 const NODE_TIERS = Object.freeze({
   compact: Object.freeze({ width: 112, height: 32 }),
   regular: Object.freeze({ width: 120, height: 34 }),
@@ -327,6 +499,11 @@ const NODE_TIERS_ROOMY = Object.freeze({
   compact: Object.freeze({ width: 140, height: 38 }),
   regular: Object.freeze({ width: 152, height: 40 }),
   wide: Object.freeze({ width: 164, height: 42 }),
+});
+const NODE_TIERS_CHAPTER = Object.freeze({
+  compact: Object.freeze({ width: 128, height: 34 }),
+  regular: Object.freeze({ width: 140, height: 36 }),
+  wide: Object.freeze({ width: 152, height: 38 }),
 });
 // 兼容旧消费方的导出名：以常规档为基准。
 const NODE_PADDING_X = 8;
@@ -370,17 +547,37 @@ const nodeTierOf = (node) => {
 };
 const NODE_AUTO_WIDTH_LIMIT = 40;
 const nodeSizeOf = (node) => {
+  const count = props.nodes?.length ?? 0;
   const fixed = (
-    (props.nodes?.length ?? 0) <= NODE_AUTO_WIDTH_LIMIT
+    count > NODE_AUTO_WIDTH_LIMIT
+      ? NODE_TIERS
+      : count <= 12
       ? NODE_TIERS_ROOMY
-      : NODE_TIERS
+      : NODE_TIERS_CHAPTER
   )[nodeTierOf(node)];
-  if ((props.nodes?.length ?? 0) > NODE_AUTO_WIDTH_LIMIT) return fixed;
+  if (count > NODE_AUTO_WIDTH_LIMIT) return fixed;
   const label = String(node.displayName || node.name || "");
-  const len = label.length;
+  const widthOfName = textWidth(label);
+  // Reserve the full status dot and padding before choosing a width tier.
+  const requiredWidth = widthOfName + NODE_PADDING_X * 2 + STATUS_DOT_SPACE;
+  const tiers =
+    count <= 12 ? [96, 120, 150, 180, 210] : [88, 108, 132, 156, 180];
   const width =
-    len <= 2 ? 96 : len <= 4 ? 120 : len <= 6 ? 150 : len <= 8 ? 180 : 210;
+    tiers.find((candidate) => candidate >= requiredWidth) ||
+    tiers[tiers.length - 1];
   return { width, height: fixed.height };
+};
+const layoutNodeSizeOf = (node) => {
+  const size = nodeSizeOf(node);
+  if (!Number(props.annotations?.[nodeKeyOf(node)])) return size;
+  const count = Object.keys(props.annotations || {}).length;
+  return {
+    width: Math.min(
+      240,
+      size.width + (count === (props.nodes?.length ?? 0) ? 20 : 32)
+    ),
+    height: size.height,
+  };
 };
 
 const buildLabel = (ctx) => {
@@ -388,45 +585,44 @@ const buildLabel = (ctx) => {
   // 小图缩放较小时切到紧凑模式：只保留名称、隐藏编号/圆点，
   // 避免屏幕尺寸文字挤爆已缩小的索引卡。
   const compact = !!ctx.compactLabels;
+  // ECharts keeps graph labels in screen pixels while symbols scale with roam.
+  // Scale every rich-text dimension explicitly, including its truncation box.
+  const scale = Math.min(1.3, currentZoom.value);
   const dotWidth = compact ? 0 : ctx.showStatusUI ? STATUS_DOT_SPACE : 0;
   const numWidth = compact ? 0 : ctx.annotationNumber ? 20 : 0;
-  const labelWidth = compact
-    ? Math.max(24, ctx.width * currentZoom.value - 4)
-    : ctx.width - ((props.nodes?.length ?? 0) <= 40 ? 32 : 16);
-  const nameWidth = compact
-    ? Math.max(24, (labelWidth - 8) / 0.8)
-    : labelWidth - 8 - dotWidth - numWidth;
+  const labelWidth = Math.max(1, ctx.width * currentZoom.value - 16 * scale);
+  const nameWidth = labelWidth / scale - 8 - dotWidth - numWidth;
   const displayName = truncateName(ctx.displayName, nameWidth);
   const rich = {
     num: {
       color: "#ffffff",
       backgroundColor: PRIMARY,
-      fontSize: 9,
-      lineHeight: 16,
-      width: 16,
-      height: 16,
-      borderRadius: 8,
+      fontSize: 9 * scale,
+      lineHeight: 16 * scale,
+      width: 16 * scale,
+      height: 16 * scale,
+      borderRadius: 8 * scale,
       align: "center",
       verticalAlign: "middle",
-      padding: [2, 0, 0, 0],
+      padding: [2 * scale, 0, 0, 0],
     },
     dot: {
       color: ctx.statusColor,
-      fontSize: 9,
-      lineHeight: 15,
-      width: STATUS_DOT_SPACE,
+      fontSize: 9 * scale,
+      lineHeight: 15 * scale,
+      width: STATUS_DOT_SPACE * scale,
       align: "left",
     },
     name: {
       color: ctx.dimmed ? MUTED_STRONG : INK_SOFT,
-      fontSize: compact ? 10 : 12.5,
-      lineHeight: compact ? 12 : 15,
+      fontSize: 12.5 * scale,
+      lineHeight: 15 * scale,
       align: "left",
       fontWeight: ctx.isSelected ? 600 : 500,
       backgroundColor: ctx.isSelected
         ? GRAPH_TOKENS.highlightSoft
         : "transparent",
-      padding: ctx.isSelected ? (compact ? [0, 1] : [1, 3]) : 0,
+      padding: ctx.isSelected ? [scale, 3 * scale] : 0,
     },
   };
   const numPrefix =
@@ -434,12 +630,12 @@ const buildLabel = (ctx) => {
   const dot = !compact && ctx.showStatusUI ? "{dot|●}" : "";
   const text = `${numPrefix}${dot}{name|${displayName}}`;
   return {
-    show: ctx.labelsVisible,
+    show: true,
     position: "inside",
     align: "center",
     verticalAlign: "middle",
     width: labelWidth,
-    padding: compact ? [2, 2] : [NODE_PADDING_Y, 0],
+    padding: [NODE_PADDING_Y * scale, 0],
     overflow: "truncate",
     ellipsis: "…",
     formatter: text,
@@ -485,17 +681,7 @@ const buildNodeStyle = (node, ctx) => {
     : "transparent";
   const annotationNumber = Number(props.annotations?.[key]) || 0;
   const isSmallGraph = (props.nodes?.length ?? 0) <= 40;
-  const baseSize = nodeSizeOf(node);
-  const annotationCount = Object.keys(props.annotations || {}).length;
-  const allNumbered =
-    annotationCount > 0 && annotationCount === (props.nodes?.length ?? 0);
-  const annotationBump = allNumbered ? 20 : 32;
-  const size = annotationNumber
-    ? {
-        width: Math.min(240, baseSize.width + annotationBump),
-        height: baseSize.height,
-      }
-    : baseSize;
+  const size = layoutNodeSizeOf(node);
   const rest = { ...node };
   delete rest.highlight;
   return {
@@ -548,7 +734,6 @@ const buildNodeStyle = (node, ctx) => {
       dimmed,
       statusColor,
       showStatusUI: ctx.showStatusUI,
-      labelsVisible: ctx.labelsVisible,
       compactLabels: ctx.compactLabels,
       displayName: node.displayName || node.name,
       width: size.width,
@@ -694,7 +879,9 @@ const buildLink = (link, ctx, linkIndex) => {
       show: ctx.showRelationLabels && ctx.labelIndexes.has(linkIndex),
       formatter: relLabel,
       position: "middle",
-      offset: [0, -8],
+      distance: 0,
+      align: "center",
+      verticalAlign: "middle",
       fontSize: 10.5,
       lineHeight: 14,
       rotate: 0,
@@ -707,18 +894,15 @@ const buildLink = (link, ctx, linkIndex) => {
   };
 };
 
-// ---------- 确定性分组布局 ----------
-// 章节是稳定的空间分组；章节内按 sectionCode 与输入顺序排列，章节块按
-// 画布比例做行列装箱。没有随机播种，也没有异步力导向，筛选/回放不抖动。
-const NODE_LABEL_MIN_ZOOM = 0.72;
-const RELATION_LABEL_MIN_ZOOM = 0.25;
-const RELATION_LABEL_ZOOM = 0.25;
-const RELATION_LABEL_DENSE_ZOOM = 1.6;
+// ---------- 确定性布局：章节播种 → 拓扑力导向 → 矩形碰撞修正 ----------
+// 章节内按 sectionCode/输入顺序播种，章节块按画布比例装箱；同步有限步
+// 松弛使关联节点聚拢，再作为实时力布局的稳定起点，视觉刷新不重新播种。
+const NODE_LABEL_COMPACT_ZOOM = 0.68;
 const RELATION_LABEL_MAX = 36;
 const RELATION_LABEL_MAX_COMPACT = 18;
-const LAYOUT_CELL_W = 140;
-const LAYOUT_CELL_H = 50;
-const LAYOUT_BLOCK_GAP = 0.35;
+const LAYOUT_GAP_X = 40;
+const LAYOUT_GAP_Y = 40;
+const LAYOUT_BLOCK_GAP = 34;
 
 const compareChapters = (a, b) => {
   if (a === b) return 0;
@@ -768,9 +952,15 @@ const computeOrganicLayout = (nodes, links, selectedKey, resolveKey) => {
     )
   );
   const scaleX = Math.min(1.15, Math.max(0.85, aspect));
-  const rootX = -160;
-  const ring1X = 215 * scaleX;
-  const ring1Y = 140;
+  const maxWidth = Math.max(
+    ...nodes.map((node) => layoutNodeSizeOf(node).width)
+  );
+  const maxHeight = Math.max(
+    ...nodes.map((node) => layoutNodeSizeOf(node).height)
+  );
+  const rootX = -Math.round(maxWidth * 0.65);
+  const ring1X = Math.max(maxWidth * 1.05, 215 * scaleX);
+  const ring1Y = Math.max(maxHeight * 1.2, 140);
   const positions = new Map([[root, { x: rootX, y: 0 }]]);
   direct.forEach((key, index) => {
     const angle =
@@ -781,8 +971,8 @@ const computeOrganicLayout = (nodes, links, selectedKey, resolveKey) => {
       y: Math.round(Math.sin(angle) * ring1Y * wobble),
     });
   });
-  const ring2X = 340 * scaleX;
-  const ring2Y = 225;
+  const ring2X = Math.max(maxWidth * 2.1, 340 * scaleX);
+  const ring2Y = Math.max(maxHeight * 2.1, 225);
   rest.forEach((key, index) => {
     const angle = (index / Math.max(1, rest.length)) * Math.PI * 2 + 0.42;
     const wobble = 1 + 0.06 * Math.sin((index + 2) * 2.1);
@@ -791,18 +981,88 @@ const computeOrganicLayout = (nodes, links, selectedKey, resolveKey) => {
       y: Math.round(Math.sin(angle) * ring2Y * wobble),
     });
   });
+  return resolveNodeOverlaps(nodes, positions, selectedKey);
+};
+
+const resolveNodeOverlaps = (nodes, positions, fixedKey = "") => {
+  const boxes = nodes.map((node) => ({
+    key: nodeKeyOf(node),
+    size: layoutNodeSizeOf(node),
+  }));
+  for (let pass = 0; pass < 48; pass += 1) {
+    let moved = false;
+    for (let i = 0; i < boxes.length; i += 1) {
+      for (let j = i + 1; j < boxes.length; j += 1) {
+        const a = boxes[i];
+        const b = boxes[j];
+        const pa = positions.get(a.key);
+        const pb = positions.get(b.key);
+        if (!pa || !pb) continue;
+        const overlapX =
+          (a.size.width + b.size.width) / 2 + 12 - Math.abs(pa.x - pb.x);
+        const overlapY =
+          (a.size.height + b.size.height) / 2 + 12 - Math.abs(pa.y - pb.y);
+        if (overlapX <= 0 || overlapY <= 0) continue;
+        const moveA = b.key === fixedKey;
+        const point = moveA ? pa : pb;
+        const other = moveA ? pb : pa;
+        const distance = (overlapX <= overlapY ? overlapX : overlapY) + 1;
+        if (overlapX <= overlapY) {
+          const direction =
+            point.x === other.x
+              ? i % 2
+                ? -1
+                : 1
+              : Math.sign(point.x - other.x);
+          point.x += direction * distance;
+        } else {
+          const direction =
+            point.y === other.y
+              ? i % 2
+                ? -1
+                : 1
+              : Math.sign(point.y - other.y);
+          point.y += direction * distance;
+        }
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+  // Dense rectangular chains may still oscillate at the iteration limit. Place
+  // any remaining collision at its closest legal vertical boundary; already
+  // accepted boxes stay fixed, so this finite fallback guarantees separation.
+  const occupied = [];
+  for (const box of boxes) {
+    const point = positions.get(box.key);
+    if (!point) continue;
+    const neighbors = occupied.filter(
+      (other) =>
+        Math.abs(point.x - other.point.x) <
+        (box.size.width + other.size.width) / 2 + 12
+    );
+    const isClear = (y) =>
+      neighbors.every(
+        (other) =>
+          Math.abs(y - other.point.y) >=
+          (box.size.height + other.size.height) / 2 + 12
+      );
+    if (!isClear(point.y)) {
+      const candidates = neighbors.flatMap((other) => {
+        const gap = (box.size.height + other.size.height) / 2 + 13;
+        return [other.point.y - gap, other.point.y + gap];
+      });
+      candidates.sort(
+        (a, b) => Math.abs(a - point.y) - Math.abs(b - point.y) || a - b
+      );
+      point.y = candidates.find(isClear);
+    }
+    occupied.push({ ...box, point });
+  }
   return positions;
 };
 
-const computeDeterministicLayout = (
-  nodes,
-  links = [],
-  selectedKey = "",
-  resolveKey = (value) => String(value)
-) => {
-  if (nodes.length > 0 && nodes.length <= ORGANIC_LAYOUT_LIMIT) {
-    return computeOrganicLayout(nodes, links, selectedKey, resolveKey);
-  }
+const computeChapterLayout = (nodes) => {
   const groups = new Map();
   nodes.forEach((node, index) => {
     const chapter = String(node.chapter || "").trim() || "未分类";
@@ -826,11 +1086,34 @@ const computeDeterministicLayout = (
       1,
       Math.min(12, Math.ceil(Math.sqrt(Math.max(1, items.length))))
     );
+    const rows = Math.ceil(items.length / cols);
+    const columnWidths = Array.from({ length: cols }, (_, col) =>
+      Math.max(
+        ...items
+          .filter((_, index) => index % cols === col)
+          .map(({ node }) => layoutNodeSizeOf(node).width)
+      )
+    );
+    const rowHeights = Array.from({ length: rows }, (_, row) =>
+      Math.max(
+        ...items
+          .slice(row * cols, row * cols + cols)
+          .map(({ node }) => layoutNodeSizeOf(node).height)
+      )
+    );
     return {
       chapter,
       items,
       cols,
-      rows: Math.ceil(items.length / cols),
+      rows,
+      columnWidths,
+      rowHeights,
+      width:
+        columnWidths.reduce((sum, width) => sum + width, 0) +
+        LAYOUT_GAP_X * (cols - 1),
+      height:
+        rowHeights.reduce((sum, height) => sum + height, 0) +
+        LAYOUT_GAP_Y * (rows - 1),
     };
   });
 
@@ -853,16 +1136,14 @@ const computeDeterministicLayout = (
       for (let col = 0; col < blockCols; col++) {
         const block = blocks[row * blockCols + col];
         if (!block) continue;
-        rowWidth += block.cols + LAYOUT_BLOCK_GAP;
-        rowHeight = Math.max(rowHeight, block.rows);
+        rowWidth += block.width + LAYOUT_BLOCK_GAP;
+        rowHeight = Math.max(rowHeight, block.height);
       }
       totalWidth = Math.max(totalWidth, rowWidth - LAYOUT_BLOCK_GAP);
       totalHeight += rowHeight + LAYOUT_BLOCK_GAP;
     }
     totalHeight -= LAYOUT_BLOCK_GAP;
-    const actualAspect =
-      (Math.max(1, totalWidth) * LAYOUT_CELL_W) /
-      (Math.max(1, totalHeight) * LAYOUT_CELL_H);
+    const actualAspect = Math.max(1, totalWidth) / Math.max(1, totalHeight);
     const score = Math.abs(Math.log(actualAspect / targetAspect));
     if (!best || score < best.score - 1e-9) {
       best = { blockCols, totalWidth, totalHeight, score };
@@ -882,17 +1163,182 @@ const computeDeterministicLayout = (
       block.items.forEach((item, position) => {
         const localCol = position % block.cols;
         const localRow = Math.floor(position / block.cols);
+        const x =
+          currentX +
+          block.columnWidths
+            .slice(0, localCol)
+            .reduce((sum, width) => sum + width + LAYOUT_GAP_X, 0);
+        const y =
+          currentY +
+          block.rowHeights
+            .slice(0, localRow)
+            .reduce((sum, height) => sum + height + LAYOUT_GAP_Y, 0);
         positions.set(nodeKeyOf(item.node), {
-          x: Math.round((currentX + localCol) * LAYOUT_CELL_W),
-          y: Math.round((currentY + localRow) * LAYOUT_CELL_H),
+          x: Math.round(x + block.columnWidths[localCol] / 2),
+          y: Math.round(y + block.rowHeights[localRow] / 2),
         });
       });
-      currentX += block.cols + LAYOUT_BLOCK_GAP;
-      rowHeight = Math.max(rowHeight, block.rows);
+      currentX += block.width + LAYOUT_BLOCK_GAP;
+      rowHeight = Math.max(rowHeight, block.height);
     }
     currentY += rowHeight + LAYOUT_BLOCK_GAP;
   }
   return positions;
+};
+
+const refineTopologyLayout = (nodes, links, positions, resolveKey) => {
+  if (nodes.length < 2 || !links.length) return positions;
+  const particles = nodes.map((node) => {
+    const key = nodeKeyOf(node);
+    const seed = positions.get(key);
+    return {
+      key,
+      chapter: String(node.chapter || "").trim() || "未分类",
+      ...layoutNodeSizeOf(node),
+      x: seed.x,
+      y: seed.y,
+      seedX: seed.x,
+      seedY: seed.y,
+      vx: 0,
+      vy: 0,
+      fx: 0,
+      fy: 0,
+      degree: 0,
+    };
+  });
+  const byKey = new Map(particles.map((particle) => [particle.key, particle]));
+  const pairs = new Set();
+  const springs = [];
+  for (const link of links) {
+    const a = byKey.get(resolveKey(link.source));
+    const b = byKey.get(resolveKey(link.target));
+    if (!a || !b || a === b) continue;
+    const pair = JSON.stringify([a.key, b.key].sort());
+    // Parallel relationship types share a spring, so adding a label does not
+    // increase the physical weight of the same connection.
+    if (pairs.has(pair)) continue;
+    pairs.add(pair);
+    a.degree += 1;
+    b.degree += 1;
+    springs.push({ a, b });
+  }
+  if (!springs.length) return positions;
+  const chapters = new Map();
+  for (const particle of particles) {
+    const group = chapters.get(particle.chapter) || { x: 0, y: 0, count: 0 };
+    group.x += particle.seedX;
+    group.y += particle.seedY;
+    group.count += 1;
+    chapters.set(particle.chapter, group);
+  }
+  for (const group of chapters.values()) {
+    group.x /= group.count;
+    group.y /= group.count;
+  }
+  // O(steps * nodes²), bounded at 120 steps (~2 million pairs for 185 nodes).
+  // Cooling and seed anchors keep chapter regions stable without pinning the
+  // original rows/columns. The solver runs only when topology is rebuilt.
+  const steps = 120;
+  for (let step = 0; step < steps; step += 1) {
+    for (const particle of particles) {
+      const group = chapters.get(particle.chapter);
+      particle.fx =
+        (particle.seedX - particle.x) * 0.006 + (group.x - particle.x) * 0.003;
+      particle.fy =
+        (particle.seedY - particle.y) * 0.006 + (group.y - particle.y) * 0.003;
+    }
+    for (let i = 0; i < particles.length; i += 1) {
+      const a = particles[i];
+      for (let j = i + 1; j < particles.length; j += 1) {
+        const b = particles[j];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const distance = Math.max(1, Math.hypot(dx, dy));
+        const repel = Math.min(5, 16000 / (distance * distance));
+        const fx = (dx / distance) * repel;
+        const fy = (dy / distance) * repel;
+        a.fx -= fx;
+        a.fy -= fy;
+        b.fx += fx;
+        b.fy += fy;
+      }
+    }
+    for (const { a, b } of springs) {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const distance = Math.max(1, Math.hypot(dx, dy));
+      // Directional rectangular extent reserves a readable gap for the edge.
+      const extent =
+        ((a.width + b.width) * Math.abs(dx) +
+          (a.height + b.height) * Math.abs(dy)) /
+        (2 * distance);
+      const rest = Math.max(90, extent + 54);
+      const chapterWeight = a.chapter === b.chapter ? 1 : 0.24;
+      const strength =
+        (0.075 * chapterWeight) / Math.sqrt(Math.max(a.degree, b.degree));
+      const force = (distance - rest) * strength;
+      const fx = (dx / distance) * force;
+      const fy = (dy / distance) * force;
+      a.fx += fx;
+      a.fy += fy;
+      b.fx -= fx;
+      b.fy -= fy;
+    }
+    const maxStep = 10 * (1 - step / steps) + 0.5;
+    for (const particle of particles) {
+      particle.vx = (particle.vx + particle.fx) * 0.68;
+      particle.vy = (particle.vy + particle.fy) * 0.68;
+      const speed = Math.max(1, Math.hypot(particle.vx, particle.vy) / maxStep);
+      particle.x += particle.vx / speed;
+      particle.y += particle.vy / speed;
+    }
+    // Symmetric projection uses real card dimensions (including annotations).
+    // Correct throughout relaxation so springs cannot build dense point piles.
+    for (let i = 0; i < particles.length; i += 1) {
+      const a = particles[i];
+      for (let j = i + 1; j < particles.length; j += 1) {
+        const b = particles[j];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const overlapX = (a.width + b.width) / 2 + 20 - Math.abs(dx);
+        const overlapY = (a.height + b.height) / 2 + 20 - Math.abs(dy);
+        if (overlapX <= 0 || overlapY <= 0) continue;
+        if (overlapX < overlapY) {
+          const move = ((overlapX + 0.1) / 2) * (dx < 0 ? -1 : 1);
+          a.x -= move;
+          b.x += move;
+        } else {
+          const move = ((overlapY + 0.1) / 2) * (dy < 0 ? -1 : 1);
+          a.y -= move;
+          b.y += move;
+        }
+      }
+    }
+  }
+  for (const particle of particles) {
+    positions.set(particle.key, {
+      x: Math.round(particle.x * 10) / 10,
+      y: Math.round(particle.y * 10) / 10,
+    });
+  }
+  return resolveNodeOverlaps(nodes, positions);
+};
+
+const computeDeterministicLayout = (
+  nodes,
+  links = [],
+  selectedKey = "",
+  resolveKey = (value) => String(value)
+) => {
+  if (nodes.length > 0 && nodes.length <= ORGANIC_LAYOUT_LIMIT) {
+    return computeOrganicLayout(nodes, links, selectedKey, resolveKey);
+  }
+  return refineTopologyLayout(
+    nodes,
+    links,
+    computeChapterLayout(nodes),
+    resolveKey
+  );
 };
 
 const boxesOverlap = (a, b) =>
@@ -900,19 +1346,15 @@ const boxesOverlap = (a, b) =>
 
 const computeRelationLabelIndexes = (links, positions, nodeBoxes, ctx) => {
   const indexes = new Set();
-  if (
-    !props.showRelationLabels ||
-    currentZoom.value < RELATION_LABEL_MIN_ZOOM
-  ) {
-    return indexes;
-  }
+  if (!props.showRelationLabels) return indexes;
   const zoom = currentZoom.value;
   const candidates = [];
   links.forEach((link, index) => {
     const sourceKey = ctx.resolveKey(link.source);
     const targetKey = ctx.resolveKey(link.target);
-    const source = positions.get(sourceKey);
-    const target = positions.get(targetKey);
+    const type = normalizeRelationType(link);
+    const source = positions.get(type === "dependent" ? targetKey : sourceKey);
+    const target = positions.get(type === "dependent" ? sourceKey : targetKey);
     if (!source || !target) return;
     const hoverAdjacent =
       !!ctx.hoveredId &&
@@ -920,34 +1362,29 @@ const computeRelationLabelIndexes = (links, positions, nodeBoxes, ctx) => {
     const selectedAdjacent =
       !!ctx.selectedId &&
       (sourceKey === ctx.selectedId || targetKey === ctx.selectedId);
-    let priority = 99;
-    if (hoverAdjacent) {
-      priority = 0;
-    } else if (selectedAdjacent) {
-      priority = 1;
-    } else if (
-      !ctx.selectedId &&
-      !ctx.hoveredId &&
-      zoom >= RELATION_LABEL_ZOOM
-    ) {
-      priority = 2;
-    } else if (zoom >= RELATION_LABEL_DENSE_ZOOM) {
-      priority = 3;
-    }
-    if (priority === 99) return;
-    if (Math.hypot(target.x - source.x, target.y - source.y) < 24) return;
-    const type = normalizeRelationType(link);
+    const priority = hoverAdjacent ? 0 : selectedAdjacent ? 1 : 2;
+    const dx = target.x - source.x;
+    const dy = target.y - source.y;
+    const length = Math.hypot(dx, dy);
+    if (length * zoom < 24) return;
     const label = RELATION_LABEL[type] || "未知";
-    const labelScale = Math.max(0.5, zoom);
+    const baseCurve = Number(ctx.curveOf(link)) || 0;
+    const curve = link.lineStyle?.pathEmphasis
+      ? 0.08
+      : Math.abs(baseCurve) < 0.08
+      ? 0.12
+      : baseCurve;
+    const width = Math.max(22, label.length * 10.5 + 10);
+    const height = 18;
+    // Edge labels rotate along the actual curve. Test their screen-size box at
+    // the quadratic midpoint rather than the midpoint of the straight chord.
     candidates.push({
       index,
       priority,
-      width: Math.max(22, label.length * 10.5 + 10) / labelScale,
-      height: 16 / labelScale,
-      sourceKey,
-      targetKey,
-      midX: (source.x + target.x) / 2,
-      midY: (source.y + target.y) / 2,
+      width: (Math.abs(dx) * width + Math.abs(dy) * height) / length / zoom,
+      height: (Math.abs(dy) * width + Math.abs(dx) * height) / length / zoom,
+      midX: (source.x + target.x) / 2 + (dy * curve) / 2,
+      midY: (source.y + target.y) / 2 - (dx * curve) / 2,
       labelWidth: label.length,
     });
   });
@@ -960,21 +1397,14 @@ const computeRelationLabelIndexes = (links, positions, nodeBoxes, ctx) => {
   const placed = [];
   const limit = zoom < 0.9 ? RELATION_LABEL_MAX_COMPACT : RELATION_LABEL_MAX;
   for (const candidate of candidates) {
-    if (candidate.priority >= 2 && placed.length >= limit) break;
+    if (placed.length >= limit) break;
     const box = {
       x1: candidate.midX - candidate.width / 2 - 3,
       x2: candidate.midX + candidate.width / 2 + 3,
       y1: candidate.midY - candidate.height / 2 - 2,
       y2: candidate.midY + candidate.height / 2 + 2,
     };
-    if (
-      nodeBoxes.some(
-        (nodeBox) =>
-          nodeBox.key !== candidate.sourceKey &&
-          nodeBox.key !== candidate.targetKey &&
-          boxesOverlap(box, nodeBox)
-      )
-    ) {
+    if (nodeBoxes.some((nodeBox) => boxesOverlap(box, nodeBox))) {
       continue;
     }
     if (placed.some((occupied) => boxesOverlap(box, occupied))) continue;
@@ -984,7 +1414,7 @@ const computeRelationLabelIndexes = (links, positions, nodeBoxes, ctx) => {
   return indexes;
 };
 
-const buildSeries = () => {
+const buildSeries = ({ rebuild = false } = {}) => {
   // 防御：按 id/name 去重节点，并过滤掉指向不存在节点的连线。
   // 重复 id 或悬空连线会让 ECharts graph series 在
   // createGraphFromNodeEdge 中抛 "Cannot set properties of undefined
@@ -1038,26 +1468,23 @@ const buildSeries = () => {
   }
   // 稳定轻微曲率：同一对节点的多条边按出现序递增曲率（确定性，避免重叠）
   const pairCount = new Map();
-  const curveOf = (link) => {
+  const curves = new Map();
+  safeLinks.forEach((link) => {
     const a = resolveKey(link.source);
     const b = resolveKey(link.target);
     const key = a < b ? `${a}|${b}` : `${b}|${a}`;
     const n = pairCount.get(key) || 0;
     pairCount.set(key, n + 1);
-    return n === 0 ? 0 : Math.min(0.08 * n, 0.24);
-  };
+    curves.set(link, n === 0 ? 0 : Math.min(0.08 * n, 0.24));
+  });
+  const curveOf = (link) => curves.get(link) || 0;
   const ctx = {
     selectedId,
     neighborIds,
     showStatusUI,
     showRelationLabels: props.showRelationLabels,
     fillByStatus: props.fillByStatus,
-    labelsVisible:
-      currentZoom.value >=
-      ((props.nodes?.length ?? 0) <= 12 ? 0.35 : NODE_LABEL_MIN_ZOOM),
-    compactLabels:
-      (props.nodes?.length ?? 0) <= 12 &&
-      currentZoom.value < NODE_LABEL_MIN_ZOOM,
+    compactLabels: currentZoom.value < NODE_LABEL_COMPACT_ZOOM,
     hoveredId: hoveredNodeId.value,
     labelIndexes: new Set(),
     curveOf,
@@ -1065,15 +1492,30 @@ const buildSeries = () => {
     nameOf: (id) => idName.get(resolveKey(id)) || "",
   };
 
-  const positions = computeDeterministicLayout(
-    safeNodes,
-    safeLinks,
-    selectedId,
-    resolveKey
-  );
+  let positions = new Map();
+  // Visual changes must use the coordinates already on screen. Changing the
+  // selection never moves the graph or uses a different layout to place labels.
+  if (!rebuild && myChart) {
+    const existing = myChart.getModel()?.getSeriesByIndex(0)?.getData();
+    existing?.each((index) => {
+      const key = existing.getId(index);
+      const point = existing.getItemLayout(index);
+      if (nodeKeys.has(key) && point?.every(Number.isFinite)) {
+        positions.set(key, { x: point[0], y: point[1] });
+      }
+    });
+  }
+  if (positions.size !== safeNodes.length) {
+    positions = computeDeterministicLayout(
+      safeNodes,
+      safeLinks,
+      selectedId,
+      resolveKey
+    );
+  }
   const nodeBoxes = safeNodes.map((node) => {
     const point = positions.get(nodeKeyOf(node)) || { x: 0, y: 0 };
-    const size = nodeSizeOf(node);
+    const size = layoutNodeSizeOf(node);
     return {
       key: nodeKeyOf(node),
       x1: point.x - size.width / 2 - 3,
@@ -1097,37 +1539,35 @@ const buildSeries = () => {
     return style;
   });
   renderedNodeByKey = new Map(data.map((node) => [node.id, node]));
+  const xs = data.map((node) => node.x);
+  const ys = data.map((node) => node.y);
 
   return {
     id: "oslab-knowledge-graph",
     type: "graph",
-    // 确定性分组/分层坐标；不再使用随机力导向，筛选/回放不改变相对布局规则。
-    layout: "none",
-    draggable: false,
+    // 从现有章节坐标播种，运行真正的力布局；拖动时由 ECharts 重新加热。
+    layout: "force",
+    draggable: true,
+    force: {
+      initLayout: "none",
+      repulsion: data.length <= 12 ? 500 : 1400,
+      edgeLength: [150, 220],
+      gravity: 0.04,
+      friction: 0.18,
+      layoutAnimation: true,
+    },
     roam: true,
+    // Keep one layout unit equal to one pixel before roam. Otherwise ECharts
+    // stretches center coordinates to the container independently of symbol
+    // sizes, undoing every spacing and collision calculation above.
+    left: "center",
+    top: "middle",
+    width: data.length ? Math.max(2, Math.max(...xs) - Math.min(...xs)) : 2,
+    height: data.length ? Math.max(2, Math.max(...ys) - Math.min(...ys)) : 2,
     // 节点与标签随画布同比缩放，相对间距恒定，任何缩放级别都不会互相覆盖。
     nodeScaleRatio: 1,
     scaleLimit: { min: 0.05, max: 4 },
     data,
-    markPoint: (() => {
-      const selected = data.find((node) => node.id === ctx.selectedId);
-      if (!selected) return { data: [] };
-      return {
-        silent: true,
-        symbol: "rect",
-        symbolSize: [28, 5],
-        itemStyle: {
-          color: GRAPH_TOKENS.highlight,
-          borderRadius: 1,
-        },
-        data: [
-          {
-            coord: [selected.x, selected.y],
-            symbolOffset: [0, -24],
-          },
-        ],
-      };
-    })(),
     links: safeLinks.map((link, index) => buildLink(link, ctx, index)),
     label: { show: true },
     // log3 B.3：focus = "none" 关闭 ECharts 的 adjacency blur（全图默认
@@ -1150,13 +1590,6 @@ const buildSeries = () => {
   };
 };
 
-const zoomBandOf = (zoom) => {
-  if (zoom < RELATION_LABEL_MIN_ZOOM) return 0;
-  if (zoom < NODE_LABEL_MIN_ZOOM) return 1;
-  if (zoom < RELATION_LABEL_DENSE_ZOOM) return 2;
-  return 3;
-};
-
 const readZoom = () => {
   if (!myChart) return currentZoom.value;
   const option = myChart.getOption();
@@ -1166,13 +1599,15 @@ const readZoom = () => {
 
 const syncZoom = () => {
   const zoom = readZoom();
+  if (Math.abs(zoom - currentZoom.value) < 0.0001) return;
   currentZoom.value = zoom;
-  const band = zoomBandOf(zoom);
-  if (band !== lastZoomBand) {
-    lastZoomBand = band;
-    // 缩放跨过标签层级时只刷新视觉，不改坐标与视野。
+  if (zoomFrame) return;
+  zoomFrame = window.requestAnimationFrame(() => {
+    zoomFrame = 0;
+    // Rich labels use screen pixels: refresh on every zoom, not just when a
+    // threshold is crossed. Panning keeps the same labels and costs no refresh.
     updateChart();
-  }
+  });
 };
 
 const handleNodeMouseOver = (params) => {
@@ -1197,8 +1632,58 @@ const initChart = () => {
   myChart.on("graphRoam", syncZoom);
   myChart.on("mouseover", handleNodeMouseOver);
   myChart.on("mouseout", handleNodeMouseOut);
+  myChart.on("rendered", handleLayoutRendered);
   lastTopologySignature = graphTopologySignature();
   updateChart({ rebuild: true });
+};
+
+const handleLayoutRendered = () => {
+  const series = myChart?.getModel()?.getSeriesByIndex(0);
+  if (!series?.forceLayout) return;
+  avoidRenderedLabelOverlaps();
+  if (series.__oslabForceSettled && fittedSeries !== series) {
+    fittedSeries = series;
+    if (!layoutFrame)
+      layoutFrame = window.requestAnimationFrame(() => {
+        layoutFrame = 0;
+        fitCurrentLayout();
+      });
+  } else if (!series.__oslabForceSettled && !labelRefresh) {
+    labelRefresh = window.setTimeout(() => {
+      labelRefresh = 0;
+      if (myChart) updateChart();
+    }, 120);
+  }
+};
+
+// Force motion and endpoint clipping can shift an edge label several pixels.
+// Check the final screen rectangles as well as the predictive label placement.
+const avoidRenderedLabelOverlaps = () => {
+  const series = myChart?.getModel()?.getSeriesByIndex(0);
+  if (!series) return;
+  const rectOf = (element) => {
+    const rect = element.getBoundingRect().clone();
+    rect.applyTransform(element.getComputedTransform());
+    return rect;
+  };
+  const cards = [];
+  series.getData().eachItemGraphicEl((element) => {
+    const card = element.childAt(0);
+    if (card) cards.push(rectOf(card));
+  });
+  const placed = [];
+  series.getEdgeData().eachItemGraphicEl((element) => {
+    const label = element.getTextContent();
+    if (!label || label.ignore || !label.style.text) return;
+    const rect = rectOf(label);
+    const overlaps = (other) =>
+      rect.x < other.x + other.width + 2 &&
+      rect.x + rect.width + 2 > other.x &&
+      rect.y < other.y + other.height + 2 &&
+      rect.y + rect.height + 2 > other.y;
+    if (cards.some(overlaps) || placed.some(overlaps)) label.hide();
+    else placed.push(rect);
+  });
 };
 
 const clickPayloadOf = (params) => {
@@ -1237,7 +1722,7 @@ const handleNodeDblClick = (params) => {
 // rebuild=true：数据/拓扑变化，notMerge 全量重建并重新适配视野；
 // rebuild=false：选中/脉冲/标签开关只刷新视觉，保留布局与视野。
 
-// 视野适配：基于确定性坐标计算内容包围盒（含节点尺寸），
+// 视野适配：使用已渲染节点的像素包围盒，包含节点的真实尺寸，
 // 用公开 graphRoam 的 zoom + dx/dy 完成缩放与居中。
 const fitCurrentLayout = () => {
   if (!myChart || !myChart.getWidth() || !myChart.getHeight()) return;
@@ -1249,45 +1734,30 @@ const fitCurrentLayout = () => {
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
-  let maxHalfWidth = 0;
-  let maxHalfHeight = 0;
   data.each((index) => {
-    const point = data.getItemLayout(index);
-    if (!point || !point.every(Number.isFinite)) return;
-    minX = Math.min(minX, point[0]);
-    minY = Math.min(minY, point[1]);
-    maxX = Math.max(maxX, point[0]);
-    maxY = Math.max(maxY, point[1]);
-    const size = data.getItemVisual(index, "symbolSize");
-    if (Array.isArray(size)) {
-      maxHalfWidth = Math.max(maxHalfWidth, size[0] / 2);
-      maxHalfHeight = Math.max(maxHalfHeight, size[1] / 2);
-    }
+    const symbol = data.getItemGraphicEl(index)?.childAt(0);
+    if (!symbol) return;
+    const rect = symbol.getBoundingRect().clone();
+    rect.applyTransform(symbol.getComputedTransform());
+    if (![rect.x, rect.y, rect.width, rect.height].every(Number.isFinite))
+      return;
+    minX = Math.min(minX, rect.x);
+    minY = Math.min(minY, rect.y);
+    maxX = Math.max(maxX, rect.x + rect.width);
+    maxY = Math.max(maxY, rect.y + rect.height);
   });
   if (!Number.isFinite(minX)) return;
   const centerX = (minX + maxX) / 2;
   const centerY = (minY + maxY) / 2;
-  // 节点随缩放同比变化，按数据单位把节点半径并入包围盒。
-  const p1 = myChart.convertToPixel({ seriesIndex: 0 }, [
-    minX - maxHalfWidth,
-    minY - maxHalfHeight,
-  ]);
-  const p2 = myChart.convertToPixel({ seriesIndex: 0 }, [
-    maxX + maxHalfWidth,
-    maxY + maxHalfHeight,
-  ]);
-  if (!p1 || !p2 || ![...p1, ...p2].every(Number.isFinite)) return;
-  const pixelWidth = Math.max(1, Math.abs(p2[0] - p1[0]));
-  const pixelHeight = Math.max(1, Math.abs(p2[1] - p1[1]));
-  const availW = Math.max(1, myChart.getWidth() - 24);
-  const availH = Math.max(1, myChart.getHeight() - 24);
+  const pixelWidth = Math.max(1, maxX - minX);
+  const pixelHeight = Math.max(1, maxY - minY);
+  const availW = Math.max(1, myChart.getWidth() - 40);
+  const availH = Math.max(1, myChart.getHeight() - 40);
   const current = readZoom();
   const ratio = Math.min(availW / pixelWidth, availH / pixelHeight);
-  const targetZoom = Math.max(0.05, Math.min(1.45, current * ratio));
+  const targetZoom = Math.max(0.05, Math.min(1.3, current * ratio));
   const zoomRatio = targetZoom / Math.max(0.0001, current);
-  const previousBand = zoomBandOf(currentZoom.value);
   currentZoom.value = targetZoom;
-  lastZoomBand = zoomBandOf(targetZoom);
   myChart.dispatchAction({
     type: "graphRoam",
     seriesIndex: 0,
@@ -1295,19 +1765,11 @@ const fitCurrentLayout = () => {
     originX: myChart.getWidth() / 2,
     originY: myChart.getHeight() / 2,
   });
-  // 适配可能跨过标签可读阈值：同步刷新标签显示层级（不改变布局与视野）。
-  if (lastZoomBand !== previousBand) {
-    updateChart();
-  }
   // 缩放围绕画布中心；再平移到内容中心。dx/dy 与 ECharts roam 的
   // 拖拽语义一致：content 移动量 = 画布中心 − 当前中心像素。
-  const centerPixel = myChart.convertToPixel({ seriesIndex: 0 }, [
-    centerX,
-    centerY,
-  ]);
-  if (centerPixel && centerPixel.every(Number.isFinite)) {
-    const dx = myChart.getWidth() / 2 - centerPixel[0];
-    const dy = myChart.getHeight() / 2 - centerPixel[1];
+  {
+    const dx = (myChart.getWidth() / 2 - centerX) * zoomRatio;
+    const dy = (myChart.getHeight() / 2 - centerY) * zoomRatio;
     if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
       myChart.dispatchAction({
         type: "graphRoam",
@@ -1317,6 +1779,7 @@ const fitCurrentLayout = () => {
       });
     }
   }
+  updateChart();
 };
 
 const updateChart = ({ rebuild = false } = {}) => {
@@ -1363,7 +1826,7 @@ const updateChart = ({ rebuild = false } = {}) => {
         return params.name || "";
       },
     },
-    series: [buildSeries()],
+    series: [buildSeries({ rebuild })],
   };
   if (rebuild) {
     myChart.setOption(option, { notMerge: true });
@@ -1385,6 +1848,7 @@ const updateChart = ({ rebuild = false } = {}) => {
       links: option.series[0].links,
     });
   }
+  avoidRenderedLabelOverlaps();
 };
 
 // 选中节点变化时只刷新高亮，不重算布局
@@ -1504,6 +1968,12 @@ onMounted(() => {
 defineExpose({ resetView, fit: resetView, reset: resetView });
 
 onBeforeUnmount(() => {
+  if (layoutFrame) window.cancelAnimationFrame(layoutFrame);
+  if (labelRefresh) window.clearTimeout(labelRefresh);
+  if (zoomFrame) {
+    window.cancelAnimationFrame(zoomFrame);
+    zoomFrame = 0;
+  }
   if (resizeObserver) {
     resizeObserver.disconnect();
     resizeObserver = null;
@@ -1526,6 +1996,7 @@ onBeforeUnmount(() => {
     myChart.off("graphRoam", syncZoom);
     myChart.off("mouseover", handleNodeMouseOver);
     myChart.off("mouseout", handleNodeMouseOut);
+    myChart.off("rendered", handleLayoutRendered);
     myChart.dispose();
     myChart = null;
   }

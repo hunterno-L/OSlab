@@ -191,7 +191,7 @@
                 <p>在资源工作区完成任务后返回，进度将按当前活动同步。</p>
                 <router-link v-if="resourceTarget" :to="resourceTarget">{{
                   activity.activityType === "DEMO"
-                    ? "进入算法模拟"
+                    ? "进入算法演示"
                     : "进入编程实验"
                 }}</router-link>
                 <p v-else class="hint">该资源暂未配置可用入口，请联系教师。</p>
@@ -690,8 +690,10 @@ async function complete(data: { confirmed?: boolean; attemptId?: string }) {
   }
 }
 const confirmReading = () => complete({ confirmed: true });
-const answered = (result: LearningAnswerResultVO) =>
-  complete({ attemptId: String(result.attemptId) });
+const answered = (result: LearningAnswerResultVO) => {
+  if (result.attemptId !== null)
+    complete({ attemptId: String(result.attemptId) });
+};
 watch(
   catalogCourseParam,
   (code) => {

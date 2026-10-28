@@ -70,6 +70,7 @@ import java.util.TreeMap;
 public class LearningTeacherServiceImpl implements LearningTeacherService {
     @Resource private com.yupi.springbootinit.learning.NodeIdentityService nodeIdentities;
     @Resource private org.springframework.jdbc.core.JdbcTemplate identityJdbc;
+    @Resource private com.yupi.springbootinit.service.ClassManagementService classManagementService;
 
     /** 未关联资源节点最多展示数（章节完整度） */
     private static final int MAX_UNCOVERED_NODES = 20;
@@ -189,6 +190,25 @@ public class LearningTeacherServiceImpl implements LearningTeacherService {
             vo.setStudentCount(entry.getValue());
             result.add(vo);
         }
+        // Include classes created through the managed class workflow, even before
+        // a student has joined them, so teachers can publish a task immediately.
+        if (classManagementService != null) {
+            try {
+                for (Map<String, Object> row : classManagementService.listAllActiveClasses()) {
+                    String className = String.valueOf(row.get("className"));
+                    if (!countByClass.containsKey(className)) {
+                        ClassOptionVO vo = new ClassOptionVO();
+                        vo.setClassName(className);
+                        Object count = row.get("studentCount");
+                        vo.setStudentCount(count instanceof Number ? ((Number) count).intValue() : 0);
+                        result.add(vo);
+                    }
+                }
+            } catch (RuntimeException ignored) {
+                // The v10 tables may not exist while an old database is upgrading.
+            }
+        }
+        result.sort(Comparator.comparing(ClassOptionVO::getClassName, Comparator.nullsLast(String::compareTo)));
         return result;
     }
 
@@ -393,6 +413,18 @@ public class LearningTeacherServiceImpl implements LearningTeacherService {
         List<Long> ids = new ArrayList<>();
         for (Students row : rows) {
             ids.add(row.getUserId().longValue());
+        }
+        if (classManagementService != null) {
+            try {
+                for (Map<String, Object> row : classManagementService.memberIdsOfClass(className)) {
+                    Object id = row.get("userId");
+                    if (id instanceof Number && !ids.contains(((Number) id).longValue())) {
+                        ids.add(((Number) id).longValue());
+                    }
+                }
+            } catch (RuntimeException ignored) {
+                // Keep the legacy roster available during a rolling database upgrade.
+            }
         }
         return ids;
     }

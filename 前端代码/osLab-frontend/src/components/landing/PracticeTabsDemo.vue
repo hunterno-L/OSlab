@@ -93,7 +93,7 @@ import { nextTick, onBeforeUnmount, ref, watch } from "vue";
 const tabs = [
   { id: "question", label: "题目练习" },
   { id: "code", label: "编程实验" },
-  { id: "sim", label: "算法模拟" },
+  { id: "sim", label: "算法演示" },
 ] as const;
 
 const active = ref<(typeof tabs)[number]["id"]>("question");

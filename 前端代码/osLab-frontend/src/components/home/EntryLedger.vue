@@ -50,7 +50,7 @@ const entries: Entry[] = [
     path: "/experiments",
   },
   {
-    label: "算法模拟",
+    label: "算法演示",
     description: "CPU 调度、内存分配、页面置换、磁盘调度",
     path: "/experiments/simulation",
   },

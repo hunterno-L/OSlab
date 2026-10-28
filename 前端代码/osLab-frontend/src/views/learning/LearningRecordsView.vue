@@ -24,7 +24,7 @@
           <a-option value="ATTEMPT">题目练习</a-option>
           <a-option value="JUDGE">编程实验判题</a-option>
           <a-option value="SIMULATION">交互模拟（判分）</a-option>
-          <a-option value="SIMULATION_RUN">算法模拟运行</a-option>
+          <a-option value="SIMULATION_RUN">算法演示运行</a-option>
           <a-option value="TASK">学习任务</a-option>
           <a-option value="UNIT">单元活动</a-option>
         </a-select>
@@ -87,7 +87,7 @@
       >
         <div class="empty-title">还没有学习记录</div>
         <div class="hint">
-          暂无题目练习、编程实验、算法模拟、学习任务或单元活动记录。
+          暂无题目练习、编程实验、算法演示、学习任务或单元活动记录。
         </div>
         <a-button
           type="primary"
@@ -1428,7 +1428,7 @@ const eventTypeName = (type: string) => {
     ATTEMPT: "题目练习",
     JUDGE: "编程实验判题",
     SIMULATION: "交互模拟（判分）",
-    SIMULATION_RUN: "算法模拟运行",
+    SIMULATION_RUN: "算法演示运行",
     TASK_ACCEPTED: "接受任务",
     TASK_SUBMISSION: "任务提交",
     UNIT_COMPLETED: "单元活动",

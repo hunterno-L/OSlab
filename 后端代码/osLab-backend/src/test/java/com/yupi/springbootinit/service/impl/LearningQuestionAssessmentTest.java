@@ -141,6 +141,33 @@ class LearningQuestionAssessmentTest {
     }
 
     @Test
+    void comprehensivePracticeRevealsAnalysisWithoutGradingOrRecordingEvidence() {
+        question.setType("COMPREHENSIVE");
+        question.setAnalysis("参考答案与解析");
+        request.setAssessmentRunId(null);
+        request.setAnswer("我的推导");
+        LearningAnswerResultVO result = service.answerQuestion(request, user);
+        assertNull(result.getCorrect());
+        assertNull(result.getAttemptId());
+        assertEquals("参考答案与解析", result.getAnalysis());
+        verify(attemptMapper, never()).insert(any());
+        verifyNoInteractions(eventService, runMapper);
+    }
+
+    @Test
+    void comprehensivePracticeRequiresAnAnswerAndIsExcludedFromScoredSessions() {
+        question.setType("COMPREHENSIVE");
+        request.setAssessmentRunId(null);
+        request.setAnswer(" ");
+        assertThrows(BusinessException.class, () -> service.answerQuestion(request, user));
+        request.setAnswer("我的推导");
+        request.setAssessmentRunId(41L);
+        assertThrows(BusinessException.class, () -> service.answerQuestion(request, user));
+        verify(attemptMapper, never()).insert(any());
+        verifyNoInteractions(eventService, runMapper);
+    }
+
+    @Test
     void rejectsMissingSessionBeforeRecordingAnything() {
         when(runMapper.selectById(41L)).thenReturn(null);
         assertRejected(ErrorCode.NOT_FOUND_ERROR);

@@ -1,8 +1,15 @@
 <template>
   <header id="globalHeader">
-    <router-link class="title-bar" to="/home" aria-label="OSLab 首页">
-      <span class="logo brand-mark" aria-hidden="true">OS</span>
-      <span class="title">OSLab <small>操作系统</small></span>
+    <router-link class="title-bar" to="/home" aria-label="ZhiCore 首页">
+      <img
+        class="logo brand-mark"
+        :src="brandMarkUrl"
+        width="36"
+        height="36"
+        alt=""
+        aria-hidden="true"
+      />
+      <span class="title">ZhiCore <small>OPERATING SYSTEMS</small></span>
     </router-link>
     <nav class="main-navigation" aria-label="主导航">
       <router-link
@@ -16,6 +23,17 @@
         {{ item.name }}
       </router-link>
     </nav>
+    <form class="header-search" role="search" @submit.prevent="submitSearch">
+      <a-input
+        v-model="searchText"
+        allow-clear
+        placeholder="搜索算法、题目"
+        aria-label="搜索算法或题目"
+        @press-enter="submitSearch"
+      >
+        <template #prefix><icon-search /></template>
+      </a-input>
+    </form>
     <div class="user-info">
       <a-dropdown
         v-if="isLoggedIn"
@@ -48,6 +66,10 @@
             <template #icon><icon-user /></template>
             个人信息
           </a-doption>
+          <a-doption value="classes">
+            <template #icon><icon-user-group /></template>
+            {{ isAdmin ? "班级管理" : "我的班级" }}
+          </a-doption>
           <a-doption value="records">
             <template #icon><icon-history /></template>
             学习记录
@@ -74,7 +96,7 @@
 <script setup lang="ts">
 import { APP_NAVIGATION, resolveNavKey } from "@/navigation/appNavigation";
 import { useRoute, useRouter } from "vue-router";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useStore } from "vuex";
 import checkAccess from "@/access/checkAccess";
 import ACCESS_ENUM from "@/access/accessEnum";
@@ -83,10 +105,13 @@ import { resolveDisplayName } from "@/utils/userPresentation";
 import { Message } from "@arco-design/web-vue";
 import { UserControllerService } from "../../generated";
 import { ApiError } from "../../generated/core/ApiError";
+import { ALGORITHMS } from "@/simulation/catalog";
 
+const brandMarkUrl = `${process.env.BASE_URL}brand-mark.svg`;
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
+const searchText = ref("");
 
 // 顶栏一级菜单：来自统一导航配置，按权限过滤；同一入口按角色解析目标地址。
 const visibleRoutes = computed(() => {
@@ -130,6 +155,25 @@ const navigateToLogin = () => {
   router.push({ path: "/user/login" });
 };
 
+const submitSearch = () => {
+  const keyword = searchText.value.trim();
+  if (!keyword) return;
+  const normalized = keyword.toLocaleLowerCase();
+  const algorithm = ALGORITHMS.find(
+    (item) =>
+      item.title.toLocaleLowerCase().includes(normalized) ||
+      item.shortTitle.toLocaleLowerCase().includes(normalized)
+  );
+  if (algorithm) {
+    void router.push({
+      path: "/experiments/simulation",
+      query: { algorithmKey: algorithm.key },
+    });
+    return;
+  }
+  void router.push({ path: "/experiments", query: { title: keyword } });
+};
+
 const handleProfileAction = async (value: string | number) => {
   if (value === "account") {
     await router.push({ path: "/account" });
@@ -137,6 +181,12 @@ const handleProfileAction = async (value: string | number) => {
   }
   if (value === "records") {
     await router.push({ path: "/records" });
+    return;
+  }
+  if (value === "classes") {
+    await router.push({
+      path: isAdmin.value ? "/teaching/classes" : "/classes",
+    });
     return;
   }
   if (value !== "logout") return;
@@ -163,7 +213,7 @@ const handleProfileAction = async (value: string | number) => {
 <style scoped>
 #globalHeader {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) minmax(190px, 22%) auto;
   align-items: center;
   gap: 18px;
   min-height: 60px;
@@ -171,6 +221,7 @@ const handleProfileAction = async (value: string | number) => {
   box-sizing: border-box;
   background: var(--oslab-panel);
   border: 1px solid var(--oslab-line);
+  border-bottom: 3px solid #20bd91;
   border-radius: var(--oslab-radius-container);
   box-shadow: var(--oslab-shadow-card);
 }
@@ -205,20 +256,14 @@ const handleProfileAction = async (value: string | number) => {
   width: 36px;
   height: 36px;
   flex: 0 0 36px;
-  display: grid;
-  place-items: center;
-  border-radius: 9px;
-  background: var(--oslab-highlight);
-  color: #3a3320;
-  font-family: var(--oslab-font-mono);
-  font-size: 11px;
-  font-weight: 700;
+  display: block;
+  object-fit: contain;
 }
 
 .main-navigation {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: thin;
@@ -228,10 +273,10 @@ const handleProfileAction = async (value: string | number) => {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
-  min-height: 36px;
-  padding: 0 13px;
+  min-height: 42px;
+  padding: 0 14px;
   border: 0;
-  border-radius: var(--oslab-radius-pill);
+  border-radius: 4px;
   color: var(--oslab-ink-soft);
   text-decoration: none;
   font-size: 13px;
@@ -248,9 +293,20 @@ const handleProfileAction = async (value: string | number) => {
 }
 
 .main-nav-link.active {
-  background: var(--oslab-primary);
-  color: var(--oslab-on-primary);
+  background: var(--oslab-primary-soft);
+  color: var(--oslab-primary);
   font-weight: 600;
+}
+.header-search {
+  min-width: 0;
+}
+.header-search :deep(.arco-input-wrapper) {
+  min-height: 40px;
+  border-radius: 22px;
+  background: var(--oslab-panel-soft);
+}
+.header-search :deep(.arco-input) {
+  font-size: 13px;
 }
 .user-info {
   display: flex;
@@ -328,6 +384,15 @@ const handleProfileAction = async (value: string | number) => {
     grid-row: 2;
     width: 100%;
   }
+  .header-search {
+    grid-column: 1 / 2;
+    grid-row: 3;
+    width: 100%;
+  }
+  .user-info {
+    grid-column: 2;
+    grid-row: 1;
+  }
   .main-nav-link {
     min-height: 34px;
     padding: 0 11px;
@@ -354,6 +419,10 @@ const handleProfileAction = async (value: string | number) => {
     width: 30px;
     height: 30px;
     flex-basis: 30px;
+  }
+  .header-search {
+    grid-column: 1 / -1;
+    grid-row: 3;
   }
 }
 </style>

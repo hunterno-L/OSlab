@@ -1,7 +1,7 @@
 <template>
   <div class="legacy-route">
     <a-spin :loading="true" />
-    <span>正在打开实验中心</span>
+    <span>正在打开编程实验</span>
   </div>
 </template>
 

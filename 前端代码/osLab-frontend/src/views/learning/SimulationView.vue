@@ -2,13 +2,10 @@
   <div class="simulation-view">
     <CourseReturnBar :can-complete-demo="canCompleteDemo" />
 
-    <header class="simulation-head">
-      <div>
-        <p class="page-subtitle">
-          18
-          项操作系统算法演示：步骤、指标与边界规则可复算；完成运行会写入普通学习活动记录，不写判题或掌握事件。
-        </p>
-      </div>
+    <header
+      v-if="returnTarget || nodeCode || contextLabel"
+      class="simulation-head"
+    >
       <div class="head-context">
         <router-link v-if="returnTarget" :to="returnTarget"
           >返回原学习位置</router-link
@@ -49,59 +46,45 @@
       >
     </section>
 
-    <div class="simulation-body" :class="{ 'rail-collapsed': railCollapsed }">
-      <aside
-        class="algorithm-rail"
-        :class="{ collapsed: railCollapsed }"
-        aria-label="算法目录与类别"
-      >
-        <button
-          type="button"
-          class="rail-collapse"
-          :aria-expanded="!railCollapsed"
-          @click="railCollapsed = !railCollapsed"
-        >
-          {{ railCollapsed ? "展开目录" : "收起目录" }}
-        </button>
-        <template v-if="!railCollapsed">
-          <div class="rail-head">
-            <h2>算法目录</h2>
-            <span class="rail-count">18 项</span>
-          </div>
-          <nav class="category-tabs" aria-label="算法类别">
-            <button
-              v-for="category in CATEGORY_ORDER"
-              :key="category"
-              type="button"
-              class="category-tab"
-              :class="{ active: definition.category === category }"
-              :aria-pressed="definition.category === category"
-              @click="selectCategory(category)"
+    <div class="simulation-body">
+      <aside class="algorithm-rail" aria-label="算法目录与类别">
+        <div class="rail-head">
+          <h2>算法目录</h2>
+          <span class="rail-count">18 项</span>
+        </div>
+        <nav class="category-tabs" aria-label="算法类别">
+          <button
+            v-for="category in CATEGORY_ORDER"
+            :key="category"
+            type="button"
+            class="category-tab"
+            :class="{ active: definition.category === category }"
+            :aria-pressed="definition.category === category"
+            @click="selectCategory(category)"
+          >
+            <span>{{ CATEGORY_LABELS[category] }}</span>
+            <span class="category-count"
+              >{{ countByCategory(category) }} 项</span
             >
-              <span>{{ CATEGORY_LABELS[category] }}</span>
-              <span class="category-count"
-                >{{ countByCategory(category) }} 项</span
-              >
-            </button>
-          </nav>
+          </button>
+        </nav>
 
-          <div class="algorithm-list">
-            <button
-              v-for="algorithm in algorithmsByCategory(definition.category)"
-              :key="algorithm.key"
-              type="button"
-              class="algorithm-item"
-              :class="{ active: algorithm.key === definition.key }"
-              :aria-current="
-                algorithm.key === definition.key ? 'true' : undefined
-              "
-              @click="selectAlgorithm(algorithm.key)"
-            >
-              <span class="algorithm-short">{{ algorithm.shortTitle }}</span>
-              <small>{{ algorithm.title }}</small>
-            </button>
-          </div>
-        </template>
+        <div class="algorithm-list">
+          <button
+            v-for="algorithm in algorithmsByCategory(definition.category)"
+            :key="algorithm.key"
+            type="button"
+            class="algorithm-item"
+            :class="{ active: algorithm.key === definition.key }"
+            :aria-current="
+              algorithm.key === definition.key ? 'true' : undefined
+            "
+            @click="selectAlgorithm(algorithm.key)"
+          >
+            <span class="algorithm-short">{{ algorithm.shortTitle }}</span>
+            <small>{{ algorithm.title }}</small>
+          </button>
+        </div>
       </aside>
 
       <div class="algorithm-workspace">
@@ -161,8 +144,6 @@ const INPUT_QUERY_KEYS = [
 
 const algorithmKey = ref(DEFAULT_ALGORITHM_KEY);
 const allRevealed = ref(false);
-const railCollapsed = ref(false);
-
 const definition = computed(
   () => ALGORITHM_BY_KEY.get(algorithmKey.value) || ALGORITHMS[0]
 );
@@ -401,7 +382,7 @@ onMounted(applyRoute);
 }
 .simulation-body {
   display: grid;
-  grid-template-columns: 224px minmax(0, 1fr);
+  grid-template-columns: 156px minmax(0, 1fr);
   gap: var(--oslab-space-4);
   align-items: start;
 }
@@ -411,36 +392,9 @@ onMounted(applyRoute);
   gap: var(--oslab-space-3);
   position: sticky;
   top: 12px;
-  padding: var(--oslab-space-3);
-  border: 1px solid var(--oslab-line);
-  border-radius: var(--oslab-radius-lg);
+  padding: 8px 6px;
+  border-right: 1px solid var(--oslab-line);
   background: var(--oslab-panel);
-}
-.rail-collapse {
-  align-self: flex-end;
-  padding: 2px 8px;
-  border: 1px solid var(--oslab-line);
-  border-radius: var(--oslab-radius-md);
-  background: var(--oslab-panel-soft);
-  color: var(--oslab-muted-strong);
-  font-size: 11px;
-  cursor: pointer;
-}
-.rail-collapse:hover {
-  color: var(--oslab-primary);
-  border-color: var(--oslab-primary);
-}
-.simulation-body.rail-collapsed {
-  grid-template-columns: 64px minmax(0, 1fr);
-}
-.algorithm-rail.collapsed {
-  align-items: center;
-  padding: 8px 4px;
-}
-.algorithm-rail.collapsed .rail-collapse {
-  align-self: center;
-  writing-mode: vertical-rl;
-  letter-spacing: 1px;
 }
 .rail-head {
   display: flex;
@@ -531,19 +485,17 @@ onMounted(applyRoute);
 }
 /* C+B 学习图册 */
 .simulation-body {
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: 156px minmax(0, 1fr);
   gap: 12px;
 }
 .algorithm-rail {
-  padding: 14px;
+  padding: 8px 6px;
   background: var(--oslab-panel);
-  border: 1px solid var(--oslab-line);
-  border-radius: var(--oslab-radius-container);
-  box-shadow: var(--oslab-shadow-card);
+  border-right: 1px solid var(--oslab-line);
 }
 .algorithm-item {
-  min-height: 44px;
-  border-radius: var(--oslab-radius-control);
+  min-height: 34px;
+  border-radius: 2px;
 }
 .algorithm-item.active,
 .category-tab.active {
@@ -555,8 +507,7 @@ onMounted(applyRoute);
 }
 
 @media (max-width: 1024px) {
-  .simulation-body,
-  .simulation-body.rail-collapsed {
+  .simulation-body {
     grid-template-columns: 1fr;
   }
   .algorithm-rail {

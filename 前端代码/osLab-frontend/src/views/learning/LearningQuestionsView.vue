@@ -180,8 +180,8 @@
             <QuestionAnswerCard
               :question="question"
               :context-label="cardContextLabel"
-              :source-unit-code="sourceContext.unitCode"
-              :source-activity-code="sourceContext.activityCode"
+              :source-unit-code="sourceContext.sourceUnitCode"
+              :source-activity-code="sourceContext.sourceActivityCode"
               @answered="(result) => onAnswered(question, result)"
             />
           </article>
@@ -215,6 +215,7 @@ import { useRoute, useRouter } from "vue-router";
 import CourseCatalogSidebar from "@/components/learning/CourseCatalogSidebar.vue";
 import QuestionAnswerCard from "@/components/learning/QuestionAnswerCard.vue";
 import { useCourseCatalog } from "@/composables/useCourseCatalog";
+import { courseContext } from "@/utils/courseContext";
 import {
   getLearningCatalog,
   getLearningQuestion,
@@ -308,13 +309,7 @@ const studyStateLabel = computed(
     "全部状态"
 );
 
-const sourceContext = computed(() => {
-  const unitCode = queryValue(route.query.sourceUnitCode);
-  const activityCode = queryValue(route.query.sourceActivityCode);
-  return unitCode && activityCode
-    ? { unitCode, activityCode }
-    : { unitCode: "", activityCode: "" };
-});
+const sourceContext = computed(() => courseContext(route.query));
 
 const scopeLabel = computed(() => {
   if (selectedUnitCode.value) {
@@ -330,8 +325,8 @@ const scopeLabel = computed(() => {
 });
 
 const cardContextLabel = computed(() => {
-  const sourceUnit = sourceContext.value.unitCode
-    ? unitByCode.value.get(sourceContext.value.unitCode)
+  const sourceUnit = sourceContext.value.sourceUnitCode
+    ? unitByCode.value.get(sourceContext.value.sourceUnitCode)
     : null;
   if (sourceUnit) return `单元 · ${sourceUnit.title}`;
   if (selectedUnitCode.value) {
@@ -682,6 +677,7 @@ const onAnswered = (
   question: LearningQuestionVO,
   result: LearningAnswerResultVO
 ) => {
+  if (result.correct === null) return;
   question.hasAttempted = true;
   question.attemptCount = (question.attemptCount || 0) + 1;
   question.latestResult = result.correct ? "CORRECT" : "WRONG";

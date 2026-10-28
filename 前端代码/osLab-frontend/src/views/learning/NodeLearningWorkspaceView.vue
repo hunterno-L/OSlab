@@ -512,7 +512,7 @@
           </template>
         </section>
 
-        <!-- 页签 4：实践（编程实验 / 算法演示，不再复制实验中心） -->
+        <!-- 页签 4：实践（编程实验 / 算法演示） -->
         <section
           id="node-panel-lab"
           v-show="activeTab === 'lab'"
@@ -1600,6 +1600,7 @@ const questionTypeName = (type: string) =>
       SINGLE: "单选题",
       MULTIPLE: "多选题",
       FILL_BLANK: "填空题",
+      COMPREHENSIVE: "综合应用题",
     } as Record<string, string>
   )[type] || type);
 

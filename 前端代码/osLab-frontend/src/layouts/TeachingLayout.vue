@@ -6,7 +6,7 @@
         <GlobalHeader />
       </a-layout-header>
       <a-layout-content id="main-content" class="content">
-        <CourseSidebar :nav-key="'teaching'" />
+        <CourseSidebar v-if="!hideSidebar" :nav-key="'teaching'" />
         <div class="content-main">
           <router-view />
         </div>
@@ -16,8 +16,13 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+import { useRoute } from "vue-router";
 import GlobalHeader from "@/components/GlobalHeader.vue";
 import CourseSidebar from "@/components/learning/CourseSidebar.vue";
+
+const route = useRoute();
+const hideSidebar = computed(() => route.meta.hideSidebar === true);
 </script>
 
 <style scoped>

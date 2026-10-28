@@ -109,7 +109,7 @@ const go = (path: string) => {
   gap: 2px;
 }
 
-/* 实验中心/算法模拟的模式卡按设计稿收窄到 160px */
+/* Legacy side-mode card width. */
 .course-sidebar--compact {
   width: 160px;
 }

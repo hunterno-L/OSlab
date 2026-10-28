@@ -6,7 +6,7 @@
     </header>
     <div class="resource-links">
       <router-link to="/assessments">题目练习</router-link
-      ><router-link to="/experiments/simulation">算法模拟</router-link
+      ><router-link to="/experiments/simulation">算法演示</router-link
       ><router-link to="/experiments">编程实验</router-link
       ><router-link to="/graph">知识图谱与学习画像</router-link>
     </div>

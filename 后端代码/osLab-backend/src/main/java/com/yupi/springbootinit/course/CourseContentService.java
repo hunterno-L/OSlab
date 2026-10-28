@@ -113,7 +113,7 @@ public class CourseContentService {
             seen.clear();
             for(JsonNode c:pack.path("chunks")) {
                 unique(seen,code(c,"chunkCode")); required(c,"title"); required(c,"contentMd"); section(c,"sectionCode",course);
-                enumeration(c,"chunkType","DEFINITION","EXPLANATION","ALGORITHM","WORKED_EXAMPLE","FIGURE","SUMMARY");
+                enumeration(c,"chunkType","DEFINITION","EXPLANATION","MECHANISM","ALGORITHM","WORKED_EXAMPLE","FIGURE","SUMMARY");
                 source(c.path("sourceRef")); array(c,"nodeCodes"); array(c,"assets");
                 if(c.path("nodeCodes").isEmpty())throw bad("教学块必须关联知识节点");
                 for(JsonNode n:c.path("nodeCodes"))if(!nodeCodes.contains(n.asText()))throw bad("未知nodeCode:"+n.asText());

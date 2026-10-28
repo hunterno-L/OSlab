@@ -30,6 +30,8 @@ public class TaskAudienceService {
     private StudentsMapper studentsMapper;
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private com.yupi.springbootinit.service.ClassManagementService classManagementService;
 
     public static class Resolved {
         private final List<Map<String, Object>> students = new ArrayList<>();
@@ -86,6 +88,22 @@ public class TaskAudienceService {
 
         Set<Long> foundUserIds = new HashSet<>();
         Set<Long> seen = new HashSet<>();
+        // Managed classes are the authoritative source for the new class workflow.
+        // Keep the legacy students roster below so existing task recipients remain valid.
+        for (Map<String, Object> managed : classManagementService.audienceRows(classNames, new ArrayList<>(userIds))) {
+            Object rawUserId = managed.get("userId");
+            if (!(rawUserId instanceof Number)) continue;
+            long userId = ((Number) rawUserId).longValue();
+            if (!seen.add(userId)) continue;
+            foundUserIds.add(userId);
+            Map<String, Object> student = new LinkedHashMap<>();
+            student.put("userId", String.valueOf(userId));
+            student.put("name", StringUtils.defaultString((String) managed.get("userName"), "学生"));
+            student.put("studentNumber", null);
+            student.put("className", managed.get("className"));
+            student.put("studentId", null);
+            result.students.add(student);
+        }
         for (Students row : rows) {
             if (row.getUserId() == null) {
                 result.excluded.add(excluded(row.getStudentNumber(), row.getName(), row.getClassName(),

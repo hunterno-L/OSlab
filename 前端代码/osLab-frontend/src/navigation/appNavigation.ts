@@ -50,23 +50,15 @@ export const APP_NAVIGATION: NavItem[] = [
   },
   {
     key: "experiments",
-    label: "实验中心",
+    label: "编程实验",
     path: "/experiments",
     access: ACCESS_ENUM.USER,
-    children: [
-      {
-        key: "exp-code",
-        label: "编程实验",
-        path: "/experiments",
-        access: ACCESS_ENUM.USER,
-      },
-      {
-        key: "exp-simulation",
-        label: "算法模拟",
-        path: "/experiments/simulation",
-        access: ACCESS_ENUM.USER,
-      },
-    ],
+  },
+  {
+    key: "algorithm-demo",
+    label: "算法演示",
+    path: "/experiments/simulation",
+    access: ACCESS_ENUM.USER,
   },
   {
     key: "tasks",
@@ -97,6 +89,12 @@ export const APP_NAVIGATION: NavItem[] = [
         key: "teaching-tasks",
         label: "学习任务",
         path: "/teaching/tasks",
+        access: ACCESS_ENUM.ADMIN,
+      },
+      {
+        key: "teaching-classes",
+        label: "班级管理",
+        path: "/teaching/classes",
         access: ACCESS_ENUM.ADMIN,
       },
       {
@@ -165,6 +163,7 @@ export const ROLE_HOME: Record<string, string> = {
 
 /** 由路径解析所属一级领域（详情页保持顶栏选中态） */
 export function resolveNavKey(path: string): string | null {
+  if (path.startsWith("/experiments/simulation")) return "algorithm-demo";
   if (path.startsWith("/courses")) return "graph";
   if (path.startsWith("/home")) return "home";
   if (path.startsWith("/assessments")) return "assessments";

@@ -11,7 +11,7 @@
           class="page-title-row"
           :class="{ 'content-wide': isWide }"
         >
-          <p class="page-eyebrow" aria-hidden="true">OSLab / LEARNING</p>
+          <p class="page-eyebrow" aria-hidden="true">ZhiCore / LEARNING</p>
           <h1 class="page-title">{{ pageTitle }}</h1>
         </div>
         <div class="content-width" :class="{ 'content-wide': isWide }">
@@ -40,9 +40,7 @@ const route = useRoute();
 const navKey = computed(
   () => (route.meta?.navKey as string) || resolveNavKey(route.path) || ""
 );
-// log3 收尾 A（log3.txt 第 1 条）：wide 路由（知识图谱/实验中心/实验工作区）
-// 放宽内容容器到 1760px，其余路由维持 1440px；只由路由 meta.contentWidth 驱动，
-// 不整站放宽。窄于 1760px 时内容贴满并保留 24-32px 页边距（.content 的 padding）。
+// Wide routes use the available workspace width.
 const isWide = computed(() => route.meta?.contentWidth === "wide");
 const pageTitle = computed(() => {
   const title = route.meta?.pageTitle;

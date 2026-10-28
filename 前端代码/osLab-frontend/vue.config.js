@@ -15,6 +15,19 @@ const shouldDisplayRuntimeError = (error) => {
 module.exports = defineConfig({
   transpileDependencies: true,
   devServer: {
+    setupMiddlewares(middlewares) {
+      // Rebuilt original demos must be served from disk, ahead of webpack's
+      // in-memory public copy, which can retain the previous hashed entry.
+      middlewares.unshift({
+        name: "legacy-simulation-assets",
+        path: "/legacy-simulation",
+        middleware: require("express").static(
+          require("path").join(__dirname, "public", "legacy-simulation"),
+          { etag: false, maxAge: 0 }
+        ),
+      });
+      return middlewares;
+    },
     proxy: {
       "/api": {
         target: process.env.VUE_APP_API_TARGET || "http://localhost:8121",

@@ -66,6 +66,11 @@ repository's base dump plus every learning upgrade and seed:
 数据库文件/oslab_upgrade_v5_teaching.sql   节点共享素材表
 数据库文件/oslab_demo_seed_v3.sql          演示题与映射种子
 数据库文件/oslab_seed_v4_content.sql       两条知识链素材与补充题
+数据库文件/oslab_upgrade_v6_courses.sql    课程、单元与内容目录
+数据库文件/oslab_upgrade_v7_identity.sql  稳定身份与实验映射
+数据库文件/oslab_upgrade_v8_teaching_tasks.sql 学习任务与执行副本
+数据库文件/oslab_upgrade_v9_learning_activities.sql 演示运行记录
+数据库文件/oslab_upgrade_v10_classes.sql 班级与成员管理
 ```
 
 Every file is a mandatory read-only mount on the `mysql` service; the loader
@@ -79,7 +84,16 @@ Initialization scripts are not rerun for an existing named volume. For an
 existing database, run the idempotent upgrade check instead:
 `数据库文件/oslab_upgrade_existing_check.sql` (utf8mb4 client charset) — it
 reports missing columns/indexes, adds them only when safe, and aborts with a
-clear message when duplicate `userAccount` rows must be resolved first.
+clear message when duplicate `userAccount` rows must be resolved first. Apply
+new additive feature migrations separately to an existing volume, for example:
+
+```sh
+docker compose --env-file .env exec -T mysql sh -c \
+  'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" oslab_db' \
+  < ../数据库文件/oslab_upgrade_v10_classes.sql
+```
+
+The v10 script uses `CREATE TABLE IF NOT EXISTS` and can be rerun safely.
 Demo accounts (`teacher_demo`, `student_demo1/2`) are not part of the SQL
 seeds; create/verify them from a running backend with
 `scripts/dev/prepare-demo-accounts.ps1 -DemoPassword <口令>`.

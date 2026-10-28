@@ -29,7 +29,8 @@ export type LearningQuestionType =
   | "JUDGE"
   | "SINGLE"
   | "MULTIPLE"
-  | "FILL_BLANK";
+  | "FILL_BLANK"
+  | "COMPREHENSIVE";
 
 export type LearningReviewStatus =
   | "DRAFT"
@@ -84,8 +85,8 @@ export interface LearningQuestionVO {
 }
 
 export interface LearningAnswerResultVO {
-  attemptId: number;
-  correct: boolean;
+  attemptId: number | null;
+  correct: boolean | null;
   analysis: string | null;
   misconception: string | null;
   isFirst: boolean;

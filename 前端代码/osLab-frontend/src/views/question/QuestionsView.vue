@@ -42,7 +42,7 @@
         <div class="experiment-section">
           <div class="section-heading">
             <div>
-              <h2>{{ selectedChapter || "编程实验" }}</h2>
+              <h2>{{ selectedChapter || "实验列表" }}</h2>
               <span v-if="selectedChapter" class="side-hint">本章实验列表</span>
             </div>
             <div class="intro-metric">
@@ -447,32 +447,36 @@ onMounted(async () => {
 }
 .experiment-grid {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: 24px;
   align-items: start;
 }
 .chapter-nav {
-  background: var(--oslab-panel, #fff);
-  border: 1px solid var(--oslab-border, #e5e6eb);
-  border-radius: var(--oslab-radius-lg, 8px);
-}
-.chapter-nav {
   position: sticky;
-  top: 12px;
-  padding: 12px;
+  top: 20px;
+  width: 100%;
+  padding: 4px 0;
+  background: transparent;
 }
 .chapter-nav-title {
-  padding: 2px 8px 10px;
+  padding: 0 10px 12px;
   color: var(--oslab-text-title, #1d2129);
   font-size: 14px;
   font-weight: 600;
 }
+.chapter-nav :deep(.arco-spin),
+.chapter-nav :deep(.arco-spin-children) {
+  width: 100%;
+}
 .chapter-item {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin: 2px 0;
-  padding: 9px 8px;
+  min-height: 42px;
+  margin: 0 0 6px;
+  padding: 8px 10px;
+  gap: 10px;
   border: 0;
   border-radius: var(--oslab-radius-md, 6px);
   background: transparent;
@@ -494,6 +498,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
   min-width: 0;
 }
 .experiment-section {
@@ -541,20 +546,7 @@ onMounted(async () => {
   line-height: 1.6;
 }
 /* C+B 学习图册 */
-.experiment-grid {
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 12px;
-}
-.chapter-nav {
-  padding: 12px;
-  background: var(--oslab-panel);
-  border: 1px solid var(--oslab-line);
-  border-radius: var(--oslab-radius-container);
-  box-shadow: var(--oslab-shadow-card);
-}
 .chapter-item {
-  min-height: 36px;
-  padding: 0 10px;
   border-radius: var(--oslab-radius-control);
   color: var(--oslab-ink-soft);
 }
@@ -611,10 +603,15 @@ onMounted(async () => {
   color: var(--oslab-muted-strong);
 }
 
-/* 与壳层同断点：<=1024 直接单列，避免 881–1024 的两栏挤压 */
 @media (max-width: 1024px) {
   .experiment-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 184px minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+@media (max-width: 760px) {
+  .experiment-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
   .chapter-nav {
     position: static;

@@ -16,7 +16,8 @@ set -eu
 #   8. oslab_upgrade_v7_identity.sql    稳定身份/题目修订/活动上下文
 #   9. oslab_upgrade_v8_teaching_tasks.sql 学习任务/私有执行副本/任务附件与证据来源
 #  10. oslab_upgrade_v9_learning_activities.sql 普通演示运行记录（与掌握证据分离）
-# 十个文件均为必需：缺挂载即失败退出，不再静默跳过（失败即失败，不吞错）。
+#  11. oslab_upgrade_v10_classes.sql 班级与成员管理
+# 所有文件均为必需：缺挂载即失败退出，不再静默跳过（失败即失败，不吞错）。
 # 已有数据卷不会重跑本目录脚本；存量库请使用
 #   数据库文件/oslab_upgrade_existing_check.sql
 # 做信息 schema 校验后的条件增量（不要对旧库重复执行 v4 的 ALTER）。
@@ -37,16 +38,17 @@ load_required_seed() {
 }
 
 echo "=== OSLab 数据库初始化：开始加载 ==="
-load_required_seed /seed/oslab_db.sql                    "1/9 基础库 oslab_db.sql"
-load_required_seed /seed/oslab_upgrade_v3_learning.sql   "2/9 v3 学习闭环表"
-load_required_seed /seed/oslab_upgrade_v4_flow.sql       "3/9 v4 测评会话/幂等/快照"
-load_required_seed /seed/oslab_upgrade_v5_teaching.sql   "4/9 v5 教学素材表"
-load_required_seed /seed/oslab_demo_seed_v3.sql          "5/9 v3 演示种子"
-load_required_seed /seed/oslab_seed_v4_content.sql       "6/9 v4 内容种子"
-load_required_seed /seed/oslab_upgrade_v6_courses.sql    "7/9 v6 课程/内容/进度草稿"
-load_required_seed /seed/oslab_upgrade_v7_identity.sql   "8/9 v7 稳定身份/修订/提交上下文"
-load_required_seed /seed/oslab_upgrade_v8_teaching_tasks.sql "9/10 v8 学习任务/执行副本/任务附件"
-load_required_seed /seed/oslab_upgrade_v9_learning_activities.sql "10/10 v9 普通演示运行记录"
+load_required_seed /seed/oslab_db.sql                    "1/11 基础库 oslab_db.sql"
+load_required_seed /seed/oslab_upgrade_v3_learning.sql   "2/11 v3 学习闭环表"
+load_required_seed /seed/oslab_upgrade_v4_flow.sql       "3/11 v4 测评会话/幂等/快照"
+load_required_seed /seed/oslab_upgrade_v5_teaching.sql   "4/11 v5 教学素材表"
+load_required_seed /seed/oslab_demo_seed_v3.sql          "5/11 v3 演示种子"
+load_required_seed /seed/oslab_seed_v4_content.sql       "6/11 v4 内容种子"
+load_required_seed /seed/oslab_upgrade_v6_courses.sql    "7/11 v6 课程/内容/进度草稿"
+load_required_seed /seed/oslab_upgrade_v7_identity.sql   "8/11 v7 稳定身份/修订/提交上下文"
+load_required_seed /seed/oslab_upgrade_v8_teaching_tasks.sql "9/11 v8 学习任务/执行副本/任务附件"
+load_required_seed /seed/oslab_upgrade_v9_learning_activities.sql "10/11 v9 普通演示运行记录"
+load_required_seed /seed/oslab_upgrade_v10_classes.sql "11/11 v10 班级与成员管理"
 
 # ---------------------------------------------------------------------
 # 加载后契约校验（§6.1.2-6）：逐项核对 information_schema，任一不符即整体失败。
@@ -144,4 +146,7 @@ expect_scalar \
 expect_scalar \
     "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='learning_activity_record'" \
     1 "v9 普通演示运行记录表存在"
+expect_scalar \
+    "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('teaching_class','teaching_class_member')" \
+    2 "v10 teaching_class / teaching_class_member 表存在"
 echo "=== OSLab 数据库初始化：加载与契约校验全部通过 ==="

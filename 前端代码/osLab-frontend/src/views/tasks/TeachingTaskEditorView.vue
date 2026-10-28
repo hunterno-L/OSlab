@@ -1418,6 +1418,15 @@ const openPreview = async () => {
 onMounted(async () => {
   window.addEventListener("beforeunload", handleBeforeUnload);
   await loadOptions();
+  if (!taskCode.value) {
+    const requestedClass = Array.isArray(route.query.className)
+      ? route.query.className[0]
+      : route.query.className;
+    if (typeof requestedClass === "string" && requestedClass.trim()) {
+      form.audience.classNames = [requestedClass.trim()];
+      markClean();
+    }
+  }
   await loadTask();
 });
 

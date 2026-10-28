@@ -1,7 +1,6 @@
 <template>
   <article class="qa-card">
-    <!-- 题干、题型、难度、章节和知识点标签在同一标题区（设计 §7.3） -->
-    <header class="qa-head">
+    <header v-if="showMetadata" class="qa-head">
       <h2 class="qa-title">{{ question.title }}</h2>
       <div class="qa-meta">
         <span v-if="typeText" class="qa-tag qa-tag-type">{{ typeText }}</span>
@@ -33,6 +32,14 @@
       {{ unavailableReason }}
     </div>
     <MdViewer class="qa-content" :value="question.content" />
+    <button
+      class="qa-metadata-toggle"
+      type="button"
+      :aria-expanded="showMetadata"
+      @click="showMetadata = !showMetadata"
+    >
+      {{ showMetadata ? "隐藏标签" : "显示标签" }}
+    </button>
 
     <!-- 判断题：JUDGE 提交 "true"/"false" -->
     <a-radio-group
@@ -93,6 +100,14 @@
       :disabled="answerDisabled"
       allow-clear
     />
+    <a-textarea
+      v-else-if="question.type === 'COMPREHENSIVE'"
+      v-model:model-value="comprehensiveAnswer"
+      class="qa-fill"
+      placeholder="写下你的思路或答案，提交后对照参考解析"
+      :auto-size="{ minRows: 5, maxRows: 16 }"
+      :disabled="answerDisabled"
+    />
     <div v-else-if="!unavailableReason" class="qa-unsupported">
       暂不支持的题型：{{ question.type }}
     </div>
@@ -120,12 +135,22 @@
     <section
       v-if="result"
       class="qa-feedback"
-      :class="result.correct ? 'is-correct' : 'is-wrong'"
+      :class="
+        result.correct === null
+          ? 'is-ungraded'
+          : result.correct
+          ? 'is-correct'
+          : 'is-wrong'
+      "
       role="status"
     >
       <div class="qa-result">
         <span class="qa-result-badge">{{
-          result.correct ? "回答正确" : "回答错误"
+          result.correct === null
+            ? "已显示参考解析"
+            : result.correct
+            ? "回答正确"
+            : "回答错误"
         }}</span>
         <span class="qa-result-hint">{{ resultHint }}</span>
       </div>
@@ -182,9 +207,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import MdViewer from "@/components/MdViewer.vue";
-import { Message } from "@arco-design/web-vue";
 import {
   answerLearningQuestion,
   type LearningAnswerResultVO,
@@ -210,11 +234,20 @@ const emit = defineEmits<{
 }>();
 
 const submitting = ref(false);
+const showMetadata = ref(false);
 const judgeAnswer = ref("");
 const singleAnswer = ref("");
 const multipleAnswer = ref<string[]>([]);
 const fillAnswer = ref("");
+const comprehensiveAnswer = ref("");
 const result = ref<LearningAnswerResultVO | null>(null);
+
+watch(
+  () => props.question.id,
+  () => {
+    showMetadata.value = false;
+  }
+);
 
 const unavailableReason = computed(() => {
   if (props.question.offline || props.question.reviewStatus !== "PUBLISHED") {
@@ -243,6 +276,7 @@ const TYPE_TEXT: Record<string, string> = {
   SINGLE: "单选题",
   MULTIPLE: "多选题",
   FILL_BLANK: "填空题",
+  COMPREHENSIVE: "综合应用题",
 };
 const typeText = computed(() => TYPE_TEXT[props.question?.type] || "");
 
@@ -262,13 +296,17 @@ const difficultyText = computed(() =>
 const hasResult = computed(() => Boolean(result.value));
 
 const resultHint = computed(() =>
-  result.value?.correct
+  result.value?.correct === null
+    ? "本题暂不自动评分，也不计入掌握度。"
+    : result.value?.correct
     ? "本知识点得到一次有效验证。"
     : "对照解析弄清错因，再答一次或先继续本组练习。"
 );
 
 const nextHint = computed(() =>
-  result.value?.correct
+  result.value?.correct === null
+    ? "对照参考解析检查思路，然后继续练习。"
+    : result.value?.correct
     ? "点击「下一题」继续本组练习，也可以返回知识点挑选其他题目。"
     : "建议先消化解析与常见误区再答一次；也可以先继续后面的题目，稍后回来复习。"
 );
@@ -284,6 +322,8 @@ const canSubmit = computed(() => {
       return multipleAnswer.value.length > 0;
     case "FILL_BLANK":
       return fillAnswer.value.trim() !== "";
+    case "COMPREHENSIVE":
+      return comprehensiveAnswer.value.trim() !== "";
     default:
       return false;
   }
@@ -312,6 +352,9 @@ const submit = async () => {
     case "FILL_BLANK":
       answer = fillAnswer.value.trim();
       break;
+    case "COMPREHENSIVE":
+      answer = comprehensiveAnswer.value.trim();
+      break;
     default:
       return;
   }
@@ -328,11 +371,9 @@ const submit = async () => {
     if (res.data?.code === 0) {
       result.value = res.data.data;
       emit("answered", result.value);
-    } else {
-      Message.error(res.data?.message || "判分失败");
     }
-  } catch (e) {
-    Message.error("提交失败，请稍后重试");
+  } catch {
+    // The global axios interceptor shows business and transport errors once.
   } finally {
     submitting.value = false;
   }
@@ -368,6 +409,23 @@ const statusTagClass = (status: string) =>
 }
 .qa-head {
   margin-bottom: var(--oslab-space-3);
+}
+.qa-metadata-toggle {
+  display: inline-block;
+  margin: -8px 0 var(--oslab-space-3);
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--oslab-muted-strong);
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.qa-metadata-toggle:hover,
+.qa-metadata-toggle:focus-visible {
+  color: var(--oslab-primary);
+  text-decoration: underline;
 }
 .qa-title {
   margin: 0;

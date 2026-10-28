@@ -10,10 +10,11 @@ const source = fs.readFileSync(
   path.join(__dirname, "../src/components/KnowledgeGraph.vue"),
   "utf8"
 );
-const script = parse(source).descriptor.scriptSetup.content;
+const descriptor = parse(source).descriptor;
+const script = descriptor.script.content + descriptor.scriptSetup.content;
 const compiled = ts.transpileModule(
   script +
-    "\nexport { initChart, applyGraphState, updateChart, resetView, handleContainerResize, handleChartClick, handleNodeDblClick, GRAPH_TOKENS, NAME_MAX_WIDTH, STATUS_COLORS, STATUS_TEXT, CATEGORY_FILLS, pulseMap };",
+    "\nexport { initChart, applyGraphState, updateChart, resetView, handleContainerResize, handleChartClick, handleNodeDblClick, computeChapterLayout, computeDeterministicLayout, createKeyResolver, GRAPH_TOKENS, NAME_MAX_WIDTH, STATUS_COLORS, STATUS_TEXT, CATEGORY_FILLS, pulseMap };",
   {
     compilerOptions: {
       target: ts.ScriptTarget.ES2020,
@@ -23,30 +24,33 @@ const compiled = ts.transpileModule(
 ).outputText;
 
 function createHarness(input, width = 1120, height = 620, asyncLayout = false) {
-  const graph = echarts.init(null, null, {
-    renderer: "svg",
-    ssr: true,
-    width,
-    height,
-  });
-  // SSR frames are explicit; only the graph solver uses the virtual clock.
-  graph.getZr().animation.stop();
-  graph.getZr().animation.start = () => undefined;
-  const setOption = graph.setOption.bind(graph);
-  // Run the same force solver synchronously in SSR to avoid test timers.
-  graph.setOption = (option, ...args) => {
-    option.animation = false;
-    for (const series of option.series || []) {
-      if (series.force) series.force.layoutAnimation = asyncLayout;
-    }
-    return setOption(option, ...args);
-  };
-  // SSR has no DOM clientWidth/clientHeight; keep the simulated container size.
-  const resize = graph.resize.bind(graph);
-  graph.resize = (options = {}) => {
-    width = options.width ?? width;
-    height = options.height ?? height;
-    return resize({ ...options, width, height });
+  let graph;
+  const createGraph = () => {
+    graph = echarts.init(null, null, {
+      renderer: "svg",
+      ssr: true,
+      width,
+      height,
+    });
+    // SSR frames are explicit; only the graph solver uses the virtual clock.
+    graph.getZr().animation.stop();
+    graph.getZr().animation.start = () => undefined;
+    const setOption = graph.setOption.bind(graph);
+    // Run the same force solver synchronously in SSR to avoid test timers.
+    graph.setOption = (option, ...args) => {
+      option.animation = false;
+      for (const series of option.series || []) {
+        if (series.force) series.force.layoutAnimation = asyncLayout;
+      }
+      return setOption(option, ...args);
+    };
+    // SSR has no DOM clientWidth/clientHeight; keep the simulated container size.
+    const resize = graph.resize.bind(graph);
+    graph.resize = (options = {}) => {
+      width = options.width ?? width;
+      height = options.height ?? height;
+      return resize({ ...options, width, height });
+    };
   };
   const callbacks = new Map();
   const emitted = [];
@@ -85,6 +89,8 @@ function createHarness(input, width = 1120, height = 620, asyncLayout = false) {
       return {
         init: () => graph,
         registerAction: echarts.registerAction,
+        registerLayout: echarts.registerLayout,
+        PRIORITY: echarts.PRIORITY,
       };
     },
     module,
@@ -108,6 +114,7 @@ function createHarness(input, width = 1120, height = 620, asyncLayout = false) {
     },
     undefined
   );
+  createGraph();
   return {
     graph,
     props,
@@ -396,6 +403,55 @@ function globalRect(element) {
   return rect;
 }
 
+function nodeCardRects(graph) {
+  const data = graph.getModel().getSeriesByIndex(0).getData();
+  return data.mapArray((index) =>
+    globalRect(data.getItemGraphicEl(index).childAt(0))
+  );
+}
+
+function assertNodeCardsDoNotOverlap(graph, gap = 1) {
+  const rects = nodeCardRects(graph);
+  for (let a = 0; a < rects.length; a += 1) {
+    for (let b = a + 1; b < rects.length; b += 1) {
+      const first = rects[a];
+      const second = rects[b];
+      assert.ok(
+        first.x + first.width + gap <= second.x ||
+          second.x + second.width + gap <= first.x ||
+          first.y + first.height + gap <= second.y ||
+          second.y + second.height + gap <= first.y,
+        `node cards ${a} and ${b} overlap at rendered pixels: ${JSON.stringify({
+          first,
+          second,
+        })}`
+      );
+    }
+  }
+}
+
+function assertRelationLabelsDoNotCoverNodes(graph) {
+  const series = graph.getModel().getSeriesByIndex(0);
+  const nodeRects = nodeCardRects(graph);
+  series.getEdgeData().eachItemGraphicEl((edge) => {
+    const label = edge.getTextContent();
+    if (!label || label.ignore || !label.style.text) return;
+    const labelRect = globalRect(label);
+    nodeRects.forEach((nodeRect) => {
+      const overlaps =
+        labelRect.x < nodeRect.x + nodeRect.width &&
+        labelRect.x + labelRect.width > nodeRect.x &&
+        labelRect.y < nodeRect.y + nodeRect.height &&
+        labelRect.y + labelRect.height > nodeRect.y;
+      assert.equal(
+        overlaps,
+        false,
+        "visible relation labels must not cover node cards"
+      );
+    });
+  });
+}
+
 function assertLabelsAttached(graph) {
   const series = graph.getModel().getSeriesByIndex(0);
   const data = series.getData();
@@ -589,7 +645,7 @@ test("node labels and relation labels survive zoom and hover", () => {
       });
       currentZoom = zoom;
       harness.flush();
-      if (zoom >= 0.72) {
+      if (zoom >= 0.18) {
         assertLabelsAttached(harness.graph);
         harness.graph.dispatchAction({
           type: "highlight",
@@ -600,14 +656,227 @@ test("node labels and relation labels survive zoom and hover", () => {
         harness.flush();
         assertLabelsAttached(harness.graph);
         harness.graph.dispatchAction({ type: "downplay", seriesIndex: 0 });
-      } else {
-        assert.equal(
-          graphData(harness).getItemModel(0).get("label.show"),
-          false,
-          "labels hide below the readability zoom threshold"
-        );
       }
     }
+  } finally {
+    harness.graph.dispose();
+  }
+});
+
+test("rendered node cards do not collide in large and zoomed-out graphs", () => {
+  for (const count of [13, 35, 150, 185]) {
+    const harness = createHarness(makeGraph(count, count > 100 ? 6 : 1));
+    try {
+      harness.initChart();
+      harness.flush();
+      assertNodeCardsDoNotOverlap(harness.graph, 0.5);
+      const before = nodeCardRects(harness.graph);
+      harness.graph.dispatchAction({
+        type: "graphRoam",
+        seriesIndex: 0,
+        zoom: 0.55,
+        originX: harness.graph.getWidth() / 2,
+        originY: harness.graph.getHeight() / 2,
+      });
+      harness.flush();
+      assertNodeCardsDoNotOverlap(harness.graph, 0.5);
+      assert.notDeepEqual(nodeCardRects(harness.graph), before);
+      assert.ok(
+        graphData(harness).getItemModel(0).get("label.show"),
+        "zooming out must not switch node labels off"
+      );
+    } finally {
+      harness.graph.dispose();
+    }
+  }
+});
+
+test("chapter force refinement responds to topology and shortens interleaved connections", () => {
+  const input = makeGraph(35);
+  // Seven interleaved five-node communities deliberately cross the seed grid.
+  input.links = input.nodes.flatMap((node, index) =>
+    index < 7
+      ? [1, 2, 3, 4].map((offset) => ({
+          source: node.id,
+          target: String(index + offset * 7),
+          relationType: "related",
+        }))
+      : []
+  );
+  const harness = createHarness(input);
+  try {
+    const resolver = harness.createKeyResolver(input.nodes);
+    const seed = harness.computeChapterLayout(input.nodes);
+    const relaxed = harness.computeDeterministicLayout(
+      input.nodes,
+      input.links,
+      "",
+      resolver
+    );
+    const averageLength = (positions) =>
+      input.links.reduce((sum, link) => {
+        const a = positions.get(link.source);
+        const b = positions.get(link.target);
+        return sum + Math.hypot(a.x - b.x, a.y - b.y);
+      }, 0) / input.links.length;
+    assert.ok(
+      averageLength(relaxed) < averageLength(seed) * 0.85,
+      `connected communities must pull together: seed=${averageLength(
+        seed
+      )}, relaxed=${averageLength(relaxed)}`
+    );
+    assert.deepEqual(
+      harness.computeDeterministicLayout(
+        input.nodes,
+        input.links,
+        "",
+        resolver
+      ),
+      relaxed,
+      "the same graph must converge to the same coordinates"
+    );
+    assert.deepEqual(
+      harness.computeDeterministicLayout(input.nodes, [], "", resolver),
+      seed,
+      "isolated nodes keep their chapter seed rather than drifting"
+    );
+    const connectedRows = new Set(
+      [...relaxed.values()].map((point) => point.y)
+    );
+    assert.ok(
+      connectedRows.size > Math.sqrt(input.nodes.length) * 2,
+      "refinement must leave the rectangular rows instead of repainting the grid"
+    );
+  } finally {
+    harness.graph.dispose();
+  }
+});
+
+test("185-node force layout keeps dense links, labels and the camera stable", () => {
+  const input = makeGraph(185, 6);
+  input.selectedId = "";
+  input.links.push(
+    ...input.nodes.flatMap((node, index) =>
+      [6, 12]
+        .filter((offset) => index + offset < input.nodes.length)
+        .map((offset) => ({
+          source: node.id,
+          target: String(index + offset),
+          relationType: "related",
+        }))
+    )
+  );
+  const harness = createHarness(input);
+  try {
+    harness.initChart();
+    harness.flush();
+    assertNodesInView(harness.graph);
+    assertNodeCardsDoNotOverlap(harness.graph, 0.5);
+    assertLabelsAttached(harness.graph);
+    assertRelationLabelsDoNotCoverNodes(harness.graph);
+    const positions = nodePositions(harness.graph);
+    harness.graph.dispatchAction({
+      type: "graphRoam",
+      seriesIndex: 0,
+      dx: 48,
+      dy: -22,
+      zoom: 1.2,
+      originX: 560,
+      originY: 310,
+    });
+    harness.flush();
+    const camera = harness.graph.getOption().series[0];
+    harness.props.selectedId = "34";
+    harness.props.nodes[34].status = "GREEN";
+    harness.applyGraphState();
+    harness.props.showRelationLabels = false;
+    harness.updateChart();
+    harness.flush();
+    const after = harness.graph.getOption().series[0];
+    assert.deepEqual(nodePositions(harness.graph), positions);
+    assert.deepEqual(after.center, camera.center);
+    assert.equal(after.zoom, camera.zoom);
+    harness.graph.resize({ width: 390, height: 420 });
+    harness.handleContainerResize();
+    harness.flush();
+    assertNodesInView(harness.graph);
+    assertNodeCardsDoNotOverlap(harness.graph, 0.5);
+    assertLabelsAttached(harness.graph);
+    assert.deepEqual(nodePositions(harness.graph), positions);
+  } finally {
+    harness.graph.dispose();
+  }
+});
+
+test("35-node chapter cards use bounded text-aware sizes with annotation clearance", () => {
+  const input = makeGraph(35);
+  input.nodes[0].displayName = "短名";
+  input.nodes[1].displayName = "长名称知识点示例需要完整内容提示";
+  input.annotations = Object.fromEntries(
+    input.nodes.map((node, index) => [node.id, index + 1])
+  );
+  const harness = createHarness(input);
+  try {
+    harness.initChart();
+    harness.flush();
+    const data = harness.graph.getOption().series[0].data;
+    assert.ok(data[0].symbolSize[0] < data[1].symbolSize[0]);
+    assert.ok(data.every((node) => node.symbolSize[0] <= 200));
+    assert.ok(data.every((node) => node.symbolSize[1] <= 38));
+    assertNodeCardsDoNotOverlap(harness.graph, 0.5);
+    assertLabelsAttached(harness.graph);
+    assertRelationLabelsDoNotCoverNodes(harness.graph);
+  } finally {
+    harness.graph.dispose();
+  }
+});
+
+test("force refinement keeps duplicate names separate through stable node keys", () => {
+  const input = makeGraph(35);
+  input.selectedId = "34";
+  for (const node of input.nodes) {
+    node.nodeCode = `os.node.${node.id}`;
+    node.stableId = `stable-${node.id}`;
+    node.name = "重复内部名称";
+    node.displayName = "同名知识点";
+  }
+  const harness = createHarness(input);
+  try {
+    harness.initChart();
+    harness.flush();
+    const data = graphData(harness);
+    assert.equal(data.count(), 35);
+    assert.equal(new Set(data.mapArray((index) => data.getId(index))).size, 35);
+    assert.equal(data.getId(34), "os.node.34");
+    assert.equal(
+      nodeStyle(harness, 34).borderColor,
+      harness.GRAPH_TOKENS.selection
+    );
+    assert.equal(graphEdgeData(harness).count(), 34);
+    assertNodeCardsDoNotOverlap(harness.graph, 0.5);
+    assertLabelsAttached(harness.graph);
+  } finally {
+    harness.graph.dispose();
+  }
+});
+
+test("visible relation labels avoid rendered node cards at fit and zoom", () => {
+  const input = makeGraph(35, 4);
+  input.selectedId = "";
+  const harness = createHarness(input);
+  try {
+    harness.initChart();
+    harness.flush();
+    assertRelationLabelsDoNotCoverNodes(harness.graph);
+    harness.graph.dispatchAction({
+      type: "graphRoam",
+      seriesIndex: 0,
+      zoom: 1.7,
+      originX: harness.graph.getWidth() / 2,
+      originY: harness.graph.getHeight() / 2,
+    });
+    harness.flush();
+    assertRelationLabelsDoNotCoverNodes(harness.graph);
   } finally {
     harness.graph.dispose();
   }
@@ -782,7 +1051,7 @@ test("course graph remains visible after a narrow resize", () => {
   }
 });
 
-test("deterministic layout auto-fits without async force settling", () => {
+test("animated force layout settles and fits without moving the camera afterward", () => {
   const harness = createHarness(makeGraph(5), 1120, 620, true);
   const nativeSetTimeout = global.setTimeout;
   const nativeClearTimeout = global.clearTimeout;
@@ -794,6 +1063,51 @@ test("deterministic layout auto-fits without async force settling", () => {
     harness.flush();
     assertNodesInView(harness.graph);
     assertLabelsAttached(harness.graph);
+  } finally {
+    harness.graph.dispose();
+    global.setTimeout = nativeSetTimeout;
+    global.clearTimeout = nativeClearTimeout;
+  }
+});
+
+test("dragging reheats the live solver and moves connected nodes", () => {
+  const harness = createHarness(makeGraph(13), 1120, 620, true);
+  const nativeSetTimeout = global.setTimeout;
+  const nativeClearTimeout = global.clearTimeout;
+  try {
+    global.setTimeout = harness.timers.setTimeout;
+    global.clearTimeout = harness.timers.clearTimeout;
+    harness.initChart();
+    harness.flush();
+    const series = harness.graph.getModel().getSeriesByIndex(0);
+    assert.equal(series.get("layout"), "force");
+    assert.equal(series.get("draggable"), true);
+    assert.equal(series.__oslabForceSettled, true);
+    const before = nodePositions(harness.graph);
+    const element = series.getData().getItemGraphicEl(5);
+    element.attr({ x: element.x + 180, y: element.y + 100 });
+    element.trigger("drag", { offsetX: element.x, offsetY: element.y });
+    assert.equal(series.__oslabForceSettled, false);
+    element.trigger("dragend", {});
+    harness.flush();
+    const after = nodePositions(harness.graph);
+    assert.equal(series.__oslabForceSettled, true);
+    assert.notDeepEqual(
+      after[5],
+      before[5],
+      "dragged card must retain its new area"
+    );
+    assert.ok(
+      after.some(
+        (point, index) =>
+          index !== 5 &&
+          Math.hypot(point[0] - before[index][0], point[1] - before[index][1]) >
+            1
+      ),
+      "force must move other cards after a drag"
+    );
+    assertNodeCardsDoNotOverlap(harness.graph, 0.5);
+    assertRelationLabelsDoNotCoverNodes(harness.graph);
   } finally {
     harness.graph.dispose();
     global.setTimeout = nativeSetTimeout;
@@ -1278,18 +1592,17 @@ test("muted edge tone greys non-adjacent relations and keeps selection path coba
   }
 });
 
-test("selected node renders a highlighter tape markPoint", () => {
+test("selected node uses an attached selection outline", () => {
   const harness = createHarness(makeGraph(3));
   try {
     harness.initChart();
     harness.flush();
     const series = harness.graph.getOption().series[0];
-    assert.ok(series.markPoint, "选中有节点时必须输出 markPoint");
-    assert.equal(series.markPoint.data.length, 1);
     assert.equal(
-      series.markPoint.itemStyle.color,
-      harness.GRAPH_TOKENS.highlight
+      graphData(harness).getItemModel(0).get("itemStyle.borderWidth"),
+      2
     );
+    assert.equal(series.markPoint, undefined);
   } finally {
     harness.graph.dispose();
   }

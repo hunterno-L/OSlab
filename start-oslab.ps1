@@ -3,7 +3,7 @@ param(
     [switch]$NoBuild,
     [switch]$Status,
     [ValidateRange(1, 65535)][int]$BackendPort = 8121,
-    [ValidateRange(1, 65525)][int]$FrontendPort = 8080,
+    [ValidateRange(1, 65525)][int]$FrontendPort = 8081,
     [string]$JavaHome
 )
 
@@ -57,6 +57,23 @@ function Resolve-JavaHome {
         }
     }
     throw "需要 JDK 17 或更新版本。请设置 JAVA_HOME，或使用 -JavaHome 指定 JDK 目录。"
+}
+
+function Clear-EncodingMismatchedMavenStatus {
+    param([string]$BackendDirectory)
+    $statusRoot = Join-Path $BackendDirectory "target\maven-status"
+    if (-not (Test-Path -LiteralPath $statusRoot)) { return }
+    $utf8 = [System.Text.UTF8Encoding]::new($false, $true)
+    foreach ($file in @(Get-ChildItem -LiteralPath $statusRoot -Filter "inputFiles.lst" -Recurse -File)) {
+        try {
+            [void]$utf8.GetCharCount([System.IO.File]::ReadAllBytes($file.FullName))
+        } catch {
+            # 增量状态由其他默认编码的 JDK 写入（如 GBK）时，当前 JDK 按 UTF-8 读取会报 Input length = 1
+            Remove-Item -LiteralPath $statusRoot -Recurse -Force
+            Write-Host "[后端] 已清理与当前 JDK 编码不一致的 Maven 增量状态。"
+            return
+        }
+    }
 }
 
 function Start-ProjectProcess {
@@ -168,6 +185,7 @@ try {
             Push-Location $BackendDir
             try {
                 $env:JAVA_HOME = $resolvedJavaHome
+                Clear-EncodingMismatchedMavenStatus $BackendDir
                 & .\mvnw.cmd -DskipTests package
                 if ($LASTEXITCODE -ne 0) { throw "后端构建失败。" }
             } finally {

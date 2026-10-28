@@ -314,6 +314,74 @@ export const getTaskExperimentResource = (id: string) =>
 export const getTeacherClasses = () =>
   axios.get<BaseResponse<any[]>>(`${base}/learning/teacher/classes`);
 
+export interface ManagedClass {
+  id: number;
+  classId?: number;
+  className: string;
+  classCode: string;
+  description?: string;
+  creatorId?: number;
+  studentCount?: number;
+  teacherName?: string;
+  joinedAt?: string;
+}
+
+export interface ClassMember {
+  userId: string;
+  userName: string;
+  userAccount: string;
+  userAvatar?: string;
+  joinedAt: string;
+}
+
+export const listManagedClasses = () =>
+  axios.get<BaseResponse<ManagedClass[]>>(`${base}/teaching/classes`);
+
+export const createManagedClass = (payload: {
+  className: string;
+  description?: string;
+}) =>
+  axios.post<BaseResponse<ManagedClass>>(`${base}/teaching/classes`, payload);
+
+export const updateManagedClass = (
+  classId: number,
+  payload: { className: string; description?: string }
+) =>
+  axios.patch<BaseResponse<ManagedClass>>(
+    `${base}/teaching/classes/${classId}`,
+    payload
+  );
+
+export const rotateManagedClassCode = (classId: number) =>
+  axios.post<BaseResponse<ManagedClass>>(
+    `${base}/teaching/classes/${classId}/rotate-code`
+  );
+
+export const deleteManagedClass = (classId: number) =>
+  axios.delete<BaseResponse<boolean>>(`${base}/teaching/classes/${classId}`);
+
+export const listManagedClassMembers = (classId: number) =>
+  axios.get<BaseResponse<ClassMember[]>>(
+    `${base}/teaching/classes/${classId}/members`
+  );
+
+export const removeManagedClassMember = (
+  classId: number,
+  userId: string | number
+) =>
+  axios.delete<BaseResponse<boolean>>(
+    `${base}/teaching/classes/${classId}/members/${userId}`
+  );
+
+export const listMyClasses = () =>
+  axios.get<BaseResponse<ManagedClass[]>>(`${base}/classes/mine`);
+
+export const joinManagedClass = (classCode: string) =>
+  axios.post<BaseResponse<ManagedClass>>(`${base}/classes/join`, { classCode });
+
+export const leaveManagedClass = (classId: number) =>
+  axios.post<BaseResponse<boolean>>(`${base}/classes/${classId}/leave`);
+
 export const listStudents = (payload: Record<string, unknown>) =>
   axios.post<BaseResponse<any>>(`${base}/student/list/page`, payload);
 

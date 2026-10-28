@@ -36,11 +36,27 @@ lacks(layout, "AuthFlowCanvas", "旧知识流动画必须移除");
 lacks(layout, "os-main", "旧左右分栏必须移除");
 
 const landing = src("views/landing/LandingView.vue");
-for (const text of ["OPERATING SYSTEMS", "AUTH ENTRY", "2026.10", "01 / 06"]) {
+for (const text of ["AUTH ENTRY", "2026.10", "01 / 06"]) {
   lacks(landing + dialog, text, "装饰性微文案必须删除");
 }
-has(landing, "沿着教材，把操作系统学明白", "落地页必须使用确认后的主标题");
-has(landing, "PagingTheater", "落地页首屏必须使用分页剧场");
+has(landing, "ZhiCore", "落地页必须展示新品牌名");
+has(landing, "Page&amp;Frame", "落地页必须使用简洁的英文主标题");
+lacks(landing, "沿着章节，逐步掌握操作系统", "旧的长主标题必须删除");
+lacks(landing, "查看平台功能", "平台功能辅助按钮必须删除");
+lacks(landing, "landing-eyebrow", "蓝色眉题必须删除");
+lacks(landing, "landing-kicker", "首屏装饰性小字必须删除");
+has(landing, "landing-hero.png", "首屏必须使用定制背景图");
+has(landing, 'id="features"', "首屏之后必须展示功能概览");
+const heroMarkup = landing.split('id="features"')[0];
+lacks(heroMarkup, "PagingTheater", "分页演示应放在功能介绍中而非首屏");
+has(landing, "PagingTheater", "功能介绍必须展示分页演示");
+has(landing, "IntersectionObserver", "落地页区块必须按滚动触发淡入");
+has(
+  landing,
+  'classList.toggle("is-visible", entry.isIntersecting)',
+  "区块离开视口时必须淡出"
+);
+has(landing, "prefers-reduced-motion", "落地页动画必须尊重减少动态偏好");
 
 for (const anchor of ["mainline", "graph", "practice", "evidence"]) {
   has(landing, `id="${anchor}"`, `落地页必须有 #${anchor} 区块`);

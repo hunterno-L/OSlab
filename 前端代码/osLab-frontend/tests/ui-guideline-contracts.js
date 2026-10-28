@@ -19,7 +19,7 @@ expectIncludes(html, 'lang="zh-CN"', "html 必须声明中文语言");
 expectExcludes(html, 'lang=""', "html lang 不能为空");
 expectIncludes(html, 'name="theme-color"', "必须声明 theme-color");
 expectIncludes(html, "viewport-fit=cover", "viewport 必须支持安全区");
-expectIncludes(html, "<title>OSLab", "必须有稳定的站点标题");
+expectIncludes(html, "<title>ZhiCore", "必须有稳定的新品牌站点标题");
 
 const router = readSrc("router/index.ts");
 expectIncludes(router, "afterEach", "路由必须同步页面标题");
@@ -249,8 +249,22 @@ expectIncludes(avatar, ':width="size"', "头像必须声明 width");
 expectIncludes(avatar, ':height="size"', "头像必须声明 height");
 
 const player = readSrc("components/learning/AlgorithmDemoPlayer.vue");
-expectIncludes(player, 'aria-label="降低播放速度"', "减速按钮必须有名");
-expectIncludes(player, 'aria-label="提高播放速度"', "加速按钮必须有名");
+expectIncludes(
+  player,
+  'class="legacy-frame"',
+  "原版播放控件必须在运行时中保留"
+);
+const legacyBridge = fs.readFileSync(
+  path.join(__dirname, "../scripts/legacy-simulation-bridge.js"),
+  "utf8"
+);
+expectIncludes(legacyBridge, 'speedDown: "降低播放速度"', "减速按钮必须有名");
+expectIncludes(legacyBridge, 'speedUp: "提高播放速度"', "加速按钮必须有名");
+expectIncludes(
+  legacyBridge,
+  'button.setAttribute("aria-label"',
+  "控件名称必须应用到原版按钮"
+);
 
 const login = readSrc("views/user/UserLoginView.vue");
 expectIncludes(login, "os-field-error", "登录错误必须贴近字段");

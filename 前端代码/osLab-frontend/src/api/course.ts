@@ -1,6 +1,8 @@
 import axios from "axios";
 import type { BaseResponse } from "@/api/learning";
 
+export { courseContext } from "@/utils/courseContext";
+
 export interface CourseProgress {
   status: string;
   goalStatus: string;
@@ -171,14 +173,3 @@ export const saveCoursePosition = (
     activityCode,
     mode,
   });
-
-/** Route context is accepted only when both codes exist. Independent resources remain independent. */
-export function courseContext(query: Record<string, unknown>) {
-  return typeof query.sourceUnitCode === "string" &&
-    typeof query.sourceActivityCode === "string"
-    ? {
-        sourceUnitCode: query.sourceUnitCode,
-        sourceActivityCode: query.sourceActivityCode,
-      }
-    : {};
-}

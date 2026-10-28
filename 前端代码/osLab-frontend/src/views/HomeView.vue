@@ -72,7 +72,7 @@
       <div class="home-theater-copy">
         <h2 id="home-theater-title">演算台 · 页面置换 LRU</h2>
         <p>改变访问序列，观察缺页与淘汰。</p>
-        <router-link to="/experiments/simulation"> 打开算法模拟 </router-link>
+        <router-link to="/experiments/simulation"> 打开算法演示 </router-link>
       </div>
       <PagingTheater mode="guided" />
     </section>

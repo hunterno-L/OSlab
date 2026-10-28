@@ -14,7 +14,8 @@ public enum LearningQuestionTypeEnum {
     JUDGE("判断题"),
     SINGLE("单选题"),
     MULTIPLE("多选题"),
-    FILL_BLANK("填空题");
+    FILL_BLANK("填空题"),
+    COMPREHENSIVE("综合应用题");
 
     private final String text;
 

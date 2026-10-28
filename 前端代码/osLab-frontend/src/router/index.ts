@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import { routes } from "@/router/routes";
 
-const SITE_TITLE = "OSLab 操作系统学习平台";
+const SITE_TITLE = "ZhiCore 操作系统学习平台";
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),

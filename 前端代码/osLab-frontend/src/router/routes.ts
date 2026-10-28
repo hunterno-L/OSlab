@@ -163,8 +163,9 @@ export const routes: Array<RouteRecordRaw> = [
         meta: {
           access: ACCESS_ENUM.USER,
           navKey: "experiments",
-          pageTitle: "实验中心",
-          // log3 收尾 A：实验中心同样两侧留白过大，先就位 wide 宽度机制
+          pageTitle: "编程实验",
+          hideSidebar: true,
+          // 编程实验内容使用宽工作区布局
           //（阶段 3 再做页内重排）
           contentWidth: "wide",
         },
@@ -188,9 +189,10 @@ export const routes: Array<RouteRecordRaw> = [
         component: SimulationView,
         meta: {
           access: ACCESS_ENUM.USER,
-          navKey: "experiments",
+          navKey: "algorithm-demo",
           contentWidth: "wide",
-          pageTitle: "算法模拟",
+          hideSidebar: true,
+          pageTitle: "算法演示",
         },
       },
       {
@@ -235,6 +237,18 @@ export const routes: Array<RouteRecordRaw> = [
         component: StudentProfileView,
         meta: { access: ACCESS_ENUM.USER, hideInMenu: true },
       },
+      {
+        path: "/classes",
+        name: "我的班级",
+        component: () => import("@/views/classes/MyClassesView.vue"),
+        meta: {
+          access: ACCESS_ENUM.USER,
+          hideInMenu: true,
+          hideSidebar: true,
+          pageTitle: "我的班级",
+          contentWidth: "wide",
+        },
+      },
     ],
   },
   {
@@ -266,6 +280,18 @@ export const routes: Array<RouteRecordRaw> = [
         name: "教师学习任务",
         component: TeachingTasksView,
         meta: { access: ACCESS_ENUM.ADMIN, navKey: "tasks" },
+      },
+      {
+        path: "/teaching/classes",
+        name: "班级管理",
+        component: () => import("@/views/classes/TeachingClassesView.vue"),
+        meta: {
+          access: ACCESS_ENUM.ADMIN,
+          navKey: "teaching",
+          pageTitle: "班级管理",
+          hideSidebar: true,
+          contentWidth: "wide",
+        },
       },
       {
         path: "/teaching/tasks/new",

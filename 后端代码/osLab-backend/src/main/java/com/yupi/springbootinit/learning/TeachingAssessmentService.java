@@ -48,6 +48,7 @@ public class TeachingAssessmentService {
             case "SINGLE":if(keys.size()<2||!answer.isTextual()||!keys.contains(answer.asText()))throw bad("单选答案须为真实选项字符串");break;
             case "MULTIPLE":strings(answer);Set<String> selected=new HashSet<>();for(JsonNode a:answer)if(!keys.contains(a.asText())||!selected.add(a.asText()))throw bad("多选答案重复或不在选项中");if(keys.size()<2)throw bad("选择题至少两个选项");break;
             case "FILL_BLANK":strings(answer);if(!options.isEmpty())throw bad("填空 options 必须为空");break;
+            case "COMPREHENSIVE":if(!answer.isTextual()||answer.asText().trim().isEmpty()||!options.isEmpty())throw bad("综合应用题参考答案必须为非空文字且 options=[]");break;
             default:throw bad("不支持的题型");}
         if(!q.path("difficulty").isIntegralNumber()||q.path("difficulty").asInt()<1||q.path("difficulty").asInt()>5)throw bad("difficulty 须为1到5整数");
         if(!q.path("sourceRef").isObject())throw bad("sourceRef 必填");

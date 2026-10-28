@@ -396,6 +396,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         wrapper.eq(LearningQuestion::getReviewStatus, LearningReviewStatusEnum.PUBLISHED.name());
         wrapper.eq(LearningQuestion::getIsDelete, 0);
         wrapper.eq(LearningQuestion::getResourceScope, com.yupi.springbootinit.task.TaskConstants.SCOPE_SHARED);
+        wrapper.ne(LearningQuestion::getType, LearningQuestionTypeEnum.COMPREHENSIVE.name());
         if (StringUtils.isNotBlank(request.getType())) {
             wrapper.eq(LearningQuestion::getType, request.getType());
         }
@@ -1006,6 +1007,21 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         }
         ThrowUtils.throwIf(!LearningReviewStatusEnum.isStudentVisible(question.getReviewStatus()),
                 ErrorCode.OPERATION_ERROR, "题目未发布，不可作答");
+        if (LearningQuestionTypeEnum.COMPREHENSIVE.name().equals(question.getType())) {
+            ThrowUtils.throwIf(taskScoped || request.getAssessmentRunId() != null
+                            || StringUtils.isNotBlank(request.getSourceUnitCode())
+                            || StringUtils.isNotBlank(request.getSourceActivityCode()),
+                    ErrorCode.PARAMS_ERROR, "综合应用题请从练习入口查看解析，暂不参与自动测评");
+            ThrowUtils.throwIf(!(request.getAnswer() instanceof String)
+                            || StringUtils.isBlank((String) request.getAnswer()),
+                    ErrorCode.PARAMS_ERROR, "请先填写答案");
+            LearningAnswerResultVO result = new LearningAnswerResultVO();
+            result.setCorrect(null);
+            result.setAnalysis(question.getAnalysis());
+            result.setMisconception(question.getMisconception());
+            result.setMasteryChanges(Collections.emptyList());
+            return result;
+        }
         if (activityContext != null) activityContext.validate(request.getSourceUnitCode(),
                 request.getSourceActivityCode(), question.getId(), false);
         if (request.getAssessmentRunId() != null) {
