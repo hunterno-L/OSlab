@@ -1,0 +1,262 @@
+{
+  "schemaVersion": "oslab-experiment-maintenance/1.0",
+  "batchCode": "batch.a.experiments.ch1.001",
+  "contributor": "A",
+  "experiments": [
+    {
+      "questionId": "1917131319528452098",
+      "resourceCode": "exp.legacy.1917131319528452098",
+      "title": "实验1.1 构建 Minix 内核",
+      "sectionCode": "sec.overview",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1917131319528452098/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1917131319528452098/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1917131319528452098/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1917131319528452098/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1917131319528452098/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.overview",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 3,
+        "wrongSolution": "experiment-files/1917131319528452098/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930153941795131394",
+      "resourceCode": "exp.legacy.1930153941795131394",
+      "title": "实验1.2 深入理解 ELF 文件格式",
+      "sectionCode": "sec.overview",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930153941795131394/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930153941795131394/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930153941795131394/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930153941795131394/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930153941795131394/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.overview",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930153941795131394/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930154079598989313",
+      "resourceCode": "exp.legacy.1930154079598989313",
+      "title": "实验1.3 使用 Linker Script 控制内核加载地址",
+      "sectionCode": "sec.overview",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930154079598989313/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930154079598989313/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930154079598989313/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930154079598989313/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930154079598989313/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.overview",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930154079598989313/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930154331844431873",
+      "resourceCode": "exp.legacy.1930154331844431873",
+      "title": "实验1.4 深入理解 MIPS 汇编与 C 语言的交互",
+      "sectionCode": "sec.overview",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930154331844431873/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930154331844431873/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930154331844431873/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930154331844431873/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930154331844431873/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.overview",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 3,
+        "wrongSolution": "experiment-files/1930154331844431873/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930154460768948226",
+      "resourceCode": "exp.legacy.1930154460768948226",
+      "title": "实验1.5 实现内核中的 printf 函数",
+      "sectionCode": "sec.overview",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930154460768948226/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930154460768948226/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930154460768948226/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930154460768948226/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930154460768948226/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.overview",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930154460768948226/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    }
+  ]
+}

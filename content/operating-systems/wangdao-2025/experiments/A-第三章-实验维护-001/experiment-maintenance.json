@@ -1,0 +1,670 @@
+{
+  "schemaVersion": "oslab-experiment-maintenance/1.0",
+  "batchCode": "batch.a.experiments.ch3.001",
+  "contributor": "A",
+  "experiments": [
+    {
+      "questionId": "1908900051330306049",
+      "resourceCode": "exp.legacy.1908900051330306049",
+      "title": "实验3.1 初始化进程控制块数组",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1908900051330306049/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1908900051330306049/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1908900051330306049/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1908900051330306049/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1908900051330306049/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1908900051330306049/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930154686162456577",
+      "resourceCode": "exp.legacy.1930154686162456577",
+      "title": "实验3.2 管理进程控制块数组",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930154686162456577/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930154686162456577/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930154686162456577/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930154686162456577/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930154686162456577/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930154686162456577/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930154848414912513",
+      "resourceCode": "exp.legacy.1930154848414912513",
+      "title": "实验3.3 进程标识",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930154848414912513/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930154848414912513/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930154848414912513/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930154848414912513/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930154848414912513/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930154848414912513/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930154980048949249",
+      "resourceCode": "exp.legacy.1930154980048949249",
+      "title": "实验3.4 初始化进程虚拟内存布局",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930154980048949249/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930154980048949249/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930154980048949249/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930154980048949249/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930154980048949249/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.virtual",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930154980048949249/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930155119123681282",
+      "resourceCode": "exp.legacy.1930155119123681282",
+      "title": "实验3.5 设置进程控制块",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930155119123681282/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930155119123681282/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930155119123681282/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930155119123681282/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930155119123681282/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930155119123681282/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930155245821022209",
+      "resourceCode": "exp.legacy.1930155245821022209",
+      "title": "实验3.6 加载镜像映射",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930155245821022209/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930155245821022209/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930155245821022209/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930155245821022209/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930155245821022209/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.overview",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930155245821022209/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930155360556208129",
+      "resourceCode": "exp.legacy.1930155360556208129",
+      "title": "实验3.7 完整加载镜像",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930155360556208129/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930155360556208129/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930155360556208129/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930155360556208129/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930155360556208129/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.overview",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930155360556208129/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930155484338507777",
+      "resourceCode": "exp.legacy.1930155484338507777",
+      "title": "实验3.8 创建进程",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930155484338507777/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930155484338507777/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930155484338507777/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930155484338507777/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930155484338507777/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930155484338507777/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930155681017810946",
+      "resourceCode": "exp.legacy.1930155681017810946",
+      "title": "实验3.9 进程创建宏命令应用",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930155681017810946/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930155681017810946/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930155681017810946/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930155681017810946/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930155681017810946/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930155681017810946/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930155792691154945",
+      "resourceCode": "exp.legacy.1930155792691154945",
+      "title": "实验3.10 进程运行与切换",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930155792691154945/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930155792691154945/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930155792691154945/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930155792691154945/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930155792691154945/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.switch",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930155792691154945/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930155905954140162",
+      "resourceCode": "exp.legacy.1930155905954140162",
+      "title": "实验3.12 异常处理",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930155905954140162/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930155905954140162/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930155905954140162/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930155905954140162/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930155905954140162/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.interrupt",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 4,
+        "wrongSolution": "experiment-files/1930155905954140162/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930156027966443521",
+      "resourceCode": "exp.legacy.1930156027966443521",
+      "title": "实验3.13 时钟中断",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156027966443521/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156027966443521/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156027966443521/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156027966443521/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156027966443521/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.interrupt",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930156027966443521/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930156143783759874",
+      "resourceCode": "exp.legacy.1930156143783759874",
+      "title": "实验3.14 进程调度实验",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156143783759874/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156143783759874/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156143783759874/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156143783759874/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156143783759874/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.scheduling",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930156143783759874/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    }
+  ]
+}

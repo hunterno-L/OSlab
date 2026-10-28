@@ -1,0 +1,1 @@
+[{"input": "3\n0\n10\n20\n", "output": "0:d:0x0\n1:d:0x10\n2:d:0x20\n"}, {"input": "1\nff\n", "output": "0:d:0xff\n"}]

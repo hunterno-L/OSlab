@@ -1,0 +1,1 @@
+[{"input": "2 hi yo\n", "output": "msg=0:hi\nmsg=1:yo\n"}, {"input": "1 x\n", "output": "msg=0:x\n"}]

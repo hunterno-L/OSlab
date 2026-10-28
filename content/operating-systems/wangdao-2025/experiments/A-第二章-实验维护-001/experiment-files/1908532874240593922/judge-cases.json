@@ -1,0 +1,1 @@
+[{"input": "67108864\n", "output": "npage=16384\nbasemem_kb=65536\n"}, {"input": "33554432\n", "output": "npage=8192\nbasemem_kb=32768\n"}, {"input": "1048576\n", "output": "npage=256\nbasemem_kb=1024\n"}]

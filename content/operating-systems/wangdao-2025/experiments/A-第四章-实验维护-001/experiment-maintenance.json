@@ -1,0 +1,772 @@
+{
+  "schemaVersion": "oslab-experiment-maintenance/1.0",
+  "batchCode": "batch.a.experiments.ch4.001",
+  "contributor": "A",
+  "experiments": [
+    {
+      "questionId": "1930156360117571585",
+      "resourceCode": "exp.legacy.1930156360117571585",
+      "title": "实验4.1 实现用户空间到内核空间的系统调用机制",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156360117571585/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156360117571585/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156360117571585/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156360117571585/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156360117571585/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.syscall",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 3,
+        "wrongSolution": "experiment-files/1930156360117571585/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930156493454495745",
+      "resourceCode": "exp.legacy.1930156493454495745",
+      "title": "实验4.2 实现内核的系统调用处理机制",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156493454495745/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156493454495745/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156493454495745/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156493454495745/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156493454495745/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.syscall",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 3,
+        "wrongSolution": "experiment-files/1930156493454495745/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930156605618573314",
+      "resourceCode": "exp.legacy.1930156605618573314",
+      "title": "实验4.3 基础系统调用函数 `sys_mem_alloc`",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156605618573314/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156605618573314/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156605618573314/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156605618573314/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156605618573314/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930156605618573314/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930156740377366529",
+      "resourceCode": "exp.legacy.1930156740377366529",
+      "title": "实验4.4 基础系统调用函数`sys_mem_map`",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156740377366529/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156740377366529/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156740377366529/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156740377366529/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156740377366529/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 1,
+        "wrongSolution": "experiment-files/1930156740377366529/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930156844614209538",
+      "resourceCode": "exp.legacy.1930156844614209538",
+      "title": "实验4.5 基础系统调用函数`sys_mem_unmap`",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156844614209538/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156844614209538/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156844614209538/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156844614209538/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156844614209538/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930156844614209538/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930156972624367618",
+      "resourceCode": "exp.legacy.1930156972624367618",
+      "title": "实验4.6 基础系统调用函数`sys_yield`",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156972624367618/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156972624367618/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156972624367618/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156972624367618/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156972624367618/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.syscall",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930156972624367618/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157095085461505",
+      "resourceCode": "exp.legacy.1930157095085461505",
+      "title": "实验4.7 实现进程间通信（IPC）机制",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157095085461505/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157095085461505/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157095085461505/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157095085461505/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157095085461505/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.ipc",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930157095085461505/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157212584693762",
+      "resourceCode": "exp.legacy.1930157212584693762",
+      "title": "实验4.8 进程创建系统调用 `sys_env_alloc`",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157212584693762/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157212584693762/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157212584693762/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157212584693762/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157212584693762/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.syscall",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930157212584693762/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157404163723265",
+      "resourceCode": "exp.legacy.1930157404163723265",
+      "title": "实验4.9 实现 `fork` 系统调用中的 `sys_env_alloc` ",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157404163723265/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157404163723265/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157404163723265/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157404163723265/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157404163723265/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.syscall",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 1,
+        "wrongSolution": "experiment-files/1930157404163723265/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157516164222977",
+      "resourceCode": "exp.legacy.1930157516164222977",
+      "title": "实验4.10 实现 `fork` 系统调用中的 `duppage` 函数",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157516164222977/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157516164222977/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157516164222977/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157516164222977/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157516164222977/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.syscall",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 1,
+        "wrongSolution": "experiment-files/1930157516164222977/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157629511094274",
+      "resourceCode": "exp.legacy.1930157629511094274",
+      "title": "实验4.11 实现缺页中断处理函数 `page_fault_handler`",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157629511094274/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157629511094274/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157629511094274/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157629511094274/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157629511094274/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page-fault",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930157629511094274/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157740261691394",
+      "resourceCode": "exp.legacy.1930157740261691394",
+      "title": "实验4.12 实现设置缺页处理函数的系统调用 `sys_set_pgfault_handler`",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157740261691394/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157740261691394/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157740261691394/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157740261691394/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157740261691394/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page-fault",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930157740261691394/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157867273605121",
+      "resourceCode": "exp.legacy.1930157867273605121",
+      "title": "实验4.13 实现 `fork` 系统调用中的缺页处理函数 `pgfault`",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157867273605121/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157867273605121/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157867273605121/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157867273605121/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157867273605121/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page-fault",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 2,
+        "wrongSolution": "experiment-files/1930157867273605121/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157984642813953",
+      "resourceCode": "exp.legacy.1930157984642813953",
+      "title": "实验4.14 实现进程状态设置系统调用 `sys_set_env_status`",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157984642813953/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157984642813953/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157984642813953/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157984642813953/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157984642813953/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.state",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 3,
+        "wrongSolution": "experiment-files/1930157984642813953/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930158086405017602",
+      "resourceCode": "exp.legacy.1930158086405017602",
+      "title": "实验4.15 实现 `fork` 系统调用",
+      "sectionCode": "sec.process",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930158086405017602/content.md",
+          "reason": "补齐实验说明与输入输出契约"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930158086405017602/starter.c",
+          "reason": "补齐可编译的起始代码与 TODO"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930158086405017602/reference.c",
+          "reason": "补齐参考实现"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930158086405017602/judge-cases.json",
+          "reason": "补齐真实输入输出用例"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930158086405017602/judge-config.json",
+          "reason": "补齐判题时限与内存配置"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.syscall",
+          "role": "PRIMARY",
+          "weight": 1.0,
+          "reason": "按实验主题映射"
+        }
+      ],
+      "unitMappings": [],
+      "verification": {
+        "fileReview": "题面、起始代码、参考解已核对",
+        "runtime": "本机 gcc 编译参考解，全部用例通过",
+        "cases": 1,
+        "wrongSolution": "experiment-files/1930158086405017602/wrong.c（应判 Wrong Answer）",
+        "openItems": []
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    }
+  ]
+}

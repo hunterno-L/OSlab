@@ -1,0 +1,1 @@
+[{"input": "4096 8192 32768\n", "output": "4096 32768\n8192 36864\n"}, {"input": "0 4096 0\n", "output": "0 0\n"}, {"input": "4096 4097 0\n", "output": "INVALID\n"}, {"input": "4096 0 0\n", "output": "INVALID\n"}]

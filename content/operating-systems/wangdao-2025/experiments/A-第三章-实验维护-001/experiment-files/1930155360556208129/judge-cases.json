@@ -1,0 +1,1 @@
+[{"input": "2 foo bar\n", "output": "argc=2\nargv[0]=foo\nargv[1]=bar\n"}, {"input": "1 hi\n", "output": "argc=1\nargv[0]=hi\n"}]

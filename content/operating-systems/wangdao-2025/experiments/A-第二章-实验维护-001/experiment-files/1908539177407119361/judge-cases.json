@@ -1,0 +1,1 @@
+[{"input": "3\na\na\na\na\n", "output": "0\n1\n2\n-1\n"}, {"input": "4\na\na\nf 0\na\n", "output": "0\n1\nok\n0\n"}, {"input": "2\nf 1\na\n", "output": "no\n0\n"}]

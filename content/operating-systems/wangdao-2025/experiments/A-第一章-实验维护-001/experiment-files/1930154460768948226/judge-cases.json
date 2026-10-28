@@ -1,0 +1,1 @@
+[{"input": "A 42\n", "output": "char=A dec=42 hex=2a\n"}, {"input": "z 255\n", "output": "char=z dec=255 hex=ff\n"}]

@@ -1,0 +1,1 @@
+[{"input": "hello 3\n", "output": "pid=0 name=hello pri=3\n"}, {"input": "init 1\n", "output": "pid=0 name=init pri=1\n"}]

@@ -1,0 +1,1 @@
+[{"input": "alloc 2\n", "output": "va=0x7f002000\n"}, {"input": "yield\n", "output": "yield\n"}, {"input": "foo\n", "output": "unknown\n"}]

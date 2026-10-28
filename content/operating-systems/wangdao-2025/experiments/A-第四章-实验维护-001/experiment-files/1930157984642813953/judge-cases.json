@@ -1,0 +1,1 @@
+[{"input": "3 2\n", "output": "env=3 status=RUNNABLE\n"}, {"input": "0 0\n", "output": "env=0 status=FREE\n"}, {"input": "1 1\n", "output": "env=1 status=NOT_RUNNABLE\n"}]

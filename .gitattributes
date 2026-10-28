@@ -1,2 +1,7 @@
 # 容器内初始化脚本必须保持 LF，Windows 检出时不得转成 CRLF
 deploy/mysql-init/*.sh text eol=lf
+
+# 脚本、SQL、Node 工具统一 LF，保证 Linux/容器/Docker 构建一致
+*.sh text eol=lf
+*.sql text eol=lf
+*.mjs text eol=lf

@@ -1,0 +1,1 @@
+[{"input": "3\n", "output": "envs=3\nfree_list=0 1 2\n"}, {"input": "1\n", "output": "envs=1\nfree_list=0\n"}]
