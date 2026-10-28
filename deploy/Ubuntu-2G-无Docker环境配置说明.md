@@ -196,9 +196,20 @@ FLUSH PRIVILEGES;
 SQL
 ```
 
-### 5.3 导入数据（顺序固定）
+### 5.3 导入数据
 
-把仓库的 `数据库文件/` 目录上传到服务器 `/opt/oslab/db/`，然后按下面的顺序执行 11 个文件。顺序与 `deploy/mysql-init/10-load-oslab-db.sh` 一致，不可调换。
+**推荐：导入五章部署包。** 把 `deploy/database-20261028/` 上传到 `/opt/oslab/db/`，其中 `oslab_db-deploy.sql.gz` 已包含第一至第五章的单元、916 道知识题和 95 张教学资源图，且已脱敏：
+
+```bash
+gunzip -c /opt/oslab/db/oslab_db-deploy.sql.gz \
+  | sudo mysql --default-character-set=utf8mb4 oslab_db
+
+sudo mysql oslab_db -e "SELECT COUNT(*) AS units FROM learning_unit;"   # 104
+```
+
+包内不含 `DROP TABLE`，只能导入空库；细节与校验见包内 `README.md`。
+
+**备选：从初始种子导入。** 把仓库的 `数据库文件/` 目录上传到服务器 `/opt/oslab/db/`，按下面的顺序执行 11 个文件。顺序与 `deploy/mysql-init/10-load-oslab-db.sh` 一致，不可调换。种子只含第一章单元，导入后还需通过 `/teaching/content` 补齐第二至第五章。
 
 ```bash
 cd /opt/oslab/db
@@ -234,7 +245,7 @@ SELECT COUNT(*) AS questions FROM learning_question;
 SELECT COUNT(*) AS node_registry FROM knowledge_node_registry;"
 ```
 
-管理员账号必须至少有一个（种子中的 `nana` 满足该条件），否则 v6 内容种子的 `updateUserId` 取不到值。五章教学单元若未包含在种子中，需要管理员登录后通过 `/teaching/content` 导入对应资源包，本步骤只负责基础库。
+管理员账号必须至少有一个（种子中的 `nana` 满足该条件），否则 v6 内容种子的 `updateUserId` 取不到值。若走种子路径，五章教学单元需要管理员登录后通过 `/teaching/content` 导入对应资源包；部署包路径已包含这些内容。
 
 ### 5.4 关于认证插件
 
@@ -340,7 +351,35 @@ dbms.memory.pagecache.size=128m
 
 ### 7.3 导入图谱数据
 
-首次导入会清空 Neo4j 自带库，仅对全新实例执行：
+**推荐：导入五章完整图谱。** `deploy/database-20261028/neo4j-graph-full.cypher` 含 346 个节点、425 条关系。脚本使用 `CREATE`，只能导入空图，且不要与下面的 `graph.db.dump` 或 7.4 的章节脚本叠加。
+
+```bash
+sudo systemctl stop neo4j
+
+sudo rm -rf /var/lib/neo4j/data/databases/neo4j \
+            /var/lib/neo4j/data/databases/system \
+            /var/lib/neo4j/data/transactions/neo4j \
+            /var/lib/neo4j/data/transactions/system
+
+sudo -u neo4j env \
+  JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 \
+  NEO4J_CONF=/etc/neo4j \
+  NEO4J_HOME=/usr/share/neo4j \
+  neo4j-admin set-initial-password '<Neo4j强密码>'
+
+sudo systemctl start neo4j
+until ss -lnt | grep -q '127.0.0.1:7687'; do sleep 2; done
+
+sudo -u neo4j env JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 \
+  cypher-shell -a bolt://127.0.0.1:7687 -u neo4j -p '<Neo4j强密码>' \
+  -f /opt/oslab/db/neo4j-graph-full.cypher
+
+sudo -u neo4j env JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 \
+  cypher-shell -a bolt://127.0.0.1:7687 -u neo4j -p '<Neo4j强密码>' \
+  "MATCH (n:Entity) RETURN count(n) AS nodes;"   # 346
+```
+
+**备选：使用旧基础图谱 `graph.db.dump`**（150 节点，需再执行 7.4）。首次导入会清空 Neo4j 自带库，仅对全新实例执行：
 
 ```bash
 sudo systemctl stop neo4j
@@ -371,7 +410,7 @@ sudo systemctl enable neo4j
 
 ### 7.4 补齐历史章节标签（可选）
 
-基础 dump 是 2025-06 的图谱，仓库额外提供两个幂等 Cypher 文件：
+**使用 7.3 的完整图谱包时跳过本节**，完整包已包含章节标签。若走 `graph.db.dump` 路径，基础 dump 是 2025-06 的图谱，仓库额外提供两个幂等 Cypher 文件：
 
 ```bash
 sudo -u neo4j env JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 \
@@ -635,6 +674,8 @@ curl -s -X POST http://127.0.0.1/api/user/login \
 
 预期：健康检查返回存活状态；首页与 API 均为 200；登录返回 `"code":0`。
 
+使用五章部署包时，再核对数据量：`learning_unit=104`、`learning_question=916`、Neo4j `Entity=346`。
+
 浏览器侧再确认四项：
 
 - 落地页 `/welcome` 正常渲染，登录弹层可打开与关闭；
@@ -820,6 +861,8 @@ nginx -t && systemctl reload nginx
 | `/opt/oslab/db/*.sql` | 11 个数据库初始化/增量脚本 |
 | `/opt/oslab/db/graph.db.dump` | Neo4j 基础图谱 |
 | `/opt/oslab/db/*.cypher` | 图谱章节标签补齐脚本 |
+| `/opt/oslab/db/oslab_db-deploy.sql.gz` | 五章脱敏数据库包（推荐，替代 11 个种子 SQL） |
+| `/opt/oslab/db/neo4j-graph-full.cypher` | 五章完整图谱包（推荐，替代 graph.db.dump） |
 | `/opt/oslab/data/task-files` | 教学任务附件目录 |
 | `/var/www/oslab` | 前端静态站 |
 | `/etc/systemd/system/oslab-backend.service` | 后端服务单元 |
