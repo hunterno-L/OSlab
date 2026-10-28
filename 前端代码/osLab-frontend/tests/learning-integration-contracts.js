@@ -146,17 +146,20 @@ assert(
 );
 assert(!simulationView.includes("runCpuSimulation"), "旧 CPU 页面调用不得残留");
 assert(!simulationView.includes("runPageSimulation"), "旧页面置换调用不得残留");
+assert(player.includes("onBeforeUnmount"), "播放器必须有离页清理");
 assert(
-  player.includes("onBeforeUnmount(clearTimer)"),
-  "播放器离页必须调用 clearTimer 停止 timer"
+  player.includes('removeEventListener("message", onMessage)'),
+  "离页必须移除 legacy 消息监听"
 );
 assert(
-  /const clearTimer\s*=\s*\(\)\s*=>\s*\{[\s\S]*?window\.clearInterval\(timer\)/.test(
-    player
-  ),
-  "clearTimer 必须清理 setInterval 句柄"
+  player.includes("clearTimeout(pendingFlush)"),
+  "离页必须清理挂起的 flush"
 );
-assert(player.includes("window.setInterval"), "播放器必须有自动播放");
+assert(player.includes("sourceRequest += 1"), "离页必须让旧请求失效");
+assert(
+  player.includes("target.postMessage"),
+  "播放器必须通过消息桥接控制 legacy 演示"
+);
 const catalog = read("../src/simulation/catalog.ts");
 const algorithmKeys = [...catalog.matchAll(/key:\s*"([a-z]+\.[a-z_]+)"/g)].map(
   (match) => match[1]

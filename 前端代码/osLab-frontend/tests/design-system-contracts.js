@@ -108,8 +108,8 @@ assert.ok(
   "page title must use the highlighter token"
 );
 assert.ok(
-  headerSource.includes("var(--oslab-radius-pill)"),
-  "global navigation must use pill radius"
+  headerSource.includes("border-radius: 4px"),
+  "global navigation must use the new 4px radius"
 );
 
 const annotationFile = path.join(

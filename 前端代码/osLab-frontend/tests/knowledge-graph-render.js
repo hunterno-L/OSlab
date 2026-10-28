@@ -1070,7 +1070,7 @@ test("animated force layout settles and fits without moving the camera afterward
   }
 });
 
-test("dragging reheats the live solver and moves connected nodes", () => {
+test("dragging keeps the card and stabilizes connected nodes", () => {
   const harness = createHarness(makeGraph(13), 1120, 620, true);
   const nativeSetTimeout = global.setTimeout;
   const nativeClearTimeout = global.clearTimeout;
@@ -1098,13 +1098,15 @@ test("dragging reheats the live solver and moves connected nodes", () => {
       "dragged card must retain its new area"
     );
     assert.ok(
-      after.some(
+      after.every(
         (point, index) =>
-          index !== 5 &&
-          Math.hypot(point[0] - before[index][0], point[1] - before[index][1]) >
-            1
+          index === 5 ||
+          Math.hypot(
+            point[0] - before[index][0],
+            point[1] - before[index][1]
+          ) <= 1
       ),
-      "force must move other cards after a drag"
+      "other cards must stay stable after a drag"
     );
     assertNodeCardsDoNotOverlap(harness.graph, 0.5);
     assertRelationLabelsDoNotCoverNodes(harness.graph);
