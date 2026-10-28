@@ -72,7 +72,7 @@ SELECT COUNT(*) AS assets FROM course_asset;"
 
 ## 4. Neo4j 恢复
 
-脚本使用 `CREATE` 而非 `MERGE`，**只能导入空图数据库**。不要与 `数据库文件/graph.db.dump` 或 `oslab_graph_chapters.cypher` 同时使用，否则会产生重复节点。
+脚本使用 `CREATE` 而非 `MERGE`，**只能导入空图数据库**。不要与 `数据库文件/graph.db.dump` 或 `oslab_graph_chapters.cypher` 同时使用，否则会产生重复节点。若导入中途失败，先清空图库再从头重跑，不能对已有部分数据的库重复执行。
 
 ```bash
 sudo -u neo4j env JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 \

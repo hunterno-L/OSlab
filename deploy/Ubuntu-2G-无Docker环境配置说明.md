@@ -351,7 +351,7 @@ dbms.memory.pagecache.size=128m
 
 ### 7.3 导入图谱数据
 
-**推荐：导入五章完整图谱。** `deploy/database-20261028/neo4j-graph-full.cypher` 含 346 个节点、425 条关系。脚本使用 `CREATE`，只能导入空图，且不要与下面的 `graph.db.dump` 或 7.4 的章节脚本叠加。
+**推荐：导入五章完整图谱。** `deploy/database-20261028/neo4j-graph-full.cypher` 含 346 个节点、425 条关系。脚本使用 `CREATE`，只能导入空图，且不要与下面的 `graph.db.dump` 或 7.4 的章节脚本叠加；导入中断时需清空图库后重跑。
 
 ```bash
 sudo systemctl stop neo4j
