@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --registry=https://registry.npmmirror.com
 COPY . .
-RUN npm run build
+RUN NODE_OPTIONS=--max-old-space-size=3072 npm run build
 
 FROM nginx:alpine
 COPY --from=builder /app/dist/ /usr/share/nginx/html/

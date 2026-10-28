@@ -14,6 +14,8 @@ const shouldDisplayRuntimeError = (error) => {
 
 module.exports = defineConfig({
   transpileDependencies: true,
+  // Windows 检出为 CRLF，prettier 规则会把整份源码判错；本机运行先关闭保存时 lint。
+  lintOnSave: false,
   devServer: {
     setupMiddlewares(middlewares) {
       // Rebuilt original demos must be served from disk, ahead of webpack's
@@ -45,5 +47,12 @@ module.exports = defineConfig({
   },
   chainWebpack(config) {
     config.plugin("monaco").use(new MonacoWebpackPlugin());
+    // 本机 Docker 的 WSL 内存有限，默认 terser 会按 CPU 数开几十个并行 worker 把内存打爆。
+    if (process.env.NODE_ENV === "production") {
+      config.optimization.minimizer("terser").tap((args) => {
+        args[0].parallel = 2;
+        return args;
+      });
+    }
   },
 });
