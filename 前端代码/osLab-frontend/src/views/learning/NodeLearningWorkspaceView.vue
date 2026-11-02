@@ -468,6 +468,10 @@
                   <span v-for="name in section.next" :key="name" class="node-detail-chip">{{ name }}</span>
                 </div>
               </div>
+              <PageReplacementLab
+                v-else-if="section.type === 'simulator' && section.widget === 'page-replacement'"
+                :preset="section.preset"
+              />
               <p v-else class="node-detail-text">{{ section.body }}</p>
             </section>
           </div>
@@ -1553,6 +1557,8 @@ const defaultTutorFocus = computed(() => {
     : `当前围绕「${nodeName.value}」学习，从概念、前置知识和练习证据逐步建立理解。`;
 });
 const lastFailure = computed(() => workbench.value?.lastFailure || null);
+
+import PageReplacementLab from "@/components/learning/PageReplacementLab.vue";
 
 const detailRaw = ref("");
 const loadDetailContent = async () => {
