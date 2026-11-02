@@ -825,6 +825,7 @@ watch(
       unitParam.value,
       nodeParam.value,
       studyStateParam.value,
+      typeParam.value,
       titleParam.value,
       page.value,
       pinnedQuestionId.value,
