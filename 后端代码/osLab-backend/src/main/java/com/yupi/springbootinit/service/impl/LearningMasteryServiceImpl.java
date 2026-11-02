@@ -190,9 +190,53 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
                 .orElse(null);
     }
 
+    /** 把“UTF-8 字节被按 GBK 解码”的标签还原；还原不成立时原样返回。 */
+    private static String repairLabel(String text) {
+        if (text == null || text.isEmpty() || text.indexOf('\uFFFD') >= 0) {
+            return text;
+        }
+        try {
+            String fixed = new String(text.getBytes("GBK"), "UTF-8");
+            if (!fixed.equals(text)) {
+                for (int i = 0; i < fixed.length(); i++) {
+                    char c = fixed.charAt(i);
+                    if (c >= 0x4E00 && c <= 0x9FFF) {
+                        return fixed;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+            // 编码不可用时原样展示
+        }
+        return text;
+    }
+
+    /** 截断（含替换符）或 UTF-8 被按 GBK 解码过的标签都不适合展示。 */
+    private static boolean isBrokenLabel(String text) {
+        if (text == null || text.isEmpty()) {
+            return true;
+        }
+        if (text.indexOf('\uFFFD') >= 0) {
+            return true;
+        }
+        try {
+            String fixed = new String(text.getBytes("GBK"), "UTF-8");
+            if (!fixed.equals(text)) {
+                for (int i = 0; i < fixed.length(); i++) {
+                    char c = fixed.charAt(i);
+                    if (c >= 0x4E00 && c <= 0x9FFF) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+            // 编码不可用时按原样展示
+        }
+        return false;
+    }
+
     @Override
-    public NodeWorkbenchVO nodeWorkbench(User user, String codeOrName) {
-        com.yupi.springbootinit.learning.NodeIdentityService.Identity identity = nodeIdentities == null ? null : nodeIdentities.resolve(codeOrName);
+    public NodeWorkbenchVO nodeWorkbench(User user, String codeOrName) {        com.yupi.springbootinit.learning.NodeIdentityService.Identity identity = nodeIdentities == null ? null : nodeIdentities.resolve(codeOrName);
         final String nodeName = identity == null ? codeOrName : identity.storageKey;
         // 一次快照同时提供节点校验、元数据和依赖边，避免高频工作台走旧图谱 N+1 路径。
         GraphDataDTO graph = knowledgeGraphService.getGraphSnapshot();
@@ -211,12 +255,14 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
                         .orderByAsc(LearningEvent::getId));
         LearningEvent latestNodeEvent = nodeEvents.isEmpty() ? null : nodeEvents.get(nodeEvents.size() - 1);
         vo.setMastery(masteryNodeFromGraph(graphNode, masteryRow, latestNodeEvent));
-        // 历史图谱里存在被截断的名字（含替换符），展示层回落到注册表里的干净名称
+        // 历史图谱里存在被截断或双重编码的名字，展示层回落到注册表里的干净名称
         if (identity != null && identity.name != null && vo.getMastery() != null) {
             String shown = vo.getMastery().getName();
-            if (shown == null || shown.indexOf('\uFFFD') >= 0) {
+            if (isBrokenLabel(shown)) {
                 vo.getMastery().setName(identity.name);
             }
+            vo.getMastery().setName(repairLabel(vo.getMastery().getName()));
+            vo.getMastery().setChapter(repairLabel(vo.getMastery().getChapter()));
         }
         // 关联已发布普通题
         List<Long> questionIds = learningQuestionNodeMapper.selectList(
