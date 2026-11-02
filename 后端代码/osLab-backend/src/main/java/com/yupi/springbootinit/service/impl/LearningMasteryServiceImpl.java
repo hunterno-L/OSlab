@@ -211,6 +211,13 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
                         .orderByAsc(LearningEvent::getId));
         LearningEvent latestNodeEvent = nodeEvents.isEmpty() ? null : nodeEvents.get(nodeEvents.size() - 1);
         vo.setMastery(masteryNodeFromGraph(graphNode, masteryRow, latestNodeEvent));
+        // 历史图谱里存在被截断的名字（含替换符），展示层回落到注册表里的干净名称
+        if (identity != null && identity.name != null && vo.getMastery() != null) {
+            String shown = vo.getMastery().getName();
+            if (shown == null || shown.indexOf('\uFFFD') >= 0) {
+                vo.getMastery().setName(identity.name);
+            }
+        }
         // 关联已发布普通题
         List<Long> questionIds = learningQuestionNodeMapper.selectList(
                 new LambdaQueryWrapper<LearningQuestionNode>()

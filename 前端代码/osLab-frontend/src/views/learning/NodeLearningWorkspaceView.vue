@@ -1564,6 +1564,7 @@ import CpuScheduleLab from "@/components/learning/CpuScheduleLab.vue";
 import DiskScheduleLab from "@/components/learning/DiskScheduleLab.vue";
 import BankerLab from "@/components/learning/BankerLab.vue";
 import PvLab from "@/components/learning/PvLab.vue";
+import QuickQuizLab from "@/components/learning/QuickQuizLab.vue";
 
 const DETAIL_WIDGETS: Record<string, any> = {
   "page-replacement": PageReplacementLab,
@@ -1571,6 +1572,7 @@ const DETAIL_WIDGETS: Record<string, any> = {
   "disk-schedule": DiskScheduleLab,
   banker: BankerLab,
   pv: PvLab,
+  "quick-quiz": QuickQuizLab,
 };
 const widgetOf = (section: { widget?: string }) =>
   section?.widget ? DETAIL_WIDGETS[section.widget] || null : null;
