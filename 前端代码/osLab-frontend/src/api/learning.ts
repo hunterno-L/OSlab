@@ -427,7 +427,7 @@ export interface LearningQuestionQueryRequest {
   sectionCode?: string;
   unitCode?: string;
   nodeCode?: string;
-  type?: LearningQuestionType | "";
+  type?: string;
   difficulty?: number;
   studyState?: "ALL" | "UNANSWERED" | "NEEDS_REVIEW" | "CORRECT";
   title?: string;
@@ -558,6 +558,8 @@ export interface LearningCatalogVO {
   attempted?: number;
   needsReview?: number;
   correct?: number;
+  /** 题型计数：ALL/CHOICE/JUDGE/FILL_BLANK/COMPREHENSIVE */
+  typeCounts?: Record<string, number>;
 }
 
 /** 题目练习目录聚合：目录范围与列表共用稳定代码谓词（仅 PUBLISHED 且未删除） */
@@ -567,6 +569,7 @@ export function getLearningCatalog(params?: {
   sectionCode?: string;
   unitCode?: string;
   studyState?: string;
+  type?: string;
 }): Promise<LearningApiResponse<LearningCatalogVO>> {
   return axios.post("/api/learning/questions/catalog", params || {});
 }

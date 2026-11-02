@@ -39,4 +39,9 @@ public class LearningCatalogRequest implements Serializable {
      * 学习状态筛选：ALL/UNANSWERED/NEEDS_REVIEW/CORRECT
      */
     private String studyState;
+
+    /**
+     * 题型筛选：CHOICE/JUDGE/FILL_BLANK/COMPREHENSIVE（空或 ALL 为全部）
+     */
+    private String type;
 }

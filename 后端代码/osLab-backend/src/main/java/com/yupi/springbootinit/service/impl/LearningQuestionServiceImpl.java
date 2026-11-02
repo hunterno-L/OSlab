@@ -273,9 +273,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         if (StringUtils.isNotBlank(request.getTitle())) {
             wrapper.like(LearningQuestion::getTitle, request.getTitle());
         }
-        if (StringUtils.isNotBlank(request.getType())) {
-            wrapper.eq(LearningQuestion::getType, request.getType());
-        }
+        applyTypeFilter(wrapper, request.getType());
         // 章节过滤（阶段 5 §5.1）：不在 SQL 另写一套，统一在内存走共享谓词 matchesChapter，
         // 与目录统计、测评候选保持同一语义（"未归类"命中 null/空白/字面值章节）
         String chapterFilter = StringUtils.trimToNull(request.getChapter());
@@ -397,9 +395,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         wrapper.eq(LearningQuestion::getIsDelete, 0);
         wrapper.eq(LearningQuestion::getResourceScope, com.yupi.springbootinit.task.TaskConstants.SCOPE_SHARED);
         wrapper.ne(LearningQuestion::getType, LearningQuestionTypeEnum.COMPREHENSIVE.name());
-        if (StringUtils.isNotBlank(request.getType())) {
-            wrapper.eq(LearningQuestion::getType, request.getType());
-        }
+        applyTypeFilter(wrapper, request.getType());
         if (request.getDifficulty() != null) {
             wrapper.eq(LearningQuestion::getDifficulty, request.getDifficulty());
         }
@@ -567,9 +563,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         if (StringUtils.isNotBlank(request.getTitle())) {
             wrapper.like(LearningQuestion::getTitle, request.getTitle());
         }
-        if (StringUtils.isNotBlank(request.getType())) {
-            wrapper.eq(LearningQuestion::getType, request.getType());
-        }
+        applyTypeFilter(wrapper, request.getType());
         if (StringUtils.isNotBlank(request.getChapter())) {
             wrapper.eq(LearningQuestion::getChapter, request.getChapter());
         }
@@ -681,6 +675,10 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
             treeCandidates = Collections.emptyList();
         }
 
+        Map<String, Integer> typeCounts = catalogTypeCounts(candidates);
+        candidates = filterByQuestionType(candidates, req.getType());
+        treeCandidates = filterByQuestionType(treeCandidates, req.getType());
+
         Set<Long> candidateIds = candidates.stream().map(LearningQuestion::getId)
                 .filter(Objects::nonNull).collect(Collectors.toCollection(LinkedHashSet::new));
         Set<Long> treeIds = treeCandidates.stream().map(LearningQuestion::getId)
@@ -727,6 +725,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         vo.setAttempted(attempted);
         vo.setNeedsReview(needsReview);
         vo.setCorrect(correct);
+        vo.setTypeCounts(typeCounts);
         return vo;
     }
 
@@ -749,6 +748,58 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
             latest.put(attempt.getQuestionId(), attempt);
         }
         return latest;
+    }
+
+    /** CHOICE 覆盖单选/多选；其余按原题型精确匹配。 */
+    private static java.util.Set<String> questionTypesFor(String type) {
+        if (StringUtils.isBlank(type) || "ALL".equalsIgnoreCase(type)) {
+            return java.util.Collections.emptySet();
+        }
+        if ("CHOICE".equalsIgnoreCase(type)) {
+            return new java.util.LinkedHashSet<>(java.util.Arrays.asList("SINGLE", "MULTIPLE"));
+        }
+        return java.util.Collections.singleton(type);
+    }
+
+    private static List<LearningQuestion> filterByQuestionType(List<LearningQuestion> questions, String type) {
+        java.util.Set<String> types = questionTypesFor(type);
+        if (types.isEmpty()) return questions;
+        return questions.stream()
+                .filter(question -> question.getType() != null && types.contains(question.getType()))
+                .collect(Collectors.toList());
+    }
+
+    private static void applyTypeFilter(LambdaQueryWrapper<LearningQuestion> wrapper, String type) {
+        java.util.Set<String> types = questionTypesFor(type);
+        if (types.isEmpty()) return;
+        if (types.size() == 1) {
+            wrapper.eq(LearningQuestion::getType, types.iterator().next());
+        } else {
+            wrapper.in(LearningQuestion::getType, types);
+        }
+    }
+
+    private static Map<String, Integer> catalogTypeCounts(List<LearningQuestion> questions) {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        int single = 0, multiple = 0, judge = 0, fill = 0, comprehensive = 0;
+        for (LearningQuestion question : questions) {
+            String type = question.getType();
+            if (type == null) continue;
+            switch (type) {
+                case "SINGLE": single++; break;
+                case "MULTIPLE": multiple++; break;
+                case "JUDGE": judge++; break;
+                case "FILL_BLANK": fill++; break;
+                case "COMPREHENSIVE": comprehensive++; break;
+                default: break;
+            }
+        }
+        counts.put("ALL", questions.size());
+        counts.put("CHOICE", single + multiple);
+        counts.put("JUDGE", judge);
+        counts.put("FILL_BLANK", fill);
+        counts.put("COMPREHENSIVE", comprehensive);
+        return counts;
     }
 
     private List<LearningQuestion> filterCatalogQuestions(List<LearningQuestion> questions,

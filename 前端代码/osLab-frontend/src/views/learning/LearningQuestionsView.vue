@@ -126,6 +126,26 @@
         </div>
       </section>
 
+      <section class="filter-row" aria-label="题目类型">
+        <div class="state-chips">
+          <span class="filter-label">题目类型</span>
+          <button
+            v-for="option in typeOptions"
+            :key="option.value || 'ALL'"
+            type="button"
+            class="filter-chip"
+            :class="{ active: typeParam === option.value }"
+            :aria-pressed="typeParam === option.value"
+            @click="selectType(option.value)"
+          >
+            {{ option.label }}
+            <span v-if="typeCount(option.value)" class="chip-count">{{
+              typeCount(option.value)
+            }}</span>
+          </button>
+        </div>
+      </section>
+
       <section class="filter-row" aria-label="题目筛选">
         <div class="state-chips">
           <span class="filter-label">作答状态</span>
@@ -304,6 +324,8 @@ const studyStateParam = computed<StudyState>(() => {
     : "ALL";
 });
 
+const typeParam = computed(() => queryValue(route.query.type).toUpperCase());
+
 const selectedUnitCode = computed(() => {
   const code = unitParam.value;
   return code && unitByCode.value.has(code) ? code : "";
@@ -321,6 +343,14 @@ const stateOptions: Array<{ value: StudyState; label: string }> = [
   { value: "UNANSWERED", label: "未作答" },
   { value: "NEEDS_REVIEW", label: "待复习" },
   { value: "CORRECT", label: "已答对" },
+];
+
+const typeOptions: Array<{ value: string; label: string }> = [
+  { value: "", label: "全部" },
+  { value: "CHOICE", label: "选择题" },
+  { value: "JUDGE", label: "判断题" },
+  { value: "FILL_BLANK", label: "填空题" },
+  { value: "COMPREHENSIVE", label: "综合题" },
 ];
 const studyStateLabel = computed(
   () =>
@@ -372,6 +402,7 @@ const replaceFilters = (
     nodeCode: queryValue(route.query.nodeCode) || undefined,
     studyState:
       studyStateParam.value === "ALL" ? undefined : studyStateParam.value,
+    type: typeParam.value || undefined,
     title: titleParam.value || undefined,
     current: page.value > 1 ? String(page.value) : undefined,
     ...patch,
@@ -433,6 +464,15 @@ const selectUnitScope = (unitCode: string) => {
 
 const selectNode = (nodeCode?: string) =>
   replaceFilters({ nodeCode: nodeCode || undefined }, true);
+
+const selectType = (value: string) =>
+  replaceFilters({ type: value || undefined, current: undefined }, true);
+
+const typeCount = (value: string) => {
+  const counts = catalog.value?.typeCounts;
+  if (!counts) return 0;
+  return counts[value || "ALL"] ?? 0;
+};
 
 const setStudyState = (state: StudyState) => {
   replaceFilters({ studyState: state === "ALL" ? undefined : state }, true);
@@ -527,6 +567,7 @@ const effectiveScope = () => {
     nodeCode: nodeParam.value || undefined,
     studyState:
       studyStateParam.value === "ALL" ? undefined : studyStateParam.value,
+    type: typeParam.value || undefined,
     title: titleParam.value || undefined,
   };
 };
@@ -542,6 +583,7 @@ const refreshCatalog = async (normalizeNode = true) => {
       sectionCode: scope.sectionCode,
       unitCode: scope.unitCode,
       studyState: scope.studyState,
+      type: scope.type,
     });
     if (epoch !== catalogEpoch) return false;
     if (res.data?.code === 0 && res.data.data) {
@@ -590,6 +632,7 @@ const loadList = async () => {
     unitCode: scope.unitCode,
     nodeCode: scope.nodeCode,
     title: scope.title,
+    type: scope.type,
     studyState: scope.studyState as LearningQuestionQueryRequest["studyState"],
   };
   loading.value = true;

@@ -56,4 +56,7 @@ public class LearningCatalogVO implements Serializable {
      * 当前范围内本人最新作答正确的题目数
      */
     private Integer correct;
+
+    /** 题型计数：ALL/CHOICE/JUDGE/FILL_BLANK/COMPREHENSIVE */
+    private java.util.Map<String, Integer> typeCounts;
 }
