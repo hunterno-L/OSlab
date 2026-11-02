@@ -1566,6 +1566,9 @@ import BankerLab from "@/components/learning/BankerLab.vue";
 import PvLab from "@/components/learning/PvLab.vue";
 import QuickQuizLab from "@/components/learning/QuickQuizLab.vue";
 import NodeMapLab from "@/components/learning/NodeMapLab.vue";
+import StateMachineLab from "@/components/learning/StateMachineLab.vue";
+import AddressTranslationLab from "@/components/learning/AddressTranslationLab.vue";
+import InterruptFlowLab from "@/components/learning/InterruptFlowLab.vue";
 
 const DETAIL_WIDGETS: Record<string, any> = {
   "page-replacement": PageReplacementLab,
@@ -1575,6 +1578,9 @@ const DETAIL_WIDGETS: Record<string, any> = {
   pv: PvLab,
   "quick-quiz": QuickQuizLab,
   "concept-map": NodeMapLab,
+  "state-machine": StateMachineLab,
+  "address-translation": AddressTranslationLab,
+  "interrupt-flow": InterruptFlowLab,
 };
 const widgetOf = (section: { widget?: string }) =>
   section?.widget ? DETAIL_WIDGETS[section.widget] || null : null;
