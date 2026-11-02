@@ -977,6 +977,15 @@ export function getNodeContent(
   });
 }
 
+/** 学生视角：仅返回已发布的节点详解 */
+export function getPublishedNodeContent(
+  nodeName: string
+): Promise<LearningApiResponse<LearningNodeContentVO | null>> {
+  return axios.get("/api/learning/nodeContent/published", {
+    params: { nodeName },
+  });
+}
+
 export function listNodeContents(): Promise<
   LearningApiResponse<LearningNodeContentVO[]>
 > {

@@ -423,7 +423,55 @@
               </div>
             </template>
           </template>
-          <div v-else class="oslab-empty">
+                    <div v-else-if="detailTemplate" class="node-detail">
+            <header class="node-detail-hero">
+              <span class="node-detail-badge">{{ detailTemplate.badge }}</span>
+              <h2 class="node-detail-title">{{ detailTemplate.title }}</h2>
+              <p class="node-detail-definition">{{ detailTemplate.definition }}</p>
+              <div v-if="detailTemplate.tags && detailTemplate.tags.length" class="node-detail-tags">
+                <span v-for="tag in detailTemplate.tags" :key="tag" class="node-detail-tag">{{ tag }}</span>
+              </div>
+            </header>
+            <section v-for="(section, index) in detailTemplate.sections" :key="index" class="node-detail-section">
+              <h3 class="node-detail-section-title">{{ section.title }}</h3>
+              <ol v-if="section.type === 'steps'" class="node-detail-steps">
+                <li v-for="(item, i) in section.items" :key="i">{{ item }}</li>
+              </ol>
+              <div v-else-if="section.type === 'table'" class="node-detail-table-wrap">
+                <table class="node-detail-table">
+                  <thead>
+                    <tr><th v-for="col in section.columns" :key="col">{{ col }}</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(row, i) in section.rows" :key="i">
+                      <td v-for="(cell, j) in row" :key="j">{{ cell }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <ul v-else-if="section.type === 'pitfalls'" class="node-detail-pitfalls">
+                <li v-for="(item, i) in section.items" :key="i">{{ item }}</li>
+              </ul>
+              <div v-else-if="section.type === 'examples'" class="node-detail-examples">
+                <article v-for="(item, i) in section.items" :key="i" class="node-detail-example">
+                  <h4>{{ item.title }}</h4>
+                  <p>{{ item.body }}</p>
+                </article>
+              </div>
+              <div v-else-if="section.type === 'graph'" class="node-detail-graph">
+                <div class="node-detail-graph-col">
+                  <span class="node-detail-graph-label">{{ section.prevLabel }}</span>
+                  <span v-for="name in section.prev" :key="name" class="node-detail-chip">{{ name }}</span>
+                </div>
+                <div class="node-detail-graph-col">
+                  <span class="node-detail-graph-label">{{ section.nextLabel }}</span>
+                  <span v-for="name in section.next" :key="name" class="node-detail-chip">{{ name }}</span>
+                </div>
+              </div>
+              <p v-else class="node-detail-text">{{ section.body }}</p>
+            </section>
+          </div>
+<div v-else class="oslab-empty">
             <span class="oslab-state-title">本节点暂无图文详解</span>
             <span class="oslab-state-hint"
               >图文详解在学习资源库中按节点关联发布。</span
@@ -811,6 +859,7 @@ import {
   type MasteryNodeVO,
   type NodeWorkbenchVO,
   type TutorSourceVO,
+  getPublishedNodeContent,
 } from "@/api/learning";
 import {
   registerAiPageContext,
@@ -1504,6 +1553,61 @@ const defaultTutorFocus = computed(() => {
     : `当前围绕「${nodeName.value}」学习，从概念、前置知识和练习证据逐步建立理解。`;
 });
 const lastFailure = computed(() => workbench.value?.lastFailure || null);
+
+const detailRaw = ref("");
+const loadDetailContent = async () => {
+  const name = currentNodeName.value;
+  if (!name) {
+    detailRaw.value = "";
+    return;
+  }
+  try {
+    const res = await getPublishedNodeContent(name);
+    detailRaw.value = res.data?.data?.resourceLinks || "";
+  } catch {
+    detailRaw.value = "";
+  }
+};
+watch(
+  currentNodeName,
+  () => {
+    void loadDetailContent();
+  },
+  { immediate: true }
+);
+
+type NodeDetailSection = {
+  type: string;
+  title: string;
+  body?: string;
+  items?: any[];
+  columns?: string[];
+  rows?: string[][];
+  prev?: string[];
+  next?: string[];
+  prevLabel?: string;
+  nextLabel?: string;
+};
+type NodeDetailTemplate = {
+  badge?: string;
+  title: string;
+  definition: string;
+  tags?: string[];
+  sections: NodeDetailSection[];
+};
+const detailTemplate = computed<NodeDetailTemplate | null>(() => {
+  const raw = detailRaw.value;
+  if (!raw || !raw.trim().startsWith("{")) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.template === "node-detail-v1" && Array.isArray(parsed.sections)) {
+      return parsed as NodeDetailTemplate;
+    }
+  } catch {
+    /* 非模板内容，忽略 */
+  }
+  return null;
+});
 
 const safeResourceUrl = (url: string) => /^(https?:\/\/|\/(?!\/))/.test(url);
 /** 教师发布的扩展阅读外链；静态图文详解统一由「知识详解」页签渲染，不在此重复 */
@@ -2649,5 +2753,128 @@ onBeforeUnmount(() => {
   .practice-row {
     flex-wrap: wrap;
   }
+}
+</style>
+
+<style scoped>
+.node-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 4px 2px 24px;
+}
+.node-detail-hero {
+  border: 1px solid var(--oslab-line, #e6e3d9);
+  border-radius: 14px;
+  padding: 20px 22px;
+  background: linear-gradient(180deg, #fbfaf3, #ffffff);
+}
+.node-detail-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #fff3c4;
+  color: #8a6d00;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+.node-detail-title {
+  margin: 10px 0 8px;
+  font-size: 22px;
+  font-weight: 700;
+}
+.node-detail-definition {
+  margin: 0;
+  color: #55524a;
+  line-height: 1.8;
+}
+.node-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.node-detail-tag {
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid #e3dfd2;
+  color: #6b675c;
+  font-size: 12px;
+}
+.node-detail-section {
+  border: 1px solid var(--oslab-line, #e6e3d9);
+  border-radius: 14px;
+  padding: 18px 22px;
+  background: #fff;
+}
+.node-detail-section-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.node-detail-steps,
+.node-detail-pitfalls {
+  margin: 0;
+  padding-left: 20px;
+  color: #45423b;
+  line-height: 1.9;
+}
+.node-detail-table-wrap {
+  overflow-x: auto;
+}
+.node-detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.node-detail-table th,
+.node-detail-table td {
+  border: 1px solid #ece9dd;
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+.node-detail-table th {
+  background: #faf8ef;
+  font-weight: 600;
+}
+.node-detail-examples {
+  display: grid;
+  gap: 10px;
+}
+.node-detail-example {
+  border-left: 3px solid #d9c86a;
+  padding: 4px 0 4px 12px;
+}
+.node-detail-example h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+.node-detail-example p {
+  margin: 0;
+  color: #55524a;
+  line-height: 1.8;
+}
+.node-detail-graph {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.node-detail-graph-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.node-detail-graph-label {
+  color: #8a8578;
+  font-size: 12px;
+}
+.node-detail-chip {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #f4f2e8;
+  color: #4d4a42;
+  font-size: 12px;
 }
 </style>

@@ -34,6 +34,9 @@ public class LearningNodeContentController {
     private LearningNodeContentService learningNodeContentService;
 
     @Resource
+    private com.yupi.springbootinit.learning.NodeIdentityService nodeIdentities;
+
+    @Resource
     private UserService userService;
 
     /**
@@ -43,6 +46,30 @@ public class LearningNodeContentController {
     @GetMapping("/get")
     public BaseResponse<LearningNodeContentVO> getByNode(@RequestParam("nodeName") String nodeName) {
         return ResultUtils.success(learningNodeContentService.getByNode(nodeName));
+    }
+
+    /**
+     * 学生视角读取已发布的节点详解（未发布返回 null）
+     */
+    @AuthCheck(mustRole = UserConstant.DEFAULT_ROLE)
+    @GetMapping("/published")
+    public BaseResponse<LearningNodeContentVO> getPublished(@RequestParam("nodeName") String nodeName) {
+        LearningNodeContentVO vo = learningNodeContentService.getByNode(nodeName);
+        if (vo == null) {
+            try {
+                com.yupi.springbootinit.learning.NodeIdentityService.Identity identity =
+                        nodeIdentities.resolve(nodeName);
+                if (identity != null && identity.name != null && !identity.name.equals(nodeName)) {
+                    vo = learningNodeContentService.getByNode(identity.name);
+                }
+            } catch (RuntimeException ignored) {
+                // 解析不到就按未发布处理
+            }
+        }
+        if (vo == null || !"PUBLISHED".equals(vo.getStatus())) {
+            return ResultUtils.success(null);
+        }
+        return ResultUtils.success(vo);
     }
 
     /**
