@@ -468,8 +468,9 @@
                   <span v-for="name in section.next" :key="name" class="node-detail-chip">{{ name }}</span>
                 </div>
               </div>
-              <PageReplacementLab
-                v-else-if="section.type === 'simulator' && section.widget === 'page-replacement'"
+              <component
+                :is="widgetOf(section)"
+                v-else-if="section.type === 'simulator' && widgetOf(section)"
                 :preset="section.preset"
               />
               <p v-else class="node-detail-text">{{ section.body }}</p>
@@ -1559,6 +1560,20 @@ const defaultTutorFocus = computed(() => {
 const lastFailure = computed(() => workbench.value?.lastFailure || null);
 
 import PageReplacementLab from "@/components/learning/PageReplacementLab.vue";
+import CpuScheduleLab from "@/components/learning/CpuScheduleLab.vue";
+import DiskScheduleLab from "@/components/learning/DiskScheduleLab.vue";
+import BankerLab from "@/components/learning/BankerLab.vue";
+import PvLab from "@/components/learning/PvLab.vue";
+
+const DETAIL_WIDGETS: Record<string, any> = {
+  "page-replacement": PageReplacementLab,
+  "cpu-schedule": CpuScheduleLab,
+  "disk-schedule": DiskScheduleLab,
+  banker: BankerLab,
+  pv: PvLab,
+};
+const widgetOf = (section: { widget?: string }) =>
+  section?.widget ? DETAIL_WIDGETS[section.widget] || null : null;
 
 const detailRaw = ref("");
 const loadDetailContent = async () => {
