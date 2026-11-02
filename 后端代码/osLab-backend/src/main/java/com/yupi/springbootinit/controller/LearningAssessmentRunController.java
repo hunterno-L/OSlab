@@ -7,6 +7,7 @@ import com.yupi.springbootinit.common.BaseResponse;
 import com.yupi.springbootinit.common.ErrorCode;
 import com.yupi.springbootinit.common.ResultUtils;
 import com.yupi.springbootinit.constant.UserConstant;
+import com.yupi.springbootinit.exception.BusinessException;
 import com.yupi.springbootinit.exception.ThrowUtils;
 import com.yupi.springbootinit.mapper.LearningAssessmentRunMapper;
 import com.yupi.springbootinit.mapper.LearningAttemptMapper;
@@ -104,10 +105,16 @@ public class LearningAssessmentRunController {
      */
     @AuthCheck(mustRole = UserConstant.DEFAULT_ROLE)
     @GetMapping("/run")
-    public BaseResponse<RunResult> run(@RequestParam("runId") long runId,
+    public BaseResponse<RunResult> run(@RequestParam("runId") String runId,
                                        HttpServletRequest servletRequest) {
         User user = userService.getLoginUser(servletRequest);
-        LearningAssessmentRun run = requireOwnedRun(runId, user);
+        long parsedRunId;
+        try {
+            parsedRunId = Long.parseLong(runId);
+        } catch (NumberFormatException e) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "测评会话不存在");
+        }
+        LearningAssessmentRun run = requireOwnedRun(parsedRunId, user);
         RunResult result = new RunResult();
         result.setRunId(run.getId());
         result.setStatus(run.getStatus());

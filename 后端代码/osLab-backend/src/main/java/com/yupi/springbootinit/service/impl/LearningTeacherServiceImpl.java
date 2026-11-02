@@ -285,7 +285,7 @@ public class LearningTeacherServiceImpl implements LearningTeacherService {
             if (StringUtils.isNotBlank(question.getMisconception())) {
                 int wrong = 0;
                 for (LearningAttempt a : entry.getValue()) {
-                    if (a.getIsCorrect() == 0) {
+                    if (Integer.valueOf(0).equals(a.getIsCorrect())) {
                         wrong++;
                     }
                 }
@@ -441,7 +441,7 @@ public class LearningTeacherServiceImpl implements LearningTeacherService {
         for (LearningAttempt a : attempts) {
             if (a.getIsFirst() == 1) {
                 first++;
-                if (a.getIsCorrect() == 1) {
+                if (Integer.valueOf(1).equals(a.getIsCorrect())) {
                     firstCorrect++;
                 }
             }
@@ -591,7 +591,7 @@ public class LearningTeacherServiceImpl implements LearningTeacherService {
             int firstCorrect = 0;
             int correct = 0;
             for (LearningAttempt a : list) {
-                if (a.getIsCorrect() == 1) {
+                if (Integer.valueOf(1).equals(a.getIsCorrect())) {
                     correct++;
                     if (a.getIsFirst() == 1) {
                         firstCorrect++;

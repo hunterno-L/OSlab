@@ -79,6 +79,30 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
     @Resource
     private LearningQuestionNodeMapper learningQuestionNodeMapper;
 
+    /** 目录聚合缓存：单次 ~500ms，短 TTL 降低重复计算，作答/审核后失效 */
+    private static final long CATALOG_CACHE_TTL_MS = 10_000L;
+    private final java.util.concurrent.ConcurrentHashMap<String, CatalogCacheItem> catalogCache =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static final class CatalogCacheItem {
+        private final LearningCatalogVO value;
+        private final long at;
+
+        private CatalogCacheItem(LearningCatalogVO value, long at) {
+            this.value = value;
+            this.at = at;
+        }
+    }
+
+    private void invalidateCatalogCache(Long userId) {
+        if (userId == null) {
+            catalogCache.clear();
+            return;
+        }
+        String prefix = userId + ":";
+        catalogCache.keySet().removeIf(key -> key.startsWith(prefix));
+    }
+
     @Resource
     private LearningAttemptMapper learningAttemptMapper;
 
@@ -232,9 +256,8 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
             vo.setHasAttempted(!attempts.isEmpty());
             vo.setAttemptCount(attempts.size());
             if (!attempts.isEmpty()) {
-                vo.setFirstResult(attempts.get(0).getIsCorrect() == 1 ? "CORRECT" : "WRONG");
-                vo.setLatestResult(attempts.get(attempts.size() - 1).getIsCorrect() == 1
-                        ? "CORRECT" : "WRONG");
+                vo.setFirstResult(resultLabel(attempts.get(0).getIsCorrect()));
+                vo.setLatestResult(resultLabel(attempts.get(attempts.size() - 1).getIsCorrect()));
                 vo.setAnalysis(question.getAnalysis());
                 vo.setMisconception(question.getMisconception());
             }
@@ -472,8 +495,8 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
             vo.setAttemptCount(count);
             vo.setHasAttempted(count > 0);
             if (count > 0) {
-                vo.setLatestResult(list.get(count - 1).getIsCorrect() == 1 ? "CORRECT" : "WRONG");
-                vo.setFirstResult(list.get(0).getIsCorrect() == 1 ? "CORRECT" : "WRONG");
+                vo.setLatestResult(resultLabel(list.get(count - 1).getIsCorrect()));
+                vo.setFirstResult(resultLabel(list.get(0).getIsCorrect()));
             }
         }
     }
@@ -641,6 +664,20 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         LearningCatalogRequest req = request == null ? new LearningCatalogRequest() : request;
         String chapterFilter = StringUtils.trimToNull(req.getChapter());
         String studyState = StringUtils.trimToNull(req.getStudyState());
+        String cacheKey = null;
+        if (user != null && user.getId() != null) {
+            cacheKey = user.getId() + ":"
+                    + StringUtils.trimToEmpty(req.getCourseCode()) + "|"
+                    + StringUtils.trimToEmpty(req.getSectionCode()) + "|"
+                    + StringUtils.trimToEmpty(req.getUnitCode()) + "|"
+                    + StringUtils.trimToEmpty(chapterFilter) + "|"
+                    + StringUtils.trimToEmpty(studyState) + "|"
+                    + StringUtils.trimToEmpty(req.getType());
+            CatalogCacheItem cached = catalogCache.get(cacheKey);
+            if (cached != null && System.currentTimeMillis() - cached.at < CATALOG_CACHE_TTL_MS) {
+                return cached.value;
+            }
+        }
 
         // 目录范围：列表/catalog/测评共用同一稳定代码解析器
         LearningQuestionScopeService.Scope scope = questionScope == null ? null : questionScope.resolve(
@@ -726,6 +763,9 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         vo.setNeedsReview(needsReview);
         vo.setCorrect(correct);
         vo.setTypeCounts(typeCounts);
+        if (cacheKey != null) {
+            catalogCache.put(cacheKey, new CatalogCacheItem(vo, System.currentTimeMillis()));
+        }
         return vo;
     }
 
@@ -1015,6 +1055,11 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         return ids;
     }
 
+    private static String resultLabel(Integer isCorrect) {
+        if (isCorrect == null) return null;
+        return isCorrect == 1 ? "CORRECT" : "WRONG";
+    }
+
     private static String stringValue(Object value) {
         return value == null ? null : String.valueOf(value);
     }
@@ -1031,6 +1076,10 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
     @Transactional(rollbackFor = Exception.class)
     public LearningAnswerResultVO answerQuestion(LearningAnswerRequest request, User user) {
         ThrowUtils.throwIf(request == null || request.getQuestionId() == null, ErrorCode.PARAMS_ERROR);
+        Object rawAnswer = request.getAnswer();
+        if (rawAnswer instanceof String && ((String) rawAnswer).length() > 20000) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "答案过长（上限 20000 字）");
+        }
         LearningQuestion question = this.getById(request.getQuestionId());
         ThrowUtils.throwIf(question == null || question.getIsDelete() == 1, ErrorCode.NOT_FOUND_ERROR, "题目不存在");
         boolean taskScoped = com.yupi.springbootinit.task.TaskConstants.SCOPE_TASK.equals(question.getResourceScope());
@@ -1066,7 +1115,23 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
             ThrowUtils.throwIf(!(request.getAnswer() instanceof String)
                             || StringUtils.isBlank((String) request.getAnswer()),
                     ErrorCode.PARAMS_ERROR, "请先填写答案");
+            // 综合应用题不自动判分，但作答要落库，否则学生写完就丢了
+            LearningAttempt comprehensiveAttempt = new LearningAttempt();
+            comprehensiveAttempt.setQuestionId(question.getId());
+            comprehensiveAttempt.setUserId(user.getId());
+            comprehensiveAttempt.setSubmittedAnswer(submittedToJson(request.getAnswer()));
+            comprehensiveAttempt.setIsCorrect(null);
+            comprehensiveAttempt.setIsFirst(0);
+            comprehensiveAttempt.setHasViewedAnalysis(1);
+            comprehensiveAttempt.setSubmissionKey(request.getSubmissionKey());
+            comprehensiveAttempt.setEvaluationIdentity(evaluationIdentity);
+            comprehensiveAttempt.setQuestionRevision(question.getRevision());
+            comprehensiveAttempt.setQuestionSnapshot(JSONUtil.toJsonStr(question));
+            learningAttemptMapper.insert(comprehensiveAttempt);
+            invalidateCatalogCache(user.getId());
+
             LearningAnswerResultVO result = new LearningAnswerResultVO();
+            result.setAttemptId(comprehensiveAttempt.getId());
             result.setCorrect(null);
             result.setAnalysis(question.getAnalysis());
             result.setMisconception(question.getMisconception());
@@ -1140,6 +1205,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
 
         List<MasteryChangeVO> changes = learningEventService.recordAttemptEvents(
                 user.getId(), question, attempt.getId(), correct, isFirst);
+        invalidateCatalogCache(user.getId());
 
         LearningAnswerResultVO result = new LearningAnswerResultVO();
         result.setAttemptId(attempt.getId());
@@ -1158,7 +1224,8 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
                                                             LearningQuestion question) {
         LearningAnswerResultVO result = new LearningAnswerResultVO();
         result.setAttemptId(attempt.getId());
-        result.setCorrect(attempt.getIsCorrect() == 1);
+        Integer storedCorrect = attempt.getIsCorrect();
+        result.setCorrect(storedCorrect == null ? null : storedCorrect == 1);
         LearningQuestion snapshot = StringUtils.isBlank(attempt.getQuestionSnapshot()) ? question
                 : JSONUtil.toBean(attempt.getQuestionSnapshot(), LearningQuestion.class);
         result.setAnalysis(snapshot.getAnalysis());
@@ -1175,6 +1242,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean reviewQuestion(LearningQuestionReviewRequest request, User operator) {
+        invalidateCatalogCache(null);
         ThrowUtils.throwIf(request == null || request.getQuestionId() == null, ErrorCode.PARAMS_ERROR);
         ReviewActionEnum action = parseAction(request.getAction());
         LearningQuestion question = this.getById(request.getQuestionId());

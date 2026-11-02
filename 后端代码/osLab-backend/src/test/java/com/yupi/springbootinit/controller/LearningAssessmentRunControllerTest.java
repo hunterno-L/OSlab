@@ -73,7 +73,7 @@ class LearningAssessmentRunControllerTest {
         when(attemptMapper.selectList(any())).thenReturn(List.of());
 
         LearningAssessmentRunController.RunQuestionVO question = (LearningAssessmentRunController.RunQuestionVO)
-                controller.run(41L, servletRequest).getData().getQuestions().get(0);
+                controller.run("41", servletRequest).getData().getQuestions().get(0);
 
         assertFalse(question.getHasAttempted());
         assertEquals(0, question.getAttemptCount());
@@ -97,7 +97,7 @@ class LearningAssessmentRunControllerTest {
         when(attemptMapper.selectList(any())).thenReturn(List.of(first, retry));
 
         LearningAssessmentRunController.RunQuestionVO question = (LearningAssessmentRunController.RunQuestionVO)
-                controller.run(41L, servletRequest).getData().getQuestions().get(0);
+                controller.run("41", servletRequest).getData().getQuestions().get(0);
 
         assertTrue(question.getHasAttempted());
         assertEquals(2, question.getAttemptCount());
@@ -114,7 +114,7 @@ class LearningAssessmentRunControllerTest {
         when(questionService.getQuestionVOs(List.of(101L), user)).thenReturn(List.of());
 
         LearningAssessmentRunController.RunQuestionVO question = (LearningAssessmentRunController.RunQuestionVO)
-                controller.run(41L, servletRequest).getData().getQuestions().get(0);
+                controller.run("41", servletRequest).getData().getQuestions().get(0);
 
         assertEquals(101L, question.getId());
         assertTrue(question.getOffline());
@@ -171,7 +171,7 @@ class LearningAssessmentRunControllerTest {
     void runAndFinishRejectAnotherUsersSessionBeforeReadingAttempts() {
         run.setUserId(8L);
         assertEquals(ErrorCode.NO_AUTH_ERROR.getCode(),
-                assertThrows(BusinessException.class, () -> controller.run(41L, servletRequest)).getCode());
+                assertThrows(BusinessException.class, () -> controller.run("41", servletRequest)).getCode());
         assertEquals(ErrorCode.NO_AUTH_ERROR.getCode(),
                 assertThrows(BusinessException.class, () -> controller.finish(finishRequest(), servletRequest)).getCode());
         verifyNoInteractions(attemptMapper, questionService);

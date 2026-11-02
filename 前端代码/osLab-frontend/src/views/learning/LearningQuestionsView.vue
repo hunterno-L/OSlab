@@ -759,10 +759,14 @@ const onAnswered = (
   question: LearningQuestionVO,
   result: LearningAnswerResultVO
 ) => {
-  if (result.correct === null) return;
   question.hasAttempted = true;
   question.attemptCount = (question.attemptCount || 0) + 1;
-  question.latestResult = result.correct ? "CORRECT" : "WRONG";
+  if (result.correct === null) {
+    // 综合应用题：保存作答但不自动判分
+    Message.info("已保存作答，综合题不自动评分");
+  } else {
+    question.latestResult = result.correct ? "CORRECT" : "WRONG";
+  }
   // 只刷新目录计数，不重载列表：避免其他题卡与当前反馈被冲掉
   void refreshCatalog(false);
 };
