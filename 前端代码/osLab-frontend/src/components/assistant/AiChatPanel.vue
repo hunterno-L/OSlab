@@ -99,7 +99,7 @@
       aria-label="AI 对话记录"
     >
       <div v-if="messages.length === 0 && !loading" class="ai-panel-empty">
-        <p>
+        <p v-if="!nextActions.length">
           导师会带入当前课程、所在页面和本人学习记录作答，并给出可执行的下一步。
         </p>
         <div class="ai-panel-prompts">
