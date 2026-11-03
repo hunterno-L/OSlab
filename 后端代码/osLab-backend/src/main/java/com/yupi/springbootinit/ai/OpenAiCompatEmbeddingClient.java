@@ -44,8 +44,8 @@ public class OpenAiCompatEmbeddingClient implements EmbeddingClient {
     public boolean available() {
         AiProperties.Ark ark = properties.getArk();
         return ark != null
-                && StringUtils.isNotBlank(ark.getApiKey())
-                && StringUtils.isNotBlank(ark.getBaseUrl())
+                && StringUtils.isNotBlank(resolvedApiKey(ark))
+                && StringUtils.isNotBlank(resolvedBaseUrl(ark))
                 && StringUtils.isNotBlank(ark.getEmbeddingModel());
     }
 
@@ -65,7 +65,8 @@ public class OpenAiCompatEmbeddingClient implements EmbeddingClient {
         }
         if (!available()) {
             throw new EmbeddingUnavailableException(
-                    "未配置可用的 embedding 模型（AI_ARK_EMBEDDING_MODEL）");
+                    "未配置可用的 embedding 模型（AI_ARK_EMBEDDING_MODEL，"
+                            + "独立端点另需 AI_EMBEDDING_BASE_URL / AI_EMBEDDING_API_KEY）");
         }
         AiProperties.Ark ark = properties.getArk();
         List<String> sanitized = new ArrayList<>(texts.size());
@@ -139,8 +140,8 @@ public class OpenAiCompatEmbeddingClient implements EmbeddingClient {
         }
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
-        headers.put("Authorization", "Bearer " + ark.getApiKey());
-        HttpJsonTransport.Response response = transport.post(url(ark.getBaseUrl()), headers, body,
+        headers.put("Authorization", "Bearer " + resolvedApiKey(ark));
+        HttpJsonTransport.Response response = transport.post(url(resolvedBaseUrl(ark)), headers, body,
                 properties.getConnectTimeoutMs(), properties.getRequestTimeoutMs());
         if (response.getStatus() != 200) {
             // 不把响应体与密钥写进日志；只保留状态码与简短原因
@@ -159,6 +160,15 @@ public class OpenAiCompatEmbeddingClient implements EmbeddingClient {
         } catch (Exception e) {
             throw new EmbeddingUnavailableException("embedding 响应不是合法 JSON", e);
         }
+    }
+
+    /** 独立 embedding 端点优先；未单独配置时复用对话端点，保持单端点部署兼容。 */
+    private static String resolvedBaseUrl(AiProperties.Ark ark) {
+        return StringUtils.defaultIfBlank(ark.getEmbeddingBaseUrl(), ark.getBaseUrl());
+    }
+
+    private static String resolvedApiKey(AiProperties.Ark ark) {
+        return StringUtils.defaultIfBlank(ark.getEmbeddingApiKey(), ark.getApiKey());
     }
 
     static String url(String baseUrl) {

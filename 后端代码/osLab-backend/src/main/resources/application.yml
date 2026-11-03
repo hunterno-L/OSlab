@@ -133,6 +133,10 @@ ai:
     # Embedding model for hybrid retrieval. Leave empty when the credential has no
     # embedding access: retrieval then degrades to keyword+graph and reports mode=FALLBACK.
     embedding-model: ${AI_ARK_EMBEDDING_MODEL:}
+    # Embedding may live on a different OpenAI-compatible endpoint than chat.
+    # Leave both empty to reuse the chat base URL and key.
+    embedding-base-url: ${AI_EMBEDDING_BASE_URL:}
+    embedding-api-key: ${AI_EMBEDDING_API_KEY:}
   # Master key for encrypting personal API keys at rest (AES-256-GCM). Never put a default here.
   master-key: ${OSLAB_AI_MASTER_KEY:}
   # Explicitly allow personal baseUrl pointing at loopback/private ranges (local model deployments).

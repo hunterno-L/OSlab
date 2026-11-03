@@ -43,6 +43,13 @@ public class AiProperties {
          * 检索必须诚实降级为关键词+图谱并标注 mode=FALLBACK，不得包装成语义检索。
          */
         private String embeddingModel = "";
+        /**
+         * 独立 embedding 服务的 OpenAI 兼容地址（例如对话用 DeepSeek、向量用阿里云）。
+         * 留空时复用 {@link #baseUrl}，保持既有单端点部署不变。
+         */
+        private String embeddingBaseUrl = "";
+        /** 独立 embedding 服务的密钥；留空时复用 {@link #apiKey}。 */
+        private String embeddingApiKey = "";
     }
 
     /** 导师轮次预算：每轮最多 3 次工具执行、2 次模型调用（计划 §5.3）。 */

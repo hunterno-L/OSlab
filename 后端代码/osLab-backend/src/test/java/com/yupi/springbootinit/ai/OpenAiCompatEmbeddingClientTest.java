@@ -24,6 +24,7 @@ class OpenAiCompatEmbeddingClientTest {
     private static class RecordingTransport implements HttpJsonTransport {
         final List<String> urls = new ArrayList<>();
         final List<String> bodies = new ArrayList<>();
+        final List<Map<String, String>> requestHeaders = new ArrayList<>();
         int status = 200;
         String body = "{}";
         /** 每次调用返回不同响应，用于批量测试。 */
@@ -35,6 +36,7 @@ class OpenAiCompatEmbeddingClientTest {
                              int connectTimeoutMs, int readTimeoutMs) {
             urls.add(url);
             bodies.add(body);
+            requestHeaders.add(new java.util.HashMap<>(headers));
             String response = scripted != null && call < scripted.size() ? scripted.get(call) : this.body;
             call++;
             return new Response(status, response);
@@ -100,6 +102,26 @@ class OpenAiCompatEmbeddingClientTest {
         assertEquals("emb-model", result.getModel());
         assertEquals("https://ark.cn-beijing.volces.com/api/v3/embeddings", transport.urls.get(0));
         assertTrue(transport.bodies.get(0).contains("\"model\":\"emb-model\""));
+        assertEquals("Bearer sk-key", transport.requestHeaders.get(0).get("Authorization"),
+                "未单独配置时复用对话端点的密钥");
+    }
+
+    @Test
+    void dedicatedEmbeddingEndpointUsesItsOwnBaseUrlAndKey() {
+        AiProperties properties = properties("qwen3.7-text-embedding");
+        properties.getArk().setEmbeddingBaseUrl("https://ws.example.com/compatible-mode/v1");
+        properties.getArk().setEmbeddingApiKey("sk-embed");
+        RecordingTransport transport = new RecordingTransport();
+        transport.body = "{\"data\":[{\"index\":0,\"embedding\":[0.1,0.2]}]}";
+        OpenAiCompatEmbeddingClient client =
+                new OpenAiCompatEmbeddingClient(properties, transport);
+
+        client.embed(Collections.singletonList("LRU"));
+
+        assertEquals("https://ws.example.com/compatible-mode/v1/embeddings", transport.urls.get(0),
+                "独立 embedding 端点必须优先于对话端点");
+        assertEquals("Bearer sk-embed", transport.requestHeaders.get(0).get("Authorization"));
+        assertTrue(transport.bodies.get(0).contains("\"model\":\"qwen3.7-text-embedding\""));
     }
 
     @Test
