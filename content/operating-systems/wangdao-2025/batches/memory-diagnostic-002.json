@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "batchCode": "batch.wd25.memory.diagnostic.002",
+  "title": "页面置换 · 诊断迁移活动（4 道，人工核验）",
+  "date": "2026-11-03",
+  "status": "DRAFT",
+  "courseCode": "course.operating-systems",
+  "catalogFiles": [
+    "catalog/sources.json",
+    "catalog/sections.json",
+    "catalog/nodes.json",
+    "catalog/demos.json"
+  ],
+  "questionPackage": "questions/a-memory-diagnostic-002.json",
+  "counts": {
+    "questions": 4,
+    "selfAuthoredQuestions": 4
+  },
+  "importOrder": ["catalog", "questionPackage"],
+  "verification": "逐题按 FIFO/LRU 确定性轨迹复算：LRU 命中后顺序 4→3→5，换出 4；FIFO 命中不重排，换出 6；同序列 FIFO 换出 1、LRU 换出 2；4 页框序列缺页 9 次、换出 5 次。",
+  "note": "对应首页/题卡中的诊断迁移活动；不使用同一道题的改名版本制造独立证据。"
+}

@@ -1,0 +1,174 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "UNITS",
+  "batchCode": "batch.db.fd-keys.001",
+  "title": "数据库系统 · 函数依赖与候选键",
+  "contributor": "S2",
+  "courseCode": "course.database-systems",
+  "note": "1 个学习单元：3 段讲义 + 6 道客观题；导入后经审核发布。",
+  "units": [
+    {
+      "unitCode": "unit.db.fd-keys",
+      "sectionCode": "sec.db.fd",
+      "title": "函数依赖、属性闭包与候选键",
+      "objectives": [
+        "能计算给定函数依赖集下的属性闭包。",
+        "能根据闭包判断超键，并区分超键与候选键。",
+        "能用最小性条件验证候选键，说明一个关系模式可能有多个候选键。"
+      ],
+      "sortOrder": 1,
+      "estimatedMinutes": 35,
+      "status": "DRAFT",
+      "nodeMappings": [
+        {
+          "nodeCode": "db.fd.attribute-closure",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "db.fd.superkey",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "db.fd.candidate-key",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.db.fd.closure-basic",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.db.fd.closure-composite",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.db.fd.superkey-judge",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.db.fd.candidate-minimal",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.db.fd.candidate-count",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.db.fd.superkey-not-candidate",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.db.fd.read.closure",
+          "activityType": "READING",
+          "title": "阅读：属性闭包的定义与计算",
+          "required": true,
+          "sortOrder": 1,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.db.fd.closure"
+          },
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.db.fd.read.keys",
+          "activityType": "READING",
+          "title": "阅读：超键与候选键",
+          "required": true,
+          "sortOrder": 2,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.db.fd.superkey"
+          },
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.db.fd.read.minimality",
+          "activityType": "READING",
+          "title": "阅读：候选键最小性判定例题",
+          "required": true,
+          "sortOrder": 3,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.db.fd.minimality"
+          },
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.db.fd.practice.closure-basic",
+          "activityType": "PRACTICE",
+          "title": "练习：求属性 A 的闭包",
+          "required": true,
+          "sortOrder": 4,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.db.fd.closure-basic"
+          },
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.db.fd.practice.closure-composite",
+          "activityType": "PRACTICE",
+          "title": "练习：复合决定因素的闭包",
+          "required": true,
+          "sortOrder": 5,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.db.fd.closure-composite"
+          },
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.db.fd.practice.superkey",
+          "activityType": "PRACTICE",
+          "title": "练习：判断超键",
+          "required": true,
+          "sortOrder": 6,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.db.fd.superkey-judge"
+          },
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.db.fd.practice.candidate-minimal",
+          "activityType": "PRACTICE",
+          "title": "练习：选择最小候选键",
+          "required": true,
+          "sortOrder": 7,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.db.fd.candidate-minimal"
+          },
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.db.fd.practice.superkey-not-candidate",
+          "activityType": "PRACTICE",
+          "title": "练习：超键但不是候选键",
+          "required": true,
+          "sortOrder": 8,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.db.fd.superkey-not-candidate"
+          },
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.db.fd.assessment.candidate-count",
+          "activityType": "ASSESSMENT",
+          "title": "测评：统计候选键个数",
+          "required": true,
+          "sortOrder": 9,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.db.fd.candidate-count"
+          },
+          "completionRule": "PASS"
+        }
+      ]
+    }
+  ]
+}

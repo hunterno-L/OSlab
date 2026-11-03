@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "batchCode": "batch.db.fd-keys.001",
+  "title": "数据库系统 · 函数依赖与候选键（3 知识点 + 3 讲义 + 6 题）",
+  "date": "2026-11-03",
+  "status": "DRAFT",
+  "courseCode": "course.database-systems",
+  "catalogFiles": [
+    "catalog/sources.json",
+    "catalog/sections.json",
+    "catalog/nodes.json",
+    "catalog/demos.json"
+  ],
+  "knowledgePackage": "knowledge/k-db-fd-keys-001.json",
+  "questionPackage": "questions/q-db-fd-keys-001.json",
+  "unitPackage": "units/u-db-fd-keys-001.json",
+  "misconceptionMapping": "misconceptions.json",
+  "counts": {
+    "knowledgeNodes": 3,
+    "contentChunks": 3,
+    "relations": 3,
+    "questions": 6,
+    "units": 1,
+    "activities": 9
+  },
+  "importOrder": ["catalog", "knowledgePackage", "unitPackage", "questionPackage"],
+  "verification": "逐题按属性闭包法复核：A+={A,B,C}；(AB)+={A,B,C,D,E}；A+ 与 B+ 均包含全部属性时存在两个候选键；{A,B} 是超键但不是最小超键。",
+  "note": "新课程包仅使用普通客观题与讲义，不依赖页面置换工具；导师与检索服务应能按课程隔离复用。"
+}
