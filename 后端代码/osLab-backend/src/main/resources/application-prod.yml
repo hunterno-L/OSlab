@@ -10,6 +10,12 @@ ai:
     api-key: ${AI_ARK_API_KEY:}
     base-url: ${AI_ARK_BASE_URL:https://ark.cn-beijing.volces.com/api/v3}
     model: ${AI_ARK_MODEL:deepseek-v3-250324}
+    # Embedding access is a separate credential capability; leave empty to degrade retrieval honestly.
+    embedding-model: ${AI_ARK_EMBEDDING_MODEL:}
+  # Master key for API keys at rest. Deployment must provide it; without it personal profiles cannot be saved.
+  master-key: ${OSLAB_AI_MASTER_KEY:}
+  # Only set true when a local model on the deployment host is intentionally exposed.
+  allow-private-base-url: ${AI_ALLOW_PRIVATE_BASE_URL:false}
 cors:
   # Comma-separated exact origins, for example: https://platform.example.edu.cn
   # Leave empty to disable browser cross-origin access.
