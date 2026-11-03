@@ -33,6 +33,8 @@ const AssessmentRunView = () =>
   import("@/views/learning/AssessmentRunView.vue");
 const HomeView = () => import("@/views/HomeView.vue");
 const StudentProfileView = () => import("@/views/user/StudentProfileView.vue");
+const ModelSettingsView = () =>
+  import("@/views/settings/ModelSettingsView.vue");
 const MyTasksView = () => import("@/views/tasks/MyTasksView.vue");
 const TaskDetailView = () => import("@/views/tasks/TaskDetailView.vue");
 const TeachingTasksView = () => import("@/views/tasks/TeachingTasksView.vue");
@@ -236,6 +238,18 @@ export const routes: Array<RouteRecordRaw> = [
         name: "学生信息",
         component: StudentProfileView,
         meta: { access: ACCESS_ENUM.USER, hideInMenu: true },
+      },
+      {
+        path: "/settings/models",
+        name: "模型设置",
+        component: ModelSettingsView,
+        meta: {
+          access: ACCESS_ENUM.USER,
+          hideInMenu: true,
+          hideSidebar: true,
+          pageTitle: "模型设置",
+          contentWidth: "wide",
+        },
       },
       {
         path: "/classes",

@@ -6,6 +6,95 @@
         >{{ total }} 条学习活动</span
       >
     </header>
+
+    <section
+      class="section-card records-ai-panel"
+      aria-labelledby="records-ai-title"
+    >
+      <header class="records-ai-head">
+        <div>
+          <h2 id="records-ai-title">AI 诊断与复习</h2>
+          <p class="hint">
+            诊断只引用本人已记录的证据；帮助情况、复测与下次复习以服务端返回为准。
+          </p>
+        </div>
+        <span v-if="dueReviewCount" class="records-ai-due"
+          >{{ dueReviewCount }} 项到期复习</span
+        >
+      </header>
+      <div class="records-ai-help">
+        <span class="records-ai-label">最近一次 AI 动作</span>
+        <AiHelpBadge
+          :level="lastSubmitResult?.evidence?.helpLevel || 'UNKNOWN'"
+        />
+        <span v-if="lastSubmitResult" class="hint">{{
+          lastSubmitResult.judgeMessage
+        }}</span>
+        <span v-else class="hint"
+          >历史帮助等级以作答前后平台记录为准；普通练习不生成帮助快照。</span
+        >
+        <span v-if="lastSubmitResult?.nextReviewDueAt" class="hint"
+          >下次复习：{{ lastSubmitResult.nextReviewDueAt }}</span
+        >
+      </div>
+      <div class="records-ai-actions">
+        <a-button
+          size="small"
+          type="primary"
+          :loading="diagnosisLoading"
+          :disabled="!diagnosisNode"
+          @click="requestDiagnosis"
+        >
+          核对诊断依据
+        </a-button>
+        <span v-if="!diagnosisNode" class="hint"
+          >先在筛选或待巩固列表选择知识点。</span
+        >
+        <span v-else class="hint">当前知识点：{{ diagnosisNode }}</span>
+        <button
+          type="button"
+          class="records-ai-refresh"
+          @click="refreshRecordsPlan"
+        >
+          刷新下一步
+        </button>
+      </div>
+      <p v-if="diagnosisError" class="hint records-ai-error" role="alert">
+        {{ diagnosisError }}
+      </p>
+      <template v-if="diagnosisTurn">
+        <MdViewer
+          v-if="diagnosisTurn.answer"
+          class="records-ai-answer"
+          :value="diagnosisTurn.answer"
+        />
+        <AiDiagnosisPanel :diagnosis="diagnosisTurn.diagnosis" />
+        <AiToolTrace :entries="diagnosisTurn.toolTrace" />
+        <div v-if="diagnosisTurn.sources?.length" class="records-ai-sources">
+          <AiSourceCard
+            v-for="(source, index) in diagnosisTurn.sources"
+            :key="source.sourceId + source.blockId"
+            :source="source"
+            :index="index"
+            @open="openDiagnosisSource"
+          />
+        </div>
+      </template>
+      <AiNextActions
+        :actions="nextActions"
+        :course-code="filters.courseCode || 'course.operating-systems'"
+        :loading="nextActionsLoading"
+        :error="nextActionsError"
+        :due-count="dueReviewCount"
+        title="复习计划"
+        empty-text="完成一次作答或预测后会生成复习任务。"
+        compact
+        :limit="3"
+        :refreshable="false"
+        @refresh="refreshRecordsPlan"
+      />
+    </section>
+
     <section v-if="activeView === 'timeline'">
       <div class="filter-bar">
         <a-input
@@ -744,6 +833,25 @@ import {
   type QuestionSubmitVO,
 } from "../../../generated";
 import KnowledgeGraph from "@/components/KnowledgeGraph.vue";
+import MdViewer from "@/components/MdViewer.vue";
+import AiHelpBadge from "@/components/ai/AiHelpBadge.vue";
+import AiDiagnosisPanel from "@/components/ai/AiDiagnosisPanel.vue";
+import AiToolTrace from "@/components/ai/AiToolTrace.vue";
+import AiSourceCard from "@/components/ai/AiSourceCard.vue";
+import AiNextActions from "@/components/ai/AiNextActions.vue";
+import { useAiActions } from "@/composables/useAiActions";
+import { askAi, useAiConversation } from "@/composables/useAiConversation";
+import {
+  getAiPageContext,
+  registerAiPageContext,
+  unregisterAiPageContext,
+} from "@/composables/useAiPageContext";
+import type { AiSourceRef, AiTurnVO } from "@/api/ai";
+import {
+  aiSourceRoute,
+  highlightSourceInPage,
+  openAiMaterialSource,
+} from "@/utils/aiSources";
 import { scoreText } from "@/utils/masteryDisplay";
 
 const route = useRoute();
@@ -1056,6 +1164,93 @@ const weakLoading = ref(false);
 const weakError = ref("");
 const weakNodes = ref<WeakNodeVO[]>([]);
 const weakLoaded = ref(false);
+
+// ---------- AI 诊断与复习（只引用服务端证据，不生成分数） ----------
+const { lastSubmitResult } = useAiActions();
+const {
+  nextActions,
+  nextActionsLoading,
+  nextActionsError,
+  dueReviewCount,
+  refreshNextActions,
+} = useAiConversation();
+const diagnosisTurn = ref<AiTurnVO | null>(null);
+const diagnosisLoading = ref(false);
+const diagnosisError = ref("");
+
+const diagnosisNode = computed(
+  () => filters.nodeName.trim() || weakNodes.value[0]?.nodeName || ""
+);
+const diagnosisContext = computed(() => {
+  const name = diagnosisNode.value;
+  if (!name) return { nodeCodes: [] as string[], eventIds: [] as string[] };
+  for (const activity of activities.value) {
+    const ref = (activity.nodeRefs || []).find(
+      (item) => item.nodeName === name || item.nodeCode === name
+    );
+    if (ref) {
+      return {
+        nodeCodes: ref.nodeCode ? [ref.nodeCode] : [],
+        eventIds: ref.eventId ? [String(ref.eventId)] : [],
+      };
+    }
+  }
+  return { nodeCodes: [] as string[], eventIds: [] as string[] };
+});
+
+async function requestDiagnosis() {
+  const node = diagnosisNode.value;
+  if (!node || diagnosisLoading.value) return;
+  diagnosisLoading.value = true;
+  diagnosisError.value = "";
+  try {
+    const turn = await askAi(
+      `请核对我对知识点「${node}」的薄弱诊断：列出依据的事件编号、可能原因和仍需核验的任务；证据不足时请明确说明，不要直接判定唯一原因。`,
+      {
+        context: {
+          courseCode: filters.courseCode || undefined,
+          nodeCodes: diagnosisContext.value.nodeCodes,
+          eventIds: diagnosisContext.value.eventIds,
+        },
+      }
+    );
+    if (!turn) {
+      diagnosisError.value = "诊断暂时不可用，请稍后重试。";
+      return;
+    }
+    diagnosisTurn.value = turn;
+  } finally {
+    diagnosisLoading.value = false;
+  }
+}
+
+function refreshRecordsPlan() {
+  void refreshNextActions({
+    courseCode:
+      filters.courseCode || getAiPageContext()?.courseCode || undefined,
+    limit: 5,
+  });
+}
+
+function openDiagnosisSource(source: AiSourceRef) {
+  if (openAiMaterialSource(source)) return;
+  if (highlightSourceInPage(source)) return;
+  const routeTarget = aiSourceRoute(source);
+  if (routeTarget) void router.push(routeTarget);
+}
+
+const aiRecordsContextProvider = () => ({
+  pageName: "学习记录",
+  courseCode: filters.courseCode || undefined,
+  nodeName: filters.nodeName || undefined,
+});
+
+onMounted(() => {
+  registerAiPageContext(aiRecordsContextProvider);
+});
+onBeforeUnmount(() => {
+  unregisterAiPageContext(aiRecordsContextProvider);
+});
 
 const loadWeakness = async () => {
   weakLoading.value = true;
@@ -1648,6 +1843,7 @@ watch(
 );
 onMounted(() => {
   void loadCourses();
+  refreshRecordsPlan();
 });
 onBeforeUnmount(() => {
   timelineSequence += 1;
@@ -1673,6 +1869,94 @@ onBeforeUnmount(() => {
   margin: 0;
   font-size: 22px;
   color: var(--oslab-text-title);
+}
+.records-ai-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+}
+.records-ai-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.records-ai-head h2 {
+  margin: 0;
+  color: var(--oslab-ink);
+  font-family: var(--oslab-font-display);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+.records-ai-head .hint {
+  margin: 4px 0 0;
+  max-width: 72ch;
+}
+.records-ai-due {
+  flex: none;
+  padding: 1px 7px;
+  border: 1px solid var(--oslab-review);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--oslab-review-text);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+.records-ai-help,
+.records-ai-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.records-ai-help {
+  padding: 8px 0;
+  border-top: 1px solid var(--oslab-line-soft);
+  border-bottom: 1px solid var(--oslab-line-soft);
+}
+.records-ai-label {
+  color: var(--oslab-muted-strong);
+  font-size: var(--oslab-text-small);
+  font-weight: 600;
+}
+.records-ai-refresh {
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--oslab-muted-strong);
+  font: inherit;
+  font-size: var(--oslab-text-small);
+  cursor: pointer;
+}
+.records-ai-refresh:hover {
+  border-bottom-color: currentColor;
+  color: var(--oslab-primary);
+}
+.records-ai-refresh:focus-visible {
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: 2px;
+  border-radius: var(--oslab-radius-sm);
+}
+.records-ai-error {
+  color: var(--oslab-weak-text);
+}
+.records-ai-answer {
+  color: var(--oslab-ink-soft);
+  font-size: var(--oslab-font-body);
+}
+.records-ai-sources {
+  display: flex;
+  flex-direction: column;
+}
+.records-ai-panel :deep(.ai-next-actions) {
+  padding-top: 10px;
+  border-top: 1px solid var(--oslab-line-soft);
 }
 
 /* ---- 筛选栏 ---- */

@@ -74,6 +74,10 @@
             <template #icon><icon-history /></template>
             学习记录
           </a-doption>
+          <a-doption value="models">
+            <template #icon><icon-settings /></template>
+            AI 模型设置
+          </a-doption>
           <a-doption value="logout">
             <template #icon><icon-export /></template>
             退出登录
@@ -181,6 +185,10 @@ const handleProfileAction = async (value: string | number) => {
   }
   if (value === "records") {
     await router.push({ path: "/records" });
+    return;
+  }
+  if (value === "models") {
+    await router.push({ path: "/settings/models" });
     return;
   }
   if (value === "classes") {
@@ -383,6 +391,14 @@ const handleProfileAction = async (value: string | number) => {
     grid-column: 1 / -1;
     grid-row: 2;
     width: 100%;
+    gap: 2px;
+    padding-right: 28px;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      #000 calc(100% - 24px),
+      transparent
+    );
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
   }
   .header-search {
     grid-column: 1 / 2;
@@ -395,7 +411,8 @@ const handleProfileAction = async (value: string | number) => {
   }
   .main-nav-link {
     min-height: 34px;
-    padding: 0 11px;
+    padding: 0 9px;
+    font-size: 12px;
   }
   .user-info {
     max-width: 180px;
@@ -414,6 +431,10 @@ const handleProfileAction = async (value: string | number) => {
   }
   .user-name {
     max-width: 84px;
+  }
+  .main-nav-link {
+    padding: 0 8px;
+    font-size: 11px;
   }
   .logo {
     width: 30px;
