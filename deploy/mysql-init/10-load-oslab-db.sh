@@ -17,6 +17,8 @@ set -eu
 #   9. oslab_upgrade_v8_teaching_tasks.sql 学习任务/私有执行副本/任务附件与证据来源
 #  10. oslab_upgrade_v9_learning_activities.sql 普通演示运行记录（与掌握证据分离）
 #  11. oslab_upgrade_v10_classes.sql 班级与成员管理
+#  12. oslab_upgrade_v11_ai_session.sql   AI 会话/轮次/资料与个人密钥密文（2026-11 升级）
+#  13. oslab_upgrade_v12_ai_evidence.sql  模型配置/证据上下文与复习项（2026-11 升级）
 # 所有文件均为必需：缺挂载即失败退出，不再静默跳过（失败即失败，不吞错）。
 # 已有数据卷不会重跑本目录脚本；存量库请使用
 #   数据库文件/oslab_upgrade_existing_check.sql
@@ -38,17 +40,19 @@ load_required_seed() {
 }
 
 echo "=== OSLab 数据库初始化：开始加载 ==="
-load_required_seed /seed/oslab_db.sql                    "1/11 基础库 oslab_db.sql"
-load_required_seed /seed/oslab_upgrade_v3_learning.sql   "2/11 v3 学习闭环表"
-load_required_seed /seed/oslab_upgrade_v4_flow.sql       "3/11 v4 测评会话/幂等/快照"
-load_required_seed /seed/oslab_upgrade_v5_teaching.sql   "4/11 v5 教学素材表"
-load_required_seed /seed/oslab_demo_seed_v3.sql          "5/11 v3 演示种子"
-load_required_seed /seed/oslab_seed_v4_content.sql       "6/11 v4 内容种子"
-load_required_seed /seed/oslab_upgrade_v6_courses.sql    "7/11 v6 课程/内容/进度草稿"
-load_required_seed /seed/oslab_upgrade_v7_identity.sql   "8/11 v7 稳定身份/修订/提交上下文"
-load_required_seed /seed/oslab_upgrade_v8_teaching_tasks.sql "9/11 v8 学习任务/执行副本/任务附件"
-load_required_seed /seed/oslab_upgrade_v9_learning_activities.sql "10/11 v9 普通演示运行记录"
-load_required_seed /seed/oslab_upgrade_v10_classes.sql "11/11 v10 班级与成员管理"
+load_required_seed /seed/oslab_db.sql                    "1/13 基础库 oslab_db.sql"
+load_required_seed /seed/oslab_upgrade_v3_learning.sql   "2/13 v3 学习闭环表"
+load_required_seed /seed/oslab_upgrade_v4_flow.sql       "3/13 v4 测评会话/幂等/快照"
+load_required_seed /seed/oslab_upgrade_v5_teaching.sql   "4/13 v5 教学素材表"
+load_required_seed /seed/oslab_demo_seed_v3.sql          "5/13 v3 演示种子"
+load_required_seed /seed/oslab_seed_v4_content.sql       "6/13 v4 内容种子"
+load_required_seed /seed/oslab_upgrade_v6_courses.sql    "7/13 v6 课程/内容/进度草稿"
+load_required_seed /seed/oslab_upgrade_v7_identity.sql   "8/13 v7 稳定身份/修订/提交上下文"
+load_required_seed /seed/oslab_upgrade_v8_teaching_tasks.sql "9/13 v8 学习任务/执行副本/任务附件"
+load_required_seed /seed/oslab_upgrade_v9_learning_activities.sql "10/13 v9 普通演示运行记录"
+load_required_seed /seed/oslab_upgrade_v10_classes.sql "11/13 v10 班级与成员管理"
+load_required_seed /seed/oslab_upgrade_v11_ai_session.sql "12/13 v11 AI 会话/轮次/资料/密钥密文"
+load_required_seed /seed/oslab_upgrade_v12_ai_evidence.sql "13/13 v12 模型配置/证据上下文/复习项"
 
 # ---------------------------------------------------------------------
 # 加载后契约校验（§6.1.2-6）：逐项核对 information_schema，任一不符即整体失败。
@@ -127,6 +131,11 @@ expect_scalar \
 expect_scalar \
     "SELECT COUNT(*) FROM learning_node_content" \
     12 "节点素材种子共 12 条"
+
+# 10) v11/v12 AI 七张表存在（2026-11 升级）
+expect_scalar \
+    "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('ai_learning_session','ai_tutor_turn','ai_material','ai_material_chunk','ai_model_profile','learning_evidence_context','learning_review_item')" \
+    7 "v11/v12 AI 七张表存在"
 
 expect_scalar \
     "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('course_catalog','course_section','learning_content_chunk','learning_unit','learning_unit_position','knowledge_node_registry','knowledge_node_relation','experiment_node')" \

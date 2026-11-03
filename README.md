@@ -3,6 +3,8 @@
 面向操作系统课程的智能学习与实验平台：以教材目录和学习单元组织循序渐进的学习，以知识图谱连接概念、资源和个人证据，把题目作答、代码提交和模拟预测转化为可解释的学习画像。
 
 > 当前产品品牌为 **ZhiCore**；仓库名、前端包名和部分历史文档仍沿用 `OSLab` / `oslab`。
+>
+> **2026-11 AI 升级**：平台把课程、资料、题目、模拟、图谱与记录连成可验证的 AI 学习流程——统一课程会话与导师编排（工具预算与轨迹可查）、语义+关键词+图谱联合检索（向量存 MySQL，不引入向量数据库）、帮助等级与证据资格、诊断与区分验证任务、下一步与复习阶梯、用户可配置模型档案；并以数据库系统第二课程包验证引擎跨课程复用。规格见 [交付计划](docs/ZhiCore整体AI升级-交付计划.md)，执行约束见 [开发约束与子代理任务书](docs/ZhiCore整体AI升级-开发约束与子代理任务书.md)。
 
 公开入口为 `/welcome`（落地页 + 登录/注册弹层）；登录后学生默认进入 `/graph`（课程学习），`/home` 为学习首页，`/teaching/content` 为教师内容维护入口。教材驱动课程系统已实现，第一至第五章已完成教材内容编排；课程内容按章交付与发布，规范见 [课程与知识图谱总体设计](docs/教材驱动课程重构/01-课程与知识图谱总体设计.md)。
 
@@ -17,7 +19,10 @@
 - **交互模拟**：18 项 CPU 调度、连续内存分配、页面置换和磁盘调度演示，共用 `/experiments/simulation` 与课程活动入口；另接入 legacy 模拟静态资源（`public/legacy-simulation`）兼容旧版演示。步骤由确定性纯函数生成，当前演示不写判题/掌握事件。
 - **学习记录**：事件时间线（作答/判题/预测，含掌握度前后快照）与只读图谱回放。
 - **班级与教学管理**：教师可维护班级与成员（`/teaching/classes`），学生查看我的班级（`/classes`）；教学端继续提供班级薄弱热力图谱、节点下钻、题目审核与导入、知识维护和用户管理。
-- **全局 AI 助手**：可拖动悬浮助手，按用户隔离会话，显式页面上下文。
+- **全局 AI 助手**：可拖动悬浮助手，按用户隔离会话，显式页面上下文；升级后接入统一课程会话：来源引用卡可打开定位、工具轨迹面板、下一步卡与补学返回、模型设置页（测试通过才可激活，密钥加密存储、响应脱敏）。
+- **AI 导师编排**：每轮最多 3 次工具执行、2 次模型调用；工具含联合检索、本人证据读取、已核验活动选择与页面置换演算核验（`PageReplacer`）；模型或 embedding 不可用时如实标注 `mode=FALLBACK`，不伪装语义检索。
+- **学习证据**：帮助等级 `NONE/HINT/ANSWER_REVEALED` 在答题事务前落库并参与证据资格；重复提交、换会话、换模型不新增首次观测；系统/编译错误不降低掌握度。
+- **跨课程**：数据库系统课程包（3 知识点、3 段讲义、6 道客观题）复用同一套检索、问答、练习、诊断与复习服务；跨课程 smoke 21/21 通过。
 - 支持账号注册、登录、学生批量管理和密码重置。
 
 掌握度模型：BKT（pLearn 学习转移项对对/错观测均生效，答错后验下降再叠加转移），状态阈值 GREEN≥0.70 且需概念+实践双证据；答错首次约 0.1123（薄弱）。判分、归因、路径全部有确定性规则，AI 不可用时闭环照常运行。
@@ -39,6 +44,9 @@ Vue 3 + Nginx ── /api ──> Spring Boot
                                │
                                ▼
                      内部隔离代码沙箱服务
+                               │
+                               ▼
+              模型网关（OpenAI 兼容；chat 与 embedding 可独立端点）
 ~~~
 
 前端通过同源 Nginx 代理访问 API，浏览器不需要知道后端容器地址。代码沙箱仅在内部网络中开放，针对每一次提交创建无网络、非 root、受资源限制的临时 Worker 容器。
@@ -163,6 +171,11 @@ docker compose --env-file .env up -d --build
 | SANDBOX_AUTH_SECRET | 是 | 后端与内部代码沙箱之间的共享密钥 |
 | OSLAB_HTTP_PORT | 否 | 前端暴露的宿主机端口，默认 80 |
 | AI_ARK_API_KEY | 否 | 配置后开启 AI 问答 |
+| AI_ARK_BASE_URL / AI_ARK_MODEL | 否 | 对话端点与模型名（OpenAI 兼容协议） |
+| AI_ARK_EMBEDDING_MODEL | 否 | 联合检索 embedding 模型；留空则降级为关键词+图谱并标注 FALLBACK |
+| AI_EMBEDDING_BASE_URL / AI_EMBEDDING_API_KEY | 否 | embedding 独立端点与密钥；留空复用对话端点 |
+| OSLAB_AI_MASTER_KEY | 生产建议 | 个人模型密钥 AES-256-GCM 加密主密钥，不得写入仓库 |
+| AI_ALLOW_PRIVATE_BASE_URL | 否 | 是否允许个人模型地址指向回环/内网（本地模型部署），默认 false |
 | COS_ACCESS_KEY 等 | 否 | 配置后开启对象存储上传 |
 | CORS_ALLOWED_ORIGINS | 否 | 仅为额外跨域前端填写精确 HTTPS 来源 |
 
@@ -172,7 +185,7 @@ docker compose --env-file .env up -d --build
 
 首次启动空数据卷时：
 
-- MySQL 自动导入 `数据库文件/oslab_db.sql`，并按 `deploy/mysql-init/10-load-oslab-db.sh` 的顺序加载 v3–v10 升级脚本（含 v10 班级与成员表）。
+- MySQL 自动导入 `数据库文件/oslab_db.sql`，并按 `deploy/mysql-init/10-load-oslab-db.sh` 的顺序加载 v3–v12 升级脚本（含 v10 班级与成员表、v11/v12 AI 会话与证据表，加载后逐项契约校验）。
 - Neo4j 自动导入 `数据库文件/graph.db.dump`。
 - 图谱导入带有持久化标记，已有图数据不会被自动覆盖。
 
@@ -234,6 +247,16 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/verify-learning.ps1
 
 失败时脚本 exit 1；报告写入本地 `artifacts/final-check/`，该目录不纳入版本控制。
 
+AI 主线验收（需运行中的后端与真实模型配置；演示账号由准备脚本幂等创建，初始口令 `123456`，首次登录迁移为 BCrypt）：
+
+~~~powershell
+powershell -ExecutionPolicy Bypass -File scripts/dev/prepare-ai-demo.ps1 -AdminPassword '<管理员口令>'
+powershell -ExecutionPolicy Bypass -File scripts/dev/smoke-ai-demo.ps1 -RequireAiMode
+powershell -ExecutionPolicy Bypass -File scripts/dev/eval-retrieval.ps1
+~~~
+
+`-RequireAiMode` 在配置真实模型后若本轮出现 FALLBACK 即失败，防止把降级当通过；报告与评价记录写入 `artifacts/ai-platform-demo/`（不纳入版本控制）。2026-11 本地实测：smoke 22/22 且 `mode=AI`；检索评价集 Top-5 命中 20/20、主线关键问句 8/8、课程隔离违规 0；诊断案例 8 例 0 断言失败；数据库课程跨课程 smoke 21/21。
+
 ## 常见问题
 
 ### Docker 未启动
@@ -258,7 +281,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/verify-learning.ps1
 前端代码/osLab-frontend/      Vue 3 前端
 后端代码/osLab-backend/       Spring Boot 后端
 代码沙箱/                     内部隔离判题服务
-数据库文件/                   MySQL/Neo4j 初始化数据与 v3–v10 升级脚本
+数据库文件/                   MySQL/Neo4j 初始化数据与 v3–v12 升级脚本
 content/                      教材内容包
 docs/                         课程、设计与交付文档
 scripts/                      内容导入与验收脚本
