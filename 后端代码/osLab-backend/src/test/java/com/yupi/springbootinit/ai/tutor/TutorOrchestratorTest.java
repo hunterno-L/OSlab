@@ -315,6 +315,25 @@ class TutorOrchestratorTest {
     }
 
     @Test
+    void retrievalReplacesTheLastToolWhenModelFillsTheBudget() {
+        List<TutorOrchestrator.ToolCallPlan> plan = orchestrator.parsePlan(
+                "{\"tools\":["
+                        + "{\"name\":\"read_learning_evidence\"},"
+                        + "{\"name\":\"check_page_trace\"},"
+                        + "{\"name\":\"select_verified_activity\"}]}",
+                new TutorTool.Context());
+
+        assertEquals(3, plan.size(), "预算已满也必须保留检索且不超过 3 个工具");
+        assertEquals(TutorToolkit.TOOL_RETRIEVE, plan.get(0).getName(),
+                "模型没选检索时，最后一个工具让位给检索，保证回答有来源");
+        assertEquals(TutorToolkit.TOOL_EVIDENCE, plan.get(1).getName());
+        assertEquals(TutorToolkit.TOOL_PAGE_TRACE, plan.get(2).getName());
+        assertTrue(plan.stream().noneMatch(item ->
+                        TutorToolkit.TOOL_SELECT_ACTIVITY.equals(item.getName())),
+                "让位的是模型计划中的最后一个工具");
+    }
+
+    @Test
     void garbagePlanFallsBackToTheDeterministicPlan() {
         ModelGateway.ChatResult plan = new ModelGateway.ChatResult();
         plan.setContent("我不知道该调用什么工具");

@@ -276,17 +276,20 @@ public class TutorOrchestrator {
                     ? AiJson.mapper().createObjectNode() : arguments);
             plan.add(item);
         }
-        // 计划里必须有检索，否则回答没有来源可引用
+        // 计划里必须有检索，否则回答没有来源可引用；预算已满时最后一个工具让位给检索。
         boolean hasRetrieval = false;
         for (ToolCallPlan item : plan) {
             if (TutorToolkit.TOOL_RETRIEVE.equals(item.getName())) {
                 hasRetrieval = true;
             }
         }
-        if (!hasRetrieval && plan.size() < max) {
+        if (!hasRetrieval && max > 0) {
             ToolCallPlan retrieval = new ToolCallPlan();
             retrieval.setName(TutorToolkit.TOOL_RETRIEVE);
             retrieval.setArguments(AiJson.mapper().createObjectNode());
+            if (plan.size() >= max) {
+                plan = new ArrayList<>(plan.subList(0, max - 1));
+            }
             plan.add(0, retrieval);
         }
         return plan;

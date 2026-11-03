@@ -20,13 +20,15 @@
 #
 # 判定原则：
 #   - 每个请求一律断言业务 code，HTTP 200 本身不算成功；
-#   - 模型不可用时 mode=FALLBACK 是"通过"（降级如实标注），
+#   - 未配置模型时 mode=FALLBACK 是"通过"（降级如实标注），
 #     但脚本会明确打印"本轮为规则降级"，绝不把它当作模型回答验收；
+#   - 配置真实对话模型与 embedding 后使用 -RequireAiMode：
+#     S7/S15b 出现 FALLBACK 即判定失败，防止降级回归被误当验收通过；
 #   - 不伪造任何模型输出；缺 key 时相关断言只验结构、权限、幂等与降级。
 #
 # 安全：口令只从参数或环境变量读取，不写日志、不进报告。
 # 报告：artifacts/ai-platform-demo/smoke-<RunKey>.json
-# 退出码：0 全部通过（含如实降级）；1 存在失败项
+# 退出码：0 全部通过（含如实降级，除非指定 -RequireAiMode）；1 存在失败项
 # 编码：必须保存为 UTF-8 with BOM（Windows PowerShell 5.1 兼容）
 # =====================================================================
 param(
@@ -39,6 +41,8 @@ param(
     [string]$SeedNodeCode = 'os.memory.lru',
     [string]$Question = '三个物理块，访问序列 1,2,3,1,4，按 LRU 访问 4 时应该换出哪一页？为什么？',
     [int]$WaitTimeoutSec = 90,
+    # 配置了真实模型与 embedding 后使用：本轮出现 FALLBACK 即失败，防止"降级也算通过"。
+    [switch]$RequireAiMode,
     [string]$RunKey = (Get-Date -Format 'yyyyMMdd-HHmmss'),
     [string]$ReportDir = 'artifacts/ai-platform-demo'
 )
@@ -289,7 +293,11 @@ if ($turnId) {
             if ($final.mode -eq 'FALLBACK') {
                 $script:degraded = $true
                 $reason = ($final.toolTrace | Where-Object { $_.summary } | Select-Object -First 1).summary
-                Add-Step 'S7' '轮次轮询到终态（规则降级）' 'PASS' "$detail；本轮为 FALLBACK，不是模型回答，原因：$reason"
+                if ($RequireAiMode) {
+                    Add-Step 'S7' '轮次轮询到终态（要求模型回答）' 'FAIL' "$detail；本轮为 FALLBACK，原因：$reason"
+                } else {
+                    Add-Step 'S7' '轮次轮询到终态（规则降级）' 'PASS' "$detail；本轮为 FALLBACK，不是模型回答，原因：$reason"
+                }
             } else {
                 Add-Step 'S7' '轮次轮询到终态（模型回答）' 'PASS' $detail
             }
@@ -464,7 +472,7 @@ try {
         Add-Step 'S14a' '创建个人资料' 'FAIL' "业务码 $($createdMaterial.code)：$($createdMaterial.message)"
     } else {
         $materialId = $createdMaterial.data.materialId
-        Add-Step 'S14a' '创建个人资料' 'PASS' "materialId=$materialId 块数=$($createdMaterial.data.chunkCount) 索引=$($createdMaterial.data.indexStatus)"
+        Add-Step 'S14a' '创建个人资料' 'PASS' "materialId=$materialId 块数=$($createdMaterial.data.chunkCount) 索引=$($createdMaterial.data.indexStatus) 模型=$($createdMaterial.data.embeddingModel)"
     }
 } catch {
     Add-Step 'S14a' '创建个人资料' 'FAIL' "请求异常：$($_.Exception.Message)"
@@ -535,6 +543,9 @@ try {
             Add-Step 'S15b' '旧入口 /learning/tutor/ask' 'FAIL' "旧契约缺字段：$($legacyMissing -join ', ')"
         } elseif ($tutor.data.mode -ne 'AI' -and $tutor.data.mode -ne 'FALLBACK') {
             Add-Step 'S15b' '旧入口 /learning/tutor/ask' 'FAIL' "mode 非法：$($tutor.data.mode)"
+        } elseif ($tutor.data.mode -eq 'FALLBACK' -and $RequireAiMode) {
+            $script:degraded = $true
+            Add-Step 'S15b' '旧入口 /learning/tutor/ask' 'FAIL' "要求 mode=AI，实际 FALLBACK；来源 $(@($tutor.data.sources).Count) 条"
         } else {
             if ($tutor.data.mode -eq 'FALLBACK') { $script:degraded = $true }
             Add-Step 'S15b' '旧入口 /learning/tutor/ask' 'PASS' "mode=$($tutor.data.mode) 来源 $(@($tutor.data.sources).Count) 条，回答长度 $($tutor.data.answer.Length)"

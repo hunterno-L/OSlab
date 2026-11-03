@@ -1,6 +1,7 @@
 package com.yupi.springbootinit.ai.retrieval;
 
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.yupi.springbootinit.ai.AiProperties;
 import com.yupi.springbootinit.ai.plan.AiContentScopeService;
@@ -169,6 +170,19 @@ class AiMaterialServiceTest {
     }
 
     @Test
+    void duplicateLookupIgnoresLogicallyDeletedMaterials() {
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<LambdaQueryWrapper<AiMaterial>> captor =
+                ArgumentCaptor.forClass(LambdaQueryWrapper.class);
+
+        service.create(owner, request(COURSE, "LRU 命中后更新顺序"));
+
+        verify(materialMapper).selectList(captor.capture());
+        assertTrue(captor.getValue().getSqlSegment().contains("isDelete"),
+                "已逻辑删除的资料不能被当作重复内容复用（否则会返回 0 块的死记录）");
+    }
+
+    @Test
     void createdMaterialIsPersonalScopedAndIndexed() {
         AiMaterialVO vo = service.create(owner, request(COURSE, "LRU 命中后更新顺序"));
 
@@ -204,24 +218,25 @@ class AiMaterialServiceTest {
         chunk.setId(1L);
         chunk.setMaterialId(700L);
         when(chunkMapper.selectList(any())).thenReturn(List.of(chunk));
-        when(materialMapper.updateById(any())).thenReturn(1);
+        when(materialMapper.deleteById(700L)).thenReturn(1);
 
         assertTrue(service.delete(owner, "700"));
 
         verify(chunkMapper).deletePhysicallyByIds(List.of(1L));
-        assertEquals(1, mine.getIsDelete());
-        assertEquals(0, mine.getChunkCount());
-        verify(materialMapper, never()).deleteById(anyLong());
+        // 全局 logic-delete-field=isDelete：必须走 deleteById，updateById 设置 isDelete 不会生效
+        verify(materialMapper).deleteById(700L);
+        verify(materialMapper, never()).updateById(any());
     }
 
     @Test
     void deleteWithoutChunksStillMarksTheMaterialDeleted() {
         when(materialMapper.selectById(700L)).thenReturn(material(7L));
         when(chunkMapper.selectList(any())).thenReturn(Collections.emptyList());
-        when(materialMapper.updateById(any())).thenReturn(1);
+        when(materialMapper.deleteById(700L)).thenReturn(1);
 
         assertTrue(service.delete(owner, "700"));
         verify(chunkMapper, never()).deletePhysicallyByIds(anyList());
+        verify(materialMapper).deleteById(700L);
     }
 
     // endregion

@@ -114,6 +114,7 @@ public class AiMaterialService {
     public List<AiMaterialVO> list(User user, String courseCode) {
         LambdaQueryWrapper<AiMaterial> query = new LambdaQueryWrapper<AiMaterial>()
                 .eq(AiMaterial::getUserId, user.getId())
+                .eq(AiMaterial::getIsDelete, 0)
                 .orderByDesc(AiMaterial::getCreateTime)
                 .orderByDesc(AiMaterial::getId);
         if (StringUtils.isNotBlank(courseCode)) {
@@ -162,17 +163,17 @@ public class AiMaterialService {
             chunkMapper.deletePhysicallyByIds(new ArrayList<>(
                     ids.subList(from, Math.min(from + 200, ids.size()))));
         }
-        // 资料是用户数据，逻辑删除保留可追溯性
-        material.setIsDelete(1);
-        material.setChunkCount(0);
-        material.setIndexStatus(AiMaterial.INDEX_PENDING);
-        return materialMapper.updateById(material) > 0;
+        // 资料是用户数据，逻辑删除保留可追溯性。
+        // 全局配置了 logic-delete-field=isDelete，手动 setIsDelete(1)+updateById 会被
+        // 逻辑删除插件过滤成空更新，必须走 deleteById 生成 SET isDelete=1 的 SQL。
+        return materialMapper.deleteById(material.getId()) > 0;
     }
 
     /** 重建某课程的个人资料索引（演示脚本与运维用）。 */
     public int reindexPersonal(User user, String courseCode) {
         LambdaQueryWrapper<AiMaterial> query = new LambdaQueryWrapper<AiMaterial>()
-                .eq(AiMaterial::getUserId, user.getId());
+                .eq(AiMaterial::getUserId, user.getId())
+                .eq(AiMaterial::getIsDelete, 0);
         if (StringUtils.isNotBlank(courseCode)) {
             query.eq(AiMaterial::getCourseCode, courseCode.trim());
         }
@@ -189,6 +190,7 @@ public class AiMaterialService {
                 .eq(AiMaterial::getUserId, userId)
                 .eq(AiMaterial::getCourseCode, courseCode)
                 .eq(AiMaterial::getTextHash, textHash)
+                .eq(AiMaterial::getIsDelete, 0)
                 .last("limit 1"));
         return found.isEmpty() ? null : found.get(0);
     }
