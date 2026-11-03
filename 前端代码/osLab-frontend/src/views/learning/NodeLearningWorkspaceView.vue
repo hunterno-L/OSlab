@@ -674,6 +674,46 @@
             </div>
           </div>
 
+          <section class="tutor-ai-plan" aria-label="AI 薄弱原因与下一步">
+            <div class="tutor-ai-head">
+              <strong>薄弱原因与下一步</strong>
+              <button type="button" @click="askUnifiedTutor">
+                向统一导师提问
+              </button>
+            </div>
+            <ul v-if="weaknessReasons.length" class="tutor-weak-list">
+              <li v-for="reason in weaknessReasons" :key="reason">
+                {{ reason }}
+              </li>
+            </ul>
+            <p v-else class="side-hint">
+              暂无足够证据；先完成一次作答或预测，避免直接判为薄弱。
+            </p>
+            <p
+              v-if="workbench?.events?.length"
+              class="tutor-evidence-ids oslab-mono"
+            >
+              证据：{{
+                workbench.events
+                  .slice(0, 3)
+                  .map((event) => `#${event.id}`)
+                  .join("、")
+              }}
+            </p>
+            <AiNextActions
+              :actions="nextActions"
+              :course-code="aiPlanCourseCode"
+              :loading="nextActionsLoading"
+              :error="nextActionsError"
+              :due-count="dueReviewCount"
+              title="下一步"
+              empty-text="完成一次作答或预测后会生成可执行任务。"
+              compact
+              :limit="2"
+              @refresh="refreshNodePlan"
+            />
+          </section>
+
           <div
             ref="tutorScroll"
             class="tutor-messages"
@@ -816,11 +856,36 @@ import {
   registerAiPageContext,
   unregisterAiPageContext,
 } from "@/composables/useAiPageContext";
+import AiNextActions from "@/components/ai/AiNextActions.vue";
+import { useAiConversation } from "@/composables/useAiConversation";
+import { askAiAssistant } from "@/composables/useAiLauncher";
 
-// AI 助手页面上下文（log3 阶段 4）：挂载注册、卸载注销
+const {
+  nextActions,
+  nextActionsLoading,
+  nextActionsError,
+  dueReviewCount,
+  refreshNextActions,
+} = useAiConversation();
+const aiPlanCourseCode = computed(
+  () => workbench.value?.learningUnits?.[0]?.courseCode || ""
+);
+
+// AI 助手页面上下文（log3 阶段 4）：挂载注册、卸载注销；升级为课程上下文
 const aiPageContextProvider = () => ({
   pageName: "节点学习工作台",
+  courseCode: workbench.value?.learningUnits?.[0]?.courseCode || undefined,
+  unitCode: workbench.value?.learningUnits?.[0]?.unitCode,
+  unitName: workbench.value?.learningUnits?.[0]?.title,
   nodeName: nodeName.value || undefined,
+  nodeCode: currentNodeCode.value || undefined,
+  nodeCodes: currentNodeCode.value ? [currentNodeCode.value] : [],
+  eventIds: (workbench.value?.events || [])
+    .slice(0, 3)
+    .map((event) => String(event.id)),
+  lastJudgeResult: workbench.value?.lastFailure?.result
+    ? resultText(workbench.value.lastFailure.result)
+    : undefined,
 });
 onMounted(() => registerAiPageContext(aiPageContextProvider));
 onBeforeUnmount(() => unregisterAiPageContext(aiPageContextProvider));
@@ -939,6 +1004,12 @@ const load = async (force = false) => {
     )
       return;
     workbench.value = data;
+    if (data.learningUnits?.[0]?.courseCode) {
+      void refreshNextActions({
+        courseCode: data.learningUnits[0].courseCode,
+        limit: 5,
+      });
+    }
     await nextTick();
     scrollToTextbookChunk();
   } catch (error) {
@@ -1504,6 +1575,45 @@ const defaultTutorFocus = computed(() => {
     : `当前围绕「${nodeName.value}」学习，从概念、前置知识和练习证据逐步建立理解。`;
 });
 const lastFailure = computed(() => workbench.value?.lastFailure || null);
+
+/** 薄弱原因只展示服务端已有归因/推荐/误区，不由前端臆测 */
+const weaknessReasons = computed(() => {
+  const reasons: string[] = [];
+  const failure = workbench.value?.lastFailure;
+  if (failure?.attributionBasis?.length) {
+    reasons.push(...failure.attributionBasis);
+  }
+  if (failure?.recommendedAction) reasons.push(failure.recommendedAction);
+  const recommendation = workbench.value?.recommendations?.[0];
+  if (recommendation?.reason) reasons.push(recommendation.reason);
+  for (const misconception of workbench.value?.misconceptions || []) {
+    reasons.push(`可能误区：${misconception}`);
+  }
+  return Array.from(new Set(reasons.filter(Boolean))).slice(0, 5);
+});
+
+async function refreshNodePlan() {
+  if (!aiPlanCourseCode.value) return;
+  await refreshNextActions({ courseCode: aiPlanCourseCode.value, limit: 5 });
+}
+
+function askUnifiedTutor() {
+  const evidence = (workbench.value?.events || [])
+    .slice(0, 3)
+    .map((event) => `#${event.id}`)
+    .join("、");
+  askAiAssistant(
+    `我当前在节点「${currentNodeName.value}」${
+      currentNodeCode.value ? `（${currentNodeCode.value}）` : ""
+    }。${
+      weaknessReasons.value.length
+        ? `已有的薄弱依据：${weaknessReasons.value.join("；")}。`
+        : "目前还没有足够证据。"
+    }${
+      evidence ? `相关证据：${evidence}。` : ""
+    }请先说明可能原因（证据不足时保留不确定性），再给出可以马上执行的下一步。`
+  );
+}
 
 const safeResourceUrl = (url: string) => /^(https?:\/\/|\/(?!\/))/.test(url);
 /** 教师发布的扩展阅读外链；静态图文详解统一由「知识详解」页签渲染，不在此重复 */
@@ -2615,6 +2725,60 @@ onBeforeUnmount(() => {
 }
 .tutor-evidence {
   margin-top: 10px;
+}
+.tutor-ai-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--oslab-line-soft);
+}
+.tutor-ai-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tutor-ai-head strong {
+  color: var(--oslab-ink);
+  font-size: var(--oslab-text-small);
+  letter-spacing: 0.02em;
+}
+.tutor-ai-head button {
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--oslab-primary);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.tutor-ai-head button:hover {
+  border-bottom-color: currentColor;
+}
+.tutor-ai-head button:focus-visible {
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: 2px;
+  border-radius: var(--oslab-radius-sm);
+}
+.tutor-weak-list {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--oslab-ink-soft);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.tutor-evidence-ids {
+  margin: 0;
+  color: var(--oslab-muted-strong);
+  font-size: 10px;
+  overflow-wrap: anywhere;
 }
 
 /* ---- 响应式：<1024px 导师面板移到内容底部（可折叠） ---- */

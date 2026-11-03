@@ -182,6 +182,8 @@
               :context-label="cardContextLabel"
               :source-unit-code="sourceContext.sourceUnitCode"
               :source-activity-code="sourceContext.sourceActivityCode"
+              :ai-action-id="aiActionIdFor(question)"
+              :course-code="courseCode || courseParam"
               @answered="(result) => onAnswered(question, result)"
             />
           </article>
@@ -209,13 +211,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import { Message } from "@arco-design/web-vue";
 import { useRoute, useRouter } from "vue-router";
 import CourseCatalogSidebar from "@/components/learning/CourseCatalogSidebar.vue";
 import QuestionAnswerCard from "@/components/learning/QuestionAnswerCard.vue";
 import { useCourseCatalog } from "@/composables/useCourseCatalog";
 import { courseContext } from "@/utils/courseContext";
+import {
+  registerAiPageContext,
+  unregisterAiPageContext,
+} from "@/composables/useAiPageContext";
 import {
   getLearningCatalog,
   getLearningQuestion,
@@ -453,7 +466,15 @@ let refreshEpoch = 0;
 
 const pinnedQuestion = ref<LearningQuestionVO | null>(null);
 const pinnedQuestionId = computed(() => queryValue(route.query.questionId));
+const aiActionIdParam = computed(() => queryValue(route.query.aiActionId));
 let pinEpoch = 0;
+
+/** AI 下一步进入时只把 actionId 传给目标任务，避免同页其他题卡误用提交键 */
+const aiActionIdFor = (question: LearningQuestionVO) =>
+  aiActionIdParam.value &&
+  String(question.id) === String(pinnedQuestionId.value)
+    ? aiActionIdParam.value
+    : undefined;
 
 const catalogNodes = computed<LearningCatalogNodeVO[]>(
   () => catalog.value?.nodes || []
@@ -753,7 +774,20 @@ watch(
   }
 );
 
+const aiPageContextProvider = () => ({
+  pageName: "题目练习",
+  courseCode: courseCode.value || courseParam.value || undefined,
+  courseTitle: courseTitle.value || undefined,
+  unitCode: selectedUnitCode.value || undefined,
+  nodeCode: nodeParam.value || undefined,
+  nodeCodes: nodeParam.value ? [nodeParam.value] : [],
+  resourceRef: pinnedQuestionId.value
+    ? `question:${pinnedQuestionId.value}`
+    : undefined,
+});
+
 onMounted(async () => {
+  registerAiPageContext(aiPageContextProvider);
   await loadCourseCatalog(courseParam.value || undefined);
   treeReady.value = true;
   if (!courseParam.value && courseCode.value) {
@@ -761,6 +795,9 @@ onMounted(async () => {
     return;
   }
   void refreshAll();
+});
+onBeforeUnmount(() => {
+  unregisterAiPageContext(aiPageContextProvider);
 });
 </script>
 

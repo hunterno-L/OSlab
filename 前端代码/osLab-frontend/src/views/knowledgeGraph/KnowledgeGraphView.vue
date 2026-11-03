@@ -793,6 +793,35 @@
                 >
               </div>
             </template>
+
+            <section class="graph-ai-plan" aria-label="AI 下一步">
+              <div class="section-title">AI 下一步</div>
+              <p v-if="graphWeaknessReasons.length" class="graph-ai-reason">
+                薄弱依据：{{ graphWeaknessReasons.join("；") }}
+              </p>
+              <p v-else class="side-hint">
+                当前证据不足，先完成一次作答或预测再判断薄弱点。
+              </p>
+              <AiNextActions
+                :actions="nextActions"
+                :course-code="courseCode"
+                :loading="nextActionsLoading"
+                :error="nextActionsError"
+                :due-count="dueReviewCount"
+                title=""
+                empty-text="完成一次学习活动后会生成可执行任务。"
+                compact
+                :limit="2"
+                @refresh="refreshGraphPlan"
+              />
+              <button
+                type="button"
+                class="cta-secondary graph-ai-ask"
+                @click="askGraphTutor"
+              >
+                向统一导师提问
+              </button>
+            </section>
           </div>
         </div>
       </div>
@@ -986,6 +1015,9 @@ import {
 } from "@/api/course";
 import { useCourseCatalog } from "@/composables/useCourseCatalog";
 import { scoreText } from "@/utils/masteryDisplay";
+import AiNextActions from "@/components/ai/AiNextActions.vue";
+import { useAiConversation } from "@/composables/useAiConversation";
+import { askAiAssistant } from "@/composables/useAiLauncher";
 import {
   personalGraph,
   masteryPath,
@@ -1000,12 +1032,21 @@ import {
   unregisterAiPageContext,
 } from "@/composables/useAiPageContext";
 
-// AI 助手页面上下文（log3 阶段 4）：挂载注册、卸载注销
+// AI 助手页面上下文（log3 阶段 4）：挂载注册、卸载注销；升级为课程上下文
 const aiPageContextProvider = () => ({
   pageName: "课程学习",
+  courseCode: courseCode.value || undefined,
+  courseTitle: courseTitle.value || undefined,
   nodeName: selectedNode.value?.name || undefined,
+  nodeCode: selectedNode.value?.nodeCode || undefined,
+  nodeCodes: selectedNode.value?.nodeCode ? [selectedNode.value.nodeCode] : [],
   sectionCode: selectedSectionCode.value || undefined,
   unitCode: selectedUnitCode.value || undefined,
+  eventIds: selectedWorkbench.value?.events?.length
+    ? selectedWorkbench.value.events
+        .slice(0, 3)
+        .map((event) => String(event.id))
+    : [],
 });
 onMounted(() => registerAiPageContext(aiPageContextProvider));
 onBeforeUnmount(() => unregisterAiPageContext(aiPageContextProvider));
@@ -1060,6 +1101,56 @@ const selectedSectionCode = ref("");
 const selectedUnitCode = ref("");
 const selectedNodeKey = ref("");
 const expandedSections = ref<string[]>([]);
+
+// 统一 AI 计划：图谱详情显示当前课程的下一步，并可直接导航到原页面
+const {
+  nextActions,
+  nextActionsLoading,
+  nextActionsError,
+  dueReviewCount,
+  refreshNextActions,
+} = useAiConversation();
+
+function refreshGraphPlan() {
+  if (!courseCode.value) return;
+  void refreshNextActions({ courseCode: courseCode.value, limit: 5 });
+}
+
+const graphWeaknessReasons = computed(() => {
+  const reasons: string[] = [];
+  const failure = lastFailure.value;
+  if (failure?.attributionBasis?.length) {
+    reasons.push(...failure.attributionBasis);
+  }
+  if (failure?.recommendedAction) reasons.push(failure.recommendedAction);
+  const recommendation = primaryRecommendation.value;
+  if (recommendation?.reason) reasons.push(recommendation.reason);
+  return Array.from(new Set(reasons.filter(Boolean))).slice(0, 4);
+});
+
+function askGraphTutor() {
+  const evidence = (selectedWorkbench.value?.events || [])
+    .slice(0, 3)
+    .map((event) => `#${event.id}`)
+    .join("、");
+  askAiAssistant(
+    `我在课程图谱里选中了节点「${selectedNode.value?.name || "未命名"}」${
+      selectedNode.value?.nodeCode ? `（${selectedNode.value.nodeCode}）` : ""
+    }。${
+      graphWeaknessReasons.value.length
+        ? `薄弱依据：${graphWeaknessReasons.value.join("；")}。`
+        : "目前证据不足。"
+    }${evidence ? `相关证据：${evidence}。` : ""}请说明可能原因并给出下一步。`
+  );
+}
+
+watch(
+  courseCode,
+  (code) => {
+    if (code) void refreshNextActions({ courseCode: code, limit: 5 });
+  },
+  { immediate: true }
+);
 const unitPreview = ref<CourseUnit | null>(null);
 const unitPreviewLoading = ref(false);
 const unitPreviewError = ref("");
@@ -3309,6 +3400,24 @@ onBeforeUnmount(() => {
   font-size: var(--oslab-text-small);
   color: var(--oslab-muted-strong);
   line-height: 1.6;
+}
+.graph-ai-plan {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--oslab-line-soft);
+}
+.graph-ai-plan .section-title {
+  margin-top: 0;
+}
+.graph-ai-reason {
+  margin: 0 0 6px;
+  color: var(--oslab-review-text);
+  font-size: var(--oslab-text-small);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.graph-ai-ask {
+  margin-top: 8px;
 }
 .path-item {
   display: flex;

@@ -111,9 +111,48 @@ function createHarness(props = {}, responseMode = "success") {
     source +
       "\nexport { submit, submitting, judgeAnswer, multipleAnswer, fillAnswer, comprehensiveAnswer, result };",
     (name) => {
-      if (name === "vue") return vue;
+      if (name === "vue")
+        return {
+          ...vue,
+          onMounted: () => undefined,
+          onBeforeUnmount: () => undefined,
+        };
+      if (name === "vue-router")
+        return { useRouter: () => ({ push: async () => undefined }) };
+      if (name === "@arco-design/web-vue")
+        return {
+          Message: {
+            info: () => undefined,
+            warning: () => undefined,
+            error: () => undefined,
+            success: () => undefined,
+          },
+        };
       if (name === "@/api/learning") return api;
+      if (name === "@/api/ai") return {};
       if (name === "@/utils/courseContext") return contextModule;
+      if (name === "@/composables/useAiActions")
+        return {
+          getStartedAiAction: () => null,
+          recordAiHelp: async () => null,
+          startAiPlanAction: async () => null,
+          submitAiPlanAction: async () => null,
+        };
+      if (name === "@/composables/useAiConversation")
+        return {
+          useAiConversation: () => ({ errorMsg: vue.ref("") }),
+          askAi: async () => null,
+        };
+      if (name === "@/composables/useAiLauncher")
+        return { askAiAssistant: () => undefined };
+      if (name === "@/composables/useAiPageContext")
+        return { getAiPageContext: () => null };
+      if (name === "@/utils/aiSources")
+        return {
+          aiSourceRoute: () => null,
+          highlightSourceInPage: () => false,
+          openAiMaterialSource: () => false,
+        };
       if (name.endsWith(".vue")) return { default: {} };
       throw new Error(`Unexpected component import: ${name}`);
     },
@@ -137,7 +176,12 @@ function practiceContext(query) {
     .descriptor.scriptSetup.content;
   return evaluate(source + "\nexport { sourceContext };", (name) => {
     if (name === "vue")
-      return { ...vue, onMounted: () => undefined, watch: () => undefined };
+      return {
+        ...vue,
+        onMounted: () => undefined,
+        onBeforeUnmount: () => undefined,
+        watch: () => undefined,
+      };
     if (name === "vue-router")
       return { useRoute: () => ({ query }), useRouter: () => ({}) };
     if (name === "@/utils/courseContext") return contextModule;

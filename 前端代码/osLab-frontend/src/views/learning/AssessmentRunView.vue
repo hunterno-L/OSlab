@@ -30,6 +30,7 @@
           :key="currentQuestion.id"
           :question="currentQuestion"
           :assessment-run-id="runId"
+          :course-code="String(route.query.courseCode || '')"
           :disabled="finished || finishing || currentQuestion.offline"
           :disabled-reason="finished ? '本轮测评已结束' : '本轮测评正在结束'"
           @answered="answerHandler"

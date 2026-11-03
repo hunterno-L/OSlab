@@ -289,7 +289,22 @@ function createViewHarness(options = {}) {
           return {
             registerAiPageContext: () => undefined,
             unregisterAiPageContext: () => undefined,
+            getAiPageContext: () => null,
           };
+        case "@/composables/useAiConversation":
+          return {
+            useAiConversation: () => ({
+              nextActions: vue.ref([]),
+              nextActionsLoading: vue.ref(false),
+              nextActionsError: vue.ref(""),
+              dueReviewCount: vue.ref(0),
+              refreshNextActions: async () => [],
+            }),
+          };
+        case "@/composables/useAiLauncher":
+          return { askAiAssistant: () => undefined };
+        case "@/components/ai/AiNextActions.vue":
+          return {};
         case "@/composables/useNodeWorkbench":
           return {
             loadNodeWorkbench: async () => ({}),
