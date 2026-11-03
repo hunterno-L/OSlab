@@ -27,9 +27,11 @@
         :style="{ left: panelPos.x + 'px', top: panelPos.y + 'px' }"
       >
         <AiChatPanel
+          :initial-prompt="pendingPrompt"
           @close="open = false"
           @header-drag="startDrag($event, 'panel')"
           @header-move="nudgePanel"
+          @prompt-consumed="pendingPrompt = ''"
         />
       </div>
       <span ref="safeAreaRef" class="ai-safe-probe" aria-hidden="true"></span>
@@ -101,6 +103,8 @@ const hiddenByRoute = computed(
 const visible = computed(() => isLoggedIn.value && !hiddenByRoute.value);
 
 const open = ref(false);
+/** 页面“选段提问/继续追问”通过 window 事件带入的初始问题 */
+const pendingPrompt = ref("");
 const fabRef = ref<HTMLElement | null>(null);
 const panelWrapRef = ref<HTMLElement | null>(null);
 const safeAreaRef = ref<HTMLElement | null>(null);
@@ -374,6 +378,17 @@ function onGlobalKeydown(e: KeyboardEvent) {
   }
 }
 
+/** 页面显式请求打开助手（如课程单元“向导师提问”） */
+function onAskRequest(event: Event) {
+  const detail = (event as CustomEvent<{ text?: string }>).detail;
+  pendingPrompt.value = typeof detail?.text === "string" ? detail.text : "";
+  open.value = true;
+}
+
+function onOpenRequest() {
+  open.value = true;
+}
+
 function handleViewportChange() {
   // resize / 浏览器缩放 / 窄屏切换：自动回收可见范围并保持底部停靠
   clampAll();
@@ -415,12 +430,16 @@ onMounted(() => {
   loadPosition();
   window.addEventListener("resize", handleViewportChange);
   window.visualViewport?.addEventListener("resize", handleViewportChange);
+  window.addEventListener("oslab:ai-ask", onAskRequest);
+  window.addEventListener("oslab:ai-open", onOpenRequest);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener("resize", handleViewportChange);
   window.visualViewport?.removeEventListener("resize", handleViewportChange);
   window.removeEventListener("keydown", onGlobalKeydown);
+  window.removeEventListener("oslab:ai-ask", onAskRequest);
+  window.removeEventListener("oslab:ai-open", onOpenRequest);
 });
 </script>
 
@@ -434,7 +453,7 @@ onBeforeUnmount(() => {
   border: none;
   border-radius: var(--oslab-radius-pill);
   background: var(--oslab-primary);
-  color: #fff;
+  color: var(--oslab-on-primary);
   font-family: var(--oslab-font-ui);
   font-size: 18px;
   font-weight: 600;
