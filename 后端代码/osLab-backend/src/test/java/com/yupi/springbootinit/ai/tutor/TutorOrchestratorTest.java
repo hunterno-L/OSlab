@@ -18,6 +18,7 @@ import com.yupi.springbootinit.model.vo.ai.SourceRef;
 import com.yupi.springbootinit.model.vo.ai.ToolTraceEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
@@ -202,6 +203,57 @@ class TutorOrchestratorTest {
         // 计划解析阶段就按预算截断，超出的工具根本不会进入执行队列
         assertFalse(traceText(result).contains(TutorToolkit.TOOL_PAGE_TRACE),
                 "超出预算的工具不得被执行");
+    }
+
+    @Test
+    void planPromptCarriesToolParameterSchemas() {
+        TutorTool pageTool = new TutorTool() {
+            @Override
+            public String name() {
+                return TutorToolkit.TOOL_PAGE_TRACE;
+            }
+
+            @Override
+            public String description() {
+                return "页面置换计算器";
+            }
+
+            @Override
+            public Map<String, Object> parameterSchema() {
+                Map<String, Object> sequence = new HashMap<>();
+                sequence.put("type", "array");
+                sequence.put("description", "页面访问序列");
+                Map<String, Object> properties = new HashMap<>();
+                properties.put("sequence", sequence);
+                Map<String, Object> schema = new HashMap<>();
+                schema.put("type", "object");
+                schema.put("properties", properties);
+                return schema;
+            }
+
+            @Override
+            public Outcome execute(Context context, JsonNode arguments) {
+                return Outcome.ok("ok", "ok");
+            }
+        };
+        when(toolkit.tools()).thenReturn(java.util.Collections.singletonList(pageTool));
+        when(toolkit.find(TutorToolkit.TOOL_PAGE_TRACE)).thenReturn(pageTool);
+
+        ModelGateway.ChatResult plan = new ModelGateway.ChatResult();
+        plan.setContent("{\"tools\":[{\"name\":\"check_page_trace\",\"arguments\":{\"sequence\":[1,2,3]}}]}");
+        ModelGateway.ChatResult answer = new ModelGateway.ChatResult();
+        answer.setContent("结论 [1]");
+        when(gateway.chat(any(), any())).thenReturn(plan, answer);
+
+        orchestrator.run(user, session, "为什么 LRU 换出 2？", new AiCourseContext(), endpoint());
+
+        ArgumentCaptor<ModelGateway.ChatRequest> captor =
+                ArgumentCaptor.forClass(ModelGateway.ChatRequest.class);
+        verify(gateway, times(2)).chat(any(), captor.capture());
+        String planPrompt = captor.getAllValues().get(0).getUser();
+        assertTrue(planPrompt.contains("\"sequence\""),
+                "工具参数 schema 必须进入计划提示，模型才能填对键名");
+        assertTrue(planPrompt.contains("页面访问序列"));
     }
 
     @Test

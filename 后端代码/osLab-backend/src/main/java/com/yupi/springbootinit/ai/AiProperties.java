@@ -54,9 +54,9 @@ public class AiProperties {
         private int poolSize = 2;
         private int queueCapacity = 32;
         /** 生成回答的 token 上限（推理型模型需要留足空间，否则 content 为空）。 */
-        private int answerMaxTokens = 900;
-        /** 工具决策的 token 上限。 */
-        private int planMaxTokens = 500;
+        private int answerMaxTokens = 4096;
+        /** 工具决策的 token 上限（推理型模型的思考 token 也计入该上限）。 */
+        private int planMaxTokens = 2048;
     }
 
     @Data

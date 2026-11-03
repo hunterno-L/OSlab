@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -390,6 +391,12 @@ public class TutorOrchestrator {
         sb.append("学生问题：").append(StringUtils.defaultString(context.getMessage())).append("\n\n可用工具：\n");
         for (TutorTool tool : toolkit.tools()) {
             sb.append("- ").append(tool.name()).append("：").append(tool.description()).append('\n');
+            Map<String, Object> schema = tool.parameterSchema();
+            if (schema != null && !schema.isEmpty()) {
+                // 结构化协议下模型只能靠提示里的 schema 对齐参数名；
+                // 缺 schema 时模型会自造键名（如把 sequence 写成 reference_string），工具只能拒绝执行。
+                sb.append("  参数 schema：").append(AiJson.write(schema)).append('\n');
+            }
         }
         return sb.toString();
     }

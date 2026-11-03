@@ -146,8 +146,8 @@ ai:
     # Bounded pool only; the 2-core/2GB target must stay able to run with -Xmx256m.
     pool-size: ${AI_TURN_POOL_SIZE:2}
     queue-capacity: ${AI_TURN_QUEUE_CAPACITY:32}
-    answer-max-tokens: ${AI_TURN_ANSWER_MAX_TOKENS:900}
-    plan-max-tokens: ${AI_TURN_PLAN_MAX_TOKENS:500}
+    answer-max-tokens: ${AI_TURN_ANSWER_MAX_TOKENS:4096}
+    plan-max-tokens: ${AI_TURN_PLAN_MAX_TOKENS:2048}
   retrieval:
     max-sources: ${AI_RETRIEVAL_MAX_SOURCES:8}
     semantic-candidates: ${AI_RETRIEVAL_SEMANTIC_CANDIDATES:200}
