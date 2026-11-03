@@ -76,11 +76,35 @@ public class DiagnosisService {
         private List<VerificationOutcome> completedVerifications = new ArrayList<>();
     }
 
+    /**
+     * 一个待安排的区分任务。两种形态互斥：
+     * <ul>
+     *   <li>预测型（{@code predictCase}）——操作系统页面置换案例，答案由 {@code PageReplacer} 现场计算；</li>
+     *   <li>题库型（{@code questionCode}）——数据库等课程包里的已发布题目，
+     *       由 {@link com.yupi.springbootinit.ai.plan.AiContentScopeService} 解析成学生可见的题目 id，
+     *       与 {@code select_verified_activity} 使用同一套已发布/同课程谓词；解析不到就不会生成动作。</li>
+     * </ul>
+     * 诊断只决定"要区分哪些原因"，题目是否可作答由编排阶段核对，因此目录里写错 code 不会伪造出题目。
+     */
+    @Data
+    public static class VerificationTask implements Serializable {
+        private String predictCase;
+        private String questionCode;
+        /** 该任务能区分的误区代码。 */
+        private List<String> discriminates = new ArrayList<>();
+        private String reason;
+        private int estimatedMinutes = 3;
+
+        public boolean isQuestion() {
+            return StringUtils.isNotBlank(questionCode);
+        }
+    }
+
     @Data
     public static class Result implements Serializable {
         private Diagnosis diagnosis;
         /** 需要安排的区分任务（由编排器转成 NextAction 并回填 verificationActionIds）。 */
-        private List<PredictCaseCatalog.PredictCase> verifications = new ArrayList<>();
+        private List<VerificationTask> verifications = new ArrayList<>();
         /** 参与判定的技能条目，供轨迹说明依据。 */
         private List<String> matchedSkills = new ArrayList<>();
     }
@@ -201,7 +225,7 @@ public class DiagnosisService {
             diagnosis.setExplanation(insufficientReason(helpedOrFailuresWithoutObservation, diagnostics,
                     Boolean.TRUE.equals(input.getCorrect())));
             // 仍然给出可用于收集证据的区分任务，但不强判原因
-            result.setVerifications(limit(predictCases.discriminating(hypothesisCodes), MAX_VERIFICATIONS));
+            result.setVerifications(verificationTasks(skills, hypothesisCodes));
             return result;
         }
         if (verificationDone && remaining.size() == 1) {
@@ -216,9 +240,89 @@ public class DiagnosisService {
         diagnosis.setExplanation("已观测到 " + independentFailures
                 + " 次无帮助条件下的失败，候选原因 " + hypothesisCodes.size()
                 + " 个尚不能区分；先完成下面的区分任务，再更新结论。");
-        result.setVerifications(limit(predictCases.discriminating(
-                remaining.isEmpty() ? hypothesisCodes : remaining), MAX_VERIFICATIONS));
+        result.setVerifications(verificationTasks(skills,
+                remaining.isEmpty() ? hypothesisCodes : remaining));
         return result;
+    }
+
+    /**
+     * 组装区分任务：预测型（OS 既有行为）在前，题库型（课程包）在后，总数不超过上限。
+     *
+     * <p>操作系统目录只登记 {@code predictCase}，候选原因与顺序与升级前完全一致；
+     * 数据库课程目录只登记 {@code questionCode}，因此不会被塞进页面置换案例。
+     */
+    List<VerificationTask> verificationTasks(List<MisconceptionCatalog.Skill> skills,
+                                             List<String> hypothesisCodes) {
+        List<VerificationTask> tasks = new ArrayList<>();
+        List<PredictCaseCatalog.PredictCase> predictCasesForCodes =
+                predictCases.discriminating(hypothesisCodes);
+        for (PredictCaseCatalog.PredictCase predictCase : limit(predictCasesForCodes, MAX_VERIFICATIONS)) {
+            VerificationTask task = new VerificationTask();
+            task.setPredictCase(predictCase.getCode());
+            task.setDiscriminates(new ArrayList<>(predictCase.getDiscriminates()));
+            task.setReason(StringUtils.defaultIfBlank(predictCase.getTitle(), predictCase.getCode()));
+            task.setEstimatedMinutes(predictCase.getEstimatedMinutes() > 0
+                    ? predictCase.getEstimatedMinutes() : 3);
+            tasks.add(task);
+        }
+        if (tasks.size() >= MAX_VERIFICATIONS) {
+            return tasks;
+        }
+        for (VerificationTask task : questionVerificationTasks(skills, hypothesisCodes)) {
+            if (tasks.size() >= MAX_VERIFICATIONS) {
+                break;
+            }
+            tasks.add(task);
+        }
+        return tasks;
+    }
+
+    /**
+     * 题库型验证条目：只把落在本次候选原因内的条目转成任务。
+     *
+     * <p>条目本身不带 {@code discriminates} 时，按"该技能下进入候选的误区"处理；
+     * 带了就取交集，避免把无关原因算进区分范围。
+     */
+    private List<VerificationTask> questionVerificationTasks(List<MisconceptionCatalog.Skill> skills,
+                                                             List<String> hypothesisCodes) {
+        List<VerificationTask> tasks = new ArrayList<>();
+        if (skills == null || hypothesisCodes == null || hypothesisCodes.isEmpty()) {
+            return tasks;
+        }
+        for (MisconceptionCatalog.Skill skill : skills) {
+            List<String> owned = new ArrayList<>();
+            for (MisconceptionCatalog.Misconception misconception : skill.getMisconceptions()) {
+                if (hypothesisCodes.contains(misconception.getCode())) {
+                    owned.add(misconception.getCode());
+                }
+            }
+            if (owned.isEmpty()) {
+                continue;
+            }
+            for (MisconceptionCatalog.Verification verification : skill.getVerification()) {
+                if (StringUtils.isBlank(verification.getQuestionCode())) {
+                    continue;
+                }
+                VerificationTask task = new VerificationTask();
+                task.setQuestionCode(verification.getQuestionCode().trim());
+                List<String> narrow = new ArrayList<>();
+                if (verification.getDiscriminates() != null) {
+                    for (String code : verification.getDiscriminates()) {
+                        if (owned.contains(code)) {
+                            narrow.add(code);
+                        }
+                    }
+                }
+                task.setDiscriminates(narrow.isEmpty() ? new ArrayList<>(owned) : narrow);
+                task.setReason(StringUtils.defaultIfBlank(verification.getReason(),
+                        "用一道已发布题目区分「" + StringUtils.defaultIfBlank(skill.getLabel(),
+                                skill.getSkillCode()) + "」的候选原因。"));
+                task.setEstimatedMinutes(verification.getEstimatedMinutes() > 0
+                        ? verification.getEstimatedMinutes() : 3);
+                tasks.add(task);
+            }
+        }
+        return tasks;
     }
 
     /**

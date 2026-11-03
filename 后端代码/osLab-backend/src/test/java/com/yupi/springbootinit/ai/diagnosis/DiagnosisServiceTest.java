@@ -261,15 +261,15 @@ class DiagnosisServiceTest {
 
         assertTrue(result.getDiagnosis().getHypotheses().size() <= 3);
         assertTrue(result.getVerifications().size() <= 2);
-        for (PredictCaseCatalog.PredictCase predictCase : result.getVerifications()) {
-            assertNotNull(catalog.find(COURSE, predictCase.getDiscriminates().get(0)),
+        for (DiagnosisService.VerificationTask task : result.getVerifications()) {
+            assertNotNull(catalog.find(COURSE, task.getDiscriminates().get(0)),
                     "区分任务必须能对应目录里的误区");
         }
     }
 
     @Test
     void catalogIsVersionedAndScopedToTheCourse() {
-        assertEquals("os-page-replacement/1", catalog.version());
+        assertEquals("multi-course/2", catalog.version());
         assertFalse(catalog.isEmpty());
         assertFalse(catalog.match(COURSE, List.of(NODE)).isEmpty());
         assertTrue(catalog.match("course.unknown", List.of(NODE)).isEmpty());
@@ -292,7 +292,109 @@ class DiagnosisServiceTest {
 
     // endregion
 
+    // region 多课程目录：数据库课程的题库型验证
+
+    @Test
+    void databaseCourseProducesCandidateCausesAndQuestionVerification() {
+        DiagnosisService.Input input = databaseInput("db.fd.attribute-closure");
+
+        DiagnosisService.Result result = service.diagnose(input);
+
+        Diagnosis diagnosis = result.getDiagnosis();
+        // 没有独立失败观测时仍然只给 INSUFFICIENT，但候选原因与区分任务要给出来
+        assertEquals(Diagnosis.STATUS_INSUFFICIENT, diagnosis.getStatus());
+        assertTrue(diagnosis.getHypotheses().stream()
+                        .anyMatch(hypothesis -> "closure.one-step".equals(hypothesis.getCode())),
+                "属性闭包的候选原因必须来自版本化目录");
+        assertTrue(diagnosis.getHypotheses().stream()
+                        .anyMatch(hypothesis -> "closure.ignore-composite".equals(hypothesis.getCode())));
+        assertTrue(result.getVerifications().size() <= 2);
+        assertFalse(result.getVerifications().isEmpty(), "数据库课程必须产出题库型区分任务");
+        for (DiagnosisService.VerificationTask task : result.getVerifications()) {
+            assertTrue(task.isQuestion(), "数据库课程不得被塞进页面置换预测案例");
+            assertNull(task.getPredictCase());
+            assertTrue(task.getQuestionCode().startsWith("q.db.fd."), "题目 code：" + task.getQuestionCode());
+            assertTrue(task.getDiscriminates().contains("closure.one-step")
+                            || task.getDiscriminates().contains("closure.ignore-composite"),
+                    "区分范围必须落在本技能的候选原因内");
+            assertFalse(task.getReason().isBlank(), "每个区分任务都要说明为什么能区分");
+            assertTrue(task.getEstimatedMinutes() > 0);
+        }
+    }
+
+    @Test
+    void databaseVerificationEntriesAreQuestionTypedForEveryRegisteredSkill() {
+        for (String skill : new String[]{"db.fd.attribute-closure", "db.fd.superkey", "db.fd.candidate-key"}) {
+            DiagnosisService.Result result = service.diagnose(databaseInput(skill));
+            assertFalse(result.getDiagnosis().getHypotheses().isEmpty(), skill + " 应有候选原因");
+            assertFalse(result.getVerifications().isEmpty(), skill + " 应有区分任务");
+            for (DiagnosisService.VerificationTask task : result.getVerifications()) {
+                assertTrue(task.isQuestion(), skill + " 的区分任务必须是题库型");
+                assertNull(task.getPredictCase(), skill + " 不得引用页面置换案例");
+            }
+        }
+    }
+
+    @Test
+    void databaseQuestionCodesMatchTheCoursePackageAuthoringCodes() {
+        // 内容包 content/database-systems/questions/q-db-fd-keys-001.json 里的 6 个 code，
+        // 已对照本地库 learning_question 逐条确认存在且为 PUBLISHED/SHARED。
+        List<String> expected = Arrays.asList(
+                "q.db.fd.closure-basic", "q.db.fd.closure-composite",
+                "q.db.fd.superkey-judge", "q.db.fd.superkey-not-candidate",
+                "q.db.fd.candidate-minimal", "q.db.fd.candidate-count");
+        List<String> actual = new ArrayList<>();
+        for (MisconceptionCatalog.Skill skill : catalog.allSkills("course.database-systems")) {
+            for (MisconceptionCatalog.Verification verification : skill.getVerification()) {
+                if (verification.getQuestionCode() != null) {
+                    actual.add(verification.getQuestionCode());
+                }
+            }
+        }
+        assertEquals(expected.size(), actual.size(), "题目 code 数量：" + actual);
+        assertTrue(expected.containsAll(actual), "目录里出现了内容包没有的题目 code：" + actual);
+        assertEquals(actual.size(), new java.util.LinkedHashSet<>(actual).size(), "题目 code 不得重复登记");
+    }
+
+    @Test
+    void unknownDatabaseSkillIsStillInsufficientWithoutVerification() {
+        DiagnosisService.Result result = service.diagnose(databaseInput("db.unknown.skill"));
+
+        assertEquals(Diagnosis.STATUS_INSUFFICIENT, result.getDiagnosis().getStatus());
+        assertTrue(result.getDiagnosis().getHypotheses().isEmpty());
+        assertTrue(result.getVerifications().isEmpty(),
+                "未登记的技能不得凭空产生区分任务");
+        assertTrue(result.getMatchedSkills().isEmpty());
+    }
+
+    @Test
+    void operatingSystemVerificationsRemainPredictTyped() {
+        // OS 既有行为不变：仍然只产出页面置换预测案例，不产出题库型任务
+        DiagnosisService.Input input = input(NODE);
+        input.setEvidence(summary(record("e1", "FAIL", true, EvidenceQualification.HELP_NONE, false)));
+
+        DiagnosisService.Result result = service.diagnose(input);
+
+        assertEquals(Diagnosis.STATUS_TENTATIVE, result.getDiagnosis().getStatus());
+        assertFalse(result.getVerifications().isEmpty());
+        for (DiagnosisService.VerificationTask task : result.getVerifications()) {
+            assertFalse(task.isQuestion(), "OS 不应出现题库型验证");
+            assertNotNull(task.getPredictCase());
+            assertNotNull(predictCases.find(task.getPredictCase()), "预测案例必须仍能在目录里找到");
+        }
+    }
+
+    // endregion
+
     // region fixtures
+
+    private DiagnosisService.Input databaseInput(String skillKey) {
+        DiagnosisService.Input input = new DiagnosisService.Input();
+        input.setUserId(7L);
+        input.setCourseCode("course.database-systems");
+        input.setSkillKeys(new ArrayList<>(List.of(skillKey)));
+        return input;
+    }
 
     private DiagnosisService.Input input(String nodeCode) {
         DiagnosisService.Input input = new DiagnosisService.Input();

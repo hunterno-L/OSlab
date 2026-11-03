@@ -36,7 +36,13 @@ param(
     [string]$AdminPassword = $env:OSLAB_ADMIN_PASSWORD,
     [string]$StudentAccount = $(if ($env:OSLAB_STUDENT_A_ACCOUNT) { $env:OSLAB_STUDENT_A_ACCOUNT } else { 'student_demo1' }),
     [string]$StudentPassword = $(if ($env:OSLAB_STUDENT_A_PASSWORD) { $env:OSLAB_STUDENT_A_PASSWORD } else { $env:OSLAB_DEMO_PASSWORD }),
+    [string]$TeacherAccount = 'teacher_demo',
+    [string]$OtherStudentAccount = 'student_demo2',
+    [string]$DemoPassword = $(if ($env:OSLAB_DEMO_PASSWORD) { $env:OSLAB_DEMO_PASSWORD } else { '123456' }),
+    [string]$ClassName = 'os2026',
     [string]$CourseCode = $(if ($env:OSLAB_AI_COURSE) { $env:OSLAB_AI_COURSE } else { 'course.operating-systems' }),
+    [string]$DatabaseCourseCode = 'course.database-systems',
+    [long]$DatabaseCourseId = 2115000000000000001,
     [string]$DbHost = $(if ($env:OSLAB_DB_HOST) { $env:OSLAB_DB_HOST } else { 'localhost' }),
     [int]$DbPort = $(if ($env:OSLAB_DB_PORT) { [int]$env:OSLAB_DB_PORT } else { 3306 }),
     [string]$DbUser = $(if ($env:OSLAB_DB_USER) { $env:OSLAB_DB_USER } else { 'root' }),
@@ -44,6 +50,9 @@ param(
     [string]$DbPassword = $env:OSLAB_DB_PASSWORD,
     [switch]$SkipMigration,
     [switch]$SkipIndex,
+    # 仅在本地演示环境使用：把已存在的演示账号口令重置为 DemoPassword 的初始 MD5。
+    # 默认关闭——既有账号默认保留原口令，不会被脚本悄悄改写。
+    [switch]$ResetDemoPassword,
     [string]$RunKey = (Get-Date -Format 'yyyyMMdd-HHmmss'),
     [string]$ReportDir = 'artifacts/ai-platform-demo'
 )
@@ -62,7 +71,12 @@ $script:steps = @()
 
 function Add-Step([string]$id, [string]$name, [string]$status, [string]$detail) {
     $script:steps += [pscustomobject]@{ id = $id; name = $name; status = $status; detail = $detail }
-    $mark = switch ($status) { 'PASS' { '[ OK ]' } 'FAIL' { '[FAIL]' } default { '[SKIP]' } }
+    $mark = switch ($status) {
+        'PASS' { '[ OK ]' }
+        'FAIL' { '[FAIL]' }
+        'WARN' { '[WARN]' }
+        default { '[SKIP]' }
+    }
     Write-Host "$mark $id $name$(if ($detail) { " —— $detail" })"
     if ($status -eq 'FAIL') { $script:failures++ }
 }
@@ -81,11 +95,13 @@ function Invoke-Api([object]$WebSession, [string]$Method, [string]$Path, [object
     return Invoke-RestMethod -Uri $uri -Method $Method -WebSession $WebSession -TimeoutSec 120
 }
 
-function Invoke-Login([string]$account, [string]$password, [string]$varName) {
+function Invoke-Login([string]$account, [string]$password) {
     $body = @{ userAccount = $account; userPassword = $password } | ConvertTo-Json
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($body)
-    return Invoke-RestMethod -Uri "$BaseUrl/user/login" -Method Post -Body $bytes `
-        -ContentType 'application/json; charset=utf-8' -SessionVariable $varName -TimeoutSec 30
+    # -SessionVariable 只在函数作用域内创建变量，必须和响应一起返回给调用方
+    $resp = Invoke-RestMethod -Uri "$BaseUrl/user/login" -Method Post -Body $bytes `
+        -ContentType 'application/json; charset=utf-8' -SessionVariable loginSession -TimeoutSec 30
+    return [pscustomobject]@{ resp = $resp; session = $loginSession }
 }
 
 function Invoke-MySql([string]$sql) {
@@ -124,7 +140,8 @@ foreach ($item in ($required + $optional)) {
 if ($missing.Count -eq 0) {
     Add-Step 'S0' '演示环境变量齐备' 'PASS' '模型与向量链路可用'
 } else {
-    Add-Step 'S0' '演示环境变量齐备' 'FAIL' ("缺少：" + ($missing -join ', ') + "。缺 key 时链路仍可跑通，但回答为规则降级（mode=FALLBACK），不得当作模型验收")
+    # 缺 key 不是准备失败：链路仍可跑通（规则回答 + 关键词检索），但不能当作模型验收。
+    Add-Step 'S0' '演示环境变量齐备' 'WARN' ("缺少：" + ($missing -join ', ') + "。缺 key 时链路仍可跑通，但回答为规则降级（mode=FALLBACK），不得当作模型验收")
 }
 
 # ---------------------------------------------------------------------
@@ -138,8 +155,11 @@ $unsafe = @()
 foreach ($file in $migrations) {
     if (-not (Test-Path $file)) { $unsafe += "缺失文件：$file"; continue }
     $content = Get-Content -Raw -Encoding UTF8 $file
-    foreach ($keyword in @('DROP ', 'TRUNCATE', 'DELETE ', 'UPDATE ', 'ALTER ')) {
-        if ($content -match [regex]::Escape($keyword)) { $unsafe += "$($keyword.Trim()) in $(Split-Path -Leaf $file)" }
+    # 只检查"语句开头"的破坏性关键字：ON UPDATE CURRENT_TIMESTAMP 这类列定义不算。
+    # 行注释先剔除，避免注释里的示例语句误报。
+    $withoutComments = ($content -split "`n" | ForEach-Object { $_ -replace '--.*$', '' }) -join "`n"
+    foreach ($match in [regex]::Matches($withoutComments, '(?im)^\s*(DROP|TRUNCATE|DELETE|UPDATE|ALTER)\b')) {
+        $unsafe += "$($match.Groups[1].Value.ToUpper()) in $(Split-Path -Leaf $file)"
     }
 }
 if ($unsafe.Count -gt 0) {
@@ -183,6 +203,134 @@ try {
 }
 
 # ---------------------------------------------------------------------
+# S2b 演示账号（幂等）
+#
+# 只在账号不存在时插入，且写入的是后端仍兼容的初始 MD5 口令
+# MD5('yupi' + 明文)（SALT 见 UserServiceImpl.SALT）；首次成功登录时后端会把它
+# 自动迁移成 BCrypt，因此这里不保存明文、也不覆盖既有账号的口令。
+# 角色与名册字段对照本地库现有行：教师 admin、学生 user，students.className=os2026，
+# studentNumber 沿用 "S<userId>" 约定。
+# ---------------------------------------------------------------------
+function Get-LegacyPasswordHash([string]$raw) {
+    $md5 = [System.Security.Cryptography.MD5]::Create()
+    try {
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes('yupi' + $raw)
+        return ([System.BitConverter]::ToString($md5.ComputeHash($bytes))).Replace('-', '').ToLowerInvariant()
+    } finally {
+        $md5.Dispose()
+    }
+}
+
+$demoAccounts = @(
+    @{ account = $TeacherAccount;      role = 'admin'; student = $false; displayName = '演示教师' },
+    @{ account = $StudentAccount;      role = 'user';  student = $true;  displayName = '演示学生A' },
+    @{ account = $OtherStudentAccount; role = 'user';  student = $true;  displayName = '演示学生B' }
+)
+
+if ([string]::IsNullOrWhiteSpace($DemoPassword)) {
+    Add-Step 'S2b' '演示账号准备' 'SKIP' '未提供 DemoPassword / OSLAB_DEMO_PASSWORD'
+} else {
+    $legacyHash = Get-LegacyPasswordHash $DemoPassword
+    $createdAccounts = @()
+    $keptAccounts = @()
+    $resetAccounts = @()
+    $accountErrors = @()
+    foreach ($item in $demoAccounts) {
+        $account = $item.account
+        try {
+            $count = (Invoke-MySql "SELECT COUNT(*) FROM user WHERE userAccount='$account'") | Select-Object -First 1
+            if ($LASTEXITCODE -ne 0) {
+                $accountErrors += "$account 查询失败"
+                continue
+            }
+            if ([int]$count -eq 0) {
+                Invoke-MySql ("INSERT INTO user (userAccount,userPassword,userName,userRole,isDelete) " +
+                    "SELECT '$account','$legacyHash',NULL,'$($item.role)',0 FROM DUAL " +
+                    "WHERE NOT EXISTS (SELECT 1 FROM user WHERE userAccount='$account')") | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    $accountErrors += "$account 插入失败"
+                    continue
+                }
+                $createdAccounts += $account
+            } else {
+                # 既有账号默认保留原口令与资料；只有显式 -ResetDemoPassword 才重置演示口令
+                $keptAccounts += $account
+                if ($ResetDemoPassword) {
+                    Invoke-MySql ("UPDATE user SET userPassword='$legacyHash' " +
+                        "WHERE userAccount='$account' AND isDelete=0") | Out-Null
+                    if ($LASTEXITCODE -ne 0) {
+                        $accountErrors += "$account 口令重置失败"
+                    } else {
+                        $resetAccounts += $account
+                    }
+                }
+            }
+            if ($item.student) {
+                $userId = (Invoke-MySql "SELECT id FROM user WHERE userAccount='$account' AND isDelete=0") |
+                    Select-Object -First 1
+                if (-not $userId) {
+                    $accountErrors += "$account 未取到 userId"
+                    continue
+                }
+                $studentNumber = "S$userId"
+                Invoke-MySql ("INSERT INTO students (studentNumber,name,className,userId,isDelete) " +
+                    "SELECT '$studentNumber','$($item.displayName)','$ClassName',$userId,0 FROM DUAL " +
+                    "WHERE NOT EXISTS (SELECT 1 FROM students WHERE userId=$userId) " +
+                    "AND NOT EXISTS (SELECT 1 FROM students WHERE studentNumber='$studentNumber')") | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    $accountErrors += "$account 名册写入失败"
+                }
+            }
+        } catch {
+            $accountErrors += "$account：$($_.Exception.Message)"
+        }
+    }
+    # 复核：三个账号都必须存在且未删除
+    $stillMissing = @()
+    foreach ($item in $demoAccounts) {
+        $c = (Invoke-MySql "SELECT COUNT(*) FROM user WHERE userAccount='$($item.account)' AND isDelete=0") |
+            Select-Object -First 1
+        if ([int]$c -eq 0) { $stillMissing += $item.account }
+    }
+    if ($accountErrors.Count -gt 0 -or $stillMissing.Count -gt 0) {
+        Add-Step 'S2b' '演示账号准备' 'FAIL' (($accountErrors + ($stillMissing | ForEach-Object { "$_ 缺失" })) -join '; ')
+    } else {
+        $detail = "已存在 " + ($keptAccounts -join ',')
+        if ($createdAccounts.Count -gt 0) { $detail += "；本次新建 " + ($createdAccounts -join ',') + "（初始 MD5 口令，首次登录自动升级）" }
+        if ($resetAccounts.Count -gt 0) { $detail += "；已按 -ResetDemoPassword 重置 " + ($resetAccounts -join ',') + " 的口令（首次登录自动升级）" }
+        Add-Step 'S2b' '演示账号准备' 'PASS' $detail
+    }
+}
+
+# ---------------------------------------------------------------------
+# S2c 数据库课程注册（幂等）
+#
+# 只在缺少 course.database-systems 时插入，取本地已注册行的同值
+# （id/title/description/status）；已有行不改写，避免覆盖内容侧发布状态。
+# ---------------------------------------------------------------------
+try {
+    $courseCount = (Invoke-MySql "SELECT COUNT(*) FROM course_catalog WHERE courseCode='$DatabaseCourseCode' AND isDelete=0") |
+        Select-Object -First 1
+    if ([int]$courseCount -gt 0) {
+        Add-Step 'S2c' '数据库课程注册' 'PASS' "$DatabaseCourseCode 已存在，保留原行"
+    } else {
+        Invoke-MySql ("INSERT INTO course_catalog (id,courseCode,title,description,status,isDelete) " +
+            "SELECT $DatabaseCourseId,'$DatabaseCourseCode','数据库系统'," +
+            "'函数依赖、属性闭包与候选键；复用统一检索、问答、练习、诊断与复习服务。','DRAFT',0 FROM DUAL " +
+            "WHERE NOT EXISTS (SELECT 1 FROM course_catalog WHERE courseCode='$DatabaseCourseCode')") | Out-Null
+        $after = (Invoke-MySql "SELECT COUNT(*) FROM course_catalog WHERE courseCode='$DatabaseCourseCode' AND isDelete=0") |
+            Select-Object -First 1
+        if ([int]$after -gt 0) {
+            Add-Step 'S2c' '数据库课程注册' 'PASS' "$DatabaseCourseCode 已按本地同值插入"
+        } else {
+            Add-Step 'S2c' '数据库课程注册' 'FAIL' '插入后仍未查到该课程'
+        }
+    }
+} catch {
+    Add-Step 'S2c' '数据库课程注册' 'FAIL' "数据库不可达：$($_.Exception.Message)"
+}
+
+# ---------------------------------------------------------------------
 # S3 管理员登录 + 课程索引重建
 # ---------------------------------------------------------------------
 $adminSession = $null
@@ -190,11 +338,12 @@ if ([string]::IsNullOrWhiteSpace($AdminPassword)) {
     Add-Step 'S3' '管理员登录' 'SKIP' '未提供 AdminPassword / OSLAB_ADMIN_PASSWORD'
 } else {
     try {
-        $resp = Invoke-Login $AdminAccount $AdminPassword 'adminSession'
-        if ($resp.code -eq 0) {
+        $login = Invoke-Login $AdminAccount $AdminPassword
+        if ($login.resp.code -eq 0) {
+            $adminSession = $login.session
             Add-Step 'S3' '管理员登录' 'PASS' "账号 $AdminAccount"
         } else {
-            Add-Step 'S3' '管理员登录' 'FAIL' "业务码 $($resp.code)：$($resp.message)"
+            Add-Step 'S3' '管理员登录' 'FAIL' "业务码 $($login.resp.code)：$($login.resp.message)"
         }
     } catch {
         Add-Step 'S3' '管理员登录' 'FAIL' "后端不可达：$($_.Exception.Message)"
@@ -231,8 +380,9 @@ if ([string]::IsNullOrWhiteSpace($StudentPassword)) {
     Add-Step 'S5' '学生登录' 'SKIP' '未提供 StudentPassword / OSLAB_STUDENT_A_PASSWORD / OSLAB_DEMO_PASSWORD'
 } else {
     try {
-        $resp = Invoke-Login $StudentAccount $StudentPassword 'studentSession'
-        if ($resp.code -eq 0) {
+        $login = Invoke-Login $StudentAccount $StudentPassword
+        if ($login.resp.code -eq 0) {
+            $studentSession = $login.session
             Add-Step 'S5' '学生登录' 'PASS' "账号 $StudentAccount"
             if (-not $SkipIndex) {
                 $personal = Invoke-Api -WebSession $studentSession -Method Post `
@@ -246,7 +396,7 @@ if ([string]::IsNullOrWhiteSpace($StudentPassword)) {
                 Add-Step 'S6' '个人资料索引重建' 'SKIP' '指定 -SkipIndex'
             }
         } else {
-            Add-Step 'S5' '学生登录' 'FAIL' "业务码 $($resp.code)：$($resp.message)"
+            Add-Step 'S5' '学生登录' 'FAIL' "业务码 $($login.resp.code)：$($login.resp.message)"
         }
     } catch {
         Add-Step 'S5' '学生登录' 'FAIL' "请求异常：$($_.Exception.Message)"

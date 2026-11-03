@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -67,6 +68,11 @@ public class AiSessionService {
         session.setStatus(STATUS_ACTIVE);
         session.setRowVersion(0);
         session.setIsDelete(0);
+        // 显式写入创建/更新时间：DB 默认值不会回填到实体，
+        // 否则创建响应里的 createdAt 会是 null，违反冻结契约样例。
+        Date now = new Date();
+        session.setCreateTime(now);
+        session.setUpdateTime(now);
         sessionMapper.insert(session);
         log.info("[ai-session] created id={} user={} course={} focus={}",
                 session.getId(), user.getId(), courseCode, focus);
@@ -122,6 +128,7 @@ public class AiSessionService {
             session.setCurrentActionJson(AiJson.write(findPlanAction(session, request.getCurrentActionId())));
         }
         session.setRowVersion(session.getRowVersion() + 1);
+        session.setUpdateTime(new Date());
         int updated = sessionMapper.updateById(session);
         if (updated == 0) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "会话更新失败，请刷新后重试");

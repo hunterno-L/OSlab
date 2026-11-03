@@ -156,6 +156,22 @@ class AiSessionTurnContractTest {
     }
 
     @Test
+    void createdSessionCarriesCreatedAtAndUpdatedAtForTheFrozenContract() {
+        AiRequests.CreateSession request = new AiRequests.CreateSession();
+        request.setCourseCode("course.operating-systems");
+        request.setFocus(AiSessionService.FOCUS_LEARN);
+
+        com.yupi.springbootinit.model.vo.ai.AiSessionVO vo = sessions.create(owner, request);
+
+        assertNotNull(vo.getCreatedAt(), "冻结契约样例要求 createdAt 非空（DB 默认值不会回填实体）");
+        assertNotNull(vo.getUpdatedAt());
+        assertEquals(0, vo.getRowVersion());
+        // sessionId 由 MyBatis-Plus ASSIGN_ID 在 insert 时分配；单测里 mapper 是 mock，
+        // 因此这里只验证写入实体本身带了契约字段（真实分配由冒烟 S3 覆盖）。
+        assertEquals("course.operating-systems", vo.getCourseCode());
+    }
+
+    @Test
     void updateBumpsRowVersionAndKeepsEverythingElseWhenOnlyModelChanges() {
         when(profileService.validateProfileForSession(7L, "55")).thenReturn(55L);
         AiRequests.UpdateSession request = new AiRequests.UpdateSession();

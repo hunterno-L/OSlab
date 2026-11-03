@@ -66,9 +66,11 @@ public final class AiJson {
             return new ArrayList<>();
         }
         try {
-            return new ArrayList<>(java.util.Arrays.asList(
-                    MAPPER.readValue(json, MAPPER.getTypeFactory()
-                            .constructCollectionType(List.class, type))));
+            // readValue 已经返回 List<T>，不能再套 Arrays.asList：
+            // 那会得到"只含一个 List 元素"的列表，调用方迭代时抛 ClassCastException。
+            List<T> parsed = MAPPER.readValue(json,
+                    MAPPER.getTypeFactory().constructCollectionType(List.class, type));
+            return parsed == null ? new ArrayList<>() : new ArrayList<>(parsed);
         } catch (Exception e) {
             log.warn("[ai] json list deserialize failed for {}: {}", type.getSimpleName(),
                     e.getClass().getSimpleName());

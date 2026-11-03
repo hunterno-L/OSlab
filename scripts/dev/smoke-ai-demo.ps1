@@ -79,10 +79,13 @@ function Invoke-Text([object]$WebSession, [string]$Path, [string]$Text) {
         -ContentType 'text/plain; charset=utf-8' -WebSession $WebSession -TimeoutSec 120
 }
 
-function Invoke-Login([string]$account, [string]$password, [string]$varName) {
+function Invoke-Login([string]$account, [string]$password) {
     $bytes = [System.Text.Encoding]::UTF8.GetBytes((@{ userAccount = $account; userPassword = $password } | ConvertTo-Json))
-    return Invoke-RestMethod -Uri "$BaseUrl/user/login" -Method Post -Body $bytes `
-        -ContentType 'application/json; charset=utf-8' -SessionVariable $varName -TimeoutSec 30
+    # -SessionVariable 在函数作用域内创建局部变量，必须随响应一起返回，
+    # 否则调用方拿到的是空会话，后续请求会被当成"未登录"。
+    $resp = Invoke-RestMethod -Uri "$BaseUrl/user/login" -Method Post -Body $bytes `
+        -ContentType 'application/json; charset=utf-8' -SessionVariable loginSession -TimeoutSec 30
+    return [pscustomobject]@{ resp = $resp; session = $loginSession }
 }
 
 Write-Host "=== ZhiCore AI 冒烟 RunKey=$RunKey ==="
@@ -99,12 +102,13 @@ if ([string]::IsNullOrWhiteSpace($StudentPassword)) {
     exit 1
 }
 try {
-    $loginA = Invoke-Login $StudentAccount $StudentPassword 'sessionA'
-    if ($loginA.code -ne 0) {
-        Add-Step 'S1' '学生 A 登录' 'FAIL' "业务码 $($loginA.code)：$($loginA.message)"
+    $loginA = Invoke-Login $StudentAccount $StudentPassword
+    if ($loginA.resp.code -ne 0) {
+        Add-Step 'S1' '学生 A 登录' 'FAIL' "业务码 $($loginA.resp.code)：$($loginA.resp.message)"
         Write-Host 'SMOKE ABORTED' -ForegroundColor Red
         exit 1
     }
+    $sessionA = $loginA.session
     Add-Step 'S1' '学生 A 登录' 'PASS' $StudentAccount
 } catch {
     Add-Step 'S1' '学生 A 登录' 'FAIL' "后端不可达：$($_.Exception.Message)"
@@ -115,9 +119,13 @@ if ([string]::IsNullOrWhiteSpace($OtherPassword)) {
     Add-Step 'S1b' '学生 B 登录' 'SKIP' '未提供第二个账号口令，跨用户权限检查将跳过'
 } else {
     try {
-        $loginB = Invoke-Login $OtherAccount $OtherPassword 'sessionB'
-        if ($loginB.code -eq 0) { Add-Step 'S1b' '学生 B 登录' 'PASS' $OtherAccount }
-        else { Add-Step 'S1b' '学生 B 登录' 'FAIL' "业务码 $($loginB.code)：$($loginB.message)" }
+        $loginB = Invoke-Login $OtherAccount $OtherPassword
+        if ($loginB.resp.code -eq 0) {
+            $sessionB = $loginB.session
+            Add-Step 'S1b' '学生 B 登录' 'PASS' $OtherAccount
+        } else {
+            Add-Step 'S1b' '学生 B 登录' 'FAIL' "业务码 $($loginB.resp.code)：$($loginB.resp.message)"
+        }
     } catch {
         Add-Step 'S1b' '学生 B 登录' 'FAIL' "请求异常：$($_.Exception.Message)"
     }

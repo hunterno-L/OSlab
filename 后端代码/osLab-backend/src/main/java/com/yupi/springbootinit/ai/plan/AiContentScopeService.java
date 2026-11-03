@@ -1,6 +1,8 @@
 package com.yupi.springbootinit.ai.plan;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yupi.springbootinit.model.dto.learning.LearningQuestionQueryRequest;
+import com.yupi.springbootinit.model.entity.LearningQuestion;
 import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.service.LearningQuestionService;
 import lombok.Data;
@@ -207,6 +209,44 @@ public class AiContentScopeService {
             log.warn("[ai-scope] eligible questions unavailable course={} node={}: {}",
                     courseCode, nodeCode, e.getClass().getSimpleName());
             return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 把课程包里的题目 code 解析成"学生口径可作答"的题目 id。
+     *
+     * <p>两步都不走捷径：先按 code 找到未删除的题目，再用
+     * {@link LearningQuestionService#listEligibleQuestionIds} 的同一套谓词确认
+     * 它已发布、属于该课程且落在学生可见范围内。任何一步不满足都返回 null，
+     * 规划器据此不生成区分任务（不引用草稿、下线或越权题目）。
+     *
+     * @param questionCode 课程包里的稳定题目 code，例如 {@code q.db.fd.closure-composite}
+     * @return 可作答的题目 id；解析不到返回 null
+     */
+    public Long eligibleQuestionIdByCode(User user, String courseCode, String questionCode) {
+        if (user == null || StringUtils.isBlank(questionCode)) {
+            return null;
+        }
+        try {
+            List<LearningQuestion> rows = learningQuestionService.list(
+                    new LambdaQueryWrapper<LearningQuestion>()
+                            .eq(LearningQuestion::getQuestionCode, questionCode.trim())
+                            .eq(LearningQuestion::getIsDelete, 0)
+                            .last("limit 1"));
+            if (rows == null || rows.isEmpty() || rows.get(0).getId() == null) {
+                return null;
+            }
+            Long id = rows.get(0).getId();
+            // 只按课程约束：区分任务只需要"同课程且学生可见"，不额外限定知识点，
+            // 否则内容包的 nodeCode 与题库 chapter 不一致时会误判为不可用。
+            LearningQuestionQueryRequest query = new LearningQuestionQueryRequest();
+            query.setCourseCode(StringUtils.trimToNull(courseCode));
+            List<Long> eligible = learningQuestionService.listEligibleQuestionIds(query, user);
+            return eligible != null && eligible.contains(id) ? id : null;
+        } catch (RuntimeException e) {
+            log.warn("[ai-scope] eligible question by code unavailable code={}: {}",
+                    questionCode, e.getClass().getSimpleName());
+            return null;
         }
     }
 

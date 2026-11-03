@@ -1,5 +1,6 @@
 package com.yupi.springbootinit.ai.plan;
 
+import com.yupi.springbootinit.ai.diagnosis.DiagnosisService;
 import com.yupi.springbootinit.ai.evidence.EvidenceReadService;
 import com.yupi.springbootinit.ai.session.AiSessionService;
 import com.yupi.springbootinit.model.entity.LearningReviewItem;
@@ -50,6 +51,9 @@ public class NextActionPlanner {
     @Resource
     private AiContentScopeService contentScope;
 
+    @Resource
+    private PredictCaseCatalog predictCases;
+
     @Data
     public static class PlanInput implements Serializable {
         private User user;
@@ -62,7 +66,8 @@ public class NextActionPlanner {
         private Long sessionId;
         private EvidenceReadService.EvidenceSummary evidence;
         private List<LearningReviewItem> dueReviews = new ArrayList<>();
-        private List<PredictCaseCatalog.PredictCase> verifications = new ArrayList<>();
+        /** 区分任务：预测型与题库型统一表示，由诊断服务决定"要区分哪些原因"。 */
+        private List<DiagnosisService.VerificationTask> verifications = new ArrayList<>();
         private Diagnosis diagnosis;
         private List<SourceRef> sources = new ArrayList<>();
         private String unitCode;
@@ -91,12 +96,16 @@ public class NextActionPlanner {
             }
         }
 
-        // 2. 区分任务：只在有候选原因时安排，最多两道（由 DiagnosisService 限制）
-        for (PredictCaseCatalog.PredictCase predictCase : safe(input.getVerifications())) {
+        // 2. 区分任务：只在有候选原因时安排，最多两道（由 DiagnosisService 限制）。
+        //    题库型任务必须解析成"已发布且同课程、学生可见"的题目才生成动作，解析不到就跳过。
+        for (DiagnosisService.VerificationTask task : safe(input.getVerifications())) {
             if (actions.size() >= input.getLimit()) {
                 break;
             }
-            actions.add(predictAction(input, predictCase));
+            NextAction action = verificationAction(input, task);
+            if (action != null) {
+                actions.add(action);
+            }
         }
 
         // 3. 读具体段落：优先用本次检索到的真实来源块，保证"可以打开到具体段落"
@@ -226,6 +235,50 @@ public class NextActionPlanner {
                 return null;
             }
         }
+        return action;
+    }
+
+    /**
+     * 区分任务分派：预测型沿用既有页面置换案例，题库型解析成学生可见题目。
+     *
+     * @return 可执行动作；任务无效或题目不可作答时返回 null（不生成占位动作）
+     */
+    private NextAction verificationAction(PlanInput input, DiagnosisService.VerificationTask task) {
+        if (task == null) {
+            return null;
+        }
+        if (task.isQuestion()) {
+            return verificationQuestionAction(input, task);
+        }
+        PredictCaseCatalog.PredictCase predictCase = predictCases.find(task.getPredictCase());
+        return predictCase == null ? null : predictAction(input, predictCase);
+    }
+
+    /**
+     * 题库型区分任务：把课程包里的 {@code questionCode} 解析成学生可作答的题目 id。
+     *
+     * <p>只接受已发布、未删除、同课程且落在既有学生口径谓词内的题目，
+     * 与 {@code select_verified_activity} 走同一条解析路径；解析不到就不生成动作，
+     * 宁可少一个任务，也不引用不可作答或越权的题目。
+     */
+    private NextAction verificationQuestionAction(PlanInput input, DiagnosisService.VerificationTask task) {
+        Long questionId = contentScope.eligibleQuestionIdByCode(input.getUser(), input.getCourseCode(),
+                task.getQuestionCode());
+        if (questionId == null) {
+            log.info("[ai-plan] verification question unavailable code={} course={}",
+                    task.getQuestionCode(), input.getCourseCode());
+            return null;
+        }
+        NextAction action = new NextAction();
+        action.setType(NextAction.TYPE_QUESTION);
+        action.setTargetRef(new TargetRef(TargetRef.KIND_QUESTION, String.valueOf(questionId), null));
+        action.setEstimatedMinutes(task.getEstimatedMinutes() > 0
+                ? task.getEstimatedMinutes() : MINUTES_QUESTION);
+        action.setStatus(NextAction.STATUS_PENDING);
+        action.setEvidenceIds(supportingIds(input.getDiagnosis()));
+        action.setReason("区分候选原因：" + StringUtils.defaultIfBlank(task.getReason(),
+                "完成一道已发布题目以区分候选原因")
+                + "（题目已发布、同课程，判分由服务端完成）");
         return action;
     }
 

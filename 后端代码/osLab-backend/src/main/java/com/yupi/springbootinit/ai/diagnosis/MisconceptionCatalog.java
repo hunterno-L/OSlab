@@ -42,10 +42,20 @@ public class MisconceptionCatalog {
         private List<String> textHints = new ArrayList<>();
     }
 
+    /**
+     * 区分任务条目，支持两种形态：
+     * <ul>
+     *   <li>{@code predictCase}——操作系统页面置换的预测案例（由服务端计算器核对）；</li>
+     *   <li>{@code questionCode}——课程包里的已发布题目（按题库 code 解析，走学生可见题目谓词）。</li>
+     * </ul>
+     * 两种形态可以并存；一条条目至少要有其中一个。
+     */
     @Data
     public static class Verification {
         private List<String> discriminates = new ArrayList<>();
         private String predictCase;
+        /** 课程包题库中的题目 code（例如 {@code q.db.fd.closure-composite}）。 */
+        private String questionCode;
         private String reason;
         private int estimatedMinutes = 3;
     }
