@@ -100,6 +100,30 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
     @Transactional(rollbackFor = Exception.class)
     public List<MasteryChangeVO> recordAttemptEvents(Long userId, LearningQuestion question,
                                                      Long attemptId, boolean correct, boolean isFirst) {
+        // 升级前入口（旧练习/测评/任务）：没有帮助记录，按 UNKNOWN 处理，
+        // 不倒推成"未获得帮助"，也不改变既有观测行为。
+        return recordAttemptEvents(userId, question, attemptId, correct, isFirst,
+                com.yupi.springbootinit.ai.evidence.EvidenceQualification.unknown());
+    }
+
+    /**
+     * 带证据资格的作答事件写入（AI 升级 §5.5）。
+     *
+     * <p>资格判定在事务之前就已确定：帮助等级为 HINT / ANSWER_REVEALED 时，
+     * 即使是该题首次作答也不作为独立观测——不更新 BKT、不增加证据数、不改可信度。
+     * 事件本身仍完整落库（isFirst=0），并把真实的首次标记与帮助情况写进 evidence JSON，
+     * 因此账本既能区分"看过答案的表现"，又不丢失"这确实是第一次做这道题"的事实。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<MasteryChangeVO> recordAttemptEvents(Long userId, LearningQuestion question,
+                                                     Long attemptId, boolean correct, boolean isFirst,
+                                                     com.yupi.springbootinit.ai.evidence.EvidenceQualification qualification) {
+        com.yupi.springbootinit.ai.evidence.EvidenceQualification effective =
+                qualification == null
+                        ? com.yupi.springbootinit.ai.evidence.EvidenceQualification.unknown() : qualification;
+        // 独立观测 = 首次作答 且 证据资格通过
+        boolean observed = isFirst && effective.isEligibleForObservation();
         List<MasteryChangeVO> changes = new ArrayList<>();
         List<LearningQuestionNode> mappings = learningQuestionNodeMapper.selectList(
                 new LambdaQueryWrapper<LearningQuestionNode>()
@@ -115,18 +139,19 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
             String idempotencyKey = "attempt:" + attemptId + ":" + nodeName;
             LearningEvent event = buildEvent(userId, nodeName,
                     LearningEventTypeEnum.ATTEMPT, LearningResourceTypeEnum.LEARNING_QUESTION,
-                    question.getId(), correct, isFirst, idempotencyKey, groupKey,
+                    question.getId(), correct, observed, idempotencyKey, groupKey,
                     JSONUtil.toJsonStr(new Evidence(
                             "普通题作答", question.getTitle(), correct ? "答对" : "答错",
-                            isFirst ? "首次作答（独立观测）" : "重复作答（不计独立观测）")));
+                            attemptNote(isFirst, effective))));
             if(mapping.getNodeCode()!=null)event.setNodeCode(mapping.getNodeCode());
             if(sourceAttempt!=null){event.setSourceUnitCode(sourceAttempt.getSourceUnitCode());event.setSourceActivityCode(sourceAttempt.getSourceActivityCode());
                 event.setSourceTaskCode(sourceAttempt.getSourceTaskCode());event.setSourceTaskItemCode(sourceAttempt.getSourceTaskItemCode());event.setSourceTaskRound(sourceAttempt.getSourceTaskRound());}
             observationMetadata(event,weight);
+            qualificationMetadata(event, isFirst, effective);
             // U15：重复作答也写入行为事件（before==after，不更新模型）；
-            // 仅首次（独立观测）才执行 BKT 更新。
+            // 仅首次且资格通过的独立观测才执行 BKT 更新。
             boolean counted = false;
-            if (isFirst) {
+            if (observed) {
                 counted = insertWithMasteryUpdate(userId, nodeName, event, correct, weight, true);
             } else {
                 insertRepeatEvent(userId, nodeName, event);
@@ -134,6 +159,57 @@ public class LearningEventServiceImpl extends ServiceImpl<LearningEventMapper, L
             changes.add(toChangeVO(userId, nodeName, event, counted));
         }
         return changes;
+    }
+
+    @Override
+    public List<Long> eventIdsOfAttempt(Long userId, Long attemptId) {
+        if (userId == null || attemptId == null) {
+            return new ArrayList<>();
+        }
+        List<LearningEvent> events = learningEventMapper.selectList(new LambdaQueryWrapper<LearningEvent>()
+                .eq(LearningEvent::getUserId, userId)
+                .eq(LearningEvent::getEventGroupKey, "attempt:" + attemptId));
+        List<Long> ids = new ArrayList<>(events.size());
+        for (LearningEvent event : events) {
+            if (event.getId() != null) {
+                ids.add(event.getId());
+            }
+        }
+        return ids;
+    }
+
+    /** 事件详情文案：区分"独立观测""重复练习""首次但已获帮助"三种情况。 */
+    private static String attemptNote(boolean firstAttempt,
+                                      com.yupi.springbootinit.ai.evidence.EvidenceQualification qualification) {
+        if (!firstAttempt) {
+            return "重复作答（不计独立观测）";
+        }
+        if (qualification.isEligibleForObservation()) {
+            return com.yupi.springbootinit.ai.evidence.EvidenceQualification.HELP_UNKNOWN
+                    .equals(qualification.getHelpLevel())
+                    ? "首次作答（独立观测；缺少帮助记录）"
+                    : "首次作答（独立观测）";
+        }
+        return "首次作答但" + (com.yupi.springbootinit.ai.evidence.EvidenceQualification.HELP_ANSWER_REVEALED
+                .equals(qualification.getHelpLevel()) ? "已揭示答案" : "已获得提示")
+                + "（不计独立观测）";
+    }
+
+    /** 把帮助情况与资格判定写进 evidence JSON，供学习记录回放与答辩核对。 */
+    private void qualificationMetadata(LearningEvent event, boolean firstAttempt,
+                                       com.yupi.springbootinit.ai.evidence.EvidenceQualification qualification) {
+        cn.hutool.json.JSONObject evidence;
+        try {evidence=JSONUtil.parseObj(event.getEvidence());}
+        catch(cn.hutool.json.JSONException e){evidence=new cn.hutool.json.JSONObject();evidence.set("description",event.getEvidence());}
+        evidence.set("firstAttempt", firstAttempt);
+        evidence.set("helpLevel", qualification.getHelpLevel());
+        evidence.set("selfReportedHelp", qualification.getSelfReportedHelp());
+        evidence.set("eligibleForObservation", qualification.isEligibleForObservation());
+        evidence.set("eligibilityReason", qualification.getEligibilityReason());
+        if (qualification.getContextId() != null) {
+            evidence.set("evidenceContextId", String.valueOf(qualification.getContextId()));
+        }
+        event.setEvidence(evidence.toString());
     }
 
     // endregion

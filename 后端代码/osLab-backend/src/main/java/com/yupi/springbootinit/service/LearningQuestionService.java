@@ -72,6 +72,18 @@ public interface LearningQuestionService extends IService<LearningQuestion> {
     LearningAnswerResultVO answerQuestion(LearningAnswerRequest request, User user);
 
     /**
+     * 带证据上下文的作答（AI 升级 §5.5）。
+     *
+     * <p>{@code evidenceContextId} 指向的帮助等级必须<b>已经在本事务之前提交</b>；
+     * 本方法在事务内以行锁读取该上下文并据此决定证据资格：
+     * HINT / ANSWER_REVEALED 时即使首次作答也不计独立观测，不更新掌握度。
+     * 行锁同时保证"记录帮助"与"提交作答"并发时被串行化。
+     *
+     * @param evidenceContextId 为 null 时按缺少帮助记录处理，行为与升级前一致
+     */
+    LearningAnswerResultVO answerQuestion(LearningAnswerRequest request, User user, Long evidenceContextId);
+
+    /**
      * 审核流转：SUBMIT（作者）、APPROVE/REJECT/PUBLISH/OFFLINE（管理员）
      */
     boolean reviewQuestion(LearningQuestionReviewRequest request, User operator);

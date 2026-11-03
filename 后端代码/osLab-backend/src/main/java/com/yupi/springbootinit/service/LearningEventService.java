@@ -30,6 +30,27 @@ public interface LearningEventService extends IService<LearningEvent> {
                                               Long attemptId, boolean correct, boolean isFirst);
 
     /**
+     * 带证据资格的作答事件写入（AI 升级 §5.5）。
+     *
+     * <p>{@code qualification} 必须在答题事务之前就已确定（帮助等级先落库）：
+     * 帮助等级为 HINT / ANSWER_REVEALED 时，即使这是该题首次作答也<b>不</b>作为独立观测，
+     * 不更新 BKT、不增加证据数、不改可信度；事件仍完整写入并把帮助情况记进 evidence JSON，
+     * 因此"看过答案"与"能够完成新题"在账本上是可区分的。
+     *
+     * @param isFirst      是否该题首次作答（终身口径）
+     * @param qualification 证据资格判定；为 null 时按 UNKNOWN 处理（保持升级前行为）
+     */
+    List<MasteryChangeVO> recordAttemptEvents(Long userId, LearningQuestion question,
+                                              Long attemptId, boolean correct, boolean isFirst,
+                                              com.yupi.springbootinit.ai.evidence.EvidenceQualification qualification);
+
+    /**
+     * 某次作答产生的学习事件 id（按事件组键回读），供证据快照引用真实事件。
+     * 只读当前用户的事件，绝不返回他人事件。
+     */
+    List<Long> eventIdsOfAttempt(Long userId, Long attemptId);
+
+    /**
      * 编程实验判题终态接入（幂等：提交 ID + 节点为幂等键）。
      * 由 JudgeServiceImpl 在终态后调用；系统故障（FAILED）记录 SYSTEM_ERROR 事件，不计学生知识失误。
      * 题目标签映射不到图谱节点时记录诊断日志并跳过，不随意创造节点。

@@ -33,7 +33,7 @@ public class ActionSubmitResultVO implements Serializable {
     private List<String> diffSteps = new ArrayList<>();
 
     /** 本次提交产生的掌握度变化（沿用原有 MasteryChangeVO，只读展示）。 */
-    private List<Object> masteryChanges = new ArrayList<>();
+    private List<com.yupi.springbootinit.model.vo.learning.MasteryChangeVO> masteryChanges = new ArrayList<>();
 
     /** 提交后安排的下一阶梯复习到期时间（带时区）。 */
     private String nextReviewDueAt;

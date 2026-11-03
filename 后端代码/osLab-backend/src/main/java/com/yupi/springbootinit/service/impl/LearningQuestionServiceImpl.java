@@ -107,6 +107,13 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
     @Resource
     private com.yupi.springbootinit.task.TaskExecutionContextService taskContext;
 
+    /**
+     * 证据资格（AI 升级 §5.5）。可为 null（既有单元测试只注入判分相关依赖），
+     * 此时按"缺少帮助记录"处理，行为与升级前完全一致。
+     */
+    @Resource
+    private com.yupi.springbootinit.ai.evidence.LearningEvidenceContextService evidenceContexts;
+
     // region CRUD
 
     @Override
@@ -979,6 +986,14 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public LearningAnswerResultVO answerQuestion(LearningAnswerRequest request, User user) {
+        // 旧入口（练习/测评/任务）不带证据上下文：两个方法都标注事务，
+        // 保证同类内部委托仍然运行在代理开启的事务里。
+        return answerQuestion(request, user, null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public LearningAnswerResultVO answerQuestion(LearningAnswerRequest request, User user, Long evidenceContextId) {
         ThrowUtils.throwIf(request == null || request.getQuestionId() == null, ErrorCode.PARAMS_ERROR);
         LearningQuestion question = this.getById(request.getQuestionId());
         ThrowUtils.throwIf(question == null || question.getIsDelete() == 1, ErrorCode.NOT_FOUND_ERROR, "题目不存在");
@@ -1053,6 +1068,13 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
                 return rebuildResultFromAttempt(existing, question);
             }
         }
+        // 证据资格（AI 升级 §5.5）：帮助等级（NONE/HINT/ANSWER_REVEALED）已在本事务
+        // 之前由独立事务落库，这里以 FOR UPDATE 行锁读取并据此判定资格，
+        // 因此不存在"先更新 BKT 再补帮助标签"的顺序，帮助记录与提交并发时也被串行化。
+        com.yupi.springbootinit.ai.evidence.EvidenceQualification qualification =
+                (evidenceContextId == null || evidenceContexts == null)
+                        ? com.yupi.springbootinit.ai.evidence.EvidenceQualification.unknown()
+                        : evidenceContexts.lockAndQualify(user.getId(), evidenceContextId);
         boolean correct = LearningQuestionGrader.grade(question.getType(), question.getAnswer(), request.getAnswer());
 
         Long identityAttempts = learningAttemptMapper.selectCount(new LambdaQueryWrapper<LearningAttempt>()
@@ -1087,8 +1109,11 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         attempt.setQuestionSnapshot(JSONUtil.toJsonStr(question));
         learningAttemptMapper.insert(attempt);
 
+        // 独立观测 = 终身首次作答 且 证据资格通过；
+        // 带提示或已看答案的首次作答仍写入账本，但不更新掌握度。
+        boolean observedFirst = isFirst && qualification.isEligibleForObservation();
         List<MasteryChangeVO> changes = learningEventService.recordAttemptEvents(
-                user.getId(), question, attempt.getId(), correct, isFirst);
+                user.getId(), question, attempt.getId(), correct, observedFirst, qualification);
 
         LearningAnswerResultVO result = new LearningAnswerResultVO();
         result.setAttemptId(attempt.getId());

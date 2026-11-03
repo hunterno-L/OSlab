@@ -47,6 +47,9 @@ public class AiMaterial implements Serializable {
 
     private Integer chunkCount;
 
+    /** 用户标注的知识点编码 JSON 数组，用于图谱约束召回。 */
+    private String nodeCodesJson;
+
     /** PENDING / KEYWORD_ONLY / EMBEDDED / FAILED —— 索引状态必须诚实。 */
     private String indexStatus;
 

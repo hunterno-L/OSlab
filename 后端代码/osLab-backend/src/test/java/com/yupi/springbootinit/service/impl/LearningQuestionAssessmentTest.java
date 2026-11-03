@@ -3,6 +3,7 @@ package com.yupi.springbootinit.service.impl;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.yupi.springbootinit.ai.evidence.EvidenceQualification;
 import com.yupi.springbootinit.common.ErrorCode;
 import com.yupi.springbootinit.exception.BusinessException;
 import com.yupi.springbootinit.mapper.LearningAssessmentRunMapper;
@@ -22,6 +23,7 @@ import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
@@ -37,6 +39,8 @@ class LearningQuestionAssessmentTest {
     private final LearningEventService eventService = mock(LearningEventService.class);
     private final LearningQuestionNodeMapper nodeMapper = mock(LearningQuestionNodeMapper.class);
     private final UserService userService = mock(UserService.class);
+    private final com.yupi.springbootinit.ai.evidence.LearningEvidenceContextService evidenceContexts =
+            mock(com.yupi.springbootinit.ai.evidence.LearningEvidenceContextService.class);
     private final LearningQuestionServiceImpl service = new LearningQuestionServiceImpl();
     private final User user = new User();
     private LearningAssessmentRun run;
@@ -79,12 +83,15 @@ class LearningQuestionAssessmentTest {
         });
         when(eventService.recordAttemptEvents(anyLong(), any(), anyLong(), anyBoolean(), anyBoolean()))
                 .thenReturn(List.of());
+        when(eventService.recordAttemptEvents(anyLong(), any(), anyLong(), anyBoolean(), anyBoolean(), any()))
+                .thenReturn(List.of());
         ReflectionTestUtils.setField(service, "baseMapper", questionMapper);
         ReflectionTestUtils.setField(service, "learningAttemptMapper", attemptMapper);
         ReflectionTestUtils.setField(service, "learningAssessmentRunMapper", runMapper);
         ReflectionTestUtils.setField(service, "learningEventService", eventService);
         ReflectionTestUtils.setField(service, "learningQuestionNodeMapper", nodeMapper);
         ReflectionTestUtils.setField(service, "userService", userService);
+        ReflectionTestUtils.setField(service, "evidenceContexts", evidenceContexts);
     }
 
     @Test
@@ -123,11 +130,28 @@ class LearningQuestionAssessmentTest {
         verify(attemptMapper).insert(attempt.capture());
         assertEquals(41L, attempt.getValue().getAssessmentRunId());
         assertEquals(0, attempt.getValue().getIsFirst());
-        verify(eventService).recordAttemptEvents(7L, question, 88L, true, false);
+        verify(eventService).recordAttemptEvents(eq(7L), eq(question), eq(88L), eq(true), eq(false),
+                argThat(qualifiesAsUnknownHelp()));
+        // 首次判定按"评估身份 + 历史遗留（无评估身份）"两次计数，二者都是学生终身口径：
+        // 断言的是"任何一次计数都不得按测评会话过滤"，而不是调用次数。
         ArgumentCaptor<LambdaQueryWrapper<LearningAttempt>> lifetime = ArgumentCaptor.forClass(LambdaQueryWrapper.class);
-        verify(attemptMapper).selectCount(lifetime.capture());
-        String sql = lifetime.getValue().getSqlSegment();
-        assertFalse(sql.contains("assessmentRunId") || sql.contains("assessment_run_id"));
+        verify(attemptMapper, atLeastOnce()).selectCount(lifetime.capture());
+        assertEquals(2, lifetime.getAllValues().size(), "评估身份计数 + 遗留计数");
+        boolean sawIdentityCount = false;
+        boolean sawLegacyCount = false;
+        for (LambdaQueryWrapper<LearningAttempt> wrapper : lifetime.getAllValues()) {
+            String sql = wrapper.getSqlSegment();
+            assertFalse(sql.contains("assessmentRunId") || sql.contains("assessment_run_id"),
+                    "首次判定必须按学生终身口径，不得按测评会话过滤");
+            if (sql.contains("evaluationIdentity")) {
+                sawIdentityCount = true;
+            }
+            if (sql.contains("questionId")) {
+                sawLegacyCount = true;
+            }
+        }
+        assertTrue(sawIdentityCount, "应按跨副本评估身份计数");
+        assertTrue(sawLegacyCount, "应兼容无评估身份的历史作答");
     }
 
     @Test
@@ -259,6 +283,99 @@ class LearningQuestionAssessmentTest {
         verify(attemptMapper, never()).insert(any());
         verifyNoInteractions(eventService);
     }
+
+    // region AI 升级 §5.5：帮助等级在答题事务前生效并参与证据资格
+
+    @Test
+    void legacyEntryWithoutEvidenceContextKeepsUnknownHelpAndExistingObservation() {
+        when(attemptMapper.selectCount(any())).thenReturn(0L);
+        LearningAnswerResultVO result = service.answerQuestion(request, user);
+        assertTrue(result.getIsFirst(), "终身首次判定不变");
+        verify(evidenceContexts, never()).lockAndQualify(anyLong(), any());
+        verify(eventService).recordAttemptEvents(eq(7L), eq(question), eq(88L), eq(true), eq(true),
+                argThat(qualifiesAsUnknownHelp()));
+    }
+
+    @Test
+    void hintedFirstAttemptIsNotCountedAsIndependentObservation() {
+        when(attemptMapper.selectCount(any())).thenReturn(0L);
+        when(evidenceContexts.lockAndQualify(7L, 555L)).thenReturn(
+                EvidenceQualification.of(555L, EvidenceQualification.HELP_HINT, null));
+        LearningAnswerResultVO result = service.answerQuestion(request, user, 555L);
+        assertTrue(result.getIsFirst(), "响应仍如实报告这是终身首次作答");
+        verify(eventService).recordAttemptEvents(eq(7L), eq(question), eq(88L), eq(true), eq(false),
+                argThat(q -> q != null && EvidenceQualification.HELP_HINT.equals(q.getHelpLevel())
+                        && !q.isEligibleForObservation()));
+    }
+
+    @Test
+    void revealedAnswerFirstAttemptIsNotCountedAsIndependentObservation() {
+        when(attemptMapper.selectCount(any())).thenReturn(0L);
+        when(evidenceContexts.lockAndQualify(7L, 555L)).thenReturn(
+                EvidenceQualification.of(555L, EvidenceQualification.HELP_ANSWER_REVEALED, "EXTERNAL_AI"));
+        service.answerQuestion(request, user, 555L);
+        verify(eventService).recordAttemptEvents(eq(7L), eq(question), eq(88L), eq(true), eq(false),
+                argThat(q -> q != null
+                        && EvidenceQualification.HELP_ANSWER_REVEALED.equals(q.getHelpLevel())
+                        && "EXTERNAL_AI".equals(q.getSelfReportedHelp())
+                        && !q.isEligibleForObservation()));
+    }
+
+    @Test
+    void unhelpedContextStillCountsFirstObservation() {
+        when(attemptMapper.selectCount(any())).thenReturn(0L);
+        when(evidenceContexts.lockAndQualify(7L, 555L)).thenReturn(
+                EvidenceQualification.of(555L, EvidenceQualification.HELP_NONE, null));
+        service.answerQuestion(request, user, 555L);
+        verify(eventService).recordAttemptEvents(eq(7L), eq(question), eq(88L), eq(true), eq(true),
+                argThat(q -> q != null && q.isEligibleForObservation()
+                        && EvidenceQualification.HELP_NONE.equals(q.getHelpLevel())));
+    }
+
+    @Test
+    void evidenceContextIsLockedBeforeTheAttemptIsWritten() {
+        when(attemptMapper.selectCount(any())).thenReturn(0L);
+        when(evidenceContexts.lockAndQualify(7L, 555L)).thenReturn(
+                EvidenceQualification.of(555L, EvidenceQualification.HELP_NONE, null));
+        service.answerQuestion(request, user, 555L);
+        // 帮助等级必须在写 attempt / 更新掌握度之前读取并生效
+        InOrder inOrder = inOrder(evidenceContexts, attemptMapper, eventService);
+        inOrder.verify(evidenceContexts).lockAndQualify(7L, 555L);
+        inOrder.verify(attemptMapper).insert(any(LearningAttempt.class));
+        inOrder.verify(eventService).recordAttemptEvents(anyLong(), any(), anyLong(), anyBoolean(),
+                anyBoolean(), any());
+    }
+
+    @Test
+    void foreignEvidenceContextIsRejectedBeforeAnythingIsWritten() {
+        when(evidenceContexts.lockAndQualify(7L, 555L)).thenThrow(
+                new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权访问该证据上下文"));
+        assertEquals(ErrorCode.NO_AUTH_ERROR.getCode(), assertThrows(BusinessException.class,
+                () -> service.answerQuestion(request, user, 555L)).getCode());
+        verify(attemptMapper, never()).insert(any());
+        verifyNoInteractions(eventService);
+    }
+
+    @Test
+    void replayedSubmissionKeyDoesNotCreateNewEvidenceContextOrObservation() {
+        request.setSubmissionKey("retry-key");
+        when(attemptMapper.selectOne(any())).thenReturn(existingAttempt(101L, 41L));
+        LearningAnswerResultVO result = service.answerQuestion(request, user, 555L);
+        assertEquals(55L, result.getAttemptId());
+        // 重复提交既不新建证据上下文，也不产生新的首次观测
+        verifyNoInteractions(evidenceContexts);
+        verify(attemptMapper, never()).insert(any());
+        verifyNoInteractions(eventService);
+    }
+
+    private static org.mockito.ArgumentMatcher<EvidenceQualification> qualifiesAsUnknownHelp() {
+        return qualification -> qualification != null
+                && EvidenceQualification.HELP_UNKNOWN.equals(qualification.getHelpLevel())
+                && qualification.isEligibleForObservation()
+                && qualification.getContextId() == null;
+    }
+
+    // endregion
 
     private void assertRejected(ErrorCode error) {
         assertEquals(error.getCode(),

@@ -1,0 +1,110 @@
+{
+  "catalogVersion": "os-page-replacement/1",
+  "note": "版本化误区映射：只服务于人工核验的小内容集。课程包提供知识点与区分任务，引擎提供候选原因、证据合并与下一步。新增课程只需追加 skills 条目，不改引擎。",
+  "courses": [
+    {
+      "courseCode": "course.operating-systems",
+      "skills": [
+        {
+          "skillCode": "os.memory.lru",
+          "label": "LRU 页面置换算法",
+          "nodeCodes": ["os.memory.lru", "LRU 页面置换算法"],
+          "misconceptions": [
+            {
+              "code": "lru.hit-no-update",
+              "label": "认为命中不改变最近使用顺序",
+              "optionHints": ["命中后顺序不变", "命中不影响淘汰"],
+              "textHints": ["命中", "顺序不变", "不需要调整"]
+            },
+            {
+              "code": "fifo.lru-confusion",
+              "label": "混淆 FIFO 与 LRU 的换出规则",
+              "optionHints": ["先进先出", "FIFO"],
+              "textHints": ["FIFO", "先进先出", "进入顺序"]
+            },
+            {
+              "code": "fault.vs-eviction",
+              "label": "混淆缺页次数与换出次数",
+              "optionHints": ["缺页次数", "置换次数"],
+              "textHints": ["缺页", "换出", "置换次数"]
+            }
+          ],
+          "verification": [
+            {
+              "discriminates": ["lru.hit-no-update", "fifo.lru-confusion"],
+              "predictCase": "page.lru-vs-fifo.victim",
+              "reason": "同一次访问序列在 FIFO 与 LRU 下换出页不同：先判断命中是否改变顺序，即可区分两种原因",
+              "estimatedMinutes": 3
+            },
+            {
+              "discriminates": ["lru.hit-no-update"],
+              "predictCase": "page.lru.hit-update-order",
+              "reason": "连续两次命中后预测换出页，只有正确更新最近使用顺序才能得到服务端计算器认可的答案",
+              "estimatedMinutes": 3
+            },
+            {
+              "discriminates": ["fault.vs-eviction"],
+              "predictCase": "page.count.faults-vs-evictions",
+              "reason": "预测缺页次数，与换出次数不同，可直接区分两类计数混淆",
+              "estimatedMinutes": 2
+            }
+          ]
+        },
+        {
+          "skillCode": "os.memory.fifo",
+          "label": "FIFO 页面置换算法",
+          "nodeCodes": ["os.memory.fifo", "FIFO 页面置换算法"],
+          "misconceptions": [
+            {
+              "code": "fifo.hit-reorders",
+              "label": "认为 FIFO 命中后也要调整进入顺序",
+              "optionHints": ["命中后移到队尾"],
+              "textHints": ["命中", "队尾", "调整顺序"]
+            },
+            {
+              "code": "fifo.lru-confusion",
+              "label": "混淆 FIFO 与 LRU 的换出规则",
+              "optionHints": ["最近最久未使用"],
+              "textHints": ["LRU", "最近最久未使用"]
+            }
+          ],
+          "verification": [
+            {
+              "discriminates": ["fifo.hit-reorders", "fifo.lru-confusion"],
+              "predictCase": "page.lru-vs-fifo.victim",
+              "reason": "命中是否改变顺序在 FIFO 与 LRU 下结论相反，可一次区分两种原因",
+              "estimatedMinutes": 3
+            }
+          ]
+        },
+        {
+          "skillCode": "os.memory.paging",
+          "label": "请求分页与缺页判定",
+          "nodeCodes": ["os.memory.paging", "os.memory.replacement"],
+          "misconceptions": [
+            {
+              "code": "fault.vs-eviction",
+              "label": "混淆缺页次数与换出次数",
+              "optionHints": ["缺页", "置换"],
+              "textHints": ["缺页率", "置换次数"]
+            },
+            {
+              "code": "free-frame-no-fault",
+              "label": "认为有空闲物理块时也算缺页并触发换出",
+              "optionHints": ["空闲块", "直接装入"],
+              "textHints": ["空闲", "物理块未满"]
+            }
+          ],
+          "verification": [
+            {
+              "discriminates": ["fault.vs-eviction"],
+              "predictCase": "page.count.faults-vs-evictions",
+              "reason": "缺页次数与换出次数在该序列下不相等，可直接区分",
+              "estimatedMinutes": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
