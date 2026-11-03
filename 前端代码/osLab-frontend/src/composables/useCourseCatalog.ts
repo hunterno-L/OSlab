@@ -4,6 +4,7 @@ import {
   getCourseResume,
   listCourses,
   type CourseOutline,
+  type CourseProgress,
   type CourseSection,
   type CourseSummary,
   type UnitSummary,
@@ -15,6 +16,16 @@ export interface CourseResume {
   reason: string;
 }
 
+export interface CourseCatalogGroup {
+  courseCode: string;
+  title: string;
+  publishedUnitCount: number;
+  completedUnitCount: number;
+  progressPercent: number;
+  sections: CourseSection[];
+  progress: CourseProgress | null;
+}
+
 /** 课程目录的共享只读视图：学生只看到 outline 返回的已发布单元。 */
 export function useCourseCatalog() {
   const courses = ref<CourseSummary[]>([]);
@@ -23,7 +34,53 @@ export function useCourseCatalog() {
   const resume = ref<CourseResume | null>(null);
   const loading = ref(false);
   const error = ref("");
+  const outlines = ref<Record<string, CourseOutline>>({});
+  const outlineLoading = ref<Record<string, boolean>>({});
+  const outlineErrors = ref<Record<string, string>>({});
   let epoch = 0;
+
+  /**
+   * 侧栏必须来自全部已发布课程，而不是当前课程的一份 outline；
+   * 否则切换课程后其他课程会从目录里“消失”。
+   */
+  const publishedCourses = computed(() =>
+    courses.value.filter((item) => item.publishedUnitCount > 0)
+  );
+
+  const courseGroups = computed<CourseCatalogGroup[]>(() =>
+    publishedCourses.value.map((item) => ({
+      courseCode: item.courseCode,
+      title: item.title,
+      publishedUnitCount: item.publishedUnitCount,
+      completedUnitCount: item.completedUnitCount,
+      progressPercent: item.progressPercent,
+      sections: outlines.value[item.courseCode]?.sections || [],
+      progress: outlines.value[item.courseCode]?.progress || null,
+    }))
+  );
+
+  async function fetchOutline(code: string, request: number) {
+    outlineLoading.value = { ...outlineLoading.value, [code]: true };
+    outlineErrors.value = { ...outlineErrors.value, [code]: "" };
+    try {
+      const data = await getCourseOutline(code);
+      if (request !== epoch) return null;
+      outlines.value = { ...outlines.value, [code]: data };
+      return data;
+    } catch (e) {
+      if (request === epoch) {
+        outlineErrors.value = {
+          ...outlineErrors.value,
+          [code]: e instanceof Error ? e.message : "课程目录加载失败",
+        };
+      }
+      return null;
+    } finally {
+      if (request === epoch) {
+        outlineLoading.value = { ...outlineLoading.value, [code]: false };
+      }
+    }
+  }
 
   async function load(preferredCourseCode?: string) {
     const request = ++epoch;
@@ -33,20 +90,35 @@ export function useCourseCatalog() {
       const list = await listCourses();
       if (request !== epoch) return;
       courses.value = list;
+      const available = list.filter((item) => item.publishedUnitCount > 0);
       const picked =
-        list.find((item) => item.courseCode === preferredCourseCode) ||
-        list.find((item) => item.courseCode === courseCode.value) ||
-        list[0];
+        available.find((item) => item.courseCode === preferredCourseCode) ||
+        available.find((item) => item.courseCode === courseCode.value) ||
+        available[0];
       if (!picked) {
         outline.value = null;
         courseCode.value = "";
-        error.value = "暂无可用课程";
+        error.value = "暂无已发布课程";
         return;
       }
       courseCode.value = picked.courseCode;
-      const data = await getCourseOutline(picked.courseCode);
+      const pickedOutline = await fetchOutline(picked.courseCode, request);
       if (request !== epoch) return;
-      outline.value = data;
+      outline.value = pickedOutline;
+      if (!pickedOutline) {
+        error.value =
+          outlineErrors.value[picked.courseCode] || "课程目录加载失败";
+        return;
+      }
+      // 其余已发布课程并行加载；单门课程失败只影响该分组，不阻断当前课程。
+      const rest = available.filter(
+        (item) => item.courseCode !== picked.courseCode
+      );
+      await Promise.all(
+        rest.map((item) => fetchOutline(item.courseCode, request))
+      );
+      if (request !== epoch) return;
+      outline.value = outlines.value[picked.courseCode] || pickedOutline;
       try {
         const resumeData = await getCourseResume(picked.courseCode);
         if (request === epoch) resume.value = resumeData;
@@ -96,6 +168,40 @@ export function useCourseCatalog() {
     visit(sections.value);
     return map;
   });
+
+  /** 跨课程选择章节/单元时，先用全局代码反查所属课程。 */
+  const sectionCourseMap = computed(() => {
+    const map = new Map<string, string>();
+    for (const [code, data] of Object.entries(outlines.value)) {
+      const visit = (items: CourseSection[]) => {
+        for (const section of items) {
+          map.set(section.sectionCode, code);
+          if (section.children?.length) visit(section.children);
+        }
+      };
+      visit(data.sections || []);
+    }
+    return map;
+  });
+
+  const unitCourseMap = computed(() => {
+    const map = new Map<string, string>();
+    for (const [code, data] of Object.entries(outlines.value)) {
+      const visit = (items: CourseSection[]) => {
+        for (const section of items) {
+          for (const unit of section.units || []) map.set(unit.unitCode, code);
+          if (section.children?.length) visit(section.children);
+        }
+      };
+      visit(data.sections || []);
+    }
+    return map;
+  });
+
+  const courseCodeOfSection = (sectionCode?: string) =>
+    sectionCode ? sectionCourseMap.value.get(sectionCode) || "" : "";
+  const courseCodeOfUnit = (unitCode?: string) =>
+    unitCode ? unitCourseMap.value.get(unitCode) || "" : "";
 
   // 目录顺序遍历（章 → 子节 → 单元），保证“第一个已发布单元”与目录一致
   const units = computed(() => {
@@ -157,6 +263,11 @@ export function useCourseCatalog() {
 
   return {
     courses,
+    publishedCourses,
+    courseGroups,
+    outlines,
+    outlineLoading,
+    outlineErrors,
     courseCode,
     courseTitle,
     outline,
@@ -173,5 +284,7 @@ export function useCourseCatalog() {
     descendantCodes,
     sectionCrumb,
     unitSection,
+    courseCodeOfSection,
+    courseCodeOfUnit,
   };
 }

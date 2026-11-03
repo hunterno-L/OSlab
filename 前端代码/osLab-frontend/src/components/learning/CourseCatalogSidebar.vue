@@ -15,10 +15,24 @@
   ></div>
   <aside class="course-catalog" :class="{ 'drawer-open': drawerOpen }">
     <div class="catalog-head">
-      <div class="course-logo">OS</div>
+      <div
+        class="course-logo"
+        :data-course="courseSlug(activeGroup?.courseCode || courseCode)"
+      >
+        {{ activeMark }}
+      </div>
       <div class="catalog-course">
-        <strong>{{ courseTitle || "操作系统" }}</strong>
-        <span>{{ courseCode || "课程目录" }}</span>
+        <strong>{{ activeGroup?.title || courseTitle || "课程目录" }}</strong>
+        <span class="catalog-summary">
+          <span
+            >{{
+              activeGroup?.publishedUnitCount ?? publishedUnitCount
+            }}
+            个单元</span
+          >
+          <span class="catalog-summary-sep" aria-hidden="true"></span>
+          <span>共 {{ catalogGroups.length }} 门课程</span>
+        </span>
       </div>
       <button
         class="drawer-close"
@@ -34,10 +48,10 @@
       type="button"
       class="catalog-all"
       :class="{ active: !selectedSectionCode && !selectedUnitCode }"
-      @click="pickCourse"
+      @click="pickCourse(courseCode)"
     >
       <span>全部课程</span>
-      <small v-if="publishedUnitCount">{{ publishedUnitCount }} 个单元</small>
+      <small>{{ catalogGroups.length }} 门课程</small>
     </button>
 
     <div class="catalog-body">
@@ -46,79 +60,119 @@
         <span>{{ error }}</span>
         <a-button size="mini" @click="$emit('retry')">重试</a-button>
       </div>
-      <ul v-else-if="rows.length" class="catalog-list">
-        <li
-          v-for="row in rows"
-          :key="row.key"
-          class="catalog-row"
-          :class="[
-            'depth-' + row.depth,
-            {
-              'is-section': row.kind === 'section',
-              'is-unit': row.kind === 'unit',
-              'is-active':
-                row.kind === 'section'
-                  ? !selectedUnitCode && row.code === selectedSectionCode
-                  : row.code === selectedUnitCode,
-              'in-path':
-                row.kind === 'section' &&
-                !!selectedUnitCode &&
-                row.code === selectedSectionCode,
-            },
-          ]"
+      <div v-else-if="catalogGroups.length" class="catalog-groups">
+        <section
+          v-for="group in catalogGroups"
+          :key="group.courseCode"
+          class="catalog-course-group"
+          :class="{ 'is-current': group.courseCode === courseCode }"
         >
-          <template v-if="row.kind === 'section'">
-            <button
-              v-if="row.expandable"
-              type="button"
-              class="catalog-arrow"
-              :class="{ open: row.expanded }"
-              :aria-expanded="row.expanded"
-              :aria-label="row.expanded ? '折叠' : '展开'"
-              @click.stop="$emit('toggle-section', row.code)"
-            >
-              <span aria-hidden="true">›</span>
-            </button>
+          <button
+            type="button"
+            class="catalog-course-row"
+            :aria-current="group.courseCode === courseCode ? 'true' : undefined"
+            @click="pickCourse(group.courseCode)"
+          >
             <span
-              v-else
-              class="catalog-arrow placeholder"
-              aria-hidden="true"
-            ></span>
-            <button
-              type="button"
-              class="catalog-label"
-              :aria-current="
-                !selectedUnitCode && row.code === selectedSectionCode
-                  ? 'true'
-                  : undefined
-              "
-              @click="pickSection(row.code)"
+              class="course-logo course-logo--small"
+              :data-course="courseSlug(group.courseCode)"
+              >{{ markOf(group.courseCode) }}</span
             >
-              <span class="catalog-title">
-                <span
-                  v-if="row.section?.textbookNumber"
-                  class="catalog-number"
-                  >{{ row.section.textbookNumber }}</span
+            <span class="catalog-course-name">
+              <strong>{{ group.title }}</strong>
+              <small>{{ group.publishedUnitCount }} 个单元</small>
+            </span>
+            <span v-if="group.courseCode === courseCode" class="catalog-current"
+              >当前</span
+            >
+          </button>
+          <ul v-if="group.rows.length" class="catalog-list">
+            <li
+              v-for="row in group.rows"
+              :key="row.key"
+              class="catalog-row"
+              :class="[
+                'depth-' + row.depth,
+                {
+                  'is-section': row.kind === 'section',
+                  'is-unit': row.kind === 'unit',
+                  'is-active':
+                    group.courseCode === courseCode &&
+                    (row.kind === 'section'
+                      ? !selectedUnitCode && row.code === selectedSectionCode
+                      : row.code === selectedUnitCode),
+                  'in-path':
+                    group.courseCode === courseCode &&
+                    row.kind === 'section' &&
+                    !!selectedUnitCode &&
+                    row.code === selectedSectionCode,
+                },
+              ]"
+            >
+              <template v-if="row.kind === 'section'">
+                <button
+                  v-if="row.expandable"
+                  type="button"
+                  class="catalog-arrow"
+                  :class="{ open: row.expanded }"
+                  :aria-expanded="row.expanded"
+                  :aria-label="row.expanded ? '折叠' : '展开'"
+                  @click.stop="$emit('toggle-section', row.code)"
                 >
-                {{ row.section?.title }}
-              </span>
-              <small v-if="row.meta" class="catalog-meta">{{ row.meta }}</small>
-            </button>
-          </template>
-          <template v-else>
-            <span class="unit-rail" aria-hidden="true"></span>
-            <button
-              type="button"
-              class="catalog-label unit-label"
-              :aria-current="row.code === selectedUnitCode ? 'true' : undefined"
-              @click="pickUnit(row.code)"
-            >
-              <span class="catalog-title">{{ row.unit?.title }}</span>
-              <small class="catalog-meta">{{ unitMeta(row.unit) }}</small>
-            </button>
-          </template>
-        </li>
-      </ul>
+                  <span aria-hidden="true">›</span>
+                </button>
+                <span
+                  v-else
+                  class="catalog-arrow placeholder"
+                  aria-hidden="true"
+                ></span>
+                <button
+                  type="button"
+                  class="catalog-label"
+                  :aria-current="
+                    group.courseCode === courseCode &&
+                    !selectedUnitCode &&
+                    row.code === selectedSectionCode
+                      ? 'true'
+                      : undefined
+                  "
+                  @click="pickSection(row.code)"
+                >
+                  <span class="catalog-title">
+                    <span
+                      v-if="row.section?.textbookNumber"
+                      class="catalog-number"
+                      >{{ row.section.textbookNumber }}</span
+                    >
+                    {{ row.section?.title }}
+                  </span>
+                  <small v-if="row.meta" class="catalog-meta">{{
+                    row.meta
+                  }}</small>
+                </button>
+              </template>
+              <template v-else>
+                <span class="unit-rail" aria-hidden="true"></span>
+                <button
+                  type="button"
+                  class="catalog-label unit-label"
+                  :aria-current="
+                    group.courseCode === courseCode &&
+                    row.code === selectedUnitCode
+                      ? 'true'
+                      : undefined
+                  "
+                  @click="pickUnit(row.code)"
+                >
+                  <span class="catalog-title">{{ row.unit?.title }}</span>
+                  <small class="catalog-meta">{{ unitMeta(row.unit) }}</small>
+                </button>
+              </template>
+            </li>
+          </ul>
+          <p v-else class="catalog-hint">目录暂不可用，请重试。</p>
+        </section>
+      </div>
       <div v-else class="catalog-empty">
         <p>课程目录尚未发布</p>
         <small>教师发布单元后会显示在这里。</small>
@@ -144,7 +198,13 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import type { CourseProgress, CourseSection, UnitSummary } from "@/api/course";
+import type {
+  CourseOutline,
+  CourseProgress,
+  CourseSection,
+  CourseSummary,
+  UnitSummary,
+} from "@/api/course";
 
 interface CatalogRow {
   key: string;
@@ -158,11 +218,21 @@ interface CatalogRow {
   meta?: string;
 }
 
+interface CatalogGroup {
+  courseCode: string;
+  title: string;
+  publishedUnitCount: number;
+  sections: CourseSection[];
+  rows: CatalogRow[];
+}
+
 // eslint-disable-next-line no-undef
 const props = defineProps<{
   courseCode: string;
   courseTitle?: string;
   sections: CourseSection[];
+  courses?: CourseSummary[];
+  outlines?: Record<string, CourseOutline>;
   selectedSectionCode?: string;
   selectedUnitCode?: string;
   expandedSections: string[];
@@ -173,7 +243,7 @@ const props = defineProps<{
 
 // eslint-disable-next-line no-undef
 const emit = defineEmits<{
-  (event: "select-course"): void;
+  (event: "select-course", courseCode: string): void;
   (event: "select-section", sectionCode: string): void;
   (event: "select-unit", unitCode: string): void;
   (event: "toggle-section", sectionCode: string): void;
@@ -181,8 +251,28 @@ const emit = defineEmits<{
 }>();
 
 const drawerOpen = ref(false);
-
 const expandedSet = computed(() => new Set(props.expandedSections));
+
+const COURSE_MARKS: Record<string, string> = {
+  "course.operating-systems": "OS",
+  "course.database-systems": "DB",
+};
+const courseSlug = (code?: string) => (code || "").split(".").pop() || "";
+const markOf = (code?: string) => {
+  if (!code) return "课";
+  const known = COURSE_MARKS[code];
+  if (known) return known;
+  const slug = courseSlug(code);
+  return (
+    slug
+      .split(/[-_]/)
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "课"
+  );
+};
 
 const publishedUnitCount = computed(() => {
   let count = 0;
@@ -196,10 +286,34 @@ const publishedUnitCount = computed(() => {
   return count;
 });
 
-const rows = computed<CatalogRow[]>(() => {
+const groups = computed<CatalogGroup[]>(() => {
+  if (props.courses?.length) {
+    return props.courses
+      .filter((course) => course.publishedUnitCount > 0)
+      .map((course) => ({
+        courseCode: course.courseCode,
+        title: course.title,
+        publishedUnitCount: course.publishedUnitCount,
+        sections: props.outlines?.[course.courseCode]?.sections || [],
+        rows: [],
+      }));
+  }
+  if (!props.courseCode) return [];
+  return [
+    {
+      courseCode: props.courseCode,
+      title: props.courseTitle || "课程目录",
+      publishedUnitCount: publishedUnitCount.value,
+      sections: props.sections || [],
+      rows: [],
+    },
+  ];
+});
+
+function buildRows(items: CourseSection[]): CatalogRow[] {
   const result: CatalogRow[] = [];
-  const visit = (items: CourseSection[], depth: number) => {
-    for (const section of items) {
+  const visit = (sections: CourseSection[], depth: number) => {
+    for (const section of sections) {
       const expandable = Boolean(
         section.children?.length || section.units?.length
       );
@@ -231,9 +345,28 @@ const rows = computed<CatalogRow[]>(() => {
       }
     }
   };
-  visit(props.sections, 0);
+  visit(items, 0);
   return result;
-});
+}
+
+const catalogGroups = computed<CatalogGroup[]>(() =>
+  groups.value.map((group) => ({
+    ...group,
+    rows: buildRows(group.sections),
+  }))
+);
+
+const activeGroup = computed(
+  () =>
+    catalogGroups.value.find(
+      (group) => group.courseCode === props.courseCode
+    ) ||
+    catalogGroups.value[0] ||
+    null
+);
+const activeMark = computed(() =>
+  markOf(activeGroup.value?.courseCode || props.courseCode)
+);
 
 const statusText = (unit?: UnitSummary) => {
   const status = unit?.progress?.status;
@@ -250,9 +383,9 @@ const unitMeta = (unit?: UnitSummary) => {
   return `${statusText(unit)}${minutes}`;
 };
 
-const pickCourse = () => {
+const pickCourse = (courseCode: string) => {
   drawerOpen.value = false;
-  emit("select-course");
+  emit("select-course", courseCode || props.courseCode);
 };
 const pickSection = (code: string) => {
   drawerOpen.value = false;
@@ -315,6 +448,94 @@ const pickUnit = (code: string) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.catalog-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.catalog-summary-sep {
+  flex: none;
+  width: 1px;
+  height: 9px;
+  background: var(--oslab-line-strong, #c9ccbe);
+}
+.course-logo[data-course="database-systems"] {
+  background: var(--oslab-mastered, #3f8f6e);
+}
+.catalog-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.catalog-course-group + .catalog-course-group {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--oslab-line-soft, #f2f3f5);
+}
+.catalog-course-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.catalog-course-row:hover {
+  background: var(--oslab-panel-soft, #f7f8f2);
+}
+.catalog-course-group.is-current .catalog-course-row {
+  background: var(--oslab-panel-muted, #f1f3ea);
+}
+.catalog-course-row:focus-visible,
+.catalog-all:focus-visible,
+.catalog-label:focus-visible,
+.catalog-arrow:focus-visible {
+  outline: 2px solid var(--oslab-primary, #2447d8);
+  outline-offset: 1px;
+}
+.course-logo--small {
+  width: 24px;
+  height: 24px;
+  flex-basis: 24px;
+  border-radius: 4px;
+  font-size: 9px;
+}
+.catalog-course-name {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.catalog-course-name strong {
+  overflow: hidden;
+  color: var(--oslab-ink, #1d2129);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.catalog-course-name small {
+  color: var(--oslab-muted-strong, #86909c);
+  font-family: var(--oslab-font-mono);
+  font-size: 10px;
+}
+.catalog-current {
+  flex: none;
+  padding: 0 5px;
+  border-radius: 3px;
+  background: var(--oslab-primary-soft, #edf3ff);
+  color: var(--oslab-primary, #2447d8);
+  font-size: 10px;
+  line-height: 18px;
 }
 .drawer-close {
   display: none;

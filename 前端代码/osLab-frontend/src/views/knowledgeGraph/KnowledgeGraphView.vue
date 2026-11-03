@@ -7,15 +7,17 @@
       :course-code="courseCode"
       :course-title="courseTitle"
       :sections="catalogSections"
+      :courses="catalogCourses"
+      :outlines="catalogOutlines"
       :selected-section-code="selectedSectionCode"
       :selected-unit-code="selectedUnitCode"
       :expanded-sections="expandedSections"
       :loading="catalogLoading"
       :error="catalogError"
       :progress="catalogProgress"
-      @select-course="selectCourseScope"
-      @select-section="selectSectionScope"
-      @select-unit="selectUnitScope"
+      @select-course="handleCatalogCourse"
+      @select-section="handleCatalogSection"
+      @select-unit="handleCatalogUnit"
       @toggle-section="toggleSection"
       @retry="loadCatalog"
     />
@@ -1088,6 +1090,8 @@ const {
   loading: catalogLoading,
   error: catalogError,
   sections: catalogSections,
+  courses: catalogCourses,
+  outlines: catalogOutlines,
   courseProgress: catalogProgress,
   sectionByCode,
   unitByCode,
@@ -1096,6 +1100,8 @@ const {
   ancestorCodes,
   descendantCodes,
   sectionCrumb,
+  courseCodeOfSection,
+  courseCodeOfUnit,
 } = useCourseCatalog();
 const selectedSectionCode = ref("");
 const selectedUnitCode = ref("");
@@ -1109,6 +1115,7 @@ const {
   nextActionsError,
   dueReviewCount,
   refreshNextActions,
+  syncCourse: syncAiCourse,
 } = useAiConversation();
 
 function refreshGraphPlan() {
@@ -2294,6 +2301,45 @@ const selectCourseScope = (syncQuery = true) => {
   clearNodeSelection();
   ensureVisibleSelection();
   if (syncQuery) syncRouteQuery();
+};
+
+/** 侧栏课程头：切换课程并回到该课程总览，会话作用域同步跟随 */
+const handleCatalogCourse = async (targetCourse: string) => {
+  if (targetCourse && targetCourse !== courseCode.value) {
+    await loadCatalogSource(targetCourse);
+    if (targetCourse !== courseCode.value) return;
+    void syncAiCourse(targetCourse);
+    selectedSectionCode.value = "";
+    selectedUnitCode.value = "";
+    resetUnitPreview();
+    clearNodeSelection();
+    ensureVisibleSelection();
+    syncRouteQuery();
+    return;
+  }
+  selectCourseScope();
+};
+
+/** 侧栏章节：目标章节可能属于另一门课程，先切课程再选中 */
+const handleCatalogSection = async (sectionCode: string) => {
+  const targetCourse = courseCodeOfSection(sectionCode);
+  if (targetCourse && targetCourse !== courseCode.value) {
+    await loadCatalogSource(targetCourse);
+    if (targetCourse !== courseCode.value) return;
+    void syncAiCourse(targetCourse);
+  }
+  selectSectionScope(sectionCode);
+};
+
+/** 侧栏单元：目标单元可能属于另一门课程，先切课程再选中 */
+const handleCatalogUnit = async (unitCode: string) => {
+  const targetCourse = courseCodeOfUnit(unitCode);
+  if (targetCourse && targetCourse !== courseCode.value) {
+    await loadCatalogSource(targetCourse);
+    if (targetCourse !== courseCode.value) return;
+    void syncAiCourse(targetCourse);
+  }
+  selectUnitScope(unitCode);
 };
 
 /** 单元映射入口：先解析为当前快照的稳定 nodeKey（含旧节点名称回退） */

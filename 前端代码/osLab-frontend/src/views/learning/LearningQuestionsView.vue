@@ -4,6 +4,8 @@
       :course-code="courseCode"
       :course-title="courseTitle"
       :sections="catalogSections"
+      :courses="catalogCourses"
+      :outlines="catalogOutlines"
       :selected-section-code="selectedSectionCode"
       :selected-unit-code="selectedUnitCode"
       :expanded-sections="expandedSections"
@@ -260,6 +262,8 @@ const {
   courseCode,
   courseTitle,
   sections: catalogSections,
+  courses: catalogCourses,
+  outlines: catalogOutlines,
   loading: treeLoading,
   error: treeError,
   courseProgress,
@@ -268,6 +272,8 @@ const {
   load: loadCourseCatalog,
   ancestorCodes,
   sectionCrumb,
+  courseCodeOfSection,
+  courseCodeOfUnit,
 } = useCourseCatalog();
 
 const expandedSections = ref<string[]>([]);
@@ -396,10 +402,10 @@ const expandSectionPath = (sectionCode?: string) => {
   );
 };
 
-const selectCourseScope = () =>
+const selectCourseScope = (targetCourse?: string) =>
   replaceFilters(
     {
-      courseCode: courseCode.value || undefined,
+      courseCode: targetCourse || courseCode.value || undefined,
       sectionCode: undefined,
       unitCode: undefined,
       nodeCode: undefined,
@@ -408,19 +414,37 @@ const selectCourseScope = () =>
   );
 
 const selectSectionScope = (sectionCode: string) => {
-  expandSectionPath(sectionCode);
+  const targetCourse = courseCodeOfSection(sectionCode);
+  const crossCourse =
+    targetCourse && targetCourse !== courseCode.value ? targetCourse : "";
+  if (!crossCourse) expandSectionPath(sectionCode);
   replaceFilters(
-    { sectionCode, unitCode: undefined, nodeCode: undefined },
+    {
+      ...(crossCourse ? { courseCode: crossCourse } : {}),
+      sectionCode,
+      unitCode: undefined,
+      nodeCode: undefined,
+    },
     true
   );
 };
 
 const selectUnitScope = (unitCode: string) => {
+  const targetCourse = courseCodeOfUnit(unitCode);
+  const crossCourse =
+    targetCourse && targetCourse !== courseCode.value ? targetCourse : "";
   const unit = unitByCode.value.get(unitCode);
-  if (!unit) return;
-  expandSectionPath(unit.sectionCode);
+  if (!crossCourse && !unit) return;
+  if (unit) expandSectionPath(unit.sectionCode);
   replaceFilters(
-    { sectionCode: unit.sectionCode, unitCode, nodeCode: undefined },
+    {
+      ...(crossCourse ? { courseCode: crossCourse } : {}),
+      ...(unit
+        ? { sectionCode: unit.sectionCode }
+        : { sectionCode: undefined }),
+      unitCode,
+      nodeCode: undefined,
+    },
     true
   );
 };

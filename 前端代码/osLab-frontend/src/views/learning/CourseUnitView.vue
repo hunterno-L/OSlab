@@ -4,6 +4,8 @@
       :course-code="courseCode || catalogCourseParam"
       :course-title="courseTitle"
       :sections="catalogSections"
+      :courses="catalogCourses"
+      :outlines="catalogOutlines"
       :selected-section-code="selectedSectionCode"
       :selected-unit-code="selectedUnitCode"
       :expanded-sections="expandedSections"
@@ -427,6 +429,7 @@ const {
   nextActionsError,
   dueReviewCount,
   refreshNextActions,
+  syncCourse: syncAiCourse,
 } = useAiConversation();
 
 /** 本单元与首页/图谱共用同一份服务端下一步计划 */
@@ -493,6 +496,8 @@ const {
   courseCode,
   courseTitle,
   sections: catalogSections,
+  courses: catalogCourses,
+  outlines: catalogOutlines,
   loading: catalogLoading,
   error: catalogError,
   courseProgress: catalogProgress,
@@ -500,6 +505,8 @@ const {
   load: loadCatalogSource,
   ancestorCodes,
   sectionCrumb,
+  courseCodeOfSection,
+  courseCodeOfUnit,
 } = useCourseCatalog();
 const expandedSections = ref<string[]>([]);
 const selectedUnitCode = computed(() => String(route.params.unitCode || ""));
@@ -550,22 +557,29 @@ const unitSwitchQuery = computed<Record<string, string>>(() => {
   }
   return query;
 });
-const goGraphCourse = () => {
+const goGraphCourse = (targetCourse?: string) => {
   const query: Record<string, string> = { scope: "course" };
-  const course = courseCode.value || catalogCourseParam.value;
+  const course = targetCourse || courseCode.value || catalogCourseParam.value;
   if (course) query.courseCode = course;
   router.push({ path: "/graph", query });
 };
 const goGraphSection = (sectionCode: string) => {
   const query: Record<string, string> = { sectionCode };
-  const course = courseCode.value || catalogCourseParam.value;
+  const course =
+    courseCodeOfSection(sectionCode) ||
+    courseCode.value ||
+    catalogCourseParam.value;
   if (course) query.courseCode = course;
   router.push({ path: "/graph", query });
 };
 const switchUnit = (unitCode: string) => {
   if (!unitCode || unitCode === selectedUnitCode.value) return;
-  const course = courseCode.value || catalogCourseParam.value;
+  const course =
+    courseCodeOfUnit(unitCode) || courseCode.value || catalogCourseParam.value;
   if (!course) return;
+  if (course !== (unit.value?.courseCode || courseCode.value)) {
+    void syncAiCourse(course);
+  }
   router.push({
     path: unitPath(course, unitCode),
     query: unitSwitchQuery.value,

@@ -214,6 +214,8 @@ function createViewHarness(options = {}) {
     loading: vue.ref(false),
     error: vue.ref(""),
     sections,
+    courses: vue.ref([]),
+    outlines: vue.ref({}),
     courseProgress: vue.ref(0),
     sectionByCode: vue.computed(
       () => new Map(sections.value.map((item) => [item.sectionCode, item]))
@@ -226,6 +228,8 @@ function createViewHarness(options = {}) {
     ancestorCodes: (code) => new Set([code]),
     descendantCodes: (code) => new Set([code]),
     sectionCrumb: () => "",
+    courseCodeOfSection: () => "",
+    courseCodeOfUnit: () => "",
   };
   const loginUser = options.loginUser || {
     id: 1,
@@ -299,6 +303,7 @@ function createViewHarness(options = {}) {
               nextActionsError: vue.ref(""),
               dueReviewCount: vue.ref(0),
               refreshNextActions: async () => [],
+              syncCourse: async () => undefined,
             }),
           };
         case "@/composables/useAiLauncher":
