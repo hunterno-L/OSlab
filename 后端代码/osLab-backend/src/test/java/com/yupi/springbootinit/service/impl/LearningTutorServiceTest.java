@@ -272,6 +272,192 @@ class LearningTutorServiceTest {
         org.mockito.Mockito.verify(questionService,org.mockito.Mockito.never()).list();
     }
 
+    // region 旧入口委托统一服务（计划 §6.2 / 任务书 §4）
+
+    /** 旧入口的模型调用必须走统一网关，不再持有第二套 Ark 客户端。 */
+    @Test
+    void oldEntryRoutesModelCallsThroughTheUnifiedGateway() {
+        com.yupi.springbootinit.ai.ModelGateway gateway = mock(com.yupi.springbootinit.ai.ModelGateway.class);
+        com.yupi.springbootinit.ai.profile.ModelProfileService profiles =
+                mock(com.yupi.springbootinit.ai.profile.ModelProfileService.class);
+        com.yupi.springbootinit.ai.ModelEndpoint endpoint =
+                com.yupi.springbootinit.ai.ModelEndpoint.platform(
+                        "https://ark.cn-beijing.volces.com/api/v3", "deepseek-v3-250324", "sk-test");
+        when(profiles.resolveEndpoint(7L, null)).thenReturn(endpoint);
+        when(gateway.available(endpoint)).thenReturn(true);
+        com.yupi.springbootinit.ai.ModelGateway.ChatResult chat =
+                new com.yupi.springbootinit.ai.ModelGateway.ChatResult();
+        chat.setContent("先看节点概要，再看你的失败记录 [1]，越界引用 [9] 应被移除");
+        when(gateway.chat(eq(endpoint), any())).thenReturn(chat);
+        ReflectionTestUtils.setField(service, "modelGateway", gateway);
+        ReflectionTestUtils.setField(service, "modelProfileService", profiles);
+
+        TutorAnswerVO vo = service.ask(ask("什么是进程调度？"), user);
+
+        assertEquals("AI", vo.getMode());
+        assertTrue(vo.getAnswer().contains("[1]"));
+        assertFalse(vo.getAnswer().contains("[9]"), "引用校验仍然生效：越界编号必须被移除");
+        org.mockito.Mockito.verify(gateway, org.mockito.Mockito.times(1)).chat(eq(endpoint), any());
+        assertTrue(vo.getRetrievalTrace().contains("校验回答引用只指向本次检索来源"));
+    }
+
+    /** 平台模型未配置时如实降级，响应结构与升级前一致。 */
+    @Test
+    void oldEntryDegradesToRuleAnswerWhenThePlatformModelIsUnconfigured() {
+        com.yupi.springbootinit.ai.ModelGateway gateway = mock(com.yupi.springbootinit.ai.ModelGateway.class);
+        com.yupi.springbootinit.ai.profile.ModelProfileService profiles =
+                mock(com.yupi.springbootinit.ai.profile.ModelProfileService.class);
+        when(profiles.resolveEndpoint(7L, null)).thenThrow(
+                new BusinessException(com.yupi.springbootinit.common.ErrorCode.API_REQUEST_ERROR,
+                        "平台默认模型未配置（缺少 AI_ARK_API_KEY）"));
+        ReflectionTestUtils.setField(service, "modelGateway", gateway);
+        ReflectionTestUtils.setField(service, "modelProfileService", profiles);
+
+        TutorAnswerVO vo = service.ask(ask("什么是进程调度？"), user);
+
+        assertEquals("FALLBACK", vo.getMode());
+        assertTrue(StringUtils.isNotBlank(vo.getAnswer()), "降级也必须给出可用的规则回答");
+        assertTrue(vo.getRetrievalTrace().contains("未配置 AI 密钥，使用规则降级回答"));
+        org.mockito.Mockito.verifyNoInteractions(gateway);
+    }
+
+    /** 模型调用失败不得编造回答，也不得把失败包装成 AI 模式。 */
+    @Test
+    void oldEntryDegradesWhenTheModelCallFails() {
+        com.yupi.springbootinit.ai.ModelGateway gateway = mock(com.yupi.springbootinit.ai.ModelGateway.class);
+        com.yupi.springbootinit.ai.profile.ModelProfileService profiles =
+                mock(com.yupi.springbootinit.ai.profile.ModelProfileService.class);
+        com.yupi.springbootinit.ai.ModelEndpoint endpoint =
+                com.yupi.springbootinit.ai.ModelEndpoint.platform(
+                        "https://ark.cn-beijing.volces.com/api/v3", "deepseek-v3-250324", "sk-test");
+        when(profiles.resolveEndpoint(7L, null)).thenReturn(endpoint);
+        when(gateway.available(endpoint)).thenReturn(true);
+        when(gateway.chat(eq(endpoint), any())).thenThrow(
+                new com.yupi.springbootinit.ai.ModelGateway.ModelCallException(
+                        "模型调用失败：鉴权失败（HTTP 401）", false));
+        ReflectionTestUtils.setField(service, "modelGateway", gateway);
+        ReflectionTestUtils.setField(service, "modelProfileService", profiles);
+
+        TutorAnswerVO vo = service.ask(ask("什么是进程调度？"), user);
+
+        assertEquals("FALLBACK", vo.getMode());
+        assertTrue(StringUtils.isNotBlank(vo.getAnswer()));
+        assertTrue(vo.getRetrievalTrace().contains("模型调用失败，使用规则降级回答"));
+    }
+
+    /** 旧响应契约不变：answer/sources/retrievalTrace/mode 四个字段，来源不超过 8 条。 */
+    @Test
+    void oldEntryKeepsTheLegacyResponseShape() {
+        TutorAnswerVO vo = service.ask(ask("什么是进程调度？"), user);
+        assertNotNull(vo.getAnswer());
+        assertNotNull(vo.getSources());
+        assertNotNull(vo.getRetrievalTrace());
+        assertEquals("FALLBACK", vo.getMode());
+        assertTrue(vo.getSources().size() <= 8);
+        assertStructuredActionFields(vo.getSources());
+    }
+
+    /** 统一检索命中时，教材片段来自联合检索且保留正文块、版本与出处。 */
+    @Test
+    void oldEntryUsesUnifiedRetrievalForTextbookSourcesWhenTheIndexIsReady() {
+        com.yupi.springbootinit.ai.retrieval.HybridRetrievalService retrieval =
+                mock(com.yupi.springbootinit.ai.retrieval.HybridRetrievalService.class);
+        com.yupi.springbootinit.ai.plan.AiContentScopeService scope =
+                mock(com.yupi.springbootinit.ai.plan.AiContentScopeService.class);
+        com.yupi.springbootinit.learning.PublishedLearningContentService published =
+                mock(com.yupi.springbootinit.learning.PublishedLearningContentService.class);
+        com.yupi.springbootinit.learning.NodeIdentityService identities =
+                mock(com.yupi.springbootinit.learning.NodeIdentityService.class);
+        ReflectionTestUtils.setField(service, "retrieval", retrieval);
+        ReflectionTestUtils.setField(service, "contentScope", scope);
+        ReflectionTestUtils.setField(service, "publishedContent", published);
+        ReflectionTestUtils.setField(service, "nodeIdentities", identities);
+
+        when(identities.storageKey("os.cpu.scheduler")).thenReturn(SEED);
+        when(identities.byStorageKey(SEED)).thenReturn(
+                new com.yupi.springbootinit.learning.NodeIdentityService.Identity(
+                        "os.cpu.scheduler", "处理机调度", SEED));
+        when(knowledgeGraphService.findByName("os.cpu.scheduler"))
+                .thenReturn(List.of(graphNode(SEED, "节点概要")));
+        when(knowledgeGraphService.getAllRelatedNames("os.cpu.scheduler")).thenReturn(List.of(SEED));
+        when(scope.courseCodeForNode("os.cpu.scheduler")).thenReturn("course.operating-systems");
+
+        com.yupi.springbootinit.ai.retrieval.HybridRetrievalService.Result result =
+                new com.yupi.springbootinit.ai.retrieval.HybridRetrievalService.Result();
+        result.getSources().add(com.yupi.springbootinit.model.vo.ai.SourceRef.of(
+                "chunk.scheduler", "COURSE", "course.operating-systems", 2,
+                "block.scheduler.1", "2.2.5", "调度机制的正文事实片段"));
+        result.setSemanticUsed(true);
+        when(retrieval.retrieve(any(), any(String.class))).thenReturn(result);
+
+        TutorAskRequest request = new TutorAskRequest();
+        request.setNodeCode("os.cpu.scheduler");
+        request.setQuestion("什么是调度？");
+        TutorAnswerVO vo = service.ask(request, user);
+
+        TutorSourceVO textbook = vo.getSources().stream()
+                .filter(source -> "TEXTBOOK".equals(source.getSourceType())).findFirst().orElse(null);
+        assertNotNull(textbook, "统一检索命中后旧响应仍要有教材来源");
+        assertEquals("block.scheduler.1", textbook.getParentChunkCode());
+        assertEquals(2, textbook.getRevision());
+        assertEquals("调度机制的正文事实片段", textbook.getSnippet());
+        assertEquals("chunk.scheduler", textbook.getSourceRef().get("sourceId"));
+        assertEquals("RESOURCE", textbook.getActionType());
+        assertTrue(vo.getRetrievalTrace().stream()
+                .anyMatch(line -> line.contains("语义+关键词+图谱")));
+        org.mockito.Mockito.verify(published, org.mockito.Mockito.never())
+                .sources(any(), any(), org.mockito.ArgumentMatchers.anyInt());
+    }
+
+    /** 个人资料不得混进旧响应：旧契约只下发课程正文。 */
+    @Test
+    void oldEntryNeverMixesPersonalMaterialsIntoTheLegacyResponse() {
+        com.yupi.springbootinit.ai.retrieval.HybridRetrievalService retrieval =
+                mock(com.yupi.springbootinit.ai.retrieval.HybridRetrievalService.class);
+        com.yupi.springbootinit.ai.plan.AiContentScopeService scope =
+                mock(com.yupi.springbootinit.ai.plan.AiContentScopeService.class);
+        ReflectionTestUtils.setField(service, "retrieval", retrieval);
+        ReflectionTestUtils.setField(service, "contentScope", scope);
+        when(scope.singleCourseCode()).thenReturn("course.operating-systems");
+
+        com.yupi.springbootinit.ai.retrieval.HybridRetrievalService.Result result =
+                new com.yupi.springbootinit.ai.retrieval.HybridRetrievalService.Result();
+        result.getSources().add(com.yupi.springbootinit.model.vo.ai.SourceRef.of(
+                "material:1", "PERSONAL", "course.operating-systems", 1,
+                "material:1:0", "我的笔记", "个人粘贴的资料"));
+        result.setSemanticUsed(true);
+        when(retrieval.retrieve(any(), any(String.class))).thenReturn(result);
+
+        TutorAnswerVO vo = service.ask(ask("什么是进程调度？"), user);
+
+        assertTrue(vo.getSources().stream().noneMatch(
+                        source -> "material:1".equals(source.getSourceId())),
+                "旧入口不得下发个人资料块");
+        // 检索范围必须显式排除个人资料
+        ArgumentCaptor<com.yupi.springbootinit.ai.retrieval.HybridRetrievalService.Scope> captor =
+                ArgumentCaptor.forClass(com.yupi.springbootinit.ai.retrieval.HybridRetrievalService.Scope.class);
+        org.mockito.Mockito.verify(retrieval).retrieve(captor.capture(), any(String.class));
+        assertFalse(captor.getValue().isIncludePersonal());
+    }
+
+    /** 课程无法确定时不猜课程，退回既有发布内容检索。 */
+    @Test
+    void oldEntryRefusesToGuessACourseAndFallsBackToPublishedContent() {
+        com.yupi.springbootinit.ai.retrieval.HybridRetrievalService retrieval =
+                mock(com.yupi.springbootinit.ai.retrieval.HybridRetrievalService.class);
+        com.yupi.springbootinit.ai.plan.AiContentScopeService scope =
+                mock(com.yupi.springbootinit.ai.plan.AiContentScopeService.class);
+        ReflectionTestUtils.setField(service, "retrieval", retrieval);
+        ReflectionTestUtils.setField(service, "contentScope", scope);
+        when(scope.courseCodeForNode(any())).thenReturn(null);
+        when(scope.singleCourseCode()).thenReturn(null);
+
+        assertDoesNotThrow(() -> service.ask(ask("什么是进程调度？"), user));
+        org.mockito.Mockito.verifyNoInteractions(retrieval);
+    }
+
+    // endregion
+
     // region fixtures
 
     private TutorAskRequest ask(String question) {

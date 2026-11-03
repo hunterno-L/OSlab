@@ -1,0 +1,54 @@
+{
+  "name": "oslab-five-chapter-deployment-bundle",
+  "version": "2026-10-28",
+  "source": {
+    "branch": "feature/learning-loop-ui-rework",
+    "commit": "47bdcb0"
+  },
+  "mysql": {
+    "file": "oslab_db-deploy.sql.gz",
+    "tables": 46,
+    "courseSections": 101,
+    "learningUnits": 104,
+    "contentChunks": 261,
+    "learningQuestions": 916,
+    "questionNodeMappings": 1603,
+    "knowledgeNodes": 196,
+    "knowledgeRelations": 254,
+    "courseAssets": 95,
+    "users": 35
+  },
+  "neo4j": {
+    "file": "neo4j-graph-full.cypher",
+    "nodes": 346,
+    "relationships": 425,
+    "labels": ["Entity"],
+    "relationshipTypes": 10
+  },
+  "sanitized": {
+    "truncated": [
+      "learning_attempt",
+      "learning_event",
+      "learning_mastery",
+      "learning_review",
+      "learning_assessment_run",
+      "learning_activity_progress",
+      "learning_activity_record",
+      "question_submit",
+      "learning_task_item_work",
+      "learning_task_submission",
+      "learning_task_file",
+      "students"
+    ],
+    "droppedBackupTables": [
+      "learning_attempt_bak_0929",
+      "learning_event_bak_0929",
+      "learning_mastery_bak_0929",
+      "learning_question_bak_0929",
+      "learning_question_node_bak_0929",
+      "learning_review_bak_0929"
+    ],
+    "lockedAccounts": 32,
+    "keptDemoAccounts": ["teacher_demo", "student_demo1", "student_demo2"]
+  }
+}

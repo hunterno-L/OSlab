@@ -180,4 +180,29 @@ class CourseContractsTest {
             assertEquals(accepted,result.get("passed"));assertEquals("SUBMIT".equals(rule)||accepted,result.get("completed"));
         }
     }
+
+    /**
+     * AI 规划器只允许引用"已发布且可访问"的单元与活动（任务书 §4）。
+     * 这里锁住它所依赖的发布口径：未发布的单元取不到快照，
+     * 已发布的快照保留稳定 activityCode 与 revision，因此下一步任务能定位到真实活动。
+     */
+    @Test void aiPlannerCanOnlyReachPublishedUnitsWithStableActivityCodes() {
+        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;
+        // 草稿态：没有 publishedJson，规划器读不到任何可引用活动
+        db.entities.put("learning_unit:unit.test",map("draftJson",UNIT,"courseCode","course.test","revision",1));
+        assertThrows(RuntimeException.class,()->s.publishedUnit("unit.test"),
+                "未发布单元不得被规划器引用");
+        assertTrue(s.publishedUnits("course.test").isEmpty(),"课程级已发布列表同样为空");
+
+        // 发布后：快照可读取，活动编码与修订号保持稳定
+        ObjectNode published=object(parse(UNIT));published.put("revision",4);
+        db.entities.put("learning_unit:unit.test",map("publishedJson",json(published),"courseCode","course.test","revision",4));
+        db.published.add(map("publishedJson",json(published)));
+        JsonNode snapshot=s.publishedUnit("unit.test");
+        assertEquals("unit.test",snapshot.path("unitCode").asText());
+        assertEquals("course.test",snapshot.path("courseCode").asText());
+        assertEquals(4,snapshot.path("revision").asInt(),"来源定位需要发布修订号");
+        assertEquals("act.test",snapshot.path("activities").get(0).path("activityCode").asText());
+        assertEquals(1,s.publishedUnits("course.test").size());
+    }
 }

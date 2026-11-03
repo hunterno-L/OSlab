@@ -1,0 +1,110 @@
+{
+  "catalogVersion": "db-fd-keys/1",
+  "note": "知识点—误区—活动映射。后端 misconception-catalog-v1.json 目前只登记操作系统技能，本文件是数据库课程包的作者侧映射，供后续接入诊断目录时复用；引擎未识别对应 skill 时应返回 INSUFFICIENT，而不是强判。",
+  "courses": [
+    {
+      "courseCode": "course.database-systems",
+      "skills": [
+        {
+          "skillCode": "db.fd.attribute-closure",
+          "label": "属性闭包",
+          "nodeCodes": ["db.fd.attribute-closure"],
+          "misconceptions": [
+            {
+              "code": "closure.one-step",
+              "label": "只应用一次函数依赖就停止扩展",
+              "optionHints": ["{A,B}"],
+              "textHints": ["只应用一次", "不再扩展"]
+            },
+            {
+              "code": "closure.ignore-composite",
+              "label": "忽略复合决定因素或新属性的继续扩展",
+              "optionHints": ["{A,B,C}", "{A,B,D}"],
+              "textHints": ["复合", "AB→C", "传递"]
+            }
+          ],
+          "verification": [
+            {
+              "activityCode": "act.db.fd.practice.closure-composite",
+              "questionCode": "q.db.fd.closure-composite",
+              "reason": "复合决定因素 AB→C 必须先用 A 与 B 同时存在，再继续使用 C→D、D→E；只扩展一步会停在 {A,B,C}。",
+              "estimatedMinutes": 3
+            },
+            {
+              "activityCode": "act.db.fd.practice.closure-basic",
+              "questionCode": "q.db.fd.closure-basic",
+              "reason": "A→B→C 需要连续扩展两轮；停在 {A,B} 说明没有继续扫描。",
+              "estimatedMinutes": 2
+            }
+          ]
+        },
+        {
+          "skillCode": "db.fd.superkey",
+          "label": "超键",
+          "nodeCodes": ["db.fd.superkey"],
+          "misconceptions": [
+            {
+              "code": "superkey.all-keys",
+              "label": "认为只有包含全部属性的集合才是超键",
+              "optionHints": ["{A,B,C}"],
+              "textHints": ["全部属性", "必须包含"]
+            },
+            {
+              "code": "superkey.candidate-same",
+              "label": "把超键与候选键混为一谈",
+              "optionHints": ["{A,B}"],
+              "textHints": ["超键就是候选键", "不要求最小"]
+            }
+          ],
+          "verification": [
+            {
+              "activityCode": "act.db.fd.practice.superkey-not-candidate",
+              "questionCode": "q.db.fd.superkey-not-candidate",
+              "reason": "{A,B} 是超键但不是候选键，可直接区分是否理解最小性。",
+              "estimatedMinutes": 3
+            },
+            {
+              "activityCode": "act.db.fd.practice.superkey",
+              "questionCode": "q.db.fd.superkey-judge",
+              "reason": "判断 K+ 是否包含全部属性即可确认超键定义，与是否最小无关。",
+              "estimatedMinutes": 2
+            }
+          ]
+        },
+        {
+          "skillCode": "db.fd.candidate-key",
+          "label": "候选键",
+          "nodeCodes": ["db.fd.candidate-key"],
+          "misconceptions": [
+            {
+              "code": "candidate.not-minimal",
+              "label": "把所有超键都当作候选键",
+              "optionHints": ["{A,B}", "{A,C}"],
+              "textHints": ["超键都是候选键", "不检查子集"]
+            },
+            {
+              "code": "candidate.omit-attribute",
+              "label": "只找到一个候选键就停止，漏掉其他最小超键",
+              "optionHints": ["1"],
+              "textHints": ["只有一个", "唯一候选键"]
+            }
+          ],
+          "verification": [
+            {
+              "activityCode": "act.db.fd.practice.candidate-minimal",
+              "questionCode": "q.db.fd.candidate-minimal",
+              "reason": "{A,B} 与 {A,C} 都能决定全部属性但包含候选键 A，必须检查真子集才能排除。",
+              "estimatedMinutes": 3
+            },
+            {
+              "activityCode": "act.db.fd.assessment.candidate-count",
+              "questionCode": "q.db.fd.candidate-count",
+              "reason": "A 与 B 都是候选键；只找一个会得到 1，而非最小超键会得到更多。",
+              "estimatedMinutes": 4
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

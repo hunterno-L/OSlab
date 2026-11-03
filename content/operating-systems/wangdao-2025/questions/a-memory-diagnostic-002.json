@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "QUESTIONS",
+  "batchCode": "batch.wd25.memory.diagnostic.002",
+  "title": "页面置换诊断迁移活动（人工核验）",
+  "contributor": "J",
+  "courseCode": "course.operating-systems",
+  "note": "4 道自编诊断/迁移题，答案均按 FIFO/LRU 确定性轨迹复算；用于区分 misconception-catalog-v1 中 lru.hit-no-update、fifo.hit-reorders、fifo.lru-confusion、fault.vs-eviction 与 free-frame-no-fault。",
+  "questions": [
+    {
+      "questionCode": "q.self.diag.lru.hit-update",
+      "title": "LRU 命中后访问 2 应换出哪一页",
+      "content": "3 个页框初始为空，按 LRU 访问 `5,4,3,5,2`。第 5 次访问页面 2 发生缺页时，应换出哪一页？（单选）",
+      "type": "SINGLE",
+      "options": [
+        { "key": "A", "value": "3" },
+        { "key": "B", "value": "4" },
+        { "key": "C", "value": "5（命中不影响顺序）" },
+        { "key": "D", "value": "2" }
+      ],
+      "answer": "B",
+      "analysis": "访问 5、4、3 后驻留顺序为 5→4→3（旧到新）。第 4 次命中 5 时必须把 5 移到最近使用端，顺序变为 4→3→5；因此访问 2 换出最久未使用的 4。若认为命中不更新顺序，才会误选 5。",
+      "misconception": "lru.hit-no-update：把 LRU 命中当成不改变最近使用顺序。",
+      "difficulty": 3,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "人工核验诊断活动：按 LRU 轨迹复算，2026-11-03",
+        "sourceQuestionNumber": null
+      },
+      "nodeMappings": [
+        { "nodeCode": "os.memory.lru", "role": "PRIMARY", "weight": 1 }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.diag.fifo.hit-order",
+      "title": "FIFO 命中后访问 3 的换出页",
+      "content": "3 个页框初始为空，按 FIFO 访问 `6,1,2,6,3`。第 5 次访问页面 3 发生缺页时，应换出哪一页？（单选）",
+      "type": "SINGLE",
+      "options": [
+        { "key": "A", "value": "1（命中后移到队尾）" },
+        { "key": "B", "value": "2" },
+        { "key": "C", "value": "6" },
+        { "key": "D", "value": "3" }
+      ],
+      "answer": "C",
+      "analysis": "FIFO 依据首次调入顺序：装入 6、1、2 后队列为 6→1→2。第 4 次命中 6 不改变队列，访问 3 仍换出最早调入的 6。只有把 FIFO 误当成 LRU，命中后调整顺序，才会误选 1。",
+      "misconception": "fifo.hit-reorders：认为 FIFO 命中后也要调整进入顺序。",
+      "difficulty": 3,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "人工核验诊断活动：按 FIFO 轨迹复算，2026-11-03",
+        "sourceQuestionNumber": null
+      },
+      "nodeMappings": [
+        { "nodeCode": "os.memory.fifo", "role": "PRIMARY", "weight": 1 }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.diag.lru-vs-fifo",
+      "title": "同一序列下 FIFO 与 LRU 的换出页",
+      "content": "3 个页框初始为空，访问序列为 `1,2,3,1,4`。关于第 5 次访问页面 4 时两种算法的换出页，哪些说法正确？（多选）",
+      "type": "MULTIPLE",
+      "options": [
+        { "key": "A", "value": "FIFO 换出 1（先进先出）" },
+        { "key": "B", "value": "FIFO 换出 2" },
+        { "key": "C", "value": "LRU 换出 1" },
+        { "key": "D", "value": "LRU 换出 2（最近最久未使用）" }
+      ],
+      "answer": ["A", "D"],
+      "analysis": "FIFO 队列为 1→2→3，第 4 次命中 1 不改变顺序，访问 4 换出 1；LRU 在第 4 次命中 1 后把 1 移到最近使用端，顺序为 2→3→1，访问 4 换出 2。两个算法在同一序列下给出了不同换出页。",
+      "misconception": "fifo.lru-confusion：混淆 FIFO 的调入顺序与 LRU 的最近访问顺序。",
+      "difficulty": 4,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "人工核验诊断活动：FIFO/LRU 对照轨迹，2026-11-03",
+        "sourceQuestionNumber": null
+      },
+      "nodeMappings": [
+        { "nodeCode": "os.memory.lru", "role": "PRIMARY", "weight": 0.5 },
+        { "nodeCode": "os.memory.fifo", "role": "PRIMARY", "weight": 0.5 }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.diag.free-frame-evictions",
+      "title": "有空页框时缺页与换出的区别",
+      "content": "4 个页框初始为空，按 FIFO 访问 `1,2,3,4,1,2,5,6,1,2,7`。整个过程中实际换出旧页 ______ 次。（一个空，只填整数）",
+      "type": "FILL_BLANK",
+      "options": [],
+      "answer": ["5"],
+      "analysis": "前 4 次缺页只把页面装入空页框，不换出；第 7 至第 11 次缺页各换出一页，共 5 次。整条序列缺页 9 次，但换出只有 5 次，不能把缺页次数直接当成换出次数。",
+      "misconception": "fault.vs-eviction / free-frame-no-fault：把缺页次数等同于换出次数，忽略空页框装入不算换出。",
+      "difficulty": 4,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "人工核验诊断活动：FIFO 缺页/换出计数复算，2026-11-03",
+        "sourceQuestionNumber": null
+      },
+      "nodeMappings": [
+        { "nodeCode": "os.memory.page_replacement", "role": "PRIMARY", "weight": 0.6 },
+        { "nodeCode": "os.memory.fifo", "role": "SECONDARY", "weight": 0.4 }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    }
+  ]
+}

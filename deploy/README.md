@@ -157,3 +157,8 @@ It runs MySQL, Redis, Neo4j, the backend, and Nginx directly on the host,
 omits Elasticsearch and the Docker-only judge sandbox, and documents the
 resulting feature limits. A recorded deployment of the same size class is in
 [裸机部署实录与运维手册-39.106.136.15.md](裸机部署实录与运维手册-39.106.136.15.md).
+
+The sanitized five-chapter MySQL snapshot and full Neo4j graph export are in
+[database-20261028/](database-20261028/README.md). Use them instead of the
+chapter-one seed SQL and the older `graph.db.dump` when deploying the full
+course.

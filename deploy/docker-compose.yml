@@ -29,6 +29,8 @@ services:
       - ../数据库文件/oslab_upgrade_v8_teaching_tasks.sql:/seed/oslab_upgrade_v8_teaching_tasks.sql:ro
       - ../数据库文件/oslab_upgrade_v9_learning_activities.sql:/seed/oslab_upgrade_v9_learning_activities.sql:ro
       - ../数据库文件/oslab_upgrade_v10_classes.sql:/seed/oslab_upgrade_v10_classes.sql:ro
+      - ../数据库文件/oslab_upgrade_v11_ai_session.sql:/seed/oslab_upgrade_v11_ai_session.sql:ro
+      - ../数据库文件/oslab_upgrade_v12_ai_evidence.sql:/seed/oslab_upgrade_v12_ai_evidence.sql:ro
       - ./mysql-init/10-load-oslab-db.sh:/docker-entrypoint-initdb.d/10-load-oslab-db.sh:ro
     networks:
       - oslab-network

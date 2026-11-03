@@ -4,6 +4,8 @@
       :course-code="courseCode || catalogCourseParam"
       :course-title="courseTitle"
       :sections="catalogSections"
+      :courses="catalogCourses"
+      :outlines="catalogOutlines"
       :selected-section-code="selectedSectionCode"
       :selected-unit-code="selectedUnitCode"
       :expanded-sections="expandedSections"
@@ -140,9 +142,18 @@
 
             <section
               v-if="activity"
+              ref="contentSectionRef"
               class="activity-card"
               :class="{ 'is-checkpoint': isPracticeActivity }"
               :key="activity.activityCode"
+              :id="
+                activity.content
+                  ? `chunk-${activity.content.chunkCode}`
+                  : undefined
+              "
+              :data-chunk-code="activity.content?.chunkCode || undefined"
+              @mouseup="captureSelection"
+              @keyup="captureSelection"
             >
               <div class="activity-card-head">
                 <span class="activity-card-index">{{
@@ -164,7 +175,27 @@
                   内容版本 {{ activity.content.revision }}
                 </p></template
               >
-              <template v-else-if="isQuestion(activity)"
+              <div
+                v-if="selectedText && activity.content"
+                class="selection-ask"
+                role="group"
+                aria-label="选中段落向导师提问"
+              >
+                <span class="selection-ask-text"
+                  >已选中 {{ selectedText.length }} 字</span
+                >
+                <a-button size="small" type="primary" @click="askSelected"
+                  >向导师提问</a-button
+                >
+                <button
+                  type="button"
+                  class="selection-ask-cancel"
+                  @click="selectedText = ''"
+                >
+                  取消
+                </button>
+              </div>
+              <template v-if="!activity.content && isQuestion(activity)"
                 ><p v-if="questionLoading">正在加载题目…</p>
                 <p v-else-if="questionError" role="alert">
                   {{ questionError }}
@@ -180,8 +211,9 @@
               /></template>
               <template
                 v-else-if="
-                  activity.activityType === 'DEMO' ||
-                  activity.activityType === 'EXPERIMENT'
+                  !activity.content &&
+                  (activity.activityType === 'DEMO' ||
+                    activity.activityType === 'EXPERIMENT')
                 "
                 ><p
                   v-if="activity.config?.instructions || activity.config?.task"
@@ -199,7 +231,7 @@
                   >刷新活动进度</a-button
                 ></template
               >
-              <p v-else class="hint">
+              <p v-else-if="!activity.content" class="hint">
                 本活动暂无可用内容，请联系教师检查资源发布状态。
               </p>
               <p v-if="saveError" role="alert" class="error">{{ saveError }}</p>
@@ -250,6 +282,13 @@
                 >
               </div>
             </aside>
+            <AiMaterialComposer
+              class="unit-material-composer"
+              :course-code="unit.courseCode"
+              :node-codes="
+                (unit.nodeMappings || []).map((node) => node.nodeCode)
+              "
+            />
             <footer>
               <router-link
                 v-if="unit.previousUnitCode"
@@ -314,6 +353,19 @@
                 }}</span
               >
             </div>
+            <AiNextActions
+              class="unit-ai-plan"
+              :actions="nextActions"
+              :course-code="unit.courseCode"
+              :loading="nextActionsLoading"
+              :error="nextActionsError"
+              :due-count="dueReviewCount"
+              title="本单元下一步"
+              empty-text="完成一次阅读或作答后会生成下一步。"
+              compact
+              :limit="2"
+              @refresh="refreshUnitPlan"
+            />
           </aside>
         </div>
       </template>
@@ -321,11 +373,19 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import MdViewer from "@/components/MdViewer.vue";
 import QuestionAnswerCard from "@/components/learning/QuestionAnswerCard.vue";
 import CourseCatalogSidebar from "@/components/learning/CourseCatalogSidebar.vue";
+import AiMaterialComposer from "@/components/ai/AiMaterialComposer.vue";
+import AiNextActions from "@/components/ai/AiNextActions.vue";
+import { askAiAssistant } from "@/composables/useAiLauncher";
+import { useAiConversation } from "@/composables/useAiConversation";
+import {
+  registerAiPageContext,
+  unregisterAiPageContext,
+} from "@/composables/useAiPageContext";
 import { useCourseCatalog } from "@/composables/useCourseCatalog";
 import {
   ALGORITHM_BY_KEY,
@@ -356,8 +416,77 @@ const unit = ref<CourseUnit | null>(null),
 const question = ref<LearningQuestionVO | null>(null),
   questionLoading = ref(false),
   questionError = ref("");
+const contentSectionRef = ref<HTMLElement | null>(null);
+const selectedText = ref("");
+const selectedChunkCode = ref("");
+const lastJudgeResult = ref("");
 let loadEpoch = 0,
   questionEpoch = 0;
+
+const {
+  nextActions,
+  nextActionsLoading,
+  nextActionsError,
+  dueReviewCount,
+  refreshNextActions,
+  syncCourse: syncAiCourse,
+} = useAiConversation();
+
+/** 本单元与首页/图谱共用同一份服务端下一步计划 */
+function refreshUnitPlan() {
+  const code = unit.value?.courseCode;
+  if (!code) return;
+  void refreshNextActions({ courseCode: code, limit: 3 });
+}
+
+/** 把课程单元、当前活动与选中段落注册进统一 AI 会话上下文 */
+const aiContextProvider = () => {
+  const a = activity.value;
+  return {
+    pageName: "课程单元",
+    courseCode: unit.value?.courseCode || catalogCourseParam.value || undefined,
+    courseTitle: courseTitle.value || undefined,
+    unitCode: unit.value?.unitCode,
+    unitName: unit.value?.title,
+    nodeCodes: (unit.value?.nodeMappings || []).map((node) => node.nodeCode),
+    resourceRef: a?.content
+      ? `chunk:${a.content.chunkCode}`
+      : a?.questionId
+      ? `question:${a.questionId}`
+      : undefined,
+    selectedSourceIds: selectedChunkCode.value ? [selectedChunkCode.value] : [],
+    lastJudgeResult: lastJudgeResult.value || undefined,
+  };
+};
+
+/** 只接受发生在当前活动正文内的选择，避免误取侧栏/菜单文字 */
+function captureSelection() {
+  const selection = window.getSelection();
+  const text = selection?.toString().trim() || "";
+  const section = contentSectionRef.value;
+  if (
+    text.length < 6 ||
+    !section ||
+    !selection?.anchorNode ||
+    !section.contains(selection.anchorNode)
+  ) {
+    return;
+  }
+  selectedText.value = text.slice(0, 1200);
+  selectedChunkCode.value = activity.value?.content?.chunkCode || "";
+}
+
+function askSelected() {
+  const quote = selectedText.value.trim();
+  if (!quote) return;
+  const a = activity.value;
+  askAiAssistant(
+    `请结合当前课程资料解释这段内容${
+      a?.title ? `（${a.title}）` : ""
+    }，并指出它对应的规则或例子：\n\n「${quote.slice(0, 600)}」`
+  );
+  selectedText.value = "";
+}
 
 // 与图谱页共用同一课程目录；目录选择驱动范围而不是第二条活动导航
 const catalogCourseParam = computed(() =>
@@ -367,6 +496,8 @@ const {
   courseCode,
   courseTitle,
   sections: catalogSections,
+  courses: catalogCourses,
+  outlines: catalogOutlines,
   loading: catalogLoading,
   error: catalogError,
   courseProgress: catalogProgress,
@@ -374,6 +505,8 @@ const {
   load: loadCatalogSource,
   ancestorCodes,
   sectionCrumb,
+  courseCodeOfSection,
+  courseCodeOfUnit,
 } = useCourseCatalog();
 const expandedSections = ref<string[]>([]);
 const selectedUnitCode = computed(() => String(route.params.unitCode || ""));
@@ -424,22 +557,29 @@ const unitSwitchQuery = computed<Record<string, string>>(() => {
   }
   return query;
 });
-const goGraphCourse = () => {
+const goGraphCourse = (targetCourse?: string) => {
   const query: Record<string, string> = { scope: "course" };
-  const course = courseCode.value || catalogCourseParam.value;
+  const course = targetCourse || courseCode.value || catalogCourseParam.value;
   if (course) query.courseCode = course;
   router.push({ path: "/graph", query });
 };
 const goGraphSection = (sectionCode: string) => {
   const query: Record<string, string> = { sectionCode };
-  const course = courseCode.value || catalogCourseParam.value;
+  const course =
+    courseCodeOfSection(sectionCode) ||
+    courseCode.value ||
+    catalogCourseParam.value;
   if (course) query.courseCode = course;
   router.push({ path: "/graph", query });
 };
 const switchUnit = (unitCode: string) => {
   if (!unitCode || unitCode === selectedUnitCode.value) return;
-  const course = courseCode.value || catalogCourseParam.value;
+  const course =
+    courseCodeOfUnit(unitCode) || courseCode.value || catalogCourseParam.value;
   if (!course) return;
+  if (course !== (unit.value?.courseCode || courseCode.value)) {
+    void syncAiCourse(course);
+  }
   router.push({
     path: unitPath(course, unitCode),
     query: unitSwitchQuery.value,
@@ -601,6 +741,7 @@ async function load() {
       data.activities[0]?.activityCode ||
       "";
     await persistPosition();
+    refreshUnitPlan();
   } catch (e) {
     if (epoch === loadEpoch)
       error.value = e instanceof Error ? e.message : "内容加载失败";
@@ -691,6 +832,12 @@ async function complete(data: { confirmed?: boolean; attemptId?: string }) {
 }
 const confirmReading = () => complete({ confirmed: true });
 const answered = (result: LearningAnswerResultVO) => {
+  lastJudgeResult.value =
+    result.correct === null
+      ? "已显示参考解析"
+      : result.correct
+      ? "回答正确"
+      : "回答错误";
   if (result.attemptId !== null)
     complete({ attemptId: String(result.attemptId) });
 };
@@ -709,6 +856,12 @@ watch(
   },
   { immediate: true }
 );
+onMounted(() => {
+  registerAiPageContext(aiContextProvider);
+});
+onBeforeUnmount(() => {
+  unregisterAiPageContext(aiContextProvider);
+});
 watch(activeCode, loadQuestion);
 // 同单元内 query.activity 变化（外部返回、前进后退）也要切换当前步骤
 watch(
@@ -847,6 +1000,47 @@ li {
   gap: 12px;
   flex-wrap: wrap;
   margin-top: 28px;
+}
+.selection-ask {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--oslab-highlight-strong);
+  border-radius: var(--oslab-radius-md);
+  background: var(--oslab-highlight-soft);
+}
+.selection-ask-text {
+  color: var(--oslab-ink-soft);
+  font-size: var(--oslab-text-small);
+}
+.selection-ask-cancel {
+  border: 0;
+  background: none;
+  color: var(--oslab-muted-strong);
+  font: inherit;
+  font-size: var(--oslab-text-small);
+  cursor: pointer;
+}
+.unit-material-composer {
+  margin-top: 24px;
+}
+.unit-ai-plan {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--oslab-line-soft);
+}
+.unit-ai-plan :deep(.ai-next-title) {
+  font-size: 15px;
+}
+/* 引用卡就地定位时的高亮（2.6s 后由脚本移除） */
+:deep(.ai-source-highlight) {
+  outline: 2px solid var(--oslab-highlight-strong);
+  outline-offset: 4px;
+  background: var(--oslab-highlight-soft);
+  transition: background var(--oslab-duration) var(--oslab-ease);
 }
 .nodes {
   border-top: 1px solid #e5e6eb;

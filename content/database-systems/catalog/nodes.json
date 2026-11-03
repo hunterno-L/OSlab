@@ -1,0 +1,28 @@
+{
+  "nodes": [
+    {
+      "nodeCode": "db.fd.attribute-closure",
+      "name": "属性闭包",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "homeSectionCode": "sec.db.fd",
+      "aliases": ["Attribute Closure", "X+"]
+    },
+    {
+      "nodeCode": "db.fd.superkey",
+      "name": "超键",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.db.fd",
+      "aliases": ["Superkey"]
+    },
+    {
+      "nodeCode": "db.fd.candidate-key",
+      "name": "候选键",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.db.fd",
+      "aliases": ["Candidate Key", "候选码"]
+    }
+  ]
+}

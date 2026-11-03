@@ -4,11 +4,14 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.yupi.springbootinit.ai.evidence.EvidenceQualification;
 import com.yupi.springbootinit.bkt.BktModel;
 import com.yupi.springbootinit.mapper.LearningEventMapper;
 import com.yupi.springbootinit.mapper.LearningMasteryMapper;
 import com.yupi.springbootinit.model.entity.LearningEvent;
 import com.yupi.springbootinit.model.entity.LearningMastery;
+import com.yupi.springbootinit.model.entity.LearningQuestion;
+import com.yupi.springbootinit.model.entity.LearningQuestionNode;
 import com.yupi.springbootinit.model.entity.Question;
 import com.yupi.springbootinit.model.entity.QuestionSubmit;
 import com.yupi.springbootinit.model.enums.QuestionSubmitStatusEnum;
@@ -56,6 +59,11 @@ class LearningEventObservationTest {
     private final LearningEventServiceImpl service = new LearningEventServiceImpl();
     private final com.yupi.springbootinit.learning.ExperimentMappingService experimentMappings =
             mock(com.yupi.springbootinit.learning.ExperimentMappingService.class);
+    /** 普通题作答路径依赖：节点映射与作答记录（AI 升级 §5.5 证据资格回归用）。 */
+    private final com.yupi.springbootinit.mapper.LearningQuestionNodeMapper questionNodeMapper =
+            mock(com.yupi.springbootinit.mapper.LearningQuestionNodeMapper.class);
+    private final com.yupi.springbootinit.mapper.LearningAttemptMapper attemptMapper =
+            mock(com.yupi.springbootinit.mapper.LearningAttemptMapper.class);
 
     private LearningMastery masteryRow;
 
@@ -76,6 +84,8 @@ class LearningEventObservationTest {
         ReflectionTestUtils.setField(service, "questionSubmitService", submitService);
         ReflectionTestUtils.setField(service, "knowledgeGraphService", knowledgeGraphService);
         ReflectionTestUtils.setField(service, "experimentMappings", experimentMappings);
+        ReflectionTestUtils.setField(service, "learningQuestionNodeMapper", questionNodeMapper);
+        ReflectionTestUtils.setField(service, "learningAttemptMapper", attemptMapper);
         when(experimentMappings.fromSnapshot(any(), any(Long.class))).thenReturn(List.of(
                 new com.yupi.springbootinit.learning.ExperimentMappingService.Mapping("os.cpu.scheduling", "进程调度", 1.0)));
         // 判题事务模板：mock 事务管理器同步执行回调（recordJudgeEvents 用编程式事务）
@@ -219,6 +229,147 @@ class LearningEventObservationTest {
         assertFalse(LearningResultEnum.PASS.isDiagnostic());
         assertFalse(LearningResultEnum.BASELINE.isKnowledgeObservation());
     }
+
+    // region AI 升级 §5.5：帮助等级参与证据资格（普通题作答路径）
+
+    @Test
+    void unhelpedFirstAttemptCountsAsIndependentObservation() {
+        stubAttemptMapping();
+        service.recordAttemptEvents(7L, attemptQuestion(), 88L, true, true,
+                EvidenceQualification.of(555L, EvidenceQualification.HELP_NONE, null));
+
+        LearningEvent event = capturedEvent();
+        assertEquals(Integer.valueOf(1), event.getIsFirst(), "无帮助的首次作答是独立观测");
+        assertEquals(1, masteryRow.getConceptEvidenceCount(), "概念证据数 +1");
+        assertNotEquals(BktModel.DEFAULT_P_INIT, masteryRow.getPKnown(), 1e-9, "BKT 应更新");
+        verify(masteryMapper).updateById(any());
+        JSONObject evidence = JSONUtil.parseObj(event.getEvidence());
+        assertEquals("NONE", evidence.getStr("helpLevel"));
+        assertTrue(evidence.getBool("firstAttempt"));
+        assertTrue(evidence.getBool("eligibleForObservation"));
+    }
+
+    @Test
+    void hintedFirstAttemptIsRecordedButDoesNotTouchMastery() {
+        stubAttemptMapping();
+        service.recordAttemptEvents(7L, attemptQuestion(), 88L, true, true,
+                EvidenceQualification.of(555L, EvidenceQualification.HELP_HINT, null));
+
+        LearningEvent event = capturedEvent();
+        assertEquals(Integer.valueOf(0), event.getIsFirst(), "带提示的作答不是独立观测");
+        assertEquals(event.getMasteryBefore(), event.getMasteryAfter(), "掌握度前后相同");
+        assertEquals(event.getSnapshotBefore(), event.getSnapshotAfter(), "快照前后相同");
+        assertEquals(0, masteryRow.getConceptEvidenceCount(), "不得增加概念证据数");
+        assertEquals(BktModel.DEFAULT_P_INIT, masteryRow.getPKnown(), 1e-9, "不得更新 BKT");
+        verify(masteryMapper, never()).updateById(any());
+        JSONObject evidence = JSONUtil.parseObj(event.getEvidence());
+        assertEquals("HINT", evidence.getStr("helpLevel"));
+        assertTrue(evidence.getBool("firstAttempt"), "账本仍保留'确实是第一次做这道题'的事实");
+        assertFalse(evidence.getBool("eligibleForObservation"));
+        assertTrue(evidence.getStr("note").contains("已获得提示"), "事件文案要说明为何不计观测");
+        assertTrue(evidence.getStr("eligibilityReason").contains("提示"));
+    }
+
+    @Test
+    void revealedAnswerFirstAttemptIsRecordedButDoesNotTouchMastery() {
+        stubAttemptMapping();
+        service.recordAttemptEvents(7L, attemptQuestion(), 88L, true, true,
+                EvidenceQualification.of(555L, EvidenceQualification.HELP_ANSWER_REVEALED, "EXTERNAL_AI"));
+
+        LearningEvent event = capturedEvent();
+        assertEquals(Integer.valueOf(0), event.getIsFirst(), "看过答案后的正确表现不等于能力");
+        assertEquals(0, masteryRow.getConceptEvidenceCount());
+        verify(masteryMapper, never()).updateById(any());
+        JSONObject evidence = JSONUtil.parseObj(event.getEvidence());
+        assertEquals("ANSWER_REVEALED", evidence.getStr("helpLevel"));
+        assertEquals("EXTERNAL_AI", evidence.getStr("selfReportedHelp"));
+        assertTrue(evidence.getStr("note").contains("已揭示答案"));
+        assertEquals("555", evidence.getStr("evidenceContextId"));
+    }
+
+    @Test
+    void unknownHelpLevelKeepsLegacyObservationBehaviour() {
+        stubAttemptMapping();
+        service.recordAttemptEvents(7L, attemptQuestion(), 88L, false, true,
+                EvidenceQualification.unknown());
+
+        LearningEvent event = capturedEvent();
+        assertEquals(Integer.valueOf(1), event.getIsFirst(),
+                "缺少帮助记录不倒推成未获得帮助，但保持升级前的观测行为");
+        assertEquals(1, masteryRow.getConceptEvidenceCount());
+        verify(masteryMapper).updateById(any());
+        JSONObject evidence = JSONUtil.parseObj(event.getEvidence());
+        assertEquals("UNKNOWN", evidence.getStr("helpLevel"));
+    }
+
+    @Test
+    void fiveArgumentLegacyEntryDelegatesWithUnknownHelpLevel() {
+        stubAttemptMapping();
+        service.recordAttemptEvents(7L, attemptQuestion(), 88L, true, true);
+        LearningEvent event = capturedEvent();
+        assertEquals(Integer.valueOf(1), event.getIsFirst());
+        assertEquals("UNKNOWN", JSONUtil.parseObj(event.getEvidence()).getStr("helpLevel"));
+    }
+
+    @Test
+    void nullQualificationIsTreatedAsUnknownNotNullPointer() {
+        stubAttemptMapping();
+        assertDoesNotThrow(() -> service.recordAttemptEvents(7L, attemptQuestion(), 88L, true, true, null));
+        assertEquals("UNKNOWN", JSONUtil.parseObj(capturedEvent().getEvidence()).getStr("helpLevel"));
+    }
+
+    @Test
+    void repeatAttemptNeverUpdatesMasteryWhateverTheHelpLevel() {
+        stubAttemptMapping();
+        service.recordAttemptEvents(7L, attemptQuestion(), 88L, true, false,
+                EvidenceQualification.of(555L, EvidenceQualification.HELP_NONE, null));
+        LearningEvent event = capturedEvent();
+        assertEquals(Integer.valueOf(0), event.getIsFirst());
+        assertEquals(0, masteryRow.getConceptEvidenceCount());
+        verify(masteryMapper, never()).updateById(any());
+        assertTrue(JSONUtil.parseObj(event.getEvidence()).getStr("note").contains("重复作答"));
+    }
+
+    @Test
+    void unmappedQuestionRecordsNothing() {
+        when(questionNodeMapper.selectList(any())).thenReturn(List.of());
+        assertTrue(service.recordAttemptEvents(7L, attemptQuestion(), 88L, true, true,
+                EvidenceQualification.of(555L, EvidenceQualification.HELP_NONE, null)).isEmpty());
+        verify(eventMapper, never()).insert(any(LearningEvent.class));
+        verify(masteryMapper, never()).updateById(any());
+    }
+
+    @Test
+    void eventIdsOfAttemptReadsOnlyThatUsersEventGroup() {
+        LearningEvent first = new LearningEvent();
+        first.setId(9001L);
+        LearningEvent second = new LearningEvent();
+        second.setId(9002L);
+        when(eventMapper.selectList(any())).thenReturn(List.of(first, second));
+        assertEquals(List.of(9001L, 9002L), service.eventIdsOfAttempt(7L, 88L));
+        assertTrue(service.eventIdsOfAttempt(7L, null).isEmpty());
+        assertTrue(service.eventIdsOfAttempt(null, 88L).isEmpty());
+    }
+
+    private LearningQuestion attemptQuestion() {
+        LearningQuestion question = new LearningQuestion();
+        question.setId(101L);
+        question.setTitle("LRU 命中后应换出哪一页");
+        question.setType("SINGLE");
+        question.setAnswer("\"B\"");
+        return question;
+    }
+
+    private void stubAttemptMapping() {
+        LearningQuestionNode mapping = new LearningQuestionNode();
+        mapping.setQuestionId(101L);
+        mapping.setNodeName("进程调度");
+        mapping.setNodeCode("os.cpu.scheduling");
+        mapping.setWeight(1.0);
+        when(questionNodeMapper.selectList(any())).thenReturn(List.of(mapping));
+    }
+
+    // endregion
 
     // region fixtures
 

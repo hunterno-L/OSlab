@@ -112,6 +112,28 @@
       暂不支持的题型：{{ question.type }}
     </div>
 
+    <div v-if="aiActionId" class="qa-help-row">
+      <span class="qa-help-label">提交前记录帮助：</span>
+      <button
+        type="button"
+        class="qa-help-btn"
+        :disabled="!!result || helpSaving"
+        @click="markHelp('HINT')"
+      >
+        我需要提示
+      </button>
+      <button
+        type="button"
+        class="qa-help-btn qa-help-btn--reveal"
+        :disabled="!!result || helpSaving"
+        @click="markHelp('ANSWER_REVEALED')"
+      >
+        我已查看答案
+      </button>
+      <AiHelpBadge :level="currentHelpLevel" />
+      <span v-if="helpNotice" class="qa-hint">{{ helpNotice }}</span>
+    </div>
+
     <div class="qa-submit-row">
       <a-button
         :type="hasResult ? 'outline' : 'primary'"
@@ -129,6 +151,10 @@
       <span v-if="question.hasAttempted && !hasResult" class="qa-hint"
         >你曾作答过本题，可再次练习</span
       >
+      <span v-if="aiStarting" class="qa-hint">正在准备 AI 任务…</span>
+      <span v-if="aiSubmitError" class="qa-hint qa-help-error" role="alert">{{
+        aiSubmitError
+      }}</span>
     </div>
 
     <!-- 提交后反馈就地展开：结果 → 解析 → 常见误区 → 掌握度变化 → 下一步 -->
@@ -152,7 +178,24 @@
             ? "回答正确"
             : "回答错误"
         }}</span>
-        <span class="qa-result-hint">{{ resultHint }}</span>
+        <span class="qa-result-hint">{{
+          serverJudgeMessage || resultHint
+        }}</span>
+      </div>
+
+      <div class="qa-help-evidence">
+        <AiHelpBadge :level="evidence?.helpLevel || 'UNKNOWN'" />
+        <span v-if="evidence" class="qa-hint">{{
+          evidence.eligibleForObservation
+            ? evidence.eligibilityReason || "本次计入独立观测"
+            : evidence.eligibilityReason
+        }}</span>
+        <span v-else class="qa-hint"
+          >普通练习不生成帮助快照；从 AI 任务进入可记录提示与看答案。</span
+        >
+        <span v-if="nextReviewDueAt" class="qa-hint"
+          >下次复习：{{ nextReviewDueAt }}</span
+        >
       </div>
 
       <div class="qa-feedback-block">
@@ -202,19 +245,94 @@
         <h3 class="qa-feedback-title">下一步</h3>
         <p class="qa-feedback-text">{{ nextHint }}</p>
       </div>
+
+      <div class="qa-feedback-block qa-ai-analysis">
+        <div class="qa-ai-head">
+          <h3 class="qa-feedback-title">AI 分析</h3>
+          <AiModeBadge v-if="analysisTurn?.mode" :mode="analysisTurn.mode" />
+        </div>
+        <a-button
+          v-if="!analysisTurn"
+          size="small"
+          :loading="analysisLoading"
+          :disabled="analysisLoading"
+          @click="requestAnalysis"
+        >
+          请求 AI 分析
+        </a-button>
+        <p v-if="analysisError" class="qa-help-error" role="alert">
+          {{ analysisError }}
+        </p>
+        <template v-if="analysisTurn">
+          <MdViewer
+            v-if="analysisTurn.answer"
+            class="qa-feedback-text"
+            :value="analysisTurn.answer"
+          />
+          <AiDiagnosisPanel :diagnosis="analysisTurn.diagnosis" />
+          <AiToolTrace :entries="analysisTurn.toolTrace" />
+          <div v-if="analysisTurn.sources?.length" class="qa-ai-sources">
+            <AiSourceCard
+              v-for="(source, index) in analysisTurn.sources"
+              :key="source.sourceId + source.blockId"
+              :source="source"
+              :index="index"
+              @open="openAnalysisSource"
+            />
+          </div>
+          <AiNextActions
+            v-if="analysisTurn.nextActions?.length"
+            :actions="analysisTurn.nextActions"
+            :course-code="analysisCourseCode"
+            title="下一步"
+            empty-text=""
+            compact
+            :refreshable="false"
+          />
+        </template>
+      </div>
     </section>
   </article>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import { Message } from "@arco-design/web-vue";
 import MdViewer from "@/components/MdViewer.vue";
+import AiHelpBadge from "@/components/ai/AiHelpBadge.vue";
+import AiModeBadge from "@/components/ai/AiModeBadge.vue";
+import AiDiagnosisPanel from "@/components/ai/AiDiagnosisPanel.vue";
+import AiToolTrace from "@/components/ai/AiToolTrace.vue";
+import AiSourceCard from "@/components/ai/AiSourceCard.vue";
+import AiNextActions from "@/components/ai/AiNextActions.vue";
 import {
   answerLearningQuestion,
   type LearningAnswerResultVO,
   type LearningQuestionVO,
   type QuestionOption,
 } from "@/api/learning";
+import type {
+  AiActivityRefVO,
+  AiEvidenceSnapshot,
+  AiSourceRef,
+  AiSubmitActionRequest,
+  AiTurnVO,
+} from "@/api/ai";
+import {
+  getStartedAiAction,
+  recordAiHelp,
+  startAiPlanAction,
+  submitAiPlanAction,
+} from "@/composables/useAiActions";
+import { askAi, useAiConversation } from "@/composables/useAiConversation";
+import { askAiAssistant } from "@/composables/useAiLauncher";
+import { getAiPageContext } from "@/composables/useAiPageContext";
+import {
+  aiSourceRoute,
+  highlightSourceInPage,
+  openAiMaterialSource,
+} from "@/utils/aiSources";
 
 // eslint-disable-next-line no-undef
 const props = defineProps<{
@@ -226,6 +344,10 @@ const props = defineProps<{
   disabledReason?: string;
   /** 列表流中的真实目录上下文（如“单元 · 小节”） */
   contextLabel?: string;
+  /** 从 AI 下一步任务进入时的 actionId（帮助等级与证据资格走统一动作接口） */
+  aiActionId?: string;
+  /** 当前课程编码（普通题卡也用于 AI 分析的会话作用域） */
+  courseCode?: string;
 }>();
 
 // eslint-disable-next-line no-undef
@@ -233,6 +355,8 @@ const emit = defineEmits<{
   (e: "answered", result: LearningAnswerResultVO): void;
 }>();
 
+const router = useRouter();
+const { errorMsg: conversationError } = useAiConversation();
 const submitting = ref(false);
 const showMetadata = ref(false);
 const judgeAnswer = ref("");
@@ -241,6 +365,133 @@ const multipleAnswer = ref<string[]>([]);
 const fillAnswer = ref("");
 const comprehensiveAnswer = ref("");
 const result = ref<LearningAnswerResultVO | null>(null);
+const aiRef = ref<AiActivityRefVO | null>(null);
+const aiStarting = ref(false);
+const aiSubmitError = ref("");
+const serverJudgeMessage = ref("");
+const evidence = ref<AiEvidenceSnapshot | null>(null);
+const helpSaving = ref(false);
+const helpNotice = ref("");
+const analysisTurn = ref<AiTurnVO | null>(null);
+const analysisLoading = ref(false);
+const analysisError = ref("");
+const nextReviewDueAt = ref("");
+
+const currentHelpLevel = computed(
+  () => evidence.value?.helpLevel || aiRef.value?.helpLevel || "UNKNOWN"
+);
+const analysisCourseCode = computed(
+  () =>
+    props.courseCode ||
+    getAiPageContext()?.courseCode ||
+    "course.operating-systems"
+);
+
+async function loadAiAction() {
+  const actionId = props.aiActionId;
+  if (!actionId) {
+    aiRef.value = null;
+    return;
+  }
+  const cached = getStartedAiAction(actionId);
+  if (cached) {
+    aiRef.value = cached;
+    return;
+  }
+  aiStarting.value = true;
+  aiSubmitError.value = "";
+  const ref = await startAiPlanAction(actionId);
+  if (ref) aiRef.value = ref;
+  else aiSubmitError.value = "任务启动失败，请刷新页面后重试。";
+  aiStarting.value = false;
+}
+
+onMounted(loadAiAction);
+watch(
+  () => props.aiActionId,
+  () => {
+    result.value = null;
+    evidence.value = null;
+    analysisTurn.value = null;
+    void loadAiAction();
+  }
+);
+
+/** 提交前记录帮助等级；答案揭示单独确认，提交后不可再改。 */
+async function markHelp(level: "HINT" | "ANSWER_REVEALED") {
+  const actionId = props.aiActionId;
+  if (!actionId || result.value || helpSaving.value) return;
+  if (level === "ANSWER_REVEALED") {
+    const confirmed = window.confirm(
+      "标记后本次作答不计独立观测，且提交后不可撤销。确认已查看答案或解析？"
+    );
+    if (!confirmed) return;
+  }
+  helpSaving.value = true;
+  helpNotice.value = "";
+  const response = await recordAiHelp(actionId, level);
+  helpSaving.value = false;
+  if (!response) {
+    helpNotice.value = "帮助等级记录失败，请重试。";
+    return;
+  }
+  if (aiRef.value) {
+    aiRef.value = { ...aiRef.value, helpLevel: response.helpLevel };
+  }
+  helpNotice.value = response.eligibleForObservation
+    ? "已记录本次帮助等级。"
+    : response.eligibilityReason || "本次作答不再计为独立观测。";
+  if (level === "HINT") {
+    // 提示内容由导师生成，但不得直接泄露答案；帮助等级已先落库
+    askAiAssistant(
+      "请给我一个不直接给出答案的提示，帮助我自己找到这道题的解法。"
+    );
+  }
+}
+
+async function requestAnalysis() {
+  if (!result.value || analysisLoading.value) return;
+  analysisLoading.value = true;
+  analysisError.value = "";
+  try {
+    const verdict =
+      result.value.correct === null
+        ? "本题未自动评分"
+        : result.value.correct
+        ? "回答正确"
+        : "回答错误";
+    const turn = await askAi(
+      `我刚提交了题目「${props.question.title}」，${verdict}。请结合我的学习证据分析可能的原因（证据不足时保留不确定性），并给出一个可立即执行的下一步。`,
+      {
+        context: {
+          courseCode: analysisCourseCode.value,
+          resourceRef: `question:${props.question.id}`,
+          eventIds: evidence.value?.eventIds || [],
+        },
+      }
+    );
+    if (!turn) {
+      analysisError.value =
+        conversationError.value || "AI 分析暂时不可用，请稍后重试。";
+      return;
+    }
+    analysisTurn.value = turn;
+  } finally {
+    analysisLoading.value = false;
+  }
+}
+
+function openAnalysisSource(source: AiSourceRef) {
+  if (openAiMaterialSource(source)) return;
+  if (highlightSourceInPage(source)) return;
+  const route = aiSourceRoute(source);
+  if (route) {
+    void router.push(route);
+    Message.info("已打开对应课程章节。");
+    return;
+  }
+  Message.warning("该来源暂无可打开的站内位置。");
+}
 
 watch(
   () => props.question.id,
@@ -312,7 +563,7 @@ const nextHint = computed(() =>
 );
 
 const canSubmit = computed(() => {
-  if (answerDisabled.value) return false;
+  if (answerDisabled.value || aiStarting.value) return false;
   switch (props.question?.type) {
     case "JUDGE":
       return judgeAnswer.value !== "";
@@ -330,10 +581,15 @@ const canSubmit = computed(() => {
 });
 
 /** 每次提交生成新的幂等键：同键重发服务端去重，主动重试/再答一次使用新键 */
-const newSubmissionKey = () =>
-  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-    ? crypto.randomUUID()
+const newSubmissionKey = () => {
+  const cryptoApi =
+    typeof crypto !== "undefined"
+      ? (crypto as Crypto & { randomUUID?: () => string })
+      : null;
+  return cryptoApi && typeof cryptoApi.randomUUID === "function"
+    ? cryptoApi.randomUUID()
     : `sub-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+};
 
 const submit = async () => {
   if (!canSubmit.value || submitting.value) return;
@@ -359,7 +615,49 @@ const submit = async () => {
       return;
   }
   submitting.value = true;
+  aiSubmitError.value = "";
+  serverJudgeMessage.value = "";
   try {
+    if (props.aiActionId) {
+      const ref = aiRef.value || (await startAiPlanAction(props.aiActionId));
+      if (!ref) {
+        aiSubmitError.value = "任务尚未就绪，请刷新后重试。";
+        return;
+      }
+      const body: AiSubmitActionRequest = {
+        submissionKey: ref.submissionKey,
+      };
+      if (props.question.type === "JUDGE" || props.question.type === "SINGLE") {
+        body.choiceKey = String(answer);
+      } else if (props.question.type === "MULTIPLE") {
+        body.choiceKey = (answer as string[]).join(",");
+      } else {
+        body.text = String(answer);
+      }
+      const data = await submitAiPlanAction(
+        props.aiActionId,
+        body,
+        props.courseCode
+      );
+      if (!data) {
+        aiSubmitError.value =
+          "提交失败，请检查网络后重试（同一提交键不会重复判分）。";
+        return;
+      }
+      evidence.value = data.evidence || null;
+      serverJudgeMessage.value = data.judgeMessage || "";
+      nextReviewDueAt.value = data.nextReviewDueAt || "";
+      result.value = {
+        attemptId: null,
+        correct: data.correct,
+        analysis: data.analysis ?? null,
+        misconception: null,
+        isFirst: Boolean(data.evidence?.eligibleForObservation),
+        masteryChanges: data.masteryChanges || [],
+      };
+      emit("answered", result.value);
+      return;
+    }
     const res = await answerLearningQuestion({
       questionId: props.question.id,
       answer,
@@ -557,6 +855,69 @@ const statusTagClass = (status: string) =>
   color: var(--oslab-muted-strong);
   font-size: var(--oslab-text-small);
 }
+.qa-help-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: var(--oslab-space-3);
+  padding: 8px 10px;
+  border: 1px dashed var(--oslab-line);
+  border-radius: var(--oslab-radius-md);
+  background: var(--oslab-panel-soft);
+}
+.qa-help-label {
+  color: var(--oslab-muted-strong);
+  font-size: var(--oslab-text-small);
+}
+.qa-help-btn {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--oslab-line-strong);
+  border-radius: var(--oslab-radius-pill);
+  background: var(--oslab-panel);
+  color: var(--oslab-ink-soft);
+  font: inherit;
+  font-size: var(--oslab-text-small);
+  cursor: pointer;
+}
+.qa-help-btn:hover:not(:disabled) {
+  border-color: var(--oslab-primary);
+  color: var(--oslab-primary);
+}
+.qa-help-btn--reveal:hover:not(:disabled) {
+  border-color: var(--oslab-weak-text);
+  color: var(--oslab-weak-text);
+}
+.qa-help-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.qa-help-error {
+  color: var(--oslab-weak-text);
+}
+.qa-help-evidence {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: calc(-1 * var(--oslab-space-2));
+}
+.qa-ai-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--oslab-space-1);
+}
+.qa-ai-sources {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--oslab-space-2);
+}
+.qa-ai-analysis {
+  padding-top: var(--oslab-space-3);
+  border-top: 1px solid var(--oslab-line-soft);
+}
 
 /* 反馈区：结果 → 解析 → 常见误区 → 掌握度变化 → 下一步 */
 .qa-feedback {
@@ -634,10 +995,8 @@ const statusTagClass = (status: string) =>
   font-size: var(--oslab-text-small);
 }
 .qa-next {
-  padding: var(--oslab-space-3);
-  border: 1px solid var(--oslab-line-soft);
-  border-radius: var(--oslab-radius-md);
-  background: var(--oslab-panel-soft);
+  padding-top: var(--oslab-space-3);
+  border-top: 1px solid var(--oslab-line-soft);
 }
 .qa-unsupported {
   color: var(--oslab-weak-text);
@@ -723,24 +1082,7 @@ const statusTagClass = (status: string) =>
   display: inline;
   margin: 0;
 }
-.qa-feedback.is-correct,
-.qa-feedback.is-wrong {
-  padding: 12px;
-  border-left: 2px solid var(--oslab-line-strong);
-  border-radius: var(--oslab-radius-md);
-}
-.qa-feedback.is-correct {
-  border-left-color: var(--oslab-mastered-text);
-  background: var(--oslab-mastered-soft);
-}
-.qa-feedback.is-wrong {
-  border-left-color: var(--oslab-weak-text);
-  background: var(--oslab-weak-soft);
-}
-.qa-feedback-title {
-  font-weight: 600;
-}
 .qa-submit-row :deep(.arco-btn-primary) {
-  border-radius: var(--oslab-radius-pill);
+  border-radius: var(--oslab-radius-control);
 }
 </style>

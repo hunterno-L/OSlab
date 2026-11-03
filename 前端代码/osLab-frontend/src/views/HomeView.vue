@@ -37,7 +37,11 @@
             aria-valuemin="0"
             aria-valuemax="100"
           >
-            <span :style="{ width: `${unit?.progress?.percent ?? 0}%` }"></span>
+            <span
+              :style="{
+                '--home-progress': (unit?.progress?.percent ?? 0) / 100,
+              }"
+            ></span>
           </div>
           <p class="home-progress-label">
             {{ unit?.progress?.completedCount ?? 0 }} /
@@ -59,6 +63,50 @@
         :recommend="recommend"
         :state="profileState"
         @retry="loadProfile"
+      />
+    </section>
+
+    <section class="home-ai-plan" aria-labelledby="home-ai-plan-title">
+      <div class="home-ai-head">
+        <div>
+          <h2 id="home-ai-plan-title">AI 学习计划</h2>
+          <p class="home-ai-sub">
+            {{
+              dueReviewCount > 0
+                ? `有 ${dueReviewCount} 项到期复习已进入计划`
+                : "根据本人证据安排阅读、作答、预测或复测"
+            }}
+          </p>
+        </div>
+        <div class="home-ai-actions">
+          <button type="button" @click="loadPlan('LEARN')">继续当前任务</button>
+          <button
+            type="button"
+            class="is-review"
+            @click="loadPlan('REVIEW', 15)"
+          >
+            复习 15 分钟
+          </button>
+        </div>
+      </div>
+      <AiNextActionCard
+        v-if="currentAction && !planHasCurrentAction"
+        :action="currentAction"
+        :course-code="course?.courseCode || ''"
+        @started="refreshPlan"
+      />
+      <AiNextActions
+        :actions="nextActions"
+        :course-code="course?.courseCode || ''"
+        :loading="nextActionsLoading"
+        :error="nextActionsError"
+        :due-count="dueReviewCount"
+        title=""
+        empty-text="暂时没有可执行的下一步；完成一次阅读或作答后会重新生成。"
+        compact
+        :limit="2"
+        :refreshable="false"
+        @refresh="refreshPlan"
       />
     </section>
 
@@ -119,7 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useStore } from "vuex";
 import { getTaskSummary } from "@/api/tasks";
 import { masteryRecommend, personalGraph } from "@/api/learning";
@@ -136,6 +184,13 @@ import EntryLedger from "@/components/home/EntryLedger.vue";
 import ProfileCard from "@/components/home/ProfileCard.vue";
 import UnitTimeline from "@/components/home/UnitTimeline.vue";
 import PagingTheater from "@/components/theater/PagingTheater.vue";
+import AiNextActions from "@/components/ai/AiNextActions.vue";
+import AiNextActionCard from "@/components/ai/AiNextActionCard.vue";
+import { useAiConversation } from "@/composables/useAiConversation";
+import {
+  registerAiPageContext,
+  unregisterAiPageContext,
+} from "@/composables/useAiPageContext";
 
 type LoadState = "loading" | "ready" | "empty" | "error";
 type Resume = {
@@ -145,6 +200,58 @@ type Resume = {
 };
 
 const store = useStore();
+
+const {
+  session,
+  nextActions,
+  nextActionsLoading,
+  nextActionsError,
+  dueReviewCount,
+  refreshNextActions,
+  setGoal,
+} = useAiConversation();
+
+const course = ref<CourseSummary | null>(null);
+
+const currentAction = computed(() => session.value?.currentAction || null);
+const planHasCurrentAction = computed(
+  () =>
+    Boolean(currentAction.value) &&
+    nextActions.value.some(
+      (action) => action.actionId === currentAction.value?.actionId
+    )
+);
+
+/** 首页把课程、当前单元与知识节点注册进统一会话上下文 */
+const aiContextProvider = () => ({
+  pageName: "学习首页",
+  courseCode: course.value?.courseCode,
+  courseTitle: course.value?.title,
+  unitCode: unit.value?.unitCode,
+  unitName: unit.value?.title,
+  nodeCodes: (unit.value?.nodeMappings || []).map((node) => node.nodeCode),
+});
+
+async function refreshPlan() {
+  const code = course.value?.courseCode;
+  if (!code) return;
+  await refreshNextActions({ courseCode: code, limit: 5 });
+}
+
+async function loadPlan(focus?: "LEARN" | "REVIEW", minutes?: number) {
+  const code = course.value?.courseCode;
+  if (!code) return;
+  if (focus) {
+    const updated = await setGoal({
+      courseCode: code,
+      focus,
+      goal: focus === "REVIEW" ? "按可用时间复习" : "继续当前任务",
+      ...(minutes ? { timeBudgetMinutes: minutes } : {}),
+    });
+    if (!updated) return;
+  }
+  await refreshPlan();
+}
 
 const displayName = computed(
   () => store.state.user?.loginUser?.userName || "同学"
@@ -159,7 +266,6 @@ const greeting = computed(() => {
   return "晚上好";
 });
 
-const course = ref<CourseSummary | null>(null);
 const outline = ref<CourseOutline | null>(null);
 const resume = ref<Resume | null>(null);
 const unit = ref<CourseUnit | null>(null);
@@ -221,6 +327,7 @@ async function loadUnit() {
     }
     unit.value = await getCourseUnit(code);
     unitState.value = "ready";
+    void refreshPlan();
   } catch {
     unitState.value = "error";
   }
@@ -286,9 +393,14 @@ const courseCompleted = computed(
 );
 
 onMounted(() => {
+  registerAiPageContext(aiContextProvider);
   void loadUnit();
   void loadProfile();
   void loadTasks();
+});
+
+onBeforeUnmount(() => {
+  unregisterAiPageContext(aiContextProvider);
 });
 </script>
 
@@ -345,7 +457,7 @@ onMounted(() => {
 
 .home-progress {
   height: 8px;
-  margin-top: 18px;
+  margin-top: 16px;
   overflow: hidden;
   border-radius: 999px;
   background: var(--oslab-panel-muted);
@@ -353,13 +465,16 @@ onMounted(() => {
 
 .home-progress span {
   display: block;
+  width: 100%;
   height: 100%;
+  transform: scaleX(var(--home-progress, 0));
+  transform-origin: left center;
   background: linear-gradient(
     90deg,
     var(--oslab-highlight),
     var(--oslab-highlight-strong)
   );
-  transition: width var(--oslab-duration-slow) var(--oslab-ease);
+  transition: transform var(--oslab-duration-slow) var(--oslab-ease);
 }
 
 .home-progress-label {
@@ -430,6 +545,68 @@ onMounted(() => {
   font: inherit;
   cursor: pointer;
   text-decoration: none;
+}
+
+.home-ai-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 0;
+  border-top: 1px dashed var(--oslab-line-strong);
+}
+.home-ai-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.home-ai-head h2 {
+  margin: 0;
+  color: var(--oslab-ink);
+  font-family: var(--oslab-font-display);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+.home-ai-sub {
+  margin: 4px 0 0;
+  color: var(--oslab-muted-strong);
+  font-size: 13px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+.home-ai-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.home-ai-actions button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--oslab-line-strong);
+  border-radius: var(--oslab-radius-control);
+  background: var(--oslab-panel);
+  color: var(--oslab-ink);
+  font: inherit;
+  font-size: var(--oslab-text-small);
+  cursor: pointer;
+  transition: border-color var(--oslab-duration-fast) var(--oslab-ease),
+    color var(--oslab-duration-fast) var(--oslab-ease);
+}
+.home-ai-actions button:hover {
+  border-color: var(--oslab-primary);
+  color: var(--oslab-primary);
+}
+.home-ai-actions button.is-review {
+  border-color: var(--oslab-primary);
+  background: var(--oslab-primary-soft);
+  color: var(--oslab-primary);
+}
+.home-ai-actions button:focus-visible {
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: 2px;
 }
 
 .home-theater {

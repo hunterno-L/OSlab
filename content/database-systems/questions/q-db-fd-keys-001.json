@@ -1,0 +1,206 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "QUESTIONS",
+  "batchCode": "batch.db.fd-keys.001",
+  "title": "数据库系统 · 函数依赖与候选键客观题",
+  "contributor": "S2",
+  "courseCode": "course.database-systems",
+  "note": "6 道客观题；所有答案按属性闭包法人工复核，闭包过程写入解析。",
+  "questions": [
+    {
+      "questionCode": "q.db.fd.closure-basic",
+      "title": "求属性 A 的闭包",
+      "content": "关系模式 R(A,B,C,D)，函数依赖集 F = {A→B, B→C}。属性 A 的闭包 A+ 是？（单选）",
+      "type": "SINGLE",
+      "options": [
+        { "key": "A", "value": "{A,B}" },
+        { "key": "B", "value": "{A,B,C}" },
+        { "key": "C", "value": "{A,B,C,D}" },
+        { "key": "D", "value": "{A,B,D}" }
+      ],
+      "answer": "B",
+      "analysis": "初值 A；由 A→B 得 {A,B}；由 B→C 得 {A,B,C}；没有依赖可再扩展，因此 A+ = {A,B,C}。D 不能由 A 推出。",
+      "misconception": "closure.one-step：只应用一次函数依赖就停止，忽略传递扩展。",
+      "difficulty": 2,
+      "sectionCode": "sec.db.fd",
+      "sourceRef": {
+        "sourceCode": "self.oslab.db",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.db.fd",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "属性闭包基本计算题，人工核验 2026-11-03",
+        "sourceQuestionNumber": null
+      },
+      "nodeMappings": [
+        { "nodeCode": "db.fd.attribute-closure", "role": "PRIMARY", "weight": 1 }
+      ],
+      "usageSuggestions": [
+        { "unitCode": "unit.db.fd-keys", "usage": "PRACTICE" }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.db.fd.closure-composite",
+      "title": "复合决定因素的闭包",
+      "content": "关系模式 R(A,B,C,D,E)，F = {AB→C, C→D, D→E}。属性集 AB 的闭包 (AB)+ 是？（单选）",
+      "type": "SINGLE",
+      "options": [
+        { "key": "A", "value": "{A,B,C}" },
+        { "key": "B", "value": "{A,B,C,D}" },
+        { "key": "C", "value": "{A,B,C,D,E}" },
+        { "key": "D", "value": "{A,B,E}" }
+      ],
+      "answer": "C",
+      "analysis": "初值 {A,B}；AB→C 可用，得 {A,B,C}；C→D 可用，得 {A,B,C,D}；D→E 可用，得 {A,B,C,D,E}。因此 (AB)+ 包含全部属性。",
+      "misconception": "closure.ignore-composite：忽略复合决定因素，或扩展后不继续使用新属性。",
+      "difficulty": 3,
+      "sectionCode": "sec.db.fd",
+      "sourceRef": {
+        "sourceCode": "self.oslab.db",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.db.fd",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "复合决定因素闭包题，人工核验 2026-11-03",
+        "sourceQuestionNumber": null
+      },
+      "nodeMappings": [
+        { "nodeCode": "db.fd.attribute-closure", "role": "PRIMARY", "weight": 1 }
+      ],
+      "usageSuggestions": [
+        { "unitCode": "unit.db.fd-keys", "usage": "PRACTICE" }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.db.fd.superkey-judge",
+      "title": "超键的判定条件",
+      "content": "判断：若属性集 K 的闭包 K+ 包含关系模式 R 的全部属性，则 K 是 R 的超键。",
+      "type": "JUDGE",
+      "options": [],
+      "answer": "true",
+      "analysis": "这正是超键的定义：K 能函数决定 R 的所有属性。注意超键不要求最小，候选键才要求最小。",
+      "misconception": "superkey.candidate-same：把超键与候选键混为一谈。",
+      "difficulty": 2,
+      "sectionCode": "sec.db.fd",
+      "sourceRef": {
+        "sourceCode": "self.oslab.db",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.db.fd",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "超键定义判断题，人工核验 2026-11-03",
+        "sourceQuestionNumber": null
+      },
+      "nodeMappings": [
+        { "nodeCode": "db.fd.superkey", "role": "PRIMARY", "weight": 1 }
+      ],
+      "usageSuggestions": [
+        { "unitCode": "unit.db.fd-keys", "usage": "PRACTICE" }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.db.fd.candidate-minimal",
+      "title": "选择最小候选键",
+      "content": "关系模式 R(A,B,C)，F = {A→B, B→C}。下列属性集中，哪一个是最小候选键？（单选）",
+      "type": "SINGLE",
+      "options": [
+        { "key": "A", "value": "{A}" },
+        { "key": "B", "value": "{A,B}" },
+        { "key": "C", "value": "{B}" },
+        { "key": "D", "value": "{A,C}" }
+      ],
+      "answer": "A",
+      "analysis": "A+ = {A,B,C}，A 是超键且没有非空真子集，因此 A 是候选键。B+ = {B,C}，B 不是超键；{A,B} 与 {A,C} 都能决定全部属性，但包含更小的候选键 A，不是最小超键。",
+      "misconception": "candidate.not-minimal：把所有超键都当作候选键，忽略最小性。",
+      "difficulty": 3,
+      "sectionCode": "sec.db.fd",
+      "sourceRef": {
+        "sourceCode": "self.oslab.db",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.db.fd",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "候选键最小性选择题，人工核验 2026-11-03",
+        "sourceQuestionNumber": null
+      },
+      "nodeMappings": [
+        { "nodeCode": "db.fd.candidate-key", "role": "PRIMARY", "weight": 1 }
+      ],
+      "usageSuggestions": [
+        { "unitCode": "unit.db.fd-keys", "usage": "PRACTICE" }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.db.fd.candidate-count",
+      "title": "统计候选键个数",
+      "content": "关系模式 R(A,B,C)，F = {A→B, B→A, A→C}。该关系模式共有 ______ 个候选键。（一个空，只填整数）",
+      "type": "FILL_BLANK",
+      "options": [],
+      "answer": ["2"],
+      "analysis": "A+ = {A,B,C}，B+ = {B,A,C}，A 与 B 都是最小超键；C+ = {C} 不是超键。{A,B} 等组合都包含候选键 A 或 B，不是最小超键。因此候选键为 A 和 B，共 2 个。",
+      "misconception": "candidate.omit-attribute：只找到一个候选键就停止，忽略其他最小超键。",
+      "difficulty": 4,
+      "sectionCode": "sec.db.fd",
+      "sourceRef": {
+        "sourceCode": "self.oslab.db",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.db.fd",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "多候选键闭包统计题，人工核验 2026-11-03",
+        "sourceQuestionNumber": null
+      },
+      "nodeMappings": [
+        { "nodeCode": "db.fd.candidate-key", "role": "PRIMARY", "weight": 1 }
+      ],
+      "usageSuggestions": [
+        { "unitCode": "unit.db.fd-keys", "usage": "ASSESSMENT" }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.db.fd.superkey-not-candidate",
+      "title": "超键但不是候选键",
+      "content": "关系模式 R(A,B,C)，F = {A→B, B→C}。下列哪个集合是超键但不是候选键？（单选）",
+      "type": "SINGLE",
+      "options": [
+        { "key": "A", "value": "{A}" },
+        { "key": "B", "value": "{A,B}" },
+        { "key": "C", "value": "{B}" },
+        { "key": "D", "value": "{C}" }
+      ],
+      "answer": "B",
+      "analysis": "A+ = {A,B,C}，A 是最小超键；{A,B}+ = {A,B,C} 是超键，但包含更小的候选键 A，因此不是候选键。B+ = {B,C} 与 C+ = {C} 都不是超键。",
+      "misconception": "candidate.not-minimal / superkey.candidate-same：把非最小超键当成候选键。",
+      "difficulty": 4,
+      "sectionCode": "sec.db.fd",
+      "sourceRef": {
+        "sourceCode": "self.oslab.db",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.db.fd",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "超键与候选键辨析题，人工核验 2026-11-03",
+        "sourceQuestionNumber": null
+      },
+      "nodeMappings": [
+        { "nodeCode": "db.fd.candidate-key", "role": "PRIMARY", "weight": 0.6 },
+        { "nodeCode": "db.fd.superkey", "role": "SECONDARY", "weight": 0.4 }
+      ],
+      "usageSuggestions": [
+        { "unitCode": "unit.db.fd-keys", "usage": "PRACTICE" }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    }
+  ]
+}

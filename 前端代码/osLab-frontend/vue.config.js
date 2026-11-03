@@ -14,6 +14,8 @@ const shouldDisplayRuntimeError = (error) => {
 
 module.exports = defineConfig({
   transpileDependencies: true,
+  // 生产包不生成 source map：在 2GB Node 堆限制下显著降低打包峰值内存。
+  productionSourceMap: false,
   devServer: {
     setupMiddlewares(middlewares) {
       // Rebuilt original demos must be served from disk, ahead of webpack's

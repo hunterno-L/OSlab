@@ -4,6 +4,8 @@
       :course-code="courseCode"
       :course-title="courseTitle"
       :sections="catalogSections"
+      :courses="catalogCourses"
+      :outlines="catalogOutlines"
       :selected-section-code="selectedSectionCode"
       :selected-unit-code="selectedUnitCode"
       :expanded-sections="expandedSections"
@@ -182,6 +184,8 @@
               :context-label="cardContextLabel"
               :source-unit-code="sourceContext.sourceUnitCode"
               :source-activity-code="sourceContext.sourceActivityCode"
+              :ai-action-id="aiActionIdFor(question)"
+              :course-code="courseCode || courseParam"
               @answered="(result) => onAnswered(question, result)"
             />
           </article>
@@ -209,13 +213,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import { Message } from "@arco-design/web-vue";
 import { useRoute, useRouter } from "vue-router";
 import CourseCatalogSidebar from "@/components/learning/CourseCatalogSidebar.vue";
 import QuestionAnswerCard from "@/components/learning/QuestionAnswerCard.vue";
 import { useCourseCatalog } from "@/composables/useCourseCatalog";
 import { courseContext } from "@/utils/courseContext";
+import {
+  registerAiPageContext,
+  unregisterAiPageContext,
+} from "@/composables/useAiPageContext";
 import {
   getLearningCatalog,
   getLearningQuestion,
@@ -247,6 +262,8 @@ const {
   courseCode,
   courseTitle,
   sections: catalogSections,
+  courses: catalogCourses,
+  outlines: catalogOutlines,
   loading: treeLoading,
   error: treeError,
   courseProgress,
@@ -255,6 +272,8 @@ const {
   load: loadCourseCatalog,
   ancestorCodes,
   sectionCrumb,
+  courseCodeOfSection,
+  courseCodeOfUnit,
 } = useCourseCatalog();
 
 const expandedSections = ref<string[]>([]);
@@ -383,10 +402,10 @@ const expandSectionPath = (sectionCode?: string) => {
   );
 };
 
-const selectCourseScope = () =>
+const selectCourseScope = (targetCourse?: string) =>
   replaceFilters(
     {
-      courseCode: courseCode.value || undefined,
+      courseCode: targetCourse || courseCode.value || undefined,
       sectionCode: undefined,
       unitCode: undefined,
       nodeCode: undefined,
@@ -395,19 +414,37 @@ const selectCourseScope = () =>
   );
 
 const selectSectionScope = (sectionCode: string) => {
-  expandSectionPath(sectionCode);
+  const targetCourse = courseCodeOfSection(sectionCode);
+  const crossCourse =
+    targetCourse && targetCourse !== courseCode.value ? targetCourse : "";
+  if (!crossCourse) expandSectionPath(sectionCode);
   replaceFilters(
-    { sectionCode, unitCode: undefined, nodeCode: undefined },
+    {
+      ...(crossCourse ? { courseCode: crossCourse } : {}),
+      sectionCode,
+      unitCode: undefined,
+      nodeCode: undefined,
+    },
     true
   );
 };
 
 const selectUnitScope = (unitCode: string) => {
+  const targetCourse = courseCodeOfUnit(unitCode);
+  const crossCourse =
+    targetCourse && targetCourse !== courseCode.value ? targetCourse : "";
   const unit = unitByCode.value.get(unitCode);
-  if (!unit) return;
-  expandSectionPath(unit.sectionCode);
+  if (!crossCourse && !unit) return;
+  if (unit) expandSectionPath(unit.sectionCode);
   replaceFilters(
-    { sectionCode: unit.sectionCode, unitCode, nodeCode: undefined },
+    {
+      ...(crossCourse ? { courseCode: crossCourse } : {}),
+      ...(unit
+        ? { sectionCode: unit.sectionCode }
+        : { sectionCode: undefined }),
+      unitCode,
+      nodeCode: undefined,
+    },
     true
   );
 };
@@ -453,7 +490,15 @@ let refreshEpoch = 0;
 
 const pinnedQuestion = ref<LearningQuestionVO | null>(null);
 const pinnedQuestionId = computed(() => queryValue(route.query.questionId));
+const aiActionIdParam = computed(() => queryValue(route.query.aiActionId));
 let pinEpoch = 0;
+
+/** AI 下一步进入时只把 actionId 传给目标任务，避免同页其他题卡误用提交键 */
+const aiActionIdFor = (question: LearningQuestionVO) =>
+  aiActionIdParam.value &&
+  String(question.id) === String(pinnedQuestionId.value)
+    ? aiActionIdParam.value
+    : undefined;
 
 const catalogNodes = computed<LearningCatalogNodeVO[]>(
   () => catalog.value?.nodes || []
@@ -753,7 +798,20 @@ watch(
   }
 );
 
+const aiPageContextProvider = () => ({
+  pageName: "题目练习",
+  courseCode: courseCode.value || courseParam.value || undefined,
+  courseTitle: courseTitle.value || undefined,
+  unitCode: selectedUnitCode.value || undefined,
+  nodeCode: nodeParam.value || undefined,
+  nodeCodes: nodeParam.value ? [nodeParam.value] : [],
+  resourceRef: pinnedQuestionId.value
+    ? `question:${pinnedQuestionId.value}`
+    : undefined,
+});
+
 onMounted(async () => {
+  registerAiPageContext(aiPageContextProvider);
   await loadCourseCatalog(courseParam.value || undefined);
   treeReady.value = true;
   if (!courseParam.value && courseCode.value) {
@@ -761,6 +819,9 @@ onMounted(async () => {
     return;
   }
   void refreshAll();
+});
+onBeforeUnmount(() => {
+  unregisterAiPageContext(aiPageContextProvider);
 });
 </script>
 

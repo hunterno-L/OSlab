@@ -88,25 +88,56 @@
       </aside>
 
       <div class="algorithm-workspace">
-        <AlgorithmDemoPlayer
+        <PredictionGate
+          v-if="predictionCandidate"
           :definition="definition"
-          :initial-input="initialInput"
-          :initial-input-error="initialInputError"
-          @progress="allRevealed = $event"
-          @completed="onDemoCompleted"
+          :input="initialInput || null"
+          :action-id="predictActionId || undefined"
+          :course-code="sourceCourseCode || undefined"
+          @availability="predictionAvailable = $event"
+          @submitted="predictionSubmitted = true"
         />
+        <div
+          class="algorithm-stage"
+          :class="{ 'is-prediction-locked': predictionLocked }"
+        >
+          <AlgorithmDemoPlayer
+            :definition="definition"
+            :initial-input="initialInput"
+            :initial-input-error="initialInputError"
+            @progress="allRevealed = $event"
+            @completed="onDemoCompleted"
+          />
+          <div
+            v-if="predictionLocked"
+            class="prediction-lock"
+            role="status"
+            aria-live="polite"
+          >
+            <p>轨迹已封存</p>
+            <span class="prediction-lock-hint"
+              >先提交这一步的预测，完整轨迹才会展开。</span
+            >
+            <button type="button" @click="scrollToPrediction">去预测</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Message } from "@arco-design/web-vue";
 import CourseReturnBar from "@/components/learning/CourseReturnBar.vue";
 import AlgorithmDemoPlayer from "@/components/learning/AlgorithmDemoPlayer.vue";
+import PredictionGate from "@/components/ai/PredictionGate.vue";
 import { recordSimulationRun } from "@/api/learning";
+import {
+  registerAiPageContext,
+  unregisterAiPageContext,
+} from "@/composables/useAiPageContext";
 import {
   ALGORITHMS,
   ALGORITHM_BY_KEY,
@@ -250,6 +281,52 @@ const initialInput = computed<DemoInput | undefined>(() =>
 );
 const initialInputError = computed(() => initialInputParse.value.error || "");
 
+// ---------- 先预测这一步：提交前遮住后续轨迹 ----------
+const predictActionId = computed(() => queryValue(route.query.aiActionId));
+const predictionSubmitted = ref(false);
+const predictionAvailable = ref(false);
+const predictionLocked = computed(
+  () => predictionAvailable.value && !predictionSubmitted.value
+);
+const hasPageInput = computed(() => {
+  const input = initialInput.value as
+    | { frames?: number; sequence?: number[] }
+    | undefined;
+  return Boolean(
+    input &&
+      Number.isInteger(input.frames) &&
+      Array.isArray(input.sequence) &&
+      input.sequence.length >= 2
+  );
+});
+const predictionCandidate = computed(
+  () =>
+    definition.value.category === "page" &&
+    (hasPageInput.value || Boolean(predictActionId.value))
+);
+
+function scrollToPrediction() {
+  document
+    .getElementById("prediction-gate")
+    ?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+const aiContextProvider = () => ({
+  pageName: "算法演示",
+  courseCode: sourceCourseCode.value || undefined,
+  nodeCode: nodeCode.value || undefined,
+  nodeCodes: nodeCode.value ? [nodeCode.value] : [],
+  resourceRef: `simulation:${definition.value.key}`,
+});
+
+watch(
+  () => [definition.value.key, initialInput.value],
+  () => {
+    predictionSubmitted.value = false;
+    predictionAvailable.value = false;
+  }
+);
+
 const applyRoute = () => {
   const explicit = queryValue(route.query.algorithmKey).toLowerCase();
   const byNode = algorithmKeyFromNodeCode(nodeCode.value);
@@ -300,7 +377,13 @@ watch(
   () => captureActivityAlgorithm()
 );
 
-onMounted(applyRoute);
+onMounted(() => {
+  applyRoute();
+  registerAiPageContext(aiContextProvider);
+});
+onBeforeUnmount(() => {
+  unregisterAiPageContext(aiContextProvider);
+});
 </script>
 
 <style scoped>
@@ -482,6 +565,82 @@ onMounted(applyRoute);
 }
 .algorithm-workspace {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--oslab-space-3);
+}
+.algorithm-stage {
+  position: relative;
+  min-width: 0;
+}
+/* 预测前把轨迹压成一条“封存窗口”，避免整页模糊 */
+.algorithm-stage.is-prediction-locked {
+  max-height: 260px;
+  overflow: hidden;
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-md);
+}
+.algorithm-stage.is-prediction-locked .legacy-demo {
+  filter: blur(6px) saturate(0.6);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+}
+.prediction-lock {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  background: var(--oslab-panel-soft);
+  background: color-mix(in srgb, var(--oslab-panel-soft) 88%, transparent);
+  text-align: center;
+}
+.prediction-lock::before {
+  content: "";
+  width: 28px;
+  height: 3px;
+  margin-bottom: 2px;
+  background: var(--oslab-highlight);
+}
+.prediction-lock p {
+  margin: 0;
+  max-width: 34ch;
+  color: var(--oslab-ink);
+  font-family: var(--oslab-font-display);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+.prediction-lock-hint {
+  max-width: 36ch;
+  color: var(--oslab-muted-strong);
+  font-size: var(--oslab-text-small);
+  line-height: 1.55;
+}
+.prediction-lock button {
+  min-height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--oslab-primary);
+  border-radius: var(--oslab-radius-control);
+  background: var(--oslab-primary);
+  color: var(--oslab-on-primary);
+  font: inherit;
+  font-size: var(--oslab-text-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+.prediction-lock button:hover {
+  background: var(--oslab-primary-hover);
+}
+.prediction-lock button:focus-visible {
+  outline: 2px solid var(--oslab-on-primary);
+  outline-offset: 2px;
 }
 /* C+B 学习图册 */
 .simulation-body {

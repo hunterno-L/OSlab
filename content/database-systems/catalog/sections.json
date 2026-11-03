@@ -1,0 +1,16 @@
+{
+  "sections": [
+    {
+      "sectionCode": "sec.db",
+      "parentSectionCode": null,
+      "title": "关系数据库设计",
+      "sortOrder": 1
+    },
+    {
+      "sectionCode": "sec.db.fd",
+      "parentSectionCode": "sec.db",
+      "title": "函数依赖、属性闭包与候选键",
+      "sortOrder": 1
+    }
+  ]
+}

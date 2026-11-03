@@ -1,0 +1,174 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "KNOWLEDGE",
+  "batchCode": "batch.db.fd-keys.001",
+  "title": "函数依赖、属性闭包与候选键",
+  "contributor": "S2",
+  "courseCode": "course.database-systems",
+  "note": "3 个知识点 + 3 段自编讲义，用于验证数据库课程复用统一检索、问答、练习与下一步服务。",
+  "nodes": [
+    {
+      "nodeCode": "db.fd.attribute-closure",
+      "name": "属性闭包",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "在函数依赖集 F 下，由属性集 X 能推导出的全部属性集合 X+；用于判断超键与候选键。",
+      "aliases": ["Attribute Closure", "X+"],
+      "homeSectionCode": "sec.db.fd",
+      "sourceRefs": [
+        {
+          "sourceCode": "self.oslab.db",
+          "origin": "SELF_AUTHORED",
+          "sectionCode": "sec.db.fd",
+          "pageStart": null,
+          "pageEnd": null,
+          "locator": "自编讲义《属性闭包的定义与计算》，2026-11-03",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "db.fd.superkey",
+      "name": "超键",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "能函数决定关系模式全部属性的属性集；超键可以包含冗余属性。",
+      "aliases": ["Superkey"],
+      "homeSectionCode": "sec.db.fd",
+      "sourceRefs": [
+        {
+          "sourceCode": "self.oslab.db",
+          "origin": "SELF_AUTHORED",
+          "sectionCode": "sec.db.fd",
+          "pageStart": null,
+          "pageEnd": null,
+          "locator": "自编讲义《超键与候选键》，2026-11-03",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "db.fd.candidate-key",
+      "name": "候选键",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "满足超键条件且任一真子集都不能决定全部属性的最小超键；一个关系模式可以有多个候选键。",
+      "aliases": ["Candidate Key", "候选码"],
+      "homeSectionCode": "sec.db.fd",
+      "sourceRefs": [
+        {
+          "sourceCode": "self.oslab.db",
+          "origin": "SELF_AUTHORED",
+          "sectionCode": "sec.db.fd",
+          "pageStart": null,
+          "pageEnd": null,
+          "locator": "自编讲义《候选键最小性与判定例题》，2026-11-03",
+          "sourceQuestionNumber": null
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "chunkCode": "chunk.db.fd.closure",
+      "sectionCode": "sec.db.fd",
+      "title": "属性闭包的定义与计算",
+      "chunkType": "ALGORITHM",
+      "contentMd": "设关系模式 R 上的函数依赖集为 F，属性集 X 的闭包 X+ 是：在 F 下由 X 能函数推导出的全部属性集合。\n\n计算步骤：\n\n1. 令结果集 `result = X`。\n2. 反复扫描 F 中的每个函数依赖 `A → B`：若 `A ⊆ result`，则把 `B` 并入 `result`。\n3. 当一轮扫描没有任何属性新增时停止；此时 `result` 就是 `X+`。\n\n例：R(A,B,C,D)，F = {A→B, B→C}。\n\n- 初值 `{A}`；由 A→B 得 `{A,B}`；由 B→C 得 `{A,B,C}`；没有新属性，停止。\n- 因此 `A+ = {A,B,C}`，A 不能决定 D。\n\n要点：闭包要一直扩展到不能再扩展，不能只应用一步；复合决定因素（如 AB→C）只有在 A 与 B 都在结果集中时才可用。",
+      "nodeCodes": ["db.fd.attribute-closure"],
+      "assets": [],
+      "sourceRef": {
+        "sourceCode": "self.oslab.db",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.db.fd",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "自编讲义《属性闭包的定义与计算》，2026-11-03",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "chunkCode": "chunk.db.fd.superkey",
+      "sectionCode": "sec.db.fd",
+      "title": "超键与候选键",
+      "chunkType": "EXPLANATION",
+      "contentMd": "若属性集 K 的闭包 `K+` 包含关系模式 R 的全部属性，则 K 是超键。\n\n候选键是**最小超键**：K 本身是超键，并且从 K 中去掉任何一个属性后都不再是超键。\n\n判定方法：\n\n1. 先求 K+，确认 K 是超键。\n2. 再检查 K 的每个真子集，若存在真子集也能决定全部属性，则 K 不是候选键。\n3. 一个关系模式可能有多个候选键，它们都满足最小性。\n\n例：R(A,B,C)，F = {A→B, B→A, A→C}。\n\n- `A+ = {A,B,C}`，A 是超键；A 没有非空真子集，因此 A 是候选键。\n- `B+ = {B,A,C}`，B 也是候选键。\n- `{A,B}` 虽是超键，但包含候选键 A，不是最小超键，因此不是候选键。",
+      "nodeCodes": ["db.fd.superkey", "db.fd.candidate-key"],
+      "assets": [],
+      "sourceRef": {
+        "sourceCode": "self.oslab.db",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.db.fd",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "自编讲义《超键与候选键》，2026-11-03",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "chunkCode": "chunk.db.fd.minimality",
+      "sectionCode": "sec.db.fd",
+      "title": "候选键最小性判定例题",
+      "chunkType": "WORKED_EXAMPLE",
+      "contentMd": "题：R(A,B,C)，F = {A→B, B→C}。求候选键。\n\n闭包计算：\n\n| 属性集 | 闭包 | 是否超键 | 是否最小 |\n| --- | --- | --- | --- |\n| A | {A,B,C} | 是 | 是（无非空真子集） |\n| B | {B,C} | 否 | — |\n| C | {C} | 否 | — |\n| AB | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n| AC | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n\n结论：唯一候选键是 A。判断最小性时，不能只看“能不能决定全部属性”，还要看是否存在更小的子集也能决定全部属性。",
+      "nodeCodes": ["db.fd.candidate-key"],
+      "assets": [],
+      "sourceRef": {
+        "sourceCode": "self.oslab.db",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.db.fd",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "自编讲义《候选键最小性与判定例题》，2026-11-03",
+        "sourceQuestionNumber": null
+      }
+    }
+  ],
+  "relations": [
+    {
+      "fromNodeCode": "db.fd.superkey",
+      "toNodeCode": "db.fd.attribute-closure",
+      "relationType": "REQUIRES",
+      "reason": "判定超键需要先用属性闭包判断 K 是否能决定全部属性。",
+      "sourceRef": {
+        "sourceCode": "self.oslab.db",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.db.fd",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "自编教学顺序：闭包 → 超键",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "db.fd.candidate-key",
+      "toNodeCode": "db.fd.superkey",
+      "relationType": "REQUIRES",
+      "reason": "候选键定义在超键之上，并额外要求最小性。",
+      "sourceRef": {
+        "sourceCode": "self.oslab.db",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.db.fd",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "自编教学顺序：超键 → 候选键",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "db.fd.candidate-key",
+      "toNodeCode": "db.fd.attribute-closure",
+      "relationType": "BASED_ON",
+      "reason": "候选键判定通过属性闭包验证超键，再检查最小性。",
+      "sourceRef": {
+        "sourceCode": "self.oslab.db",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.db.fd",
+        "pageStart": null,
+        "pageEnd": null,
+        "locator": "自编方法依据：闭包判定候选键",
+        "sourceQuestionNumber": null
+      }
+    }
+  ]
+}
