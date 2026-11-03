@@ -161,4 +161,63 @@ class PageReplacerTest {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> PageReplacer.replace("LFU", 3, SEQ));
     }
+
+    // region AI 诊断案例依赖的确定性契约（计划 §5.4）
+
+    @Test
+    void diagnosisExample_fifoEvictsOneAndLruEvictsTwoWithSameFaultCount() {
+        // 计划正文的例子：三页框访问 1,2,3,1,4，两种算法缺页数相同但换出页不同，
+        // 因此它能区分"混淆 FIFO 与 LRU"，也能区分"命中后没有更新顺序"
+        List<Integer> sequence = Arrays.asList(1, 2, 3, 1, 4);
+        SimulationPageVO fifo = PageReplacer.replace("FIFO", 3, sequence);
+        SimulationPageVO lru = PageReplacer.replace("LRU", 3, sequence);
+
+        Assertions.assertEquals(4, fifo.getPageFaults());
+        Assertions.assertEquals(4, lru.getPageFaults());
+        Assertions.assertEquals(1, countEvictions(fifo), "三页框装 1,2,3 后只有访问 4 会触发一次换出");
+        Assertions.assertEquals(1, countEvictions(lru));
+        Assertions.assertEquals(1, fifo.getSteps().get(4).getEvicted(), "FIFO 换出最早装入的 1");
+        Assertions.assertEquals(2, lru.getSteps().get(4).getEvicted(), "LRU 换出最久未用的 2（1 刚被命中）");
+    }
+
+    @Test
+    void visiblePrefixCannotLeakThePredictedVictim() {
+        // AI 预测任务在学生作答前只允许下发前缀：截断序列后，
+        // 步骤数必须等于前缀长度，且待预测步本身不在其中
+        List<Integer> sequence = Arrays.asList(1, 2, 3, 1, 4);
+        SimulationPageVO full = PageReplacer.replace("LRU", 3, sequence);
+        SimulationPageVO prefix = PageReplacer.replace("LRU", 3, sequence.subList(0, 4));
+
+        Assertions.assertEquals(5, full.getSteps().size());
+        Assertions.assertEquals(4, prefix.getSteps().size(), "前缀计算的步骤数必须等于前缀长度");
+        Assertions.assertNull(prefix.getSteps().get(3).getEvicted(),
+                "待预测步之前的可见步骤不含换出页，因此轨迹本身不会泄露答案");
+        Assertions.assertEquals(3, prefix.getPageFaults(), "前缀缺页数独立于后续访问");
+    }
+
+    @Test
+    void repeatedRunsAreIdenticalSoToolAndGradingAgree() {
+        // check_page_trace 工具与提交判分必须得到同一份结果，否则诊断会和判分互相矛盾
+        SimulationPageVO first = PageReplacer.replace("LRU", 3, SEQ);
+        SimulationPageVO second = PageReplacer.replace("LRU", 3, SEQ);
+        Assertions.assertEquals(first.getPageFaults(), second.getPageFaults());
+        Assertions.assertEquals(first.getSteps().size(), second.getSteps().size());
+        for (int i = 0; i < first.getSteps().size(); i++) {
+            Assertions.assertEquals(first.getSteps().get(i).getEvicted(), second.getSteps().get(i).getEvicted());
+            Assertions.assertEquals(first.getSteps().get(i).getFrames(), second.getSteps().get(i).getFrames());
+            Assertions.assertEquals(first.getSteps().get(i).getFault(), second.getSteps().get(i).getFault());
+        }
+    }
+
+    private static int countEvictions(SimulationPageVO vo) {
+        int count = 0;
+        for (SimulationPageVO.PageStep step : vo.getSteps()) {
+            if (step.getEvicted() != null) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    // endregion
 }

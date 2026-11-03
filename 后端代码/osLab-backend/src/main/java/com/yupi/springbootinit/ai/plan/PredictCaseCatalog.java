@@ -78,7 +78,7 @@ public class PredictCaseCatalog {
     private final Map<String, PredictCase> cases = new LinkedHashMap<>();
 
     @PostConstruct
-    void init() {
+    public void init() {
         register(newCase("page.lru-vs-fifo.victim",
                 "预测 LRU 的换出页（命中后是否更新顺序）",
                 "LRU", 3, Arrays.asList(1, 2, 3, 1, 4), 4, Metric.VICTIM,

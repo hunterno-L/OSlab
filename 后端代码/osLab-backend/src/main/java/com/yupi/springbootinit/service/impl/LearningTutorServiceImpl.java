@@ -2,10 +2,11 @@ package com.yupi.springbootinit.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.volcengine.ark.runtime.model.completion.chat.ChatCompletionRequest;
-import com.volcengine.ark.runtime.model.completion.chat.ChatMessage;
-import com.volcengine.ark.runtime.model.completion.chat.ChatMessageRole;
-import com.volcengine.ark.runtime.service.ArkService;
+import com.yupi.springbootinit.ai.ModelEndpoint;
+import com.yupi.springbootinit.ai.ModelGateway;
+import com.yupi.springbootinit.ai.plan.AiContentScopeService;
+import com.yupi.springbootinit.ai.profile.ModelProfileService;
+import com.yupi.springbootinit.ai.retrieval.HybridRetrievalService;
 import com.yupi.springbootinit.common.ErrorCode;
 import com.yupi.springbootinit.exception.BusinessException;
 import com.yupi.springbootinit.mapper.LearningEventMapper;
@@ -20,6 +21,7 @@ import com.yupi.springbootinit.model.entity.Question;
 import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.model.enums.learning.LearningResultEnum;
 import com.yupi.springbootinit.model.enums.learning.LearningReviewStatusEnum;
+import com.yupi.springbootinit.model.vo.ai.SourceRef;
 import com.yupi.springbootinit.model.vo.learning.LearningActionVO;
 import com.yupi.springbootinit.model.vo.learning.LearningPathVO;
 import com.yupi.springbootinit.model.vo.learning.PathItemVO;
@@ -32,10 +34,8 @@ import com.yupi.springbootinit.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -103,23 +103,28 @@ public class LearningTutorServiceImpl implements LearningTutorService {
     @Resource
     private com.yupi.springbootinit.learning.PublishedLearningContentService publishedContent;
 
-    @Value("${ai.ark.api-key:}")
-    private String apiKey;
+    /**
+     * 统一模型网关（计划 §6.2「旧入口内部委托统一服务」）。
+     *
+     * <p>旧导师不再持有第二套 Ark SDK 客户端：平台默认模型与个人模型配置只有一个来源，
+     * 因此不存在"新入口能配置、旧入口另一套模型"的状态。
+     * 单测不注入时保持 null，ask() 走规则降级（与升级前"未配置 key"行为一致）。
+     */
+    @Resource
+    private ModelGateway modelGateway;
 
-    @Value("${ai.ark.base-url:https://ark.cn-beijing.volces.com/api/v3}")
-    private String baseUrl;
+    @Resource
+    private ModelProfileService modelProfileService;
 
-    @Value("${ai.ark.model:deepseek-v3-250324}")
-    private String model;
+    /**
+     * 统一联合检索（语义 + 关键词 + 图谱）。为空或索引未建立时退回既有发布内容检索，
+     * 旧响应结构保持不变。
+     */
+    @Resource
+    private HybridRetrievalService retrieval;
 
-    private ArkService arkService;
-
-    @PostConstruct
-    public void init() {
-        this.arkService = StringUtils.isNotBlank(apiKey)
-                ? ArkService.builder().baseUrl(baseUrl).apiKey(apiKey).build()
-                : null;
-    }
+    @Resource
+    private AiContentScopeService contentScope;
 
     @Override
     public TutorAnswerVO ask(TutorAskRequest request, User user) {
@@ -193,7 +198,7 @@ public class LearningTutorServiceImpl implements LearningTutorService {
             com.yupi.springbootinit.learning.NodeIdentityService.Identity identity=nodeIdentities.byStorageKey(name);
             if(identity!=null)codes.add(identity.nodeCode);
         }
-        List<TutorSourceVO> textbookSources=publishedContent==null?Collections.emptyList():publishedContent.sources(codes,question,2);
+        List<TutorSourceVO> textbookSources=retrieveTextbookSources(user,codes,question,2,trace);
         trace.add("检索到 "+textbookSources.size()+" 个已发布教材片段（保留正文块、版本与出处）");
         // Textbook material shares the content quota; personal evidence and next action keep their reserved places.
         List<TutorSourceVO> contentSources=new ArrayList<>(textbookSources);
@@ -247,14 +252,15 @@ public class LearningTutorServiceImpl implements LearningTutorService {
             return empty;
         }
 
-        // 8. AI 生成（无密钥或调用失败时降级为规则回答，不依赖外部 key）
-        if (arkService == null) {
+        // 8. AI 生成（模型未配置或调用失败时降级为规则回答，不依赖外部 key）
+        ModelEndpoint endpoint = resolveEndpoint(user, trace);
+        if (endpoint == null) {
             trace.add("未配置 AI 密钥，使用规则降级回答");
             return fallbackResult(question, seedNode, sources, trace);
         }
         String answer;
         try {
-            answer = generate(question, seedNode, sources);
+            answer = generate(endpoint, question, seedNode, sources);
         } catch (Exception e) {
             log.warn("[tutor] AI generation failed, fallback. {}", e.getClass().getSimpleName());
             trace.add("模型调用失败，使用规则降级回答");
@@ -443,7 +449,7 @@ public class LearningTutorServiceImpl implements LearningTutorService {
      * AI 生成：grounded prompt + 编号引用要求 + §5.4.5 行为约束
      * （先提示定位再解释；不直接输出完整实验答案或整段可提交代码）
      */
-    private String generate(String question, String seedNode, List<TutorSourceVO> sources) {
+    private String generate(ModelEndpoint endpoint, String question, String seedNode, List<TutorSourceVO> sources) {
         StringBuilder material = new StringBuilder();
         for (int i = 0; i < sources.size(); i++) {
             TutorSourceVO s = sources.get(i);
@@ -462,15 +468,113 @@ public class LearningTutorServiceImpl implements LearningTutorService {
                 + "资料中可能包含该学生本人的学习事件，可结合其薄弱点给个性化建议，但不要提及任何其他学生。";
         String userPrompt = (StringUtils.isBlank(seedNode) ? "" : "当前学习节点：" + seedNode + "\n")
                 + "学生问题：" + question + "\n\n课程资料：\n" + material;
-        List<ChatMessage> messages = new ArrayList<>();
-        messages.add(ChatMessage.builder().role(ChatMessageRole.SYSTEM).content(system).build());
-        messages.add(ChatMessage.builder().role(ChatMessageRole.USER).content(userPrompt).build());
-        ChatCompletionRequest chatRequest = ChatCompletionRequest.builder()
-                .model(model).messages(messages).build();
-        StringBuilder response = new StringBuilder();
-        arkService.createChatCompletion(chatRequest).getChoices()
-                .forEach(choice -> response.append(choice.getMessage().getContent()));
-        return response.toString();
+        // 统一网关：协议适配、超时与失败语义都在网关内，导师只负责提示词与引用校验
+        ModelGateway.ChatResult result = modelGateway.chat(endpoint,
+                ModelGateway.ChatRequest.of(system, userPrompt));
+        return result == null || result.getContent() == null ? "" : result.getContent();
+    }
+
+    /**
+     * 旧入口没有模型配置参数，固定走平台默认端点（{@code ai.ark.*}）。
+     *
+     * @return 可发起真实调用的端点；未配置或不可用时返回 null，由调用方降级为规则回答
+     */
+    private ModelEndpoint resolveEndpoint(User user, List<String> trace) {
+        if (modelGateway == null || modelProfileService == null || user == null) {
+            return null;
+        }
+        try {
+            ModelEndpoint endpoint = modelProfileService.resolveEndpoint(user.getId(), null);
+            if (!modelGateway.available(endpoint)) {
+                return null;
+            }
+            return endpoint;
+        } catch (BusinessException e) {
+            log.info("[tutor] platform model unavailable: {}", e.getMessage());
+            return null;
+        } catch (RuntimeException e) {
+            log.warn("[tutor] model endpoint resolution failed: {}", e.getClass().getSimpleName());
+            return null;
+        }
+    }
+
+    /**
+     * 教材片段来源：优先走统一联合检索（语义 + 关键词 + 图谱，计划 §5.2），
+     * 依赖缺失、课程无法确定或索引为空时退回既有 {@code publishedContent.sources(...)}。
+     *
+     * <p>两条路径都只下发已发布课程正文：旧契约里没有个人资料的位置，
+     * 因此这里显式 {@code includePersonal=false}，避免把个人材料混进旧响应。
+     */
+    private List<TutorSourceVO> retrieveTextbookSources(User user, List<String> codes, String question,
+                                                        int quota, List<String> trace) {
+        String courseCode = resolveCourseCode(codes);
+        if (retrieval != null && user != null && StringUtils.isNotBlank(courseCode)) {
+            try {
+                HybridRetrievalService.Scope scope = new HybridRetrievalService.Scope();
+                scope.setUserId(user.getId());
+                scope.setCourseCode(courseCode);
+                scope.setNodeCodes(codes == null ? new ArrayList<>() : new ArrayList<>(codes));
+                scope.setIncludePersonal(false);
+                HybridRetrievalService.Result result = retrieval.retrieve(scope, question);
+                List<TutorSourceVO> out = new ArrayList<>();
+                for (SourceRef ref : result.getSources()) {
+                    if (!"COURSE".equals(ref.getOwnerScope())) {
+                        continue;
+                    }
+                    out.add(textbookSource(ref));
+                    if (out.size() >= quota) {
+                        break;
+                    }
+                }
+                if (!out.isEmpty()) {
+                    trace.add(result.isComplete()
+                            ? "统一检索（语义+关键词+图谱）命中 " + out.size() + " 个已发布教材片段"
+                            : "统一检索命中 " + out.size() + " 个已发布教材片段（语义不可用：仅关键词+图谱）");
+                    return out;
+                }
+                trace.add("统一检索无课程正文命中，退回既有发布内容检索");
+            } catch (RuntimeException e) {
+                log.warn("[tutor] unified retrieval failed: {}", e.getClass().getSimpleName());
+                trace.add("统一检索失败，退回既有发布内容检索");
+            }
+        }
+        return publishedContent == null ? Collections.emptyList() : publishedContent.sources(codes, question, quota);
+    }
+
+    /**
+     * 由节点归属反查课程；节点查不到时用平台唯一课程。
+     * 都不成立就返回 null（不猜课程，退回既有检索）。
+     */
+    private String resolveCourseCode(List<String> codes) {
+        if (contentScope == null) {
+            return null;
+        }
+        if (codes != null) {
+            for (String code : codes) {
+                String courseCode = contentScope.courseCodeForNode(code);
+                if (StringUtils.isNotBlank(courseCode)) {
+                    return courseCode;
+                }
+            }
+        }
+        return contentScope.singleCourseCode();
+    }
+
+    /** 统一检索的 SourceRef 映射为旧契约的 TEXTBOOK 来源，保留正文块、版本与出处。 */
+    private TutorSourceVO textbookSource(SourceRef ref) {
+        TutorSourceVO vo = new TutorSourceVO();
+        vo.setSourceType("TEXTBOOK");
+        vo.setActionType("RESOURCE");
+        vo.setSourceId(StringUtils.defaultIfBlank(ref.getSourceId(), ref.getBlockId()));
+        vo.setParentChunkCode(StringUtils.defaultIfBlank(ref.getBlockId(), ref.getSourceId()));
+        vo.setTargetId(vo.getParentChunkCode());
+        vo.setTitle(StringUtils.defaultIfBlank(ref.getLocator(), vo.getParentChunkCode()));
+        vo.setRevision(ref.getRevision());
+        vo.setSnippet(ref.getExcerpt());
+        vo.setSourceRef(JSONUtil.parseObj(JSONUtil.toJsonStr(ref)));
+        vo.setSourceSectionTitle(ref.getLocator());
+        vo.setTargetUrl("#chunk-" + vo.getParentChunkCode());
+        return vo;
     }
 
     /**
