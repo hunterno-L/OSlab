@@ -4,7 +4,6 @@ import ACCESS_ENUM from "@/access/accessEnum";
 import checkAccess from "@/access/checkAccess";
 
 router.beforeEach(async (to, from, next) => {
-  console.log("登陆用户信息", store.state.user.loginUser);
   let loginUser = store.state.user.loginUser;
   // 如果之前没登陆过，自动登录。后端不可达时不得让导航失败（否则所有页面
   // 都会渲染成空白 router-view）；按未登录处理，由页面自身的登录跳转兜底。

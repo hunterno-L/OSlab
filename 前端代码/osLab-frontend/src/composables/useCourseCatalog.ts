@@ -67,11 +67,11 @@ export function useCourseCatalog() {
       if (request !== epoch) return null;
       outlines.value = { ...outlines.value, [code]: data };
       return data;
-    } catch (e) {
+    } catch {
       if (request === epoch) {
         outlineErrors.value = {
           ...outlineErrors.value,
-          [code]: e instanceof Error ? e.message : "课程目录加载失败",
+          [code]: "课程目录加载失败，请检查网络后重试",
         };
       }
       return null;
@@ -125,10 +125,10 @@ export function useCourseCatalog() {
       } catch {
         if (request === epoch) resume.value = null;
       }
-    } catch (e) {
+    } catch {
       if (request !== epoch) return;
       outline.value = null;
-      error.value = e instanceof Error ? e.message : "课程目录加载失败";
+      error.value = "课程目录加载失败，请检查网络后重试";
     } finally {
       if (request === epoch) loading.value = false;
     }

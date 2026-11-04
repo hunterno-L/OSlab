@@ -229,7 +229,6 @@ const handleProfileAction = async (value: string | number) => {
   box-sizing: border-box;
   background: var(--oslab-panel);
   border: 1px solid var(--oslab-line);
-  border-bottom: 3px solid #20bd91;
   border-radius: var(--oslab-radius-container);
   box-shadow: var(--oslab-shadow-card);
 }
@@ -274,6 +273,7 @@ const handleProfileAction = async (value: string | number) => {
   gap: 8px;
   min-width: 0;
   overflow-x: auto;
+  box-sizing: border-box;
   scrollbar-width: thin;
 }
 
@@ -284,7 +284,7 @@ const handleProfileAction = async (value: string | number) => {
   min-height: 42px;
   padding: 0 14px;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--oslab-radius-control);
   color: var(--oslab-ink-soft);
   text-decoration: none;
   font-size: 13px;
@@ -378,8 +378,15 @@ const handleProfileAction = async (value: string | number) => {
 }
 
 .login-trigger {
-  color: var(--oslab-primary, #2447d8);
+  min-height: 40px;
   padding: 8px 12px;
+  border-radius: var(--oslab-radius-control);
+  color: var(--oslab-primary, #2447d8);
+  transition: background-color var(--oslab-duration-fast) var(--oslab-ease);
+}
+
+.login-trigger:hover {
+  background: var(--oslab-panel-soft);
 }
 @media (max-width: 900px) {
   #globalHeader {
@@ -410,8 +417,8 @@ const handleProfileAction = async (value: string | number) => {
     grid-row: 1;
   }
   .main-nav-link {
-    min-height: 34px;
-    padding: 0 9px;
+    min-height: 40px;
+    padding: 0 10px;
     font-size: 12px;
   }
   .user-info {
@@ -434,7 +441,7 @@ const handleProfileAction = async (value: string | number) => {
   }
   .main-nav-link {
     padding: 0 8px;
-    font-size: 11px;
+    font-size: 12px;
   }
   .logo {
     width: 30px;
@@ -444,6 +451,19 @@ const handleProfileAction = async (value: string | number) => {
   .header-search {
     grid-column: 1 / -1;
     grid-row: 3;
+  }
+}
+
+/* 触屏：导航、账户与搜索框统一到 44px 触控目标 */
+@media (pointer: coarse) {
+  .main-nav-link,
+  .login-trigger,
+  .user-trigger {
+    min-height: 44px;
+  }
+
+  .header-search :deep(.arco-input-wrapper) {
+    min-height: 44px;
   }
 }
 </style>

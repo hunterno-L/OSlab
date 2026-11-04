@@ -13,7 +13,14 @@
 </template>
 
 <script>
-import * as echarts from "echarts";
+// 按需引入：仅注册知识图谱用到的 graph 系列、tooltip 组件与 canvas 渲染器，
+// 避免把 ECharts 全量图表（约 1MB）打进图谱路由的分块。
+import * as echarts from "echarts/core";
+import { GraphChart } from "echarts/charts";
+import { TooltipComponent } from "echarts/components";
+import { CanvasRenderer } from "echarts/renderers";
+
+echarts.use([GraphChart, TooltipComponent, CanvasRenderer]);
 
 // 样式更新不重启力布局，缩放和选中保留当前坐标。
 // 视野缩放/居中一律使用 ECharts 公开的 graphRoam（zoom + dx/dy），
@@ -274,19 +281,19 @@ let fittedSeries = null;
 // 组件其他位置新增裸色值。
 const GRAPH_TOKENS = Object.freeze({
   surface: "transparent",
-  nodeBorder: "#c9ccbe",
+  nodeBorder: "#c3cedb",
   nodeRadius: 8,
   category: Object.freeze({
     concept: "#e8eefc",
     algorithm: "#f1e9fa",
     function: "#e4f2ed",
-    fallback: "#eeefe7",
+    fallback: "#ecf0f5",
   }),
   nodeFill: Object.freeze({
     concept: "#f8faff",
     algorithm: "#fbf8ff",
     function: "#f6fbf9",
-    fallback: "#fafbf7",
+    fallback: "#fafbfd",
   }),
   nodeShadow: "rgba(32, 36, 43, 0.08)",
   selection: "#2447d8",
@@ -297,7 +304,7 @@ const GRAPH_TOKENS = Object.freeze({
   pathRing: "rgba(107, 128, 159, 0.28)",
   reviewRing: "rgba(184, 137, 46, 0.26)",
   inkSoft: "#3a4150",
-  textSoft: "#6b7168",
+  textSoft: "#66707c",
   labelSurface: "#ffffff",
   highlightSoft: "#fff7c2",
   highlight: "#f2d64b",

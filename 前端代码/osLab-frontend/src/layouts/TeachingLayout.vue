@@ -28,24 +28,22 @@ const hideSidebar = computed(() => route.meta.hideSidebar === true);
 <style scoped>
 .themed-layout {
   min-height: 100vh;
-  background-color: var(--oslab-canvas);
-  background-image: radial-gradient(
-    rgba(32, 36, 43, 0.075) 1px,
-    transparent 1px
-  );
-  background-size: 22px 22px;
+  /* 底色由 body::before 的固定渐变层承载，布局壳保持透明 */
+  background-color: transparent;
 }
 .themed-layout .header {
   height: auto;
   line-height: normal;
-  padding: 12px 12px 0;
+  padding: var(--oslab-space-3) var(--oslab-space-3) 0;
   margin-bottom: 0;
   background: transparent;
   box-shadow: none;
 }
 .themed-layout .content {
   background: transparent;
-  padding: 20px 32px 32px;
+  background-image: var(--oslab-canvas-dots);
+  background-size: var(--oslab-dot-grid-size);
+  padding: var(--oslab-space-5) var(--oslab-space-8) var(--oslab-space-8);
   display: flex;
   gap: var(--oslab-space-4, 16px);
   align-items: flex-start;
@@ -56,11 +54,11 @@ const hideSidebar = computed(() => route.meta.hideSidebar === true);
 }
 @media (max-width: 1024px) {
   .themed-layout .header {
-    padding: 8px 8px 0;
+    padding: var(--oslab-space-2) var(--oslab-space-2) 0;
   }
   .themed-layout .content {
     flex-direction: column;
-    padding: 16px 12px 32px;
+    padding: var(--oslab-space-4) var(--oslab-space-3) var(--oslab-space-8);
   }
   .content-main {
     width: 100%;

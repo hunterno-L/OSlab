@@ -26,22 +26,53 @@
 
 /* ---------- 1) 设计令牌 ---------- */
 :root {
-  /* C+B 学习图册：冷纸画布、索引卡、荧光笔、珊瑚批注 */
-  --oslab-canvas: #eef0e9;
+  /* C+B 学习图册：浅冷蓝纸面、索引卡、荧光笔、珊瑚批注。
+     工作区（登录后全部页面）使用这一套纸面令牌；公开页页壳改用
+     下方 --public-* 令牌，两套主题互不串色。 */
+  --oslab-canvas: #edf1f6;
   --oslab-panel: #ffffff;
-  --oslab-panel-soft: #f7f8f2;
-  --oslab-panel-muted: #f1f3ea;
+  --oslab-panel-soft: #f4f7fb;
+  --oslab-panel-muted: #e9eef5;
+
+  /* 浅冷蓝纸面微光：全站固定视口背景层（body::before），长页面不会拉伸渐变。
+     冷蓝灰基底 + 极淡钴蓝/青绿光晕，静态、几乎不可察觉，
+     只做纸面在自然光下的过渡，不做装饰性光斑。 */
+  --oslab-glow-cool: rgba(126, 158, 190, 0.16); /* 冷蓝灰 */
+  --oslab-glow-mist: rgba(146, 186, 205, 0.13); /* 青绿雾 */
+  --oslab-glow-cobalt: rgba(36, 71, 216, 0.045); /* 钴蓝余辉 */
+  --oslab-glow-lamp: rgba(242, 214, 75, 0.04); /* 极淡荧光黄 */
+  --oslab-canvas-gradient: radial-gradient(
+      92% 62% at 6% -6%,
+      var(--oslab-glow-cool),
+      transparent 62%
+    ),
+    radial-gradient(78% 58% at 96% 4%, var(--oslab-glow-mist), transparent 64%),
+    radial-gradient(
+      64% 48% at 84% 98%,
+      var(--oslab-glow-cobalt),
+      transparent 66%
+    ),
+    radial-gradient(54% 42% at 12% 86%, var(--oslab-glow-lamp), transparent 62%),
+    linear-gradient(172deg, #f3f6fa 0%, var(--oslab-canvas) 46%, #e4eaf2 100%);
+  /* 纸面点阵：只在学习/教师工作区内容区保留，比上一版更淡、静态 */
+  --oslab-canvas-dots: radial-gradient(
+    rgba(32, 36, 43, 0.04) 1px,
+    transparent 1px
+  );
+  --oslab-dot-grid-size: 22px 22px;
 
   /* 文本 */
   --oslab-ink: #20242b;
   --oslab-ink-soft: #3a4150;
-  --oslab-muted: #8b9187;
-  --oslab-muted-strong: #6b7168;
+  /* 次级文字：10–11px 小字在冷蓝纸面/白色面板上仍需 ≥4.5:1 */
+  --oslab-muted: #5f6873;
+  /* 辅助文字在冷蓝渐变最深处仍需 ≥4.5:1（≈6:1） */
+  --oslab-muted-strong: #525b66;
 
   /* 边线 */
-  --oslab-line: #dddfd3;
-  --oslab-line-soft: #eceee6;
-  --oslab-line-strong: #c9ccbe;
+  --oslab-line: #dbe2ea;
+  --oslab-line-soft: #e9eef4;
+  --oslab-line-strong: #c3cedb;
 
   /* 品牌钴蓝：按钮、链接、选中态 */
   --oslab-primary: #2447d8;
@@ -67,7 +98,7 @@
   --oslab-weak: #b8543f;
   --oslab-weak-soft: #f6e3de;
   --oslab-unseen: #6b7168;
-  --oslab-unseen-soft: #eeefe9;
+  --oslab-unseen-soft: #eceff4;
   --oslab-danger: var(--oslab-weak);
 
   /* 状态标签文字色：11px 小字对 soft 底色需 ≥4.5:1（WCAG AA） */
@@ -78,16 +109,16 @@
 
   /* 图谱 token：KnowledgeGraph.vue 的 GRAPH_TOKENS 必须逐项镜像 */
   --oslab-graph-surface: transparent;
-  --oslab-graph-node-border: #c9ccbe;
+  --oslab-graph-node-border: #c3cedb;
   --oslab-graph-node-radius: 8px;
   --oslab-graph-category-concept: #e8eefc;
   --oslab-graph-category-algorithm: #f1e9fa;
   --oslab-graph-category-function: #e4f2ed;
-  --oslab-graph-category-default: #eeefe7;
+  --oslab-graph-category-default: #ecf0f5;
   --oslab-graph-node-fill-concept: #f8faff;
   --oslab-graph-node-fill-algorithm: #fbf8ff;
   --oslab-graph-node-fill-function: #f6fbf9;
-  --oslab-graph-node-fill-default: #fafbf7;
+  --oslab-graph-node-fill-default: #fafbfd;
   --oslab-graph-node-shadow: rgba(32, 36, 43, 0.08);
   --oslab-graph-selection: #2447d8;
   --oslab-graph-selection-ring: rgba(36, 71, 216, 0.18);
@@ -96,7 +127,7 @@
   --oslab-graph-path-edge: #3f66a5;
   --oslab-graph-path-ring: rgba(107, 128, 159, 0.28);
   --oslab-graph-review-ring: rgba(184, 137, 46, 0.26);
-  --oslab-graph-text-soft: #6b7168;
+  --oslab-graph-text-soft: #66707c;
   --oslab-graph-label-surface: #ffffff;
   --oslab-graph-highlight-soft: #fff7c2;
   --oslab-graph-highlight: #f2d64b;
@@ -151,11 +182,98 @@
   --oslab-duration-slow: 420ms;
   --oslab-shadow-card: 0 8px 24px rgba(32, 36, 43, 0.06);
   --oslab-shadow-overlay: 0 16px 40px rgba(32, 36, 43, 0.14);
+
+  /* 公开页页壳（/welcome、/user/login、/user/register）：深蓝星图。
+     只给页面壳层/页头/hero/分节/页脚使用；白卡、表单、表格仍用
+     上面的纸面令牌，保证卡内文字始终是深色。 */
+  --public-bg: #070d1c;
+  --public-bg-deep: #040913;
+  --public-ink: #f3f6fc; /* 深底 15:1 */
+  --public-ink-soft: #c8d4e7; /* 深底 11:1 */
+  --public-muted: #9dabc4; /* 深底 ≈8:1，页脚/编号/辅助文字仍可读 */
+  --public-line: rgba(158, 180, 214, 0.22);
+  --public-line-soft: rgba(158, 180, 214, 0.12);
+  --public-accent: #9db8ff; /* 深底上的链接/箭头/图标，≥6:1 */
+  --public-focus: #9db8ff; /* 焦点环，深底 ≥3:1 */
+  --public-cta-bg: rgba(255, 255, 255, 0.04);
+  --public-shadow-paper: 0 30px 70px rgba(2, 6, 18, 0.55);
 }
 
 /* ---------- 2) 基础元素 ---------- */
 :root {
   color-scheme: light;
+}
+
+/* 全站背景：固定视口层承载渐变，页面容器一律透明；
+   滚动时长页面不会把光晕拉散，也没有任何动效。 */
+html {
+  background-color: var(--oslab-canvas);
+}
+
+/* 首帧主题由 index.html 的极早脚本写在 html 上（body 尚未解析），
+   再把同一深蓝传给 body::before，避免公开页闪一帧浅色。 */
+html[data-theme="public"] {
+  background-color: var(--public-bg-deep);
+}
+
+html[data-theme="public"] body::before {
+  background-color: var(--public-bg);
+  background-image: none;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--oslab-canvas);
+  background-image: var(--oslab-canvas-gradient);
+}
+
+/* 公开页：body 底色换成深墨蓝，纸面渐变完全让位给星图背景（App.vue 的
+   .public-sky）。两套主题只在这里切换，避免深底/浅底互相串色。 */
+body[data-theme="public"]::before {
+  background-color: var(--public-bg);
+  background-image: none;
+}
+
+/* 弹性滚动到页面边缘时不露出冷纸色（不支持 :has 的浏览器退回 body 底色） */
+html:has(body[data-theme="public"]) {
+  background-color: var(--public-bg-deep);
+}
+
+/* 窄屏收紧光晕半径，避免大面积渐变在 390px 宽度里显得脏 */
+@media (max-width: 640px) {
+  :root {
+    --oslab-canvas-gradient: radial-gradient(
+        150% 48% at 12% -6%,
+        var(--oslab-glow-cool),
+        transparent 70%
+      ),
+      radial-gradient(
+        130% 42% at 100% 10%,
+        var(--oslab-glow-mist),
+        transparent 72%
+      ),
+      radial-gradient(
+        110% 38% at 68% 104%,
+        var(--oslab-glow-cobalt),
+        transparent 74%
+      ),
+      linear-gradient(178deg, #f2f5f9 0%, var(--oslab-canvas) 55%, #e4eaf2 100%);
+  }
+}
+
+/* 浏览器自带表面也归设计系统：选区用荧光笔，光标用钴蓝 */
+::selection {
+  background: var(--oslab-highlight-strong);
+  color: var(--oslab-ink);
+}
+
+input,
+textarea {
+  caret-color: var(--oslab-primary);
 }
 
 /* 跳过导航：仅键盘聚焦时出现 */
@@ -197,6 +315,15 @@ select:focus-visible,
 textarea:focus-visible {
   outline: 2px solid var(--oslab-primary);
   outline-offset: 1px;
+}
+
+/* 公开页深底上钴蓝环对比不足：只给深色页面壳层换亮蓝环。
+   白卡（认证弹层/演示面板）内部保持钴蓝，浅底上仍有足够对比。 */
+body[data-theme="public"] .landing-brand:focus-visible,
+body[data-theme="public"] .landing-section-copy a:focus-visible,
+body[data-theme="public"] .landing-section-copy button:focus-visible,
+body[data-theme="public"] .landing-section-copy [role="button"]:focus-visible {
+  outline-color: var(--public-focus);
 }
 
 /* ---------- 3) Arco 桥接 ---------- */
@@ -254,20 +381,20 @@ body {
 
   /* Arco 背景/文本/边线/圆角 */
   --color-bg-1: #ffffff;
-  --color-bg-2: #f7f8f2;
-  --color-bg-3: #eef0e9;
-  --color-bg-4: #e6e8dd;
-  --color-bg-5: #dddfd3;
+  --color-bg-2: #f4f7fb;
+  --color-bg-3: #edf1f6;
+  --color-bg-4: #e4eaf2;
+  --color-bg-5: #dbe2ea;
   --color-text-1: #20242b;
   --color-text-2: #3a4150;
-  --color-text-3: #6b7168;
-  --color-text-4: #8b9187;
-  --color-border-1: #eceee6;
-  --color-border-2: #dddfd3;
-  --color-border-3: #c9ccbe;
-  --color-fill-1: #f7f8f2;
-  --color-fill-2: #eef0e9;
-  --color-fill-3: #e6e8dd;
+  --color-text-3: #5f6873;
+  --color-text-4: #8b95a1;
+  --color-border-1: #e9eef4;
+  --color-border-2: #dbe2ea;
+  --color-border-3: #c3cedb;
+  --color-fill-1: #f4f7fb;
+  --color-fill-2: #edf1f6;
+  --color-fill-3: #e4eaf2;
   --border-radius-small: 9px;
   --border-radius-medium: 12px;
   --border-radius-large: 14px;
@@ -465,6 +592,12 @@ body .arco-input-wrapper:focus-within,
 body .arco-select-view:focus-within {
   border-color: var(--oslab-primary);
   box-shadow: 0 0 0 2px var(--oslab-primary-soft);
+}
+/* 占位符按正文对比度处理（Arco 默认 text-4 过浅，达不到 4.5:1） */
+body .arco-input::placeholder,
+body .arco-textarea::placeholder {
+  color: var(--oslab-muted-strong);
+  opacity: 1;
 }
 body .arco-table-th {
   background: var(--oslab-panel-soft);

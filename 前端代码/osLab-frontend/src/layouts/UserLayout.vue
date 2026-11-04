@@ -30,7 +30,8 @@ provide("oslabAuthBusy", authBusy);
 <style>
 #userLayout {
   min-height: 100vh;
-  background: var(--oslab-canvas);
+  /* 底色由 body::before 的固定渐变层承载 */
+  background: transparent;
   color: var(--oslab-ink);
   font-family: var(--oslab-font-ui);
 }

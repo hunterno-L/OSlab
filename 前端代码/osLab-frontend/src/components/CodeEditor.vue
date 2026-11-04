@@ -11,7 +11,9 @@
 </template>
 
 <script setup lang="ts">
-import * as monaco from "monaco-editor";
+// 使用 editor.api 入口 + MonacoWebpackPlugin 的 languages 白名单，
+// 避免把全部基础语言与 css/html/json/ts 语言服务打进产物（见 vue.config.js）。
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { onMounted, ref, toRaw, withDefaults, defineProps, watch } from "vue";
 
 /**

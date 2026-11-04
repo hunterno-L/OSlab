@@ -74,6 +74,24 @@ const rows = [
   text-align: right;
 }
 
+/* 直接铺在深蓝星图上（不是白卡），页壳文字统一走公开页令牌 */
+body[data-theme="public"] .evidence-ledger li,
+body[data-theme="public"] .evidence-ledger li:last-child {
+  border-color: var(--public-line);
+}
+
+body[data-theme="public"] .evidence-ledger strong {
+  color: var(--public-ink);
+}
+
+body[data-theme="public"] .evidence-ledger span {
+  color: var(--public-ink-soft);
+}
+
+body[data-theme="public"] .evidence-ledger em {
+  color: var(--public-muted);
+}
+
 @media (max-width: 640px) {
   .evidence-ledger li {
     grid-template-columns: 1fr;

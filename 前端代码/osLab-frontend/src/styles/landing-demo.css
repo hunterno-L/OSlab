@@ -60,6 +60,13 @@
   line-height: 1.6;
 }
 
+/* 公开页深蓝星图上，演示面板是浮起的白纸：靠投影离开背景，
+   不需要再描 1px 冷纸边线（边线在深底上看不见，只会让卡片发灰）。 */
+body[data-theme="public"] .demo-panel {
+  border-color: transparent;
+  box-shadow: var(--public-shadow-paper);
+}
+
 @media (max-width: 640px) {
   .demo-panel {
     padding: 14px;

@@ -8,7 +8,27 @@ import "@/plugins/axios";
 import "@/styles/learning-theme.css";
 import "@/access";
 import "bytemd/dist/index.css";
-import ArcoVueIcon from "@arco-design/web-vue/es/icon";
+// 仅注册项目实际使用的 18 个图标：全量 ArcoVueIcon 会把数百个图标打进首屏 vendor。
+import {
+  IconArrowLeft,
+  IconArrowRight,
+  IconBook,
+  IconCopy,
+  IconDown,
+  IconExport,
+  IconFile,
+  IconHistory,
+  IconLaunch,
+  IconPlus,
+  IconQuestionCircle,
+  IconRefresh,
+  IconRobot,
+  IconSearch,
+  IconSend,
+  IconSettings,
+  IconUser,
+  IconUserGroup,
+} from "@arco-design/web-vue/es/icon";
 import { OpenAPI } from "../generated";
 
 // Generated endpoints already start with "/api". A relative base keeps every
@@ -29,4 +49,27 @@ app.config.errorHandler = (err, _instance, info) => {
   console.error("[vue]", info, err);
 };
 
-app.use(ArcoVue).use(ArcoVueIcon).use(store).use(router).mount("#app");
+// 与 ArcoVueIcon 的注册名保持一致（PascalCase），模板里的 <icon-xxx> 仍可解析。
+const arcoIcons = {
+  IconArrowLeft,
+  IconArrowRight,
+  IconBook,
+  IconCopy,
+  IconDown,
+  IconExport,
+  IconFile,
+  IconHistory,
+  IconLaunch,
+  IconPlus,
+  IconQuestionCircle,
+  IconRefresh,
+  IconRobot,
+  IconSearch,
+  IconSend,
+  IconSettings,
+  IconUser,
+  IconUserGroup,
+};
+Object.entries(arcoIcons).forEach(([name, icon]) => app.component(name, icon));
+
+app.use(ArcoVue).use(store).use(router).mount("#app");
