@@ -14,13 +14,21 @@
         平台会把补丁应用到源码、重新编译、在 QEMU 里启动，只有内核真的输出了指定内容才算通过。
       </p>
       <a-divider />
-      <p class="kl-text"><strong>本次任务：</strong>让 xv6 启动时多打印一行 <code>ZhiCore</code>。</p>
-      <ul class="kl-list">
-        <li>文件：<code>kernel/main.c</code> 的 main 函数开头</li>
-        <li>已有代码：<code>printk("xv6 kernel is booting\n");</code></li>
-        <li>你要做的：在它后面加一行打印 <code>ZhiCore</code></li>
-        <li>提交格式：unified diff（下面有示例）</li>
-      </ul>
+      <p class="kl-text"><strong>可选任务</strong></p>
+      <ol class="kl-list">
+        <li><strong>启动横幅</strong>：在 <code>kernel/main.c</code> 打印 <code>ZhiCore</code>，判分看内核启动日志</li>
+        <li><strong>CPU 数量</strong>：启动时打印 <code>CPUS=</code> 和核数，判分看日志里的标记</li>
+        <li><strong>系统调用</strong>：实现 <code>hello()</code> 返回 42，判分跑用户程序 <code>hello</code> 看输出</li>
+      </ol>
+      <p class="kl-text"><strong>判分步骤</strong></p>
+      <ol class="kl-list">
+        <li>复制一份干净的 xv6 源码到临时目录</li>
+        <li>把你的 unified diff 应用上去（补丁失败直接判 PATCH_ERROR）</li>
+        <li>用 riscv 交叉编译器编译内核和文件系统镜像</li>
+        <li>在 QEMU 里启动这个内核</li>
+        <li>执行任务对应的验证命令，抓内核输出</li>
+        <li>输出里出现约定标记才判 PASS，否则 FAIL</li>
+      </ol>
       <pre class="kl-example">--- a/kernel/main.c
 +++ b/kernel/main.c
 @@ -18,7 +18,8 @@
@@ -36,9 +44,10 @@
     <a-card class="kl-card" title="提交补丁">
       <a-textarea v-model="patch" :auto-size="{ minRows: 8, maxRows: 16 }" placeholder="粘贴 unified diff" />
       <div class="kl-actions">
-        <a-select v-model="test" style="width: 220px">
-          <a-option value="banner">启动横幅检查（约 1 分钟）</a-option>
-          <a-option value="usertests">完整自测 usertests -q（约 5 分钟）</a-option>
+        <a-select v-model="task" style="width: 220px">
+          <a-option value="banner">任务一：启动横幅</a-option>
+          <a-option value="cpus">任务二：CPU 数量</a-option>
+          <a-option value="hello">任务三：hello 系统调用</a-option>
         </a-select>
         <a-button type="primary" :loading="running" @click="submit">提交并判分</a-button>
         <a-button :disabled="running" @click="patch = EXAMPLE">填入示例</a-button>
@@ -77,7 +86,7 @@ const EXAMPLE = `--- a/kernel/main.c
 
 const stages = ["复制源码", "应用补丁", "编译内核", "启动 QEMU", "执行测试", "判分"];
 const patch = ref("");
-const test = ref("banner");
+const task = ref("banner");
 const running = ref(false);
 const activeStage = ref(-1);
 const result = ref<Record<string, any> | null>(null);
@@ -95,7 +104,7 @@ const submit = async () => {
   activeStage.value = 0;
   tick();
   try {
-    const resp = await axios.post("/api/kernel/submit", { patch: patch.value, test: test.value }, { timeout: 420000 });
+    const resp = await axios.post("/api/kernel/submit", { patch: patch.value, task: task.value }, { timeout: 420000 });
     result.value = resp.data;
     activeStage.value = stages.length;
     if (resp.data.ok) Message.success("通过");

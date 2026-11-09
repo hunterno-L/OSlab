@@ -67,6 +67,12 @@ export const APP_NAVIGATION: NavItem[] = [
     access: ACCESS_ENUM.USER,
   },
   {
+    key: "ai",
+    label: "AI 助手",
+    path: "/ai",
+    access: ACCESS_ENUM.USER,
+  },
+  {
     key: "tasks",
     label: "学习任务",
     path: "/tasks",
