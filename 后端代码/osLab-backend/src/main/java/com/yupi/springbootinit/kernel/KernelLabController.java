@@ -29,6 +29,72 @@ public class KernelLabController {
             "usertests", new String[]{"usertests -q", "ALL TESTS PASSED", "260"}
     );
 
+    @PostMapping("/submit")
+    public Map<String, Object> submit(@RequestBody Map<String, Object> body) {
+        String patch = body == null || body.get("patch") == null ? "" : String.valueOf(body.get("patch"));
+        String test = body == null || body.get("test") == null ? "banner" : String.valueOf(body.get("test"));
+        Map<String, Object> result = new LinkedHashMap<>();
+        if (patch.contains("../../") || patch.contains("Makefile")) {
+            result.put("ok", false);
+            result.put("error", "提交内容不允许修改 Makefile 或越界路径");
+            return result;
+        }
+        if (!patch.isEmpty() && !patch.endsWith("\n")) {
+            patch = patch + "\n";
+        }
+        String marker = "usertests".equals(test) ? "ALL TESTS PASSED" : "ZhiCore";
+        String runCmd = "usertests".equals(test)
+                ? "printf 'usertests -q\\n'; sleep 250"
+                : "sleep 6";
+        int wait = "usertests".equals(test) ? 260 : 20;
+
+        String patchB64 = java.util.Base64.getEncoder()
+                .encodeToString(patch.getBytes(StandardCharsets.UTF_8));
+        String script = String.join("\n",
+                "set -e",
+                "rm -rf /mnt/g/ZhiCore/kernel-lab/web-run",
+                "cp -r " + STARTER + " /mnt/g/ZhiCore/kernel-lab/web-run",
+                "cd /mnt/g/ZhiCore/kernel-lab/web-run",
+                "echo '" + patchB64 + "' | base64 -d > /tmp/sub.patch",
+                "if [ -s /tmp/sub.patch ]; then patch -p1 --batch --forward < /tmp/sub.patch || { echo PATCH_FAILED; exit 5; }; fi",
+                "make TOOLPREFIX=riscv64-linux-gnu- -j2 >/tmp/kbuild.log 2>&1 || { echo BUILD_FAILED; tail -20 /tmp/kbuild.log; exit 3; }",
+                "make TOOLPREFIX=riscv64-linux-gnu- fs.img >>/tmp/kbuild.log 2>&1",
+                "( " + runCmd + " ) | timeout " + (wait + 40) + " make TOOLPREFIX=riscv64-linux-gnu- qemu > /tmp/krun.log 2>&1 || true",
+                "if grep -q '" + marker + "' /tmp/krun.log; then echo RESULT=PASS; else echo RESULT=FAIL; fi",
+                "echo '---LOG---'",
+                "tail -25 /tmp/krun.log");
+
+        long start = System.currentTimeMillis();
+        List<String> lines = new ArrayList<>();
+        try {
+            ProcessBuilder pb = new ProcessBuilder("wsl", "-d", "Ubuntu-24.04", "-u", "root", "bash", "-lc", script);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    lines.add(line);
+                }
+            }
+            process.waitFor(wait + 120L, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            result.put("ok", false);
+            result.put("error", "执行失败：" + e.getMessage());
+            return result;
+        }
+        String output = String.join("\n", lines);
+        boolean pass = output.contains("RESULT=PASS");
+        result.put("ok", pass);
+        result.put("test", test);
+        result.put("seconds", Math.round((System.currentTimeMillis() - start) / 100.0) / 10.0);
+        result.put("stage", output.contains("BUILD_FAILED") ? "BUILD_ERROR"
+                : output.contains("PATCH_FAILED") ? "PATCH_ERROR"
+                : pass ? "PASS" : "FAIL");
+        result.put("log", output.length() > 4000 ? output.substring(output.length() - 4000) : output);
+        return result;
+    }
+
     @PostMapping("/run")
     public Map<String, Object> run(@RequestBody(required = false) Map<String, Object> body) {
         String test = body == null || body.get("test") == null ? "boot" : String.valueOf(body.get("test"));

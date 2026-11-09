@@ -71,6 +71,24 @@ export const routes: Array<RouteRecordRaw> = [
     component: LearningLayout,
     meta: { hideInMenu: true },
     children: [
+    {
+      path: "/ai",
+      name: "AI 学习助手",
+      component: () => import("@/views/ai/AiWorkspaceView.vue"),
+      meta: { access: ACCESS_ENUM.USER, navKey: "ai", pageTitle: "AI 学习助手" },
+    },
+    {
+      path: "/ai/settings",
+      name: "AI 模型设置",
+      component: () => import("@/views/ai/AiSettingsView.vue"),
+      meta: { access: ACCESS_ENUM.USER, navKey: "ai", pageTitle: "AI 模型设置" },
+    },
+    {
+      path: "/kernel",
+      name: "内核实验",
+      component: () => import("@/views/kernel/KernelLabView.vue"),
+      meta: { access: ACCESS_ENUM.USER, navKey: "kernel", pageTitle: "内核实验" },
+    },
       {
         path: "",
         name: "角色首页",
@@ -465,24 +483,6 @@ export const routes: Array<RouteRecordRaw> = [
     path: "/knowledge-graph",
     redirect: () => ({ path: "/graph" }),
     meta: { hideInMenu: true },
-  },
-  {
-    path: "/ai",
-    name: "AI 学习助手",
-    component: AiWorkspaceView,
-    meta: { access: ACCESS_ENUM.USER },
-  },
-  {
-    path: "/ai/settings",
-    name: "AI 模型设置",
-    component: AiSettingsView,
-    meta: { access: ACCESS_ENUM.USER },
-  },
-  {
-    path: "/kernel",
-    name: "内核实验",
-    component: KernelLabView,
-    meta: { access: ACCESS_ENUM.USER },
   },
   {
     path: "/noAuth",

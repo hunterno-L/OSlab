@@ -1,27 +1,60 @@
 <template>
   <div class="kl-page">
     <header class="kl-head">
-      <h1>真实内核实验（xv6）</h1>
-      <p>在 QEMU 里启动 xv6，跑真实内核测试：构建 → 启动 → 执行 → 判分，全程无模拟。</p>
+      <div>
+        <h1>真实内核实验 · xv6</h1>
+        <p>改的是真内核：补丁提交后编译、在 QEMU 里启动、检查内核输出。不是模拟动画。</p>
+      </div>
+      <a-tag color="arcoblue">RISC-V · QEMU</a-tag>
     </header>
 
-    <a-card class="kl-card" title="运行测试">
-      <a-space wrap>
-        <a-select v-model="test" style="width: 260px">
-          <a-option value="boot">启动自检（约 10 秒）</a-option>
-          <a-option value="copyin">usertests copyin（约 1 分钟）</a-option>
-          <a-option value="usertests">完整自测 usertests -q（约 5 分钟）</a-option>
-        </a-select>
-        <a-button type="primary" :loading="running" @click="run">运行</a-button>
-        <a-tag v-if="result" :color="result.ok ? 'green' : 'red'">
-          {{ result.ok ? "PASS" : "FAIL" }} · {{ result.seconds }}s
-        </a-tag>
-      </a-space>
-      <p class="kl-hint">后端会在 WSL 里执行构建与 QEMU，只允许白名单测试，不接收任意命令。</p>
+    <a-card class="kl-card" title="这个实验是什么">
+      <p class="kl-text">
+        xv6 是 MIT 的教学操作系统，几千行代码，跑在 RISC-V 上。你在这里修改它的内核源码，
+        平台会把补丁应用到源码、重新编译、在 QEMU 里启动，只有内核真的输出了指定内容才算通过。
+      </p>
+      <a-divider />
+      <p class="kl-text"><strong>本次任务：</strong>让 xv6 启动时多打印一行 <code>ZhiCore</code>。</p>
+      <ul class="kl-list">
+        <li>文件：<code>kernel/main.c</code> 的 main 函数开头</li>
+        <li>已有代码：<code>printk("xv6 kernel is booting\n");</code></li>
+        <li>你要做的：在它后面加一行打印 <code>ZhiCore</code></li>
+        <li>提交格式：unified diff（下面有示例）</li>
+      </ul>
+      <pre class="kl-example">--- a/kernel/main.c
++++ b/kernel/main.c
+@@ -18,7 +18,8 @@
+     consoleinit();
+     printkinit();
+     printk("\n");
+     printk("xv6 kernel is booting\n");
++    printk("ZhiCore\n");
+     printk("\n");
+     kinit();            // physical page allocator</pre>
     </a-card>
 
-    <a-card v-if="result" class="kl-card" title="输出">
-      <pre class="kl-log">{{ result.log }}</pre>
+    <a-card class="kl-card" title="提交补丁">
+      <a-textarea v-model="patch" :auto-size="{ minRows: 8, maxRows: 16 }" placeholder="粘贴 unified diff" />
+      <div class="kl-actions">
+        <a-select v-model="test" style="width: 220px">
+          <a-option value="banner">启动横幅检查（约 1 分钟）</a-option>
+          <a-option value="usertests">完整自测 usertests -q（约 5 分钟）</a-option>
+        </a-select>
+        <a-button type="primary" :loading="running" @click="submit">提交并判分</a-button>
+        <a-button :disabled="running" @click="patch = EXAMPLE">填入示例</a-button>
+        <a-tag v-if="result" :color="result.ok ? 'green' : 'red'">{{ result.stage }} · {{ result.seconds }}s</a-tag>
+      </div>
+    </a-card>
+
+    <a-card class="kl-card" title="判题过程">
+      <div class="kl-stages">
+        <div v-for="(stage, index) in stages" :key="stage" class="kl-stage"
+             :class="{ on: running && index === activeStage, done: index < activeStage || (!running && result) }">
+          <span class="kl-dot" />
+          <span>{{ stage }}</span>
+        </div>
+      </div>
+      <pre v-if="result" class="kl-log">{{ result.log || result.error }}</pre>
     </a-card>
   </div>
 </template>
@@ -31,31 +64,65 @@ import { ref } from "vue";
 import axios from "axios";
 import { Message } from "@arco-design/web-vue";
 
-const test = ref("boot");
-const running = ref(false);
-const result = ref<Record<string, any> | null>(null);
+const EXAMPLE = `--- a/kernel/main.c
++++ b/kernel/main.c
+@@ -18,7 +18,8 @@
+     consoleinit();
+     printkinit();
+     printk("\\n");
+     printk("xv6 kernel is booting\\n");
++    printk("ZhiCore\\n");
+     printk("\\n");
+     kinit();            // physical page allocator`;
 
-const run = async () => {
+const stages = ["复制源码", "应用补丁", "编译内核", "启动 QEMU", "执行测试", "判分"];
+const patch = ref("");
+const test = ref("banner");
+const running = ref(false);
+const activeStage = ref(-1);
+const result = ref<Record<string, any> | null>(null);
+let timer: number | undefined;
+
+const tick = () => {
+  timer = window.setInterval(() => {
+    if (activeStage.value < stages.length - 1) activeStage.value += 1;
+  }, 2500);
+};
+
+const submit = async () => {
   running.value = true;
   result.value = null;
+  activeStage.value = 0;
+  tick();
   try {
-    const resp = await axios.post("/api/kernel/run", { test: test.value }, { timeout: 420000 });
+    const resp = await axios.post("/api/kernel/submit", { patch: patch.value, test: test.value }, { timeout: 420000 });
     result.value = resp.data;
-    if (resp.data.ok) Message.success("测试通过");
-    else Message.warning("测试未通过");
+    activeStage.value = stages.length;
+    if (resp.data.ok) Message.success("通过");
+    else Message.warning(resp.data.stage || "未通过");
   } catch (e: any) {
-    Message.error(e?.message || "运行失败");
+    Message.error(e?.message || "提交失败");
   } finally {
     running.value = false;
+    if (timer) window.clearInterval(timer);
   }
 };
 </script>
 
 <style scoped>
 .kl-page { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; display: flex; flex-direction: column; gap: 16px; }
+.kl-head { display: flex; justify-content: space-between; align-items: center; }
 .kl-head h1 { margin: 0 0 6px; font-size: 22px; }
 .kl-head p { margin: 0; color: #6b675c; font-size: 13px; }
 .kl-card { border-radius: 12px; }
-.kl-hint { margin: 12px 0 0; color: #8a8578; font-size: 12px; }
-.kl-log { margin: 0; max-height: 560px; overflow: auto; background: #1f1e1a; color: #e8e4d8; padding: 14px; border-radius: 8px; font-size: 12px; line-height: 1.7; white-space: pre-wrap; }
+.kl-text { font-size: 14px; line-height: 1.9; color: #3f3d36; margin: 0; }
+.kl-list { margin: 8px 0 0; padding-left: 18px; font-size: 13px; line-height: 1.9; color: #55524a; }
+.kl-example { background: #f7f5ec; border-radius: 8px; padding: 12px; font-size: 12px; line-height: 1.7; overflow-x: auto; }
+.kl-actions { display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+.kl-stages { display: flex; gap: 8px; flex-wrap: wrap; }
+.kl-stage { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #f4f2e9; color: #8a8578; font-size: 12px; transition: 0.3s; }
+.kl-stage.on { background: #fdf0c9; color: #6b5b17; }
+.kl-stage.done { background: #e9f2e4; color: #3d6b2f; }
+.kl-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.kl-log { margin-top: 14px; max-height: 420px; overflow: auto; background: #1f1e1a; color: #e8e4d8; padding: 14px; border-radius: 8px; font-size: 12px; line-height: 1.7; white-space: pre-wrap; }
 </style>
