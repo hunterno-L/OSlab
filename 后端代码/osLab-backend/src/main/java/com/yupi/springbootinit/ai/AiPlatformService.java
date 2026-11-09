@@ -470,6 +470,18 @@ public class AiPlatformService {
                 "SELECT COUNT(*) FROM learning_attempt a WHERE a.userId=? AND a.hasViewedAnalysis=1",
                 Integer.class, userId);
         result.put("assistedAttempts", assisted == null ? 0 : assisted);
+        // 证据资格：看过解析、或作答前 30 分钟内用过 AI 帮助的，权重 0.5
+        Map<String, Object> weighted = jdbc.queryForMap(
+                "SELECT SUM(w) wsum, SUM(w * (isCorrect=1)) wok FROM ("
+                        + " SELECT a.isCorrect, CASE WHEN a.hasViewedAnalysis=1 THEN 0.5 "
+                        + "   WHEN EXISTS (SELECT 1 FROM ai_help_event h WHERE h.userId=a.userId AND h.questionId=a.questionId "
+                        + "        AND h.createTime >= DATE_SUB(a.createTime, INTERVAL 30 MINUTE)) THEN 0.5 "
+                        + "   ELSE 1 END AS w "
+                        + " FROM learning_attempt a WHERE a.userId=?) t", userId);
+        double wsum = weighted.get("wsum") == null ? 0 : ((Number) weighted.get("wsum")).doubleValue();
+        double wok = weighted.get("wok") == null ? 0 : ((Number) weighted.get("wok")).doubleValue();
+        result.put("weightedAttempts", Math.round(wsum * 100) / 100.0);
+        result.put("weightedAccuracy", wsum == 0 ? null : Math.round(wok / wsum * 1000) / 1000.0);
         return result;
     }
 
