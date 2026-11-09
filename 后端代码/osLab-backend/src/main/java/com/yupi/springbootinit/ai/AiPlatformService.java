@@ -33,6 +33,12 @@ public class AiPlatformService {
     @Resource
     private ObjectMapper objectMapper;
 
+    @org.springframework.beans.factory.annotation.Value("${DEEPSEEK_API_KEY:}")
+    private String envDeepseekKey;
+
+    @org.springframework.beans.factory.annotation.Value("${AI_ARK_API_KEY:}")
+    private String envArkKey;
+
     private final RestTemplate restTemplate = new RestTemplate();
     private final AtomicLong idGen = new AtomicLong(System.currentTimeMillis() % 100000000L);
 
@@ -153,7 +159,26 @@ public class AiPlatformService {
 
     private Map<String, Object> rawConfig(long userId) {
         List<Map<String, Object>> rows = jdbc.queryForList("SELECT * FROM ai_user_config WHERE userId=?", userId);
-        return rows.isEmpty() ? null : rows.get(0);
+        if (!rows.isEmpty()) {
+            return rows.get(0);
+        }
+        // 未保存个人配置时回落到进程环境（填充式：有 key 自动启用）
+        Map<String, Object> env = new LinkedHashMap<>();
+        String deepseek = envDeepseekKey;
+        String ark = envArkKey;
+        if (StringUtils.hasText(deepseek)) {
+            env.put("baseUrl", "https://api.deepseek.com/v1");
+            env.put("apiKey", deepseek);
+            env.put("model", "deepseek-chat");
+        } else if (StringUtils.hasText(ark)) {
+            env.put("baseUrl", "https://ark.cn-beijing.volces.com/api/v3");
+            env.put("apiKey", ark);
+            env.put("model", "deepseek-v3-250324");
+        } else {
+            return null;
+        }
+        env.put("source", "ENV");
+        return env;
     }
 
     // ---------- 问答 ----------
