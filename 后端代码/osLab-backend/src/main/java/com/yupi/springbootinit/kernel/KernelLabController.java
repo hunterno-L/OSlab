@@ -1,7 +1,11 @@
 package com.yupi.springbootinit.kernel;
 
-import org.springframework.web.bind.annotation.PostMapping;
+import com.yupi.springbootinit.model.entity.User;
+import com.yupi.springbootinit.service.UserService;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,61 +13,79 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-
-import com.yupi.springbootinit.model.entity.User;
-import com.yupi.springbootinit.service.UserService;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * xv6 真实内核实验：补丁提交 → 构建 → QEMU 运行 → 按任务标记判分。
- * 只接受白名单任务与测试，拒绝改动 Makefile 或越界路径的补丁。
+ * xv6 内核实验：整文件编辑 → 覆盖源码 → 构建 → QEMU 运行 → 按标记判分。
  */
 @RestController
 @RequestMapping("/kernel")
 public class KernelLabController {
 
+    private static final String ST_ROOT = "G:\\ZhiCore\\kernel-lab";
     private static final String STARTER = "/mnt/g/ZhiCore/kernel-lab/xv6-lab/xv6-riscv";
     private static final String WORK = "/mnt/g/ZhiCore/kernel-lab/web-run";
 
     @Resource
-    private org.springframework.jdbc.core.JdbcTemplate jdbc;
+    private JdbcTemplate jdbc;
 
     @Resource
     private UserService userService;
 
-    /** marker, 运行命令, 等待秒数, 预置脚本 */
+    /** 任务：判分标记、运行命令、等待秒数、脚手架脚本、学生编辑的文件 */
     private static final Map<String, String[]> TASKS = new LinkedHashMap<>();
 
     static {
-        TASKS.put("banner", new String[]{"ZhiCore", "sleep 6", "20", ""});
-        TASKS.put("cpus", new String[]{"CPUS=", "sleep 6", "20", ""});
-        TASKS.put("hello", new String[]{"HELLO=42", "printf 'hello\\n'; sleep 6", "30",
-                "cat > user/hello.c <<'EOF'\n"
-                        + "#include \"kernel/types.h\"\n"
-                        + "#include \"user/user.h\"\n"
-                        + "int main(){ printf(\"HELLO=%d\\n\", hello()); exit(0); }\n"
-                        + "EOF\n"
-                        + "sed -i 's|^UPROGS=\\\\|UPROGS=\\\\\n\t$U/_hello\\\\|' Makefile"});
+        TASKS.put("banner", new String[]{"ZhiCore", "sleep 6", "20", "", "kernel/main.c"});
+        TASKS.put("cpus", new String[]{"CPUS=", "sleep 6", "20", "", "kernel/main.c"});
+        TASKS.put("hello", new String[]{"HELLO=42", "sleep 4; printf 'echo\\n'; sleep 8", "30",
+                "cp -r /mnt/g/ZhiCore/kernel-lab/fixtures/hello/. .", "kernel/sysproc.c"});
     }
 
-    private static final Map<String, String[]> TESTS = Map.of(
-            "boot", new String[]{"echo kernel_ok", "kernel_ok", "15"},
-            "copyin", new String[]{"usertests copyin", "OK", "90"},
-            "usertests", new String[]{"usertests -q", "ALL TESTS PASSED", "260"}
-    );
+    @GetMapping("/task/{task}")
+    public Map<String, Object> template(@PathVariable String task) {
+        String[] spec = TASKS.get(task);
+        Map<String, Object> result = new LinkedHashMap<>();
+        if (spec == null) {
+            result.put("error", "未知任务");
+            return result;
+        }
+        String rel = spec[4];
+        String content;
+        try {
+            content = new String(Files.readAllBytes(Paths.get(ST_ROOT, "xv6-lab", "xv6-riscv", rel.replace("/", "\\"))),
+                    StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            content = "// 读取模板失败：" + e.getMessage();
+        }
+        if ("hello".equals(task) && !content.contains("sys_hello")) {
+            content = content + "\n/* ===== 在此实现 hello 系统调用 =====\n"
+                    + " * 要求：函数名 sys_hello，返回 uint64，值为 42。\n"
+                    + " * 提示：照抄上面的 sys_uptime 结构，返回值改成 42。\n"
+                    + " */\n"
+                    + "uint64\nsys_hello(void)\n{\n  return 0; // TODO: 改成 42\n}\n";
+        }
+        result.put("task", task);
+        result.put("path", rel);
+        result.put("content", content);
+        return result;
+    }
 
     @PostMapping("/submit")
     public Map<String, Object> submit(@RequestBody Map<String, Object> body, HttpServletRequest request) {
-        String patch = body == null || body.get("patch") == null ? "" : String.valueOf(body.get("patch"));
         String task = body == null || body.get("task") == null ? "banner" : String.valueOf(body.get("task"));
+        String content = body == null || body.get("content") == null ? "" : String.valueOf(body.get("content"));
         Map<String, Object> result = new LinkedHashMap<>();
         String[] spec = TASKS.get(task);
         if (spec == null) {
@@ -71,20 +93,28 @@ public class KernelLabController {
             result.put("error", "未知任务：" + task);
             return result;
         }
-        if (patch.contains("../../") || patch.contains("Makefile")) {
+        if (content.contains("Makefile") || content.contains("../../")) {
             result.put("ok", false);
-            result.put("error", "提交内容不允许修改 Makefile 或越界路径");
+            result.put("error", "不允许修改 Makefile 或越界路径");
             return result;
         }
-        if (!patch.isEmpty() && !patch.endsWith("\n")) {
-            patch = patch + "\n";
-        }
+
         String marker = spec[0];
         String runCmd = spec[1];
         int wait = Integer.parseInt(spec[2]);
         String setup = spec[3];
-        String patchB64 = java.util.Base64.getEncoder()
-                .encodeToString(patch.getBytes(StandardCharsets.UTF_8));
+        String relPath = spec[4];
+
+        Path tmp = Paths.get(ST_ROOT, "web-upload", task + ".txt");
+        try {
+            Files.createDirectories(tmp.getParent());
+            Files.write(tmp, content.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            result.put("ok", false);
+            result.put("error", "写入失败：" + e.getMessage());
+            return result;
+        }
+        String upload = "/mnt/g/ZhiCore/kernel-lab/web-upload/" + task + ".txt";
 
         List<String> script = new ArrayList<>();
         script.add("set -e");
@@ -94,9 +124,8 @@ public class KernelLabController {
         if (!setup.isEmpty()) {
             script.add(setup);
         }
-        script.add("echo '" + patchB64 + "' | base64 -d > /tmp/sub.patch");
-        script.add("if [ -s /tmp/sub.patch ]; then patch -p1 --batch --forward < /tmp/sub.patch || { echo PATCH_FAILED; exit 5; }; fi");
-        script.add("make TOOLPREFIX=riscv64-linux-gnu- -j2 >/tmp/kbuild.log 2>&1 || { echo BUILD_FAILED; tail -20 /tmp/kbuild.log; exit 3; }");
+        script.add("cp '" + upload + "' '" + relPath + "'");
+        script.add("make TOOLPREFIX=riscv64-linux-gnu- -j2 >/tmp/kbuild.log 2>&1 || { echo BUILD_FAILED; tail -25 /tmp/kbuild.log; exit 3; }");
         script.add("make TOOLPREFIX=riscv64-linux-gnu- fs.img >>/tmp/kbuild.log 2>&1 || { echo FS_FAILED; exit 4; }");
         script.add("( " + runCmd + " ) | timeout " + (wait + 40) + " make TOOLPREFIX=riscv64-linux-gnu- qemu > /tmp/krun.log 2>&1 || true");
         script.add("if grep -q '" + marker + "' /tmp/krun.log; then echo RESULT=PASS; else echo RESULT=FAIL; fi");
@@ -123,21 +152,22 @@ public class KernelLabController {
             result.put("error", "执行失败：" + e.getMessage());
             return result;
         }
+
         String output = String.join("\n", lines);
         boolean pass = output.contains("RESULT=PASS");
         result.put("ok", pass);
         result.put("task", task);
         result.put("seconds", Math.round((System.currentTimeMillis() - start) / 100.0) / 10.0);
-        result.put("stage", output.contains("PATCH_FAILED") ? "PATCH_ERROR"
-                : output.contains("BUILD_FAILED") ? "BUILD_ERROR"
+        result.put("stage", output.contains("BUILD_FAILED") ? "BUILD_ERROR"
                 : pass ? "PASS" : "FAIL");
         result.put("log", output.length() > 4000 ? output.substring(output.length() - 4000) : output);
+
         long userId = 0L;
         try {
             User user = userService.getLoginUser(request);
             userId = user == null ? 0L : user.getId();
         } catch (Exception ignored) {
-            // 未登录也允许跑，只是不记录
+            // 未登录不记录
         }
         if (userId > 0) {
             try {
@@ -146,10 +176,10 @@ public class KernelLabController {
                         System.currentTimeMillis() * 1000 + (long) (Math.random() * 1000),
                         userId, task, (String) result.get("stage"), pass ? 1 : 0,
                         new java.math.BigDecimal(String.valueOf(result.get("seconds"))),
-                        Integer.toHexString(patch.hashCode()), patch,
+                        Integer.toHexString(content.hashCode()), content,
                         String.valueOf(result.get("log")));
             } catch (Exception ignored) {
-                // 记录失败不影响判分结果
+                // 记录失败不影响判分
             }
         }
         return result;
@@ -165,57 +195,5 @@ public class KernelLabController {
         }
         return jdbc.queryForList("SELECT id,task,stage,passed,seconds,createTime FROM kernel_submission "
                 + "WHERE userId=? ORDER BY id DESC LIMIT 20", user.getId());
-    }
-
-    @PostMapping("/run")
-    public Map<String, Object> run(@RequestBody(required = false) Map<String, Object> body) {
-        String test = body == null || body.get("test") == null ? "boot" : String.valueOf(body.get("test"));
-        String[] spec = TESTS.get(test);
-        Map<String, Object> result = new LinkedHashMap<>();
-        if (spec == null) {
-            result.put("ok", false);
-            result.put("error", "未知测试：" + test);
-            return result;
-        }
-        String marker = spec[1];
-        int wait = Integer.parseInt(spec[2]);
-        String script = "cd " + STARTER + " || exit 2\n"
-                + "make TOOLPREFIX=riscv64-linux-gnu- -j2 >/tmp/kbuild.log 2>&1 || { echo BUILD_FAILED; tail -20 /tmp/kbuild.log; exit 3; }\n"
-                + "make TOOLPREFIX=riscv64-linux-gnu- fs.img >>/tmp/kbuild.log 2>&1 || { echo FS_FAILED; exit 4; }\n"
-                + "(sleep 4; printf '" + spec[0] + "\\n'; sleep " + wait + ") | timeout " + (wait + 40)
-                + " make TOOLPREFIX=riscv64-linux-gnu- qemu > /tmp/krun.log 2>&1\n"
-                + "if grep -q '" + marker + "' /tmp/krun.log; then echo RESULT=PASS; else echo RESULT=FAIL; fi\n"
-                + "echo '---LOG---'\n"
-                + "tail -25 /tmp/krun.log\n";
-        long start = System.currentTimeMillis();
-        List<String> lines = new ArrayList<>();
-        int exit = -1;
-        try {
-            ProcessBuilder pb = new ProcessBuilder("wsl", "-d", "Ubuntu-24.04", "-u", "root", "bash", "-lc", script);
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    lines.add(line);
-                }
-            }
-            if (!process.waitFor(wait + 120L, TimeUnit.SECONDS)) {
-                process.destroyForcibly();
-            }
-            exit = process.exitValue();
-        } catch (Exception e) {
-            result.put("ok", false);
-            result.put("error", "执行失败：" + e.getMessage());
-            return result;
-        }
-        String output = String.join("\n", lines);
-        result.put("ok", output.contains("RESULT=PASS"));
-        result.put("test", test);
-        result.put("seconds", Math.round((System.currentTimeMillis() - start) / 100.0) / 10.0);
-        result.put("exit", exit);
-        result.put("log", output.length() > 4000 ? output.substring(output.length() - 4000) : output);
-        return result;
     }
 }

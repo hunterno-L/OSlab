@@ -2,13 +2,8 @@
   <div class="kl-workspace">
     <aside class="kl-side">
       <div class="kl-side-title">内核实验</div>
-      <div
-        v-for="item in tasks"
-        :key="item.key"
-        class="kl-task"
-        :class="{ active: task === item.key }"
-        @click="selectTask(item.key)"
-      >
+      <div v-for="item in tasks" :key="item.key" class="kl-task"
+           :class="{ active: task === item.key }" @click="selectTask(item.key)">
         <div class="kl-task-name">{{ item.name }}</div>
         <div class="kl-task-tag">{{ item.file }}</div>
       </div>
@@ -29,15 +24,22 @@
       <section class="kl-panel">
         <div class="kl-panel-title">任务说明</div>
         <p class="kl-text">{{ current.detail }}</p>
-        <pre class="kl-example">{{ current.example }}</pre>
+        <ul class="kl-list">
+          <li>编辑文件：<code>{{ current.file }}</code></li>
+          <li>判分标记：<code>{{ current.marker }}</code></li>
+          <li>流程：覆盖源码 → 编译 → QEMU 启动 → 抓输出 → 判分</li>
+        </ul>
       </section>
 
       <section class="kl-panel">
-        <div class="kl-panel-title">提交补丁（unified diff）</div>
-        <a-textarea v-model="patch" :auto-size="{ minRows: 10, maxRows: 18 }" placeholder="--- a/kernel/... +++ b/kernel/..." />
+        <div class="kl-panel-title">
+          代码 · {{ template.path || current.file }}
+          <span class="kl-hint">（整文件提交，按注释里的 TODO 补全）</span>
+        </div>
+        <textarea v-model="code" class="kl-editor" spellcheck="false" />
         <div class="kl-actions">
           <a-button type="primary" :loading="running" @click="submit">提交并判分</a-button>
-          <a-button :disabled="running" @click="patch = current.example">填入示例</a-button>
+          <a-button :disabled="running" @click="loadTemplate">重置为模板</a-button>
           <a-tag v-if="result" :color="result.ok ? 'green' : 'red'">{{ result.stage }} · {{ result.seconds }}s</a-tag>
         </div>
       </section>
@@ -78,7 +80,9 @@ import { computed, onMounted, ref } from "vue";
 import axios from "axios";
 import { Message } from "@arco-design/web-vue";
 
-type Task = { key: string; name: string; file: string; desc: string; detail: string; example: string };
+type Task = {
+  key: string; name: string; file: string; desc: string; detail: string; marker: string;
+};
 
 const tasks: Task[] = [
   {
@@ -86,51 +90,31 @@ const tasks: Task[] = [
     name: "任务一 · 启动横幅",
     file: "kernel/main.c",
     desc: "让内核启动时多打印一行 ZhiCore",
-    detail: "在 main() 里已有的 printk(\"xv6 kernel is booting\\n\") 后面加一行输出。判分检查内核启动日志。",
-    example: `--- a/kernel/main.c
-+++ b/kernel/main.c
-@@ -18,7 +18,8 @@
-     consoleinit();
-     printkinit();
-     printk("\\n");
-     printk("xv6 kernel is booting\\n");
-+    printk("ZhiCore\\n");
-     printk("\\n");
-     kinit();            // physical page allocator`,
+    detail: "打开 main.c，找到 printk(\"xv6 kernel is booting\\n\") 这一行，在它后面加一行 printk(\"ZhiCore\\n\")。判分检查内核启动日志里是否出现 ZhiCore。",
+    marker: "ZhiCore",
   },
   {
     key: "cpus",
     name: "任务二 · CPU 数量",
     file: "kernel/main.c",
     desc: "启动时打印 CPUS= 和核数",
-    detail: "xv6 在 proc.c 里维护 ncpu，defs.h 已声明。可在 procinit() 之后打印 printk(\"CPUS=%d\\n\", ncpu)。",
-    example: `--- a/kernel/main.c
-+++ b/kernel/main.c
-@@ -18,6 +18,7 @@
-     printk("\\n");
-     printk("xv6 kernel is booting\\n");
-     printk("\\n");
-+    printk("CPUS=%d\\n", 3);
-     kinit();            // physical page allocator`,
+    detail: "在 main() 里 procinit() 之后加一行 printk(\"CPUS=%d\\n\", 3)，让内核启动时报告核数。",
+    marker: "CPUS=",
   },
   {
     key: "hello",
     name: "任务三 · hello 系统调用",
-    file: "kernel/sysproc.c / syscall.c / syscall.h / user/usys.pl",
-    desc: "实现 hello() 返回 42，判分跑用户程序 hello",
-    detail: "平台会预置 user/hello.c 并加入构建。你需要：syscall.h 定义编号、sysproc.c 实现 sys_hello、syscall.c 注册、usys.pl 加桩。",
-    example: `--- a/kernel/syscall.h
-+++ b/kernel/syscall.h
-@@ -1,3 +1,4 @@
- #define SYS_fork 1
-+#define SYS_hello 22
- #define SYS_exit 2`,
+    file: "kernel/sysproc.c",
+    desc: "实现 sys_hello() 返回 42",
+    detail: "平台已经接好系统调用号、分发表和用户态桩，你只需要在 sysproc.c 末尾把 sys_hello 的返回值从 0 改成 42。判分会跑 echo 程序，检查输出 HELLO=42。",
+    marker: "HELLO=42",
   },
 ];
 
-const stages = ["复制源码", "应用补丁", "编译内核", "启动 QEMU", "执行测试", "判分"];
+const stages = ["复制源码", "写入你的代码", "编译内核", "启动 QEMU", "执行测试", "判分"];
 const task = ref("banner");
-const patch = ref("");
+const code = ref("");
+const template = ref<Record<string, any>>({});
 const running = ref(false);
 const activeStage = ref(-1);
 const result = ref<Record<string, any> | null>(null);
@@ -139,6 +123,16 @@ let timer: number | undefined;
 
 const current = computed(() => tasks.find((t) => t.key === task.value) || tasks[0]);
 const latest = computed(() => history.value.find((h) => h.task === task.value));
+
+const loadTemplate = async () => {
+  try {
+    const resp = await axios.get(`/api/kernel/task/${task.value}`);
+    template.value = resp.data;
+    code.value = resp.data.content || "";
+  } catch (e: any) {
+    Message.error(e?.message || "加载模板失败");
+  }
+};
 
 const loadHistory = async () => {
   try {
@@ -149,12 +143,11 @@ const loadHistory = async () => {
   }
 };
 
-const selectTask = (key: string) => {
+const selectTask = async (key: string) => {
   task.value = key;
-  patch.value = "";
   result.value = null;
   activeStage.value = -1;
-  loadHistory();
+  await Promise.all([loadTemplate(), loadHistory()]);
 };
 
 const submit = async () => {
@@ -165,7 +158,7 @@ const submit = async () => {
     if (activeStage.value < stages.length - 1) activeStage.value += 1;
   }, 2500);
   try {
-    const resp = await axios.post("/api/kernel/submit", { patch: patch.value, task: task.value }, { timeout: 420000 });
+    const resp = await axios.post("/api/kernel/submit", { task: task.value, content: code.value }, { timeout: 420000 });
     result.value = resp.data;
     activeStage.value = stages.length;
     if (resp.data.ok) Message.success("通过");
@@ -179,7 +172,9 @@ const submit = async () => {
   }
 };
 
-onMounted(loadHistory);
+onMounted(async () => {
+  await Promise.all([loadTemplate(), loadHistory()]);
+});
 </script>
 
 <style scoped>
@@ -192,14 +187,16 @@ onMounted(loadHistory);
 .kl-task-name { font-size: 13px; color: #3f3d36; }
 .kl-task-tag { font-size: 11px; color: #a09a8a; margin-top: 4px; }
 .kl-side-foot { margin-top: 18px; font-size: 11px; color: #b3ad9c; }
-.kl-main { flex: 1; padding: 20px 24px 40px; display: flex; flex-direction: column; gap: 14px; max-width: 1000px; }
+.kl-main { flex: 1; padding: 20px 24px 40px; display: flex; flex-direction: column; gap: 14px; max-width: 1040px; }
 .kl-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .kl-head h1 { margin: 0 0 6px; font-size: 20px; }
 .kl-head p { margin: 0; color: #6b675c; font-size: 13px; }
 .kl-panel { background: #fff; border: 1px solid #ece8da; border-radius: 12px; padding: 16px; }
 .kl-panel-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #3f3d36; }
+.kl-hint { font-weight: 400; color: #a09a8a; font-size: 12px; }
 .kl-text { margin: 0; font-size: 13px; line-height: 1.9; color: #55524a; }
-.kl-example { margin: 10px 0 0; background: #f7f5ec; border-radius: 8px; padding: 12px; font-size: 12px; line-height: 1.7; overflow-x: auto; }
+.kl-list { margin: 8px 0 0; padding-left: 18px; font-size: 13px; line-height: 1.9; color: #55524a; }
+.kl-editor { width: 100%; min-height: 340px; border: 1px solid #e5e0d0; border-radius: 8px; padding: 12px; font-family: Consolas, Monaco, monospace; font-size: 12.5px; line-height: 1.7; background: #fffdf7; resize: vertical; }
 .kl-actions { display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
 .kl-stages { display: flex; gap: 8px; flex-wrap: wrap; }
 .kl-stage { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #f4f2e9; color: #8a8578; font-size: 12px; }
