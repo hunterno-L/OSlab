@@ -25,7 +25,7 @@ const expectToken = (name, value) => {
   );
 };
 
-expectToken("oslab-canvas", "#edf1f6");
+expectToken("oslab-canvas", "#e6e9d1");
 expectToken("oslab-panel", "#ffffff");
 expectToken("oslab-panel-soft", "#f4f7fb");
 expectToken("oslab-panel-muted", "#e9eef5");

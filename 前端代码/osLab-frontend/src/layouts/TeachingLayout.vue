@@ -41,8 +41,6 @@ const hideSidebar = computed(() => route.meta.hideSidebar === true);
 }
 .themed-layout .content {
   background: transparent;
-  background-image: var(--oslab-canvas-dots);
-  background-size: var(--oslab-dot-grid-size);
   padding: var(--oslab-space-5) var(--oslab-space-8) var(--oslab-space-8);
   display: flex;
   gap: var(--oslab-space-4, 16px);
