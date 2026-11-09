@@ -84,7 +84,7 @@ public class KernelLabController {
     }
 
     static {
-        TASKS.put("banner", task("banner", "实验 1.1 内核启动横幅", "操作系统概述 · 系统启动",
+        TASKS.put("banner", task("banner", "实验 1.1 内核启动横幅", "第一章 启动与硬件 · 系统启动",
                 "kernel/main.c", "ZhiCore", "sleep 6", 20, "",
                 "xv6 启动后由 main() 初始化控制台、内存、进程和文件系统。本实验在内核启动路径上增加一行输出，确认你改的代码真的在硬件模拟器里跑起来了。",
                 "在 main() 中找到 printk(\"xv6 kernel is booting\\n\")，在它后面加一行 printk(\"ZhiCore\\n\")。注意保留换行符。",
@@ -93,34 +93,91 @@ public class KernelLabController {
                         "QEMU 串口输出就是判分依据"},
                 new String[]{"定位 main() 中的启动打印", "增加一行 printk 输出 ZhiCore", "提交后观察评测结果与内核日志"}));
 
-        TASKS.put("cpus", task("cpus", "实验 1.2 多核启动", "操作系统概述 · 多核与并发",
+        TASKS.put("cpus", task("cpus", "实验 1.2 多核启动", "第一章 启动与硬件 · 多核与并发",
                 "kernel/main.c", "CPUS=", "sleep 6", 20, "",
                 "xv6 启动时每个 hart 都会进入 main()，0 号核负责初始化，其余核等待。本实验打印核数，理解多核启动顺序。",
                 "在 procinit() 之后加一行 printk(\"CPUS=%d\\n\", 3)，输出 QEMU 配置的核数。",
                 new String[]{"hart 与 CPU 核的对应关系", "started 变量如何同步多核", "启动日志中的 hart 1/2 starting"},
                 new String[]{"找到 procinit() 调用位置", "在其后打印 CPUS= 与核数", "提交并核对日志顺序"}));
 
-        TASKS.put("pages", task("pages", "实验 3.1 物理内存页数", "内存管理 · 分页",
+        TASKS.put("memtop", task("memtop", "实验 1.3 物理内存上界", "第一章 启动与硬件 · 内存布局",
+                "kernel/main.c", "MEM=", "sleep 6", 20, "",
+                "xv6 用 PHYSTOP 标记物理内存上界，内核之后的内存由页分配器接管。本实验打印该上界，建立内核地址空间的范围感。",
+                "在 kvminit() 之后加一行 printk(\"MEM=%d\\n\", PHYSTOP)，PHYSTOP 定义在 memlayout.h。",
+                new String[]{"内核地址空间布局", "PHYSTOP 与 KERNBASE", "内核如何限制可用内存"},
+                new String[]{"确认 memlayout.h 已包含", "在 kvminit 后打印 PHYSTOP", "提交并核对输出"}));
+
+        TASKS.put("pages", task("pages", "实验 2.1 物理内存页数", "第二章 内存管理 · 分页",
                 "kernel/main.c", "PAGES=", "sleep 6", 20, "",
                 "xv6 把物理内存按 4KB 分页管理，PHYSTOP 是物理内存上界。本实验打印总页数，建立“内存被切成页”的直观认识。",
                 "在 kinit() 之后加一行 printk(\"PAGES=%d\\n\", PHYSTOP / PGSIZE)，PHYSTOP 与 PGSIZE 在 memlayout.h 中定义。",
                 new String[]{"PHYSTOP 与 PGSIZE 的含义", "kinit 如何把空闲页串成链表", "页号与物理地址的换算"},
                 new String[]{"确认 memlayout.h 已包含", "在 kinit 后打印页数", "提交并检查 PAGES= 数值"}));
 
-        TASKS.put("procs", task("procs", "实验 4.1 进程表容量", "进程管理 · 进程控制块",
+        TASKS.put("procs", task("procs", "实验 3.1 进程表容量", "第三章 进程管理 · 进程控制块",
                 "kernel/main.c", "PROCS=", "sleep 6", 20, "",
                 "xv6 用固定大小的进程表管理进程，NPROC 决定同时存在的进程上限。本实验打印该上限，理解进程控制块的静态分配。",
                 "在 procinit() 之后加一行 printk(\"PROCS=%d\\n\", NPROC)，NPROC 在 param.h 中定义。",
                 new String[]{"proc 结构与进程状态", "NPROC 静态数组的取舍", "进程表初始化 procinit"},
                 new String[]{"确认 param.h 已包含", "在 procinit 后打印 NPROC", "提交并核对输出"}));
 
-        TASKS.put("hello", task("hello", "实验 5.1 hello 系统调用", "系统调用 · 用户态与内核态",
+        TASKS.put("nfile", task("nfile", "实验 4.1 打开文件上限", "第四章 文件系统 · 文件表",
+                "kernel/main.c", "NFILE=", "sleep 6", 20, "",
+                "xv6 用全局文件表管理打开的文件，NFILE 是上限。本实验打印该上限，理解“文件描述符”背后的表结构。",
+                "在 fileinit() 之后加一行 printk(\"NFILE=%d\\n\", NFILE)，NFILE 在 param.h 中定义。",
+                new String[]{"file 结构与引用计数", "每进程 fd 表与全局文件表的关系", "fileinit 初始化时机"},
+                new String[]{"确认 param.h 已包含", "在 fileinit 后打印 NFILE", "提交并核对输出"}));
+
+        TASKS.put("ninode", task("ninode", "实验 4.2 inode 表容量", "第四章 文件系统 · inode",
+                "kernel/main.c", "NINODE=", "sleep 6", 20, "",
+                "inode 表缓存最近使用的磁盘 inode，NINODE 决定缓存大小。本实验打印该值，理解文件系统元数据的内存缓存。",
+                "在 iinit() 之后加一行 printk(\"NINODE=%d\\n\", NINODE)，NINODE 在 param.h 中定义。",
+                new String[]{"inode 与 dinode 的区别", "inode 缓存与磁盘读取", "iinit 的作用"},
+                new String[]{"确认 param.h 已包含", "在 iinit 后打印 NINODE", "提交并核对输出"}));
+
+        TASKS.put("hello", task("hello", "实验 5.1 hello 系统调用", "第五章 系统调用 · 用户态与内核态",
                 "kernel/sysproc.c", "HELLO=42", "sleep 4; printf 'echo\\n'; sleep 8", 30,
                 "cp -r /mnt/g/ZhiCore/kernel-lab/fixtures/hello/. .",
                 "系统调用是用户态进入内核的唯一入口。本实验实现 sys_hello() 返回 42，平台已预置系统调用号、分发表、用户态桩和测试程序，你只需要补全内核侧实现。",
                 "在 sysproc.c 末尾把 sys_hello 的返回值从 0 改成 42。判分会运行用户程序 echo，检查输出 HELLO=42。",
                 new String[]{"系统调用号与 syscall.h", "syscall() 如何按编号分发", "usys.pl 生成用户态桩", "返回值如何从内核传回用户态"},
                 new String[]{"阅读 sys_hello 骨架与上方 sys_uptime 写法", "把返回值改为 42", "提交后查看 echo 的输出"}));
+    }
+
+    @GetMapping("/stats")
+    public List<Map<String, Object>> stats(HttpServletRequest request) {
+        long userId = 0L;
+        try {
+            User user = userService.getLoginUser(request);
+            userId = user == null ? 0L : user.getId();
+        } catch (Exception ignored) {
+            // 未登录返回空统计
+        }
+        List<Map<String, Object>> rows = userId == 0
+                ? new ArrayList<>()
+                : jdbc.queryForList("SELECT task, COUNT(*) total, SUM(passed) passed, MAX(createTime) lastTime "
+                        + "FROM kernel_submission WHERE userId=? GROUP BY task", userId);
+        Map<String, Map<String, Object>> byTask = new LinkedHashMap<>();
+        for (Map<String, Object> row : rows) {
+            byTask.put(String.valueOf(row.get("task")), row);
+        }
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (TaskSpec spec : TASKS.values()) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("code", spec.code);
+            item.put("title", spec.title);
+            item.put("chapter", spec.chapter);
+            item.put("file", spec.file);
+            Map<String, Object> stat = byTask.get(spec.code);
+            int total = stat == null ? 0 : ((Number) stat.get("total")).intValue();
+            int passed = stat == null || stat.get("passed") == null ? 0 : ((Number) stat.get("passed")).intValue();
+            item.put("attempts", total);
+            item.put("passed", passed);
+            item.put("rate", total == 0 ? null : Math.round(passed * 100.0 / total));
+            item.put("lastTime", stat == null ? null : stat.get("lastTime"));
+            result.add(item);
+        }
+        return result;
     }
 
     private static final Map<String, String> COMMENTS = new LinkedHashMap<>();

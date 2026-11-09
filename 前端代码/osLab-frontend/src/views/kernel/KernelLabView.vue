@@ -2,7 +2,7 @@
   <div class="lab">
     <div class="lab-top">
       <div class="lab-top-left">
-        <router-link to="/experiments" class="lab-back">← 返回编程实验</router-link>
+        <router-link to="/kernel" class="lab-back">← 返回内核实验</router-link>
         <div class="lab-title-row">
           <span class="lab-tag">内核实验</span>
           <h1>{{ meta.title || "加载中…" }}</h1>
@@ -103,13 +103,16 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { Message } from "@arco-design/web-vue";
 
 const tabs = ["实验说明", "知识要点", "实验任务"];
+const route = useRoute();
+const router = useRouter();
 const activeTab = ref("实验说明");
 const taskList = ref<Array<Record<string, any>>>([]);
-const task = ref("banner");
+const task = ref(String(route.params.code || "banner"));
 const meta = ref<Record<string, any>>({});
 const code = ref("");
 const running = ref(false);
@@ -163,6 +166,7 @@ const loadHistory = async () => {
 const selectTask = async () => {
   result.value = null;
   activeStage.value = -1;
+  router.replace(`/kernel/lab/${task.value}`);
   await Promise.all([loadTemplate(), loadHistory()]);
 };
 
@@ -205,6 +209,10 @@ const submit = async () => {
 
 onMounted(async () => {
   await loadTasks();
+  const code = String(route.params.code || "");
+  if (code && (taskList.value.length === 0 || taskList.value.some((t) => t.code === code))) {
+    task.value = code;
+  }
   await selectTask();
 });
 </script>

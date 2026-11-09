@@ -86,6 +86,12 @@ export const routes: Array<RouteRecordRaw> = [
     {
       path: "/kernel",
       name: "内核实验",
+      component: () => import("@/views/kernel/KernelListView.vue"),
+      meta: { access: ACCESS_ENUM.USER, navKey: "kernel", pageTitle: "内核实验" },
+    },
+    {
+      path: "/kernel/lab/:code",
+      name: "内核实验工作区",
       component: () => import("@/views/kernel/KernelLabView.vue"),
       meta: { access: ACCESS_ENUM.USER, navKey: "kernel", pageTitle: "内核实验" },
     },
