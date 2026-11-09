@@ -450,6 +450,30 @@ public class AiPlatformService {
         return result;
     }
 
+    public Map<String, Object> probe(long userId, String nodeCode) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT q.id,q.title,q.options,q.type FROM learning_question q "
+                        + "JOIN learning_question_node n ON n.questionId=q.id "
+                        + "WHERE n.nodeCode=? AND q.isDelete=0 AND q.type IN ('SINGLE','JUDGE','MULTIPLE') "
+                        + "ORDER BY q.id LIMIT 2", nodeCode);
+        List<Map<String, Object>> questions = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("questionId", row.get("id"));
+            item.put("title", row.get("title"));
+            item.put("type", row.get("type"));
+            item.put("options", row.get("options"));
+            questions.add(item);
+        }
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("nodeCode", nodeCode);
+        result.put("questions", questions);
+        result.put("note", questions.isEmpty()
+                ? "该节点没有可用于验证的短题，保留当前判断的不确定性。"
+                : "先用这两道短题验证，再更新薄弱点结论。");
+        return result;
+    }
+
     public void recordHelp(long userId, Map<String, Object> body) {
         String sessionId = str(body.get("sessionId"));
         String type = str(body.get("eventType"));

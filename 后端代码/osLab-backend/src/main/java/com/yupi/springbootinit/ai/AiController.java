@@ -87,6 +87,12 @@ public class AiController {
         return ResultUtils.success(aiPlatformService.diagnose(login(request).getId(), nodeCode, courseCode));
     }
 
+    @GetMapping("/probe")
+    public BaseResponse<Map<String, Object>> probe(@RequestParam("nodeCode") String nodeCode,
+                                                   HttpServletRequest request) {
+        return ResultUtils.success(aiPlatformService.probe(login(request).getId(), nodeCode));
+    }
+
     @PostMapping("/help")
     public BaseResponse<Boolean> recordHelp(@RequestBody Map<String, Object> body,
                                             HttpServletRequest request) {

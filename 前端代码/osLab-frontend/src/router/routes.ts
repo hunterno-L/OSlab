@@ -40,6 +40,8 @@ const TeachingTaskEditorView = () =>
   import("@/views/tasks/TeachingTaskEditorView.vue");
 const TeachingTaskReviewView = () =>
   import("@/views/tasks/TeachingTaskReviewView.vue");
+const AiWorkspaceView = () => import("@/views/ai/AiWorkspaceView.vue");
+const AiSettingsView = () => import("@/views/ai/AiSettingsView.vue");
 
 /**
  * Phase 1 路由重构：嵌套布局壳 + 规范路径 + 旧路径兼容重定向（保留 query/params）。
@@ -462,6 +464,18 @@ export const routes: Array<RouteRecordRaw> = [
     path: "/knowledge-graph",
     redirect: () => ({ path: "/graph" }),
     meta: { hideInMenu: true },
+  },
+  {
+    path: "/ai",
+    name: "AI 学习助手",
+    component: AiWorkspaceView,
+    meta: { access: ACCESS_ENUM.USER },
+  },
+  {
+    path: "/ai/settings",
+    name: "AI 模型设置",
+    component: AiSettingsView,
+    meta: { access: ACCESS_ENUM.USER },
   },
   {
     path: "/noAuth",
