@@ -1,79 +1,93 @@
 <template>
-  <div class="kl-page">
-    <header class="kl-head">
-      <div>
-        <h1>真实内核实验 · xv6</h1>
-        <p>改的是真内核：补丁提交后编译、在 QEMU 里启动、检查内核输出。不是模拟动画。</p>
+  <div class="kl-workspace">
+    <aside class="kl-side">
+      <div class="kl-side-title">内核实验</div>
+      <div
+        v-for="item in tasks"
+        :key="item.key"
+        class="kl-task"
+        :class="{ active: task === item.key }"
+        @click="selectTask(item.key)"
+      >
+        <div class="kl-task-name">{{ item.name }}</div>
+        <div class="kl-task-tag">{{ item.file }}</div>
       </div>
-      <a-tag color="arcoblue">RISC-V · QEMU</a-tag>
-    </header>
+      <div class="kl-side-foot">RISC-V · QEMU · xv6</div>
+    </aside>
 
-    <a-card class="kl-card" title="这个实验是什么">
-      <p class="kl-text">
-        xv6 是 MIT 的教学操作系统，几千行代码，跑在 RISC-V 上。你在这里修改它的内核源码，
-        平台会把补丁应用到源码、重新编译、在 QEMU 里启动，只有内核真的输出了指定内容才算通过。
-      </p>
-      <a-divider />
-      <p class="kl-text"><strong>可选任务</strong></p>
-      <ol class="kl-list">
-        <li><strong>启动横幅</strong>：在 <code>kernel/main.c</code> 打印 <code>ZhiCore</code>，判分看内核启动日志</li>
-        <li><strong>CPU 数量</strong>：启动时打印 <code>CPUS=</code> 和核数，判分看日志里的标记</li>
-        <li><strong>系统调用</strong>：实现 <code>hello()</code> 返回 42，判分跑用户程序 <code>hello</code> 看输出</li>
-      </ol>
-      <p class="kl-text"><strong>判分步骤</strong></p>
-      <ol class="kl-list">
-        <li>复制一份干净的 xv6 源码到临时目录</li>
-        <li>把你的 unified diff 应用上去（补丁失败直接判 PATCH_ERROR）</li>
-        <li>用 riscv 交叉编译器编译内核和文件系统镜像</li>
-        <li>在 QEMU 里启动这个内核</li>
-        <li>执行任务对应的验证命令，抓内核输出</li>
-        <li>输出里出现约定标记才判 PASS，否则 FAIL</li>
-      </ol>
-      <pre class="kl-example">--- a/kernel/main.c
-+++ b/kernel/main.c
-@@ -18,7 +18,8 @@
-     consoleinit();
-     printkinit();
-     printk("\n");
-     printk("xv6 kernel is booting\n");
-+    printk("ZhiCore\n");
-     printk("\n");
-     kinit();            // physical page allocator</pre>
-    </a-card>
-
-    <a-card class="kl-card" title="提交补丁">
-      <a-textarea v-model="patch" :auto-size="{ minRows: 8, maxRows: 16 }" placeholder="粘贴 unified diff" />
-      <div class="kl-actions">
-        <a-select v-model="task" style="width: 220px">
-          <a-option value="banner">任务一：启动横幅</a-option>
-          <a-option value="cpus">任务二：CPU 数量</a-option>
-          <a-option value="hello">任务三：hello 系统调用</a-option>
-        </a-select>
-        <a-button type="primary" :loading="running" @click="submit">提交并判分</a-button>
-        <a-button :disabled="running" @click="patch = EXAMPLE">填入示例</a-button>
-        <a-tag v-if="result" :color="result.ok ? 'green' : 'red'">{{ result.stage }} · {{ result.seconds }}s</a-tag>
-      </div>
-    </a-card>
-
-    <a-card class="kl-card" title="判题过程">
-      <div class="kl-stages">
-        <div v-for="(stage, index) in stages" :key="stage" class="kl-stage"
-             :class="{ on: running && index === activeStage, done: index < activeStage || (!running && result) }">
-          <span class="kl-dot" />
-          <span>{{ stage }}</span>
+    <main class="kl-main">
+      <header class="kl-head">
+        <div>
+          <h1>{{ current.name }}</h1>
+          <p>{{ current.desc }}</p>
         </div>
-      </div>
-      <pre v-if="result" class="kl-log">{{ result.log || result.error }}</pre>
-    </a-card>
+        <a-tag :color="latest && latest.passed ? 'green' : 'gray'">
+          {{ latest ? (latest.passed ? "已通过" : "未通过") : "未提交" }}
+        </a-tag>
+      </header>
+
+      <section class="kl-panel">
+        <div class="kl-panel-title">任务说明</div>
+        <p class="kl-text">{{ current.detail }}</p>
+        <pre class="kl-example">{{ current.example }}</pre>
+      </section>
+
+      <section class="kl-panel">
+        <div class="kl-panel-title">提交补丁（unified diff）</div>
+        <a-textarea v-model="patch" :auto-size="{ minRows: 10, maxRows: 18 }" placeholder="--- a/kernel/... +++ b/kernel/..." />
+        <div class="kl-actions">
+          <a-button type="primary" :loading="running" @click="submit">提交并判分</a-button>
+          <a-button :disabled="running" @click="patch = current.example">填入示例</a-button>
+          <a-tag v-if="result" :color="result.ok ? 'green' : 'red'">{{ result.stage }} · {{ result.seconds }}s</a-tag>
+        </div>
+      </section>
+
+      <section v-if="running || result" class="kl-panel">
+        <div class="kl-panel-title">判题过程</div>
+        <div class="kl-stages">
+          <div v-for="(stage, index) in stages" :key="stage" class="kl-stage"
+               :class="{ on: running && index === activeStage, done: (!running && result) || index < activeStage }">
+            <span class="kl-dot" />{{ stage }}
+          </div>
+        </div>
+        <pre v-if="result" class="kl-log">{{ result.log || result.error }}</pre>
+      </section>
+
+      <section class="kl-panel">
+        <div class="kl-panel-title">我的提交</div>
+        <a-table :data="history" :pagination="false" size="small" row-key="id">
+          <template #columns>
+            <a-table-column title="任务" data-index="task" />
+            <a-table-column title="结果">
+              <template #cell="{ record }">
+                <a-tag :color="record.passed ? 'green' : 'red'">{{ record.stage }}</a-tag>
+              </template>
+            </a-table-column>
+            <a-table-column title="耗时(s)" data-index="seconds" />
+            <a-table-column title="时间" data-index="createTime" />
+          </template>
+        </a-table>
+        <a-empty v-if="!history.length" description="还没有提交记录" />
+      </section>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import axios from "axios";
 import { Message } from "@arco-design/web-vue";
 
-const EXAMPLE = `--- a/kernel/main.c
+type Task = { key: string; name: string; file: string; desc: string; detail: string; example: string };
+
+const tasks: Task[] = [
+  {
+    key: "banner",
+    name: "任务一 · 启动横幅",
+    file: "kernel/main.c",
+    desc: "让内核启动时多打印一行 ZhiCore",
+    detail: "在 main() 里已有的 printk(\"xv6 kernel is booting\\n\") 后面加一行输出。判分检查内核启动日志。",
+    example: `--- a/kernel/main.c
 +++ b/kernel/main.c
 @@ -18,7 +18,8 @@
      consoleinit();
@@ -82,33 +96,81 @@ const EXAMPLE = `--- a/kernel/main.c
      printk("xv6 kernel is booting\\n");
 +    printk("ZhiCore\\n");
      printk("\\n");
-     kinit();            // physical page allocator`;
+     kinit();            // physical page allocator`,
+  },
+  {
+    key: "cpus",
+    name: "任务二 · CPU 数量",
+    file: "kernel/main.c",
+    desc: "启动时打印 CPUS= 和核数",
+    detail: "xv6 在 proc.c 里维护 ncpu，defs.h 已声明。可在 procinit() 之后打印 printk(\"CPUS=%d\\n\", ncpu)。",
+    example: `--- a/kernel/main.c
++++ b/kernel/main.c
+@@ -18,6 +18,7 @@
+     printk("\\n");
+     printk("xv6 kernel is booting\\n");
+     printk("\\n");
++    printk("CPUS=%d\\n", 3);
+     kinit();            // physical page allocator`,
+  },
+  {
+    key: "hello",
+    name: "任务三 · hello 系统调用",
+    file: "kernel/sysproc.c / syscall.c / syscall.h / user/usys.pl",
+    desc: "实现 hello() 返回 42，判分跑用户程序 hello",
+    detail: "平台会预置 user/hello.c 并加入构建。你需要：syscall.h 定义编号、sysproc.c 实现 sys_hello、syscall.c 注册、usys.pl 加桩。",
+    example: `--- a/kernel/syscall.h
++++ b/kernel/syscall.h
+@@ -1,3 +1,4 @@
+ #define SYS_fork 1
++#define SYS_hello 22
+ #define SYS_exit 2`,
+  },
+];
 
 const stages = ["复制源码", "应用补丁", "编译内核", "启动 QEMU", "执行测试", "判分"];
-const patch = ref("");
 const task = ref("banner");
+const patch = ref("");
 const running = ref(false);
 const activeStage = ref(-1);
 const result = ref<Record<string, any> | null>(null);
+const history = ref<any[]>([]);
 let timer: number | undefined;
 
-const tick = () => {
-  timer = window.setInterval(() => {
-    if (activeStage.value < stages.length - 1) activeStage.value += 1;
-  }, 2500);
+const current = computed(() => tasks.find((t) => t.key === task.value) || tasks[0]);
+const latest = computed(() => history.value.find((h) => h.task === task.value));
+
+const loadHistory = async () => {
+  try {
+    const resp = await axios.get("/api/kernel/submissions", { params: { task: task.value } });
+    history.value = resp.data || [];
+  } catch {
+    history.value = [];
+  }
+};
+
+const selectTask = (key: string) => {
+  task.value = key;
+  patch.value = "";
+  result.value = null;
+  activeStage.value = -1;
+  loadHistory();
 };
 
 const submit = async () => {
   running.value = true;
   result.value = null;
   activeStage.value = 0;
-  tick();
+  timer = window.setInterval(() => {
+    if (activeStage.value < stages.length - 1) activeStage.value += 1;
+  }, 2500);
   try {
     const resp = await axios.post("/api/kernel/submit", { patch: patch.value, task: task.value }, { timeout: 420000 });
     result.value = resp.data;
     activeStage.value = stages.length;
     if (resp.data.ok) Message.success("通过");
     else Message.warning(resp.data.stage || "未通过");
+    await loadHistory();
   } catch (e: any) {
     Message.error(e?.message || "提交失败");
   } finally {
@@ -116,22 +178,33 @@ const submit = async () => {
     if (timer) window.clearInterval(timer);
   }
 };
+
+onMounted(loadHistory);
 </script>
 
 <style scoped>
-.kl-page { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; display: flex; flex-direction: column; gap: 16px; }
-.kl-head { display: flex; justify-content: space-between; align-items: center; }
-.kl-head h1 { margin: 0 0 6px; font-size: 22px; }
+.kl-workspace { display: flex; min-height: calc(100vh - 140px); background: #faf9f3; }
+.kl-side { width: 240px; border-right: 1px solid #ece8da; padding: 18px 14px; background: #fffdf6; }
+.kl-side-title { font-size: 13px; color: #8a8578; margin-bottom: 12px; letter-spacing: 0.08em; }
+.kl-task { padding: 10px 12px; border-radius: 10px; cursor: pointer; margin-bottom: 8px; border: 1px solid transparent; }
+.kl-task:hover { background: #f6f3e6; }
+.kl-task.active { background: #fdf4d6; border-color: #e6d48a; }
+.kl-task-name { font-size: 13px; color: #3f3d36; }
+.kl-task-tag { font-size: 11px; color: #a09a8a; margin-top: 4px; }
+.kl-side-foot { margin-top: 18px; font-size: 11px; color: #b3ad9c; }
+.kl-main { flex: 1; padding: 20px 24px 40px; display: flex; flex-direction: column; gap: 14px; max-width: 1000px; }
+.kl-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.kl-head h1 { margin: 0 0 6px; font-size: 20px; }
 .kl-head p { margin: 0; color: #6b675c; font-size: 13px; }
-.kl-card { border-radius: 12px; }
-.kl-text { font-size: 14px; line-height: 1.9; color: #3f3d36; margin: 0; }
-.kl-list { margin: 8px 0 0; padding-left: 18px; font-size: 13px; line-height: 1.9; color: #55524a; }
-.kl-example { background: #f7f5ec; border-radius: 8px; padding: 12px; font-size: 12px; line-height: 1.7; overflow-x: auto; }
+.kl-panel { background: #fff; border: 1px solid #ece8da; border-radius: 12px; padding: 16px; }
+.kl-panel-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #3f3d36; }
+.kl-text { margin: 0; font-size: 13px; line-height: 1.9; color: #55524a; }
+.kl-example { margin: 10px 0 0; background: #f7f5ec; border-radius: 8px; padding: 12px; font-size: 12px; line-height: 1.7; overflow-x: auto; }
 .kl-actions { display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
 .kl-stages { display: flex; gap: 8px; flex-wrap: wrap; }
-.kl-stage { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #f4f2e9; color: #8a8578; font-size: 12px; transition: 0.3s; }
+.kl-stage { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #f4f2e9; color: #8a8578; font-size: 12px; }
 .kl-stage.on { background: #fdf0c9; color: #6b5b17; }
 .kl-stage.done { background: #e9f2e4; color: #3d6b2f; }
 .kl-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.kl-log { margin-top: 14px; max-height: 420px; overflow: auto; background: #1f1e1a; color: #e8e4d8; padding: 14px; border-radius: 8px; font-size: 12px; line-height: 1.7; white-space: pre-wrap; }
+.kl-log { margin-top: 12px; max-height: 360px; overflow: auto; background: #1f1e1a; color: #e8e4d8; padding: 14px; border-radius: 8px; font-size: 12px; line-height: 1.7; white-space: pre-wrap; }
 </style>

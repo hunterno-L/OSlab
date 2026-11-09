@@ -26,8 +26,8 @@
     <a-card class="ai-card" title="提问">
       <a-textarea v-model="question" :auto-size="{ minRows: 3, maxRows: 6 }" placeholder="例如：缺页中断和页面置换是什么关系？" />
       <div class="ai-actions">
-        <a-button type="primary" :loading="asking" :disabled="!sessionId || !question.trim()" @click="ask">提问</a-button>
-        <a-button :loading="planning" :disabled="!sessionId" @click="loadPlan">生成下一步</a-button>
+        <a-button type="primary" :loading="asking" :disabled="!question.trim()" @click="ask">提问</a-button>
+        <a-button :loading="planning" @click="loadPlan">生成下一步</a-button>
         <a-tag v-if="answer" :color="answer.mode === 'MODEL' ? 'green' : 'orange'">
           {{ answer.mode === "MODEL" ? "模型回答" : "降级回答" }}
         </a-tag>
@@ -115,6 +115,10 @@ const start = async () => {
 const ask = async () => {
   asking.value = true;
   try {
+    if (!sessionId.value) {
+      await start();
+      if (!sessionId.value) return;
+    }
     answer.value = await aiApi.ask({ sessionId: sessionId.value, question: question.value });
     await aiApi.help({ sessionId: sessionId.value, eventType: "TUTOR_ANSWER", payload: { question: question.value } });
   } catch (e: any) {
@@ -127,8 +131,15 @@ const ask = async () => {
 const loadPlan = async () => {
   planning.value = true;
   try {
+    if (!sessionId.value) {
+      await start();
+      if (!sessionId.value) return;
+    }
     const data = await aiApi.plan({ sessionId: sessionId.value });
     tasks.value = data.tasks || [];
+    if (!tasks.value.length) {
+      Message.info("暂时没有可安排的下一步，先完成一次练习或测评");
+    }
   } catch (e: any) {
     Message.error(e?.message || "生成计划失败");
   } finally {

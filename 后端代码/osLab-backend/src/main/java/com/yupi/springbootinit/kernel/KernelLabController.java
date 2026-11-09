@@ -1,9 +1,17 @@
 package com.yupi.springbootinit.kernel;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import com.yupi.springbootinit.model.entity.User;
+import com.yupi.springbootinit.service.UserService;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -24,6 +32,12 @@ public class KernelLabController {
 
     private static final String STARTER = "/mnt/g/ZhiCore/kernel-lab/xv6-lab/xv6-riscv";
     private static final String WORK = "/mnt/g/ZhiCore/kernel-lab/web-run";
+
+    @Resource
+    private org.springframework.jdbc.core.JdbcTemplate jdbc;
+
+    @Resource
+    private UserService userService;
 
     /** marker, 运行命令, 等待秒数, 预置脚本 */
     private static final Map<String, String[]> TASKS = new LinkedHashMap<>();
@@ -47,7 +61,7 @@ public class KernelLabController {
     );
 
     @PostMapping("/submit")
-    public Map<String, Object> submit(@RequestBody Map<String, Object> body) {
+    public Map<String, Object> submit(@RequestBody Map<String, Object> body, HttpServletRequest request) {
         String patch = body == null || body.get("patch") == null ? "" : String.valueOf(body.get("patch"));
         String task = body == null || body.get("task") == null ? "banner" : String.valueOf(body.get("task"));
         Map<String, Object> result = new LinkedHashMap<>();
@@ -118,7 +132,39 @@ public class KernelLabController {
                 : output.contains("BUILD_FAILED") ? "BUILD_ERROR"
                 : pass ? "PASS" : "FAIL");
         result.put("log", output.length() > 4000 ? output.substring(output.length() - 4000) : output);
+        long userId = 0L;
+        try {
+            User user = userService.getLoginUser(request);
+            userId = user == null ? 0L : user.getId();
+        } catch (Exception ignored) {
+            // 未登录也允许跑，只是不记录
+        }
+        if (userId > 0) {
+            try {
+                jdbc.update("INSERT INTO kernel_submission (id,userId,task,stage,passed,seconds,patchHash,patchText,logTail) "
+                                + "VALUES (?,?,?,?,?,?,?,?,?)",
+                        System.currentTimeMillis() * 1000 + (long) (Math.random() * 1000),
+                        userId, task, (String) result.get("stage"), pass ? 1 : 0,
+                        new java.math.BigDecimal(String.valueOf(result.get("seconds"))),
+                        Integer.toHexString(patch.hashCode()), patch,
+                        String.valueOf(result.get("log")));
+            } catch (Exception ignored) {
+                // 记录失败不影响判分结果
+            }
+        }
         return result;
+    }
+
+    @GetMapping("/submissions")
+    public List<Map<String, Object>> submissions(@RequestParam(value = "task", required = false) String task,
+                                                 HttpServletRequest request) {
+        User user = userService.getLoginUser(request);
+        if (task != null && !task.isEmpty()) {
+            return jdbc.queryForList("SELECT id,task,stage,passed,seconds,createTime FROM kernel_submission "
+                    + "WHERE userId=? AND task=? ORDER BY id DESC LIMIT 20", user.getId(), task);
+        }
+        return jdbc.queryForList("SELECT id,task,stage,passed,seconds,createTime FROM kernel_submission "
+                + "WHERE userId=? ORDER BY id DESC LIMIT 20", user.getId());
     }
 
     @PostMapping("/run")
