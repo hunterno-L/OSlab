@@ -26,47 +26,30 @@
 
 /* ---------- 1) 设计令牌 ---------- */
 :root {
-  /* C+B 学习图册：浅冷蓝纸面、索引卡、荧光笔、珊瑚批注。
+  /* C+B 学习图册：Qoder 通用模式的浅绿纸面、索引卡、荧光笔、珊瑚批注。
      工作区（登录后全部页面）使用这一套纸面令牌；公开页页壳改用
      下方 --public-* 令牌，两套主题互不串色。 */
-  --oslab-canvas: #edf1f6;
+  --oslab-canvas: #e6e9d1;
   --oslab-panel: #ffffff;
   --oslab-panel-soft: #f4f7fb;
   --oslab-panel-muted: #e9eef5;
 
-  /* 浅冷蓝纸面微光：全站固定视口背景层（body::before），长页面不会拉伸渐变。
-     冷蓝灰基底 + 极淡钴蓝/青绿光晕，静态、几乎不可察觉，
-     只做纸面在自然光下的过渡，不做装饰性光斑。 */
-  --oslab-glow-cool: rgba(126, 158, 190, 0.16); /* 冷蓝灰 */
-  --oslab-glow-mist: rgba(146, 186, 205, 0.13); /* 青绿雾 */
-  --oslab-glow-cobalt: rgba(36, 71, 216, 0.045); /* 钴蓝余辉 */
-  --oslab-glow-lamp: rgba(242, 214, 75, 0.04); /* 极淡荧光黄 */
+  /* Qoder 通用模式的浅绿渐变：顶部青黄纸光 → 中段浅灰绿 → 底部鼠尾草。
+     全站固定视口背景层（body::before），长页面不会拉伸渐变；静态、
+     柔和，不做装饰性光斑，也不铺点阵。 */
   --oslab-canvas-gradient: radial-gradient(
-      92% 62% at 6% -6%,
-      var(--oslab-glow-cool),
+      130% 80% at 50% -18%,
+      rgba(252, 253, 235, 0.5),
       transparent 62%
     ),
-    radial-gradient(78% 58% at 96% 4%, var(--oslab-glow-mist), transparent 64%),
-    radial-gradient(
-      64% 48% at 84% 98%,
-      var(--oslab-glow-cobalt),
-      transparent 66%
-    ),
-    radial-gradient(54% 42% at 12% 86%, var(--oslab-glow-lamp), transparent 62%),
-    linear-gradient(172deg, #f3f6fa 0%, var(--oslab-canvas) 46%, #e4eaf2 100%);
-  /* 纸面点阵：只在学习/教师工作区内容区保留，比上一版更淡、静态 */
-  --oslab-canvas-dots: radial-gradient(
-    rgba(32, 36, 43, 0.04) 1px,
-    transparent 1px
-  );
-  --oslab-dot-grid-size: 22px 22px;
+    linear-gradient(180deg, #eaebc8 0%, #e3e6ce 54%, #dde2d4 100%);
 
   /* 文本 */
   --oslab-ink: #20242b;
   --oslab-ink-soft: #3a4150;
-  /* 次级文字：10–11px 小字在冷蓝纸面/白色面板上仍需 ≥4.5:1 */
+  /* 次级文字：10–11px 小字在浅绿纸面/白色面板上仍需 ≥4.5:1 */
   --oslab-muted: #5f6873;
-  /* 辅助文字在冷蓝渐变最深处仍需 ≥4.5:1（≈6:1） */
+  /* 辅助文字在浅绿渐变最深处仍需 ≥4.5:1（≈5.5:1） */
   --oslab-muted-strong: #525b66;
 
   /* 边线 */
@@ -238,31 +221,9 @@ body[data-theme="public"]::before {
   background-image: none;
 }
 
-/* 弹性滚动到页面边缘时不露出冷纸色（不支持 :has 的浏览器退回 body 底色） */
+/* 弹性滚动到页面边缘时不露出浅色纸面（不支持 :has 的浏览器退回 body 底色） */
 html:has(body[data-theme="public"]) {
   background-color: var(--public-bg-deep);
-}
-
-/* 窄屏收紧光晕半径，避免大面积渐变在 390px 宽度里显得脏 */
-@media (max-width: 640px) {
-  :root {
-    --oslab-canvas-gradient: radial-gradient(
-        150% 48% at 12% -6%,
-        var(--oslab-glow-cool),
-        transparent 70%
-      ),
-      radial-gradient(
-        130% 42% at 100% 10%,
-        var(--oslab-glow-mist),
-        transparent 72%
-      ),
-      radial-gradient(
-        110% 38% at 68% 104%,
-        var(--oslab-glow-cobalt),
-        transparent 74%
-      ),
-      linear-gradient(178deg, #f2f5f9 0%, var(--oslab-canvas) 55%, #e4eaf2 100%);
-  }
 }
 
 /* 浏览器自带表面也归设计系统：选区用荧光笔，光标用钴蓝 */

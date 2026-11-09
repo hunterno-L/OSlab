@@ -2,13 +2,13 @@
 
 ## 1. Overview
 
-**Creative North Star: 「深蓝星图 + 浅冷蓝纸面」**
+**Creative North Star: 「深蓝星图 + Qoder 浅绿纸面」**
 
-register: product。同一品牌语言分两套页面壳：公开页（`/welcome`、`/user/login`、`/user/register`）是深墨蓝星图，白卡像浮起的纸；登录后的工作区（`/home`、`/graph`、`/teaching/*` 等）是浅冷蓝纸面，服务表格、编辑器与长时间阅读。白卡、表单、表格内部始终使用纸面令牌，深底不会把卡内文字变浅。
+register: product。同一品牌语言分两套页面壳：公开页（`/welcome`、`/user/login`、`/user/register`）是深墨蓝星图，白卡像浮起的纸；登录后的工作区（`/home`、`/graph`、`/teaching/*` 等）是 Qoder 通用模式的浅绿纸面，服务表格、编辑器与长时间阅读。白卡、表单、表格内部始终使用纸面令牌，深底不会把卡内文字变浅。
 
 明确拒绝：紫蓝泛 AI 渐变、玻璃拟态、霓虹赛博朋克、渐变文字、装饰性光斑/blob、斜纹背景、通用 AI SaaS 模板、游戏化弹跳动画、用颜色或动效伪装 AI 能力。
 
-**Key Characteristics:** 深蓝页壳与浅蓝纸面；钴蓝只做主动作与当前项；荧光笔只标“现在”；状态色只表达学习结果；全站仅保留 hero 星图漂移这一处签名动效。
+**Key Characteristics:** 深蓝页壳与浅绿纸面；钴蓝只做主动作与当前项；荧光笔只标“现在”；状态色只表达学习结果；全站仅保留 hero 星图漂移这一处签名动效。
 
 ## 2. Theme Architecture
 
@@ -17,15 +17,15 @@ register: product。同一品牌语言分两套页面壳：公开页（`/welcome
 - `public`：`/welcome`、`/user/login`、`/user/register`
 - `workspace`：其余全部路由
 
-`body[data-theme="public"]::before` 换成深墨蓝；`body[data-theme="public"] .public-sky` 显示星图；`workspace` 下星图 `display:none`，沿用 `body::before` 的冷蓝纸面渐变。公开页令牌只被页壳、页头、hero、分节标题、页脚消费。
+`body[data-theme="public"]::before` 换成深墨蓝；`body[data-theme="public"] .public-sky` 显示星图；`workspace` 下星图 `display:none`，沿用 `body::before` 的浅绿纸面渐变。公开页令牌只被页壳、页头、hero、分节标题、页脚消费。
 
 ## 3. Colors
 
 ### Workspace（纸面，登录后）
-- 画布 `#edf1f6`；次级面板 `#f4f7fb`；嵌套/选中 `#e9eef5`；主面板 `#ffffff`。
+- 画布 `#e6e9d1`；次级面板 `#f4f7fb`；嵌套/选中 `#e9eef5`；主面板 `#ffffff`。
 - 边线 `#dbe2ea` / `#e9eef4` / `#c3cedb`。
-- 文本 主 `#20242b`，次 `#3a4150`，辅助 `#5f6873`（画布 ≈5.0:1），强辅助 `#525b66`（≈6.1:1）。
-- 固定背景 `--oslab-canvas-gradient`：`172deg` 冷蓝灰线性渐变叠 2 层冷蓝/青绿光晕（`rgba(126,158,190,.16)`、`rgba(146,186,205,.13)`）与极淡钴蓝、荧光黄余辉；静态。内容区另有 22px 点阵 `rgba(32,36,43,.04)`，比渐变更淡。
+- 文本 主 `#20242b`，次 `#3a4150`，辅助 `#5f6873`（画布 ≈4.6:1），强辅助 `#525b66`（≈5.5:1）。
+- 固定背景 `--oslab-canvas-gradient`：`180deg` 浅绿线性渐变（`#eaebc8 → #e3e6ce 54% → #dde2d4`）叠顶部极淡纸光 `rgba(252,253,235,.5)`；静态、平滑，不铺点阵。
 
 ### Public（星图，公开页）
 - 基底 `--public-bg` `#070d1c`，深端 `#040913`；线性渐变 `#081020 → #070d1c → #040913`。

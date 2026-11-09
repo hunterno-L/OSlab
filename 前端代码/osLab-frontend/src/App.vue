@@ -132,7 +132,7 @@ const AiMaterialDialog = defineAsyncComponent(
 );
 
 // 主题壳：公开页（/welcome、/user/login、/user/register）用深蓝星图，
-// 其余登录后页面用浅冷蓝纸面。写在 body 上，CSS 只在页面壳层消费，
+// 其余登录后页面用 Qoder 浅绿纸面。写在 body 上，CSS 只在页面壳层消费，
 // 白卡/表单/表格继续使用纸面令牌，不随主题变浅。
 const PUBLIC_PATHS = new Set(["/welcome", "/user/login", "/user/register"]);
 const router = useRouter();
@@ -151,7 +151,7 @@ function applyTheme(path: string) {
   if (themeColor) {
     themeColor.setAttribute(
       "content",
-      theme === "public" ? "#070d1c" : "#edf1f6"
+      theme === "public" ? "#070d1c" : "#e6e9d1"
     );
   }
 }
