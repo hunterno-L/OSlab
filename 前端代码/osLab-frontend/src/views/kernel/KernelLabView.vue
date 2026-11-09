@@ -1,77 +1,100 @@
 <template>
-  <div class="kl-workspace">
-    <aside class="kl-side">
-      <div class="kl-side-title">内核实验</div>
-      <div v-for="item in tasks" :key="item.key" class="kl-task"
-           :class="{ active: task === item.key }" @click="selectTask(item.key)">
-        <div class="kl-task-name">{{ item.name }}</div>
-        <div class="kl-task-tag">{{ item.file }}</div>
+  <div class="lab">
+    <div class="lab-top">
+      <div class="lab-top-left">
+        <router-link to="/experiments" class="lab-back">← 返回编程实验</router-link>
+        <div class="lab-title-row">
+          <span class="lab-tag">内核实验</span>
+          <h1>{{ meta.title || "加载中…" }}</h1>
+        </div>
+        <div class="lab-crumb">{{ meta.chapter }} · {{ meta.path }}</div>
       </div>
-      <div class="kl-side-foot">RISC-V · QEMU · xv6</div>
-    </aside>
+      <div class="lab-top-right">
+        <a-select v-model="task" style="width: 220px" @change="selectTask">
+          <a-option v-for="item in taskList" :key="item.code" :value="item.code">
+            {{ item.title }}
+          </a-option>
+        </a-select>
+        <a-button type="primary" :loading="running" @click="submit">提交评测</a-button>
+        <a-button @click="scrollToHistory">查看提交记录</a-button>
+      </div>
+    </div>
 
-    <main class="kl-main">
-      <header class="kl-head">
-        <div>
-          <h1>{{ current.name }}</h1>
-          <p>{{ current.desc }}</p>
+    <div class="lab-body">
+      <section class="lab-doc">
+        <div class="lab-tabs">
+          <span v-for="tab in tabs" :key="tab" class="lab-tab" :class="{ on: activeTab === tab }" @click="activeTab = tab">
+            {{ tab }}
+          </span>
         </div>
-        <a-tag :color="latest && latest.passed ? 'green' : 'gray'">
-          {{ latest ? (latest.passed ? "已通过" : "未通过") : "未提交" }}
-        </a-tag>
-      </header>
 
-      <section class="kl-panel">
-        <div class="kl-panel-title">任务说明</div>
-        <p class="kl-text">{{ current.detail }}</p>
-        <ul class="kl-list">
-          <li>编辑文件：<code>{{ current.file }}</code></li>
-          <li>判分标记：<code>{{ current.marker }}</code></li>
-          <li>流程：覆盖源码 → 编译 → QEMU 启动 → 抓输出 → 判分</li>
-        </ul>
+        <div v-if="activeTab === '实验说明'" class="lab-doc-body">
+          <h3>任务描述</h3>
+          <p>{{ meta.summary }}</p>
+          <h3>知识要点</h3>
+          <ol>
+            <li v-for="p in meta.points" :key="p">{{ p }}</li>
+          </ol>
+          <h3>实验任务</h3>
+          <ol>
+            <li v-for="s in meta.steps" :key="s">{{ s }}</li>
+          </ol>
+        </div>
+
+        <div v-else-if="activeTab === '知识要点'" class="lab-doc-body">
+          <h3>本实验涉及</h3>
+          <ul>
+            <li v-for="p in meta.points" :key="p">{{ p }}</li>
+          </ul>
+          <p class="lab-note">{{ meta.guide }}</p>
+        </div>
+
+        <div v-else class="lab-doc-body">
+          <h3>操作提示</h3>
+          <p>{{ meta.guide }}</p>
+          <h3>评测方式</h3>
+          <p>平台把整份文件覆盖进 xv6 源码，编译后在 QEMU 里启动，抓内核输出；出现标记 <code>{{ meta.marker }}</code> 才判通过。</p>
+        </div>
       </section>
 
-      <section class="kl-panel">
-        <div class="kl-panel-title">
-          代码 · {{ template.path || current.file }}
-          <span class="kl-hint">（整文件提交，按注释里的 TODO 补全）</span>
+      <section class="lab-code">
+        <div class="lab-code-head">
+          <span>CODE / EDITOR</span>
+          <span class="lab-file">{{ meta.path }}</span>
         </div>
-        <textarea v-model="code" class="kl-editor" spellcheck="false" />
-        <div class="kl-actions">
-          <a-button type="primary" :loading="running" @click="submit">提交并判分</a-button>
-          <a-button :disabled="running" @click="loadTemplate">重置为模板</a-button>
-          <a-tag v-if="result" :color="result.ok ? 'green' : 'red'">{{ result.stage }} · {{ result.seconds }}s</a-tag>
-        </div>
-      </section>
-
-      <section v-if="running || result" class="kl-panel">
-        <div class="kl-panel-title">判题过程</div>
-        <div class="kl-stages">
-          <div v-for="(stage, index) in stages" :key="stage" class="kl-stage"
-               :class="{ on: running && index === activeStage, done: (!running && result) || index < activeStage }">
-            <span class="kl-dot" />{{ stage }}
+        <div class="lab-editor-wrap">
+          <div class="lab-gutter">
+            <div v-for="n in lineCount" :key="n">{{ n }}</div>
           </div>
+          <textarea v-model="code" class="lab-editor" spellcheck="false" @scroll="syncScroll" ref="editorRef" />
         </div>
-        <pre v-if="result" class="kl-log">{{ result.log || result.error }}</pre>
       </section>
+    </div>
 
-      <section class="kl-panel">
-        <div class="kl-panel-title">我的提交</div>
-        <a-table :data="history" :pagination="false" size="small" row-key="id">
-          <template #columns>
-            <a-table-column title="任务" data-index="task" />
-            <a-table-column title="结果">
-              <template #cell="{ record }">
-                <a-tag :color="record.passed ? 'green' : 'red'">{{ record.stage }}</a-tag>
-              </template>
-            </a-table-column>
-            <a-table-column title="耗时(s)" data-index="seconds" />
-            <a-table-column title="时间" data-index="createTime" />
-          </template>
-        </a-table>
-        <a-empty v-if="!history.length" description="还没有提交记录" />
-      </section>
-    </main>
+    <section class="lab-eval" ref="evalRef">
+      <div class="lab-eval-head">EVALUATION / 评测结果</div>
+      <div class="lab-stages">
+        <span v-for="(stage, index) in stages" :key="stage" class="lab-stage"
+              :class="{ on: running && index === activeStage, done: (!running && result) || index < activeStage }">
+          {{ stage }}
+        </span>
+      </div>
+      <pre v-if="result" class="lab-log">{{ result.log || result.error }}</pre>
+      <p v-else class="lab-empty">提交后在右侧查看判题进度与结果。</p>
+
+      <a-table :data="history" :pagination="false" size="small" row-key="id" style="margin-top: 12px">
+        <template #columns>
+          <a-table-column title="任务" data-index="task" />
+          <a-table-column title="结果">
+            <template #cell="{ record }">
+              <a-tag :color="record.passed ? 'green' : 'red'">{{ record.stage }}</a-tag>
+            </template>
+          </a-table-column>
+          <a-table-column title="耗时(s)" data-index="seconds" />
+          <a-table-column title="时间" data-index="createTime" />
+        </template>
+      </a-table>
+    </section>
   </div>
 </template>
 
@@ -80,58 +103,39 @@ import { computed, onMounted, ref } from "vue";
 import axios from "axios";
 import { Message } from "@arco-design/web-vue";
 
-type Task = {
-  key: string; name: string; file: string; desc: string; detail: string; marker: string;
-};
-
-const tasks: Task[] = [
-  {
-    key: "banner",
-    name: "任务一 · 启动横幅",
-    file: "kernel/main.c",
-    desc: "让内核启动时多打印一行 ZhiCore",
-    detail: "打开 main.c，找到 printk(\"xv6 kernel is booting\\n\") 这一行，在它后面加一行 printk(\"ZhiCore\\n\")。判分检查内核启动日志里是否出现 ZhiCore。",
-    marker: "ZhiCore",
-  },
-  {
-    key: "cpus",
-    name: "任务二 · CPU 数量",
-    file: "kernel/main.c",
-    desc: "启动时打印 CPUS= 和核数",
-    detail: "在 main() 里 procinit() 之后加一行 printk(\"CPUS=%d\\n\", 3)，让内核启动时报告核数。",
-    marker: "CPUS=",
-  },
-  {
-    key: "hello",
-    name: "任务三 · hello 系统调用",
-    file: "kernel/sysproc.c",
-    desc: "实现 sys_hello() 返回 42",
-    detail: "平台已经接好系统调用号、分发表和用户态桩，你只需要在 sysproc.c 末尾把 sys_hello 的返回值从 0 改成 42。判分会跑 echo 程序，检查输出 HELLO=42。",
-    marker: "HELLO=42",
-  },
-];
-
-const stages = ["复制源码", "写入你的代码", "编译内核", "启动 QEMU", "执行测试", "判分"];
+const tabs = ["实验说明", "知识要点", "实验任务"];
+const activeTab = ref("实验说明");
+const taskList = ref<Array<Record<string, any>>>([]);
 const task = ref("banner");
+const meta = ref<Record<string, any>>({});
 const code = ref("");
-const template = ref<Record<string, any>>({});
 const running = ref(false);
-const activeStage = ref(-1);
 const result = ref<Record<string, any> | null>(null);
 const history = ref<any[]>([]);
+const activeStage = ref(-1);
+const stages = ["复制源码", "写入代码", "编译内核", "启动 QEMU", "执行测试", "判分"];
+const evalRef = ref<HTMLElement | null>(null);
+const editorRef = ref<HTMLTextAreaElement | null>(null);
 let timer: number | undefined;
 
-const current = computed(() => tasks.find((t) => t.key === task.value) || tasks[0]);
-const latest = computed(() => history.value.find((h) => h.task === task.value));
+const lineCount = computed(() => Math.max(1, code.value.split("\n").length));
+
+const loadTasks = async () => {
+  try {
+    const resp = await axios.get("/api/kernel/tasks");
+    taskList.value = resp.data || [];
+    if (taskList.value.length && !taskList.value.some((t) => t.code === task.value)) {
+      task.value = taskList.value[0].code;
+    }
+  } catch {
+    taskList.value = [];
+  }
+};
 
 const loadTemplate = async () => {
-  try {
-    const resp = await axios.get(`/api/kernel/task/${task.value}`);
-    template.value = resp.data;
-    code.value = resp.data.content || "";
-  } catch (e: any) {
-    Message.error(e?.message || "加载模板失败");
-  }
+  const resp = await axios.get(`/api/kernel/task/${task.value}`);
+  meta.value = resp.data;
+  code.value = resp.data.content || "";
 };
 
 const loadHistory = async () => {
@@ -143,12 +147,20 @@ const loadHistory = async () => {
   }
 };
 
-const selectTask = async (key: string) => {
-  task.value = key;
+const selectTask = async () => {
   result.value = null;
   activeStage.value = -1;
   await Promise.all([loadTemplate(), loadHistory()]);
 };
+
+const syncScroll = () => {
+  const gutter = document.querySelector(".lab-gutter") as HTMLElement | null;
+  if (gutter && editorRef.value) {
+    gutter.scrollTop = editorRef.value.scrollTop;
+  }
+};
+
+const scrollToHistory = () => evalRef.value?.scrollIntoView({ behavior: "smooth" });
 
 const submit = async () => {
   running.value = true;
@@ -164,6 +176,7 @@ const submit = async () => {
     if (resp.data.ok) Message.success("通过");
     else Message.warning(resp.data.stage || "未通过");
     await loadHistory();
+    scrollToHistory();
   } catch (e: any) {
     Message.error(e?.message || "提交失败");
   } finally {
@@ -173,35 +186,42 @@ const submit = async () => {
 };
 
 onMounted(async () => {
-  await Promise.all([loadTemplate(), loadHistory()]);
+  await loadTasks();
+  await selectTask();
 });
 </script>
 
 <style scoped>
-.kl-workspace { display: flex; min-height: calc(100vh - 140px); background: #faf9f3; }
-.kl-side { width: 240px; border-right: 1px solid #ece8da; padding: 18px 14px; background: #fffdf6; }
-.kl-side-title { font-size: 13px; color: #8a8578; margin-bottom: 12px; letter-spacing: 0.08em; }
-.kl-task { padding: 10px 12px; border-radius: 10px; cursor: pointer; margin-bottom: 8px; border: 1px solid transparent; }
-.kl-task:hover { background: #f6f3e6; }
-.kl-task.active { background: #fdf4d6; border-color: #e6d48a; }
-.kl-task-name { font-size: 13px; color: #3f3d36; }
-.kl-task-tag { font-size: 11px; color: #a09a8a; margin-top: 4px; }
-.kl-side-foot { margin-top: 18px; font-size: 11px; color: #b3ad9c; }
-.kl-main { flex: 1; padding: 20px 24px 40px; display: flex; flex-direction: column; gap: 14px; max-width: 1040px; }
-.kl-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.kl-head h1 { margin: 0 0 6px; font-size: 20px; }
-.kl-head p { margin: 0; color: #6b675c; font-size: 13px; }
-.kl-panel { background: #fff; border: 1px solid #ece8da; border-radius: 12px; padding: 16px; }
-.kl-panel-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; color: #3f3d36; }
-.kl-hint { font-weight: 400; color: #a09a8a; font-size: 12px; }
-.kl-text { margin: 0; font-size: 13px; line-height: 1.9; color: #55524a; }
-.kl-list { margin: 8px 0 0; padding-left: 18px; font-size: 13px; line-height: 1.9; color: #55524a; }
-.kl-editor { width: 100%; min-height: 340px; border: 1px solid #e5e0d0; border-radius: 8px; padding: 12px; font-family: Consolas, Monaco, monospace; font-size: 12.5px; line-height: 1.7; background: #fffdf7; resize: vertical; }
-.kl-actions { display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
-.kl-stages { display: flex; gap: 8px; flex-wrap: wrap; }
-.kl-stage { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #f4f2e9; color: #8a8578; font-size: 12px; }
-.kl-stage.on { background: #fdf0c9; color: #6b5b17; }
-.kl-stage.done { background: #e9f2e4; color: #3d6b2f; }
-.kl-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.kl-log { margin-top: 12px; max-height: 360px; overflow: auto; background: #1f1e1a; color: #e8e4d8; padding: 14px; border-radius: 8px; font-size: 12px; line-height: 1.7; white-space: pre-wrap; }
+.lab { background: #f7f6ef; min-height: calc(100vh - 120px); padding: 18px 22px 40px; }
+.lab-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+.lab-back { font-size: 13px; color: #4b6b8a; text-decoration: none; }
+.lab-title-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.lab-title-row h1 { margin: 0; font-size: 24px; }
+.lab-tag { border: 1px solid #d9c86a; color: #8a7320; font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+.lab-crumb { margin-top: 8px; font-size: 12px; color: #8a8578; }
+.lab-top-right { display: flex; gap: 10px; align-items: center; }
+.lab-body { display: grid; grid-template-columns: minmax(380px, 1fr) minmax(520px, 1.2fr); gap: 16px; margin-top: 16px; }
+.lab-doc, .lab-code, .lab-eval { background: #fff; border: 1px solid #e8e4d4; border-radius: 12px; }
+.lab-tabs { display: flex; gap: 18px; padding: 14px 18px 0; border-bottom: 1px solid #eee9d9; }
+.lab-tab { font-size: 14px; color: #6b675c; padding-bottom: 10px; cursor: pointer; border-bottom: 2px solid transparent; }
+.lab-tab.on { color: #b8860b; border-bottom-color: #d9b93a; }
+.lab-doc-body { padding: 16px 20px 22px; font-size: 13.5px; line-height: 1.95; color: #3f3d36; }
+.lab-doc-body h3 { font-size: 15px; margin: 16px 0 8px; border-left: 3px solid #d9b93a; padding-left: 8px; }
+.lab-doc-body h3:first-child { margin-top: 0; }
+.lab-doc-body ol, .lab-doc-body ul { padding-left: 20px; margin: 6px 0; }
+.lab-note { background: #fdf8e6; border-radius: 8px; padding: 10px 12px; color: #6b5b17; }
+.lab-code { display: flex; flex-direction: column; overflow: hidden; }
+.lab-code-head { display: flex; justify-content: space-between; padding: 10px 14px; font-size: 12px; color: #8a8578; border-bottom: 1px solid #eee9d9; }
+.lab-file { color: #b3ad9c; }
+.lab-editor-wrap { display: flex; background: #2b2b26; min-height: 420px; max-height: 560px; overflow: hidden; }
+.lab-gutter { width: 44px; padding: 12px 8px; text-align: right; color: #7d7a6c; font-family: Consolas, Monaco, monospace; font-size: 12px; line-height: 1.65; overflow: hidden; background: #232320; user-select: none; }
+.lab-editor { flex: 1; padding: 12px; background: #2b2b26; color: #e8e4d8; border: none; outline: none; resize: none; font-family: Consolas, Monaco, monospace; font-size: 12.5px; line-height: 1.65; white-space: pre; overflow: auto; }
+.lab-eval { margin-top: 16px; padding: 16px 18px; }
+.lab-eval-head { font-size: 12px; letter-spacing: 0.08em; color: #8a8578; margin-bottom: 10px; }
+.lab-stages { display: flex; gap: 8px; flex-wrap: wrap; }
+.lab-stage { font-size: 12px; padding: 5px 12px; border-radius: 999px; background: #f4f2e9; color: #8a8578; }
+.lab-stage.on { background: #fdf0c9; color: #6b5b17; }
+.lab-stage.done { background: #e9f2e4; color: #3d6b2f; }
+.lab-log { margin-top: 12px; max-height: 320px; overflow: auto; background: #1f1e1a; color: #e8e4d8; padding: 14px; border-radius: 8px; font-size: 12px; line-height: 1.7; white-space: pre-wrap; }
+.lab-empty { font-size: 12px; color: #a09a8a; margin: 10px 0 0; }
 </style>
