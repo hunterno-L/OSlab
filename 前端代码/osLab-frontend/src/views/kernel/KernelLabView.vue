@@ -63,10 +63,13 @@
           <span class="lab-file">{{ meta.path }}</span>
         </div>
         <div class="lab-editor-wrap">
-          <div class="lab-gutter">
+          <div class="lab-gutter" ref="gutterRef">
             <div v-for="n in lineCount" :key="n">{{ n }}</div>
           </div>
-          <textarea v-model="code" class="lab-editor" spellcheck="false" @scroll="syncScroll" ref="editorRef" />
+          <div class="lab-code-area">
+            <pre class="lab-highlight" ref="preRef" v-html="highlighted"></pre>
+            <textarea v-model="code" class="lab-editor" spellcheck="false" @scroll="syncScroll" ref="editorRef" />
+          </div>
         </div>
       </section>
     </div>
@@ -116,9 +119,19 @@ const activeStage = ref(-1);
 const stages = ["复制源码", "写入代码", "编译内核", "启动 QEMU", "执行测试", "判分"];
 const evalRef = ref<HTMLElement | null>(null);
 const editorRef = ref<HTMLTextAreaElement | null>(null);
+const preRef = ref<HTMLElement | null>(null);
+const gutterRef = ref<HTMLElement | null>(null);
 let timer: number | undefined;
 
 const lineCount = computed(() => Math.max(1, code.value.split("\n").length));
+
+const escapeHtml = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const highlighted = computed(() => {
+  const escaped = escapeHtml(code.value) + "\n";
+  return escaped.replace(/(\/\*[\s\S]*?\*\/|\/\/[^\n]*)/g, '<span class="cm">$1</span>');
+});
 
 const loadTasks = async () => {
   try {
@@ -154,9 +167,14 @@ const selectTask = async () => {
 };
 
 const syncScroll = () => {
-  const gutter = document.querySelector(".lab-gutter") as HTMLElement | null;
-  if (gutter && editorRef.value) {
-    gutter.scrollTop = editorRef.value.scrollTop;
+  const ta = editorRef.value;
+  if (!ta) return;
+  if (preRef.value) {
+    preRef.value.scrollTop = ta.scrollTop;
+    preRef.value.scrollLeft = ta.scrollLeft;
+  }
+  if (gutterRef.value) {
+    gutterRef.value.scrollTop = ta.scrollTop;
   }
 };
 
@@ -215,7 +233,11 @@ onMounted(async () => {
 .lab-file { color: #b3ad9c; }
 .lab-editor-wrap { display: flex; background: #2b2b26; min-height: 420px; max-height: 560px; overflow: hidden; }
 .lab-gutter { width: 44px; padding: 12px 8px; text-align: right; color: #7d7a6c; font-family: Consolas, Monaco, monospace; font-size: 12px; line-height: 1.65; overflow: hidden; background: #232320; user-select: none; }
-.lab-editor { flex: 1; padding: 12px; background: #2b2b26; color: #e8e4d8; border: none; outline: none; resize: none; font-family: Consolas, Monaco, monospace; font-size: 12.5px; line-height: 1.65; white-space: pre; overflow: auto; }
+.lab-code-area { position: relative; flex: 1; overflow: hidden; }
+.lab-highlight { position: absolute; inset: 0; margin: 0; padding: 12px; color: #e8e4d8; font-family: Consolas, Monaco, monospace; font-size: 12.5px; line-height: 1.65; white-space: pre; overflow: hidden; pointer-events: none; }
+.lab-highlight :deep(.cm) { color: #7fc97f; font-style: italic; }
+.lab-editor { position: absolute; inset: 0; padding: 12px; background: transparent; color: transparent; caret-color: #ffffff; border: none; outline: none; resize: none; font-family: Consolas, Monaco, monospace; font-size: 12.5px; line-height: 1.65; white-space: pre; overflow: auto; }
+.lab-editor::selection { background: rgba(120, 160, 220, 0.35); }
 .lab-eval { margin-top: 16px; padding: 16px 18px; }
 .lab-eval-head { font-size: 12px; letter-spacing: 0.08em; color: #8a8578; margin-bottom: 10px; }
 .lab-stages { display: flex; gap: 8px; flex-wrap: wrap; }

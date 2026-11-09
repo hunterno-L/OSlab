@@ -123,6 +123,37 @@ public class KernelLabController {
                 new String[]{"阅读 sys_hello 骨架与上方 sys_uptime 写法", "把返回值改为 42", "提交后查看 echo 的输出"}));
     }
 
+    private static final Map<String, String> COMMENTS = new LinkedHashMap<>();
+
+    static {
+        COMMENTS.put("// start() jumps here in supervisor mode on all CPUs.",
+                "// 所有 CPU 上，start() 会以 Supervisor 模式跳转到这里");
+        COMMENTS.put("// physical page allocator", "// 物理页分配器");
+        COMMENTS.put("// create kernel page table", "// 创建内核页表");
+        COMMENTS.put("// turn on paging", "// 开启分页");
+        COMMENTS.put("// process table", "// 进程表");
+        COMMENTS.put("// trap vectors", "// 陷入向量");
+        COMMENTS.put("// install kernel trap vector", "// 安装内核陷入向量");
+        COMMENTS.put("// set up interrupt controller", "// 初始化中断控制器");
+        COMMENTS.put("// ask PLIC for device interrupts", "// 向 PLIC 申请设备中断");
+        COMMENTS.put("// buffer cache", "// 缓冲区缓存");
+        COMMENTS.put("// inode table", "// inode 表");
+        COMMENTS.put("// file table", "// 文件表");
+        COMMENTS.put("// emulated hard disk", "// 模拟硬盘");
+        COMMENTS.put("// first user process", "// 第一个用户进程");
+        COMMENTS.put("// return how many clock tick interrupts have occurred\n// since start.",
+                "// 返回自启动以来发生的时钟中断次数");
+        COMMENTS.put("// since start.", "// 自启动以来");
+    }
+
+    private static String translate(String content) {
+        String result = content;
+        for (Map.Entry<String, String> entry : COMMENTS.entrySet()) {
+            result = result.replace(entry.getKey(), entry.getValue());
+        }
+        return result;
+    }
+
     @GetMapping("/tasks")
     public List<Map<String, Object>> list() {
         List<Map<String, Object>> result = new ArrayList<>();
@@ -153,6 +184,7 @@ public class KernelLabController {
         } catch (Exception e) {
             content = "// 读取模板失败：" + e.getMessage();
         }
+        content = translate(content);
         String header = "/* ===== " + spec.title + " =====\n"
                 + " * 章节：" + spec.chapter + "\n"
                 + " * 任务：" + spec.summary.replace("*/", "") + "\n"
