@@ -42,6 +42,7 @@ const TeachingTaskReviewView = () =>
   import("@/views/tasks/TeachingTaskReviewView.vue");
 const AiWorkspaceView = () => import("@/views/ai/AiWorkspaceView.vue");
 const AiSettingsView = () => import("@/views/ai/AiSettingsView.vue");
+const KernelLabView = () => import("@/views/kernel/KernelLabView.vue");
 
 /**
  * Phase 1 路由重构：嵌套布局壳 + 规范路径 + 旧路径兼容重定向（保留 query/params）。
@@ -475,6 +476,12 @@ export const routes: Array<RouteRecordRaw> = [
     path: "/ai/settings",
     name: "AI 模型设置",
     component: AiSettingsView,
+    meta: { access: ACCESS_ENUM.USER },
+  },
+  {
+    path: "/kernel",
+    name: "内核实验",
+    component: KernelLabView,
     meta: { access: ACCESS_ENUM.USER },
   },
   {
