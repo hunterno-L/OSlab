@@ -93,6 +93,24 @@ public class AiController {
         return ResultUtils.success(aiPlatformService.probe(login(request).getId(), nodeCode));
     }
 
+    @PostMapping("/probe/submit")
+    public BaseResponse<Map<String, Object>> submitProbe(@RequestBody Map<String, Object> body,
+                                                         HttpServletRequest request) {
+        try {
+            return ResultUtils.success(aiPlatformService.submitProbe(login(request).getId(), body));
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, e.getMessage());
+        }
+    }
+
+    @PostMapping("/index/build")
+    public BaseResponse<Map<String, Object>> buildIndex(@RequestParam("courseCode") String courseCode,
+                                                        @RequestParam(value = "limit", defaultValue = "200") int limit,
+                                                        HttpServletRequest request) {
+        login(request);
+        return ResultUtils.success(aiPlatformService.buildIndex(courseCode, limit));
+    }
+
     @PostMapping("/help")
     public BaseResponse<Boolean> recordHelp(@RequestBody Map<String, Object> body,
                                             HttpServletRequest request) {

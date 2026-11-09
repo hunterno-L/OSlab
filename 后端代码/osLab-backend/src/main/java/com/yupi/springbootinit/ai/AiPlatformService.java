@@ -39,8 +39,20 @@ public class AiPlatformService {
     @org.springframework.beans.factory.annotation.Value("${AI_ARK_API_KEY:}")
     private String envArkKey;
 
+    @org.springframework.beans.factory.annotation.Value("${EMBEDDING_API_KEY:}")
+    private String embeddingKey;
+
+    @org.springframework.beans.factory.annotation.Value("${EMBEDDING_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}")
+    private String embeddingBase;
+
+    @org.springframework.beans.factory.annotation.Value("${EMBEDDING_MODEL:text-embedding-v3}")
+    private String embeddingModel;
+
     private final RestTemplate restTemplate = new RestTemplate();
     private final AtomicLong idGen = new AtomicLong(System.currentTimeMillis() % 100000000L);
+
+    @Resource
+    private com.yupi.springbootinit.service.LearningQuestionService learningQuestionService;
 
     private long nextId() {
         return System.currentTimeMillis() * 1000L + (idGen.incrementAndGet() % 1000);
@@ -233,6 +245,144 @@ public class AiPlatformService {
     }
 
     private List<Map<String, Object>> retrieve(String courseCode, String question, String nodeCode, int limit) {
+        List<Map<String, Object>> keyword = keywordRetrieve(courseCode, question, nodeCode, limit);
+        if (!StringUtils.hasText(embeddingKey)) {
+            return keyword;
+        }
+        try {
+            List<Map<String, Object>> vector = vectorRetrieve(courseCode, question, limit);
+            if (vector.isEmpty()) {
+                return keyword;
+            }
+            Map<String, Map<String, Object>> merged = new LinkedHashMap<>();
+            for (Map<String, Object> item : vector) {
+                merged.put(String.valueOf(item.get("sourceId")), item);
+            }
+            for (Map<String, Object> item : keyword) {
+                merged.putIfAbsent(String.valueOf(item.get("sourceId")), item);
+            }
+            return new ArrayList<>(merged.values());
+        } catch (Exception e) {
+            return keyword;
+        }
+    }
+
+    private List<Map<String, Object>> vectorRetrieve(String courseCode, String question, int limit) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT e.chunkCode,e.vectorJson,c.title,c.sectionCode,c.contentMd FROM ai_chunk_embedding e "
+                        + "JOIN learning_content_chunk c ON c.chunkCode=e.chunkCode "
+                        + "WHERE e.courseCode=? AND c.reviewStatus='PUBLISHED' AND c.isDelete=0", courseCode);
+        if (rows.isEmpty()) {
+            return new ArrayList<>();
+        }
+        double[] q = embedTexts(List.of(question)).get(0);
+        List<Map<String, Object>> scored = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            try {
+                double[] v = objectMapper.readValue(String.valueOf(row.get("vectorJson")), double[].class);
+                double score = cosine(q, v);
+                Map<String, Object> src = new LinkedHashMap<>();
+                src.put("sourceId", row.get("chunkCode"));
+                src.put("title", row.get("title"));
+                src.put("sectionCode", row.get("sectionCode"));
+                src.put("snippet", snippet(str(row.get("contentMd")), 160));
+                src.put("score", Math.round(score * 1000) / 1000.0);
+                scored.add(src);
+            } catch (Exception ignored) {
+                // 单条向量损坏不影响其它
+            }
+        }
+        scored.sort((a, b) -> Double.compare(
+                ((Number) b.getOrDefault("score", 0)).doubleValue(),
+                ((Number) a.getOrDefault("score", 0)).doubleValue()));
+        Map<String, Object> seen = new LinkedHashMap<>();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map<String, Object> item : scored) {
+            if (result.size() >= limit) {
+                break;
+            }
+            if (seen.putIfAbsent(String.valueOf(item.get("sourceId")), item) == null) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    public Map<String, Object> buildIndex(String courseCode, int limit) {
+        if (!StringUtils.hasText(embeddingKey)) {
+            throw new IllegalStateException("未配置 EMBEDDING_API_KEY，无法建立语义索引");
+        }
+        List<Map<String, Object>> chunks = jdbc.queryForList(
+                "SELECT chunkCode,courseCode,title,contentMd FROM learning_content_chunk "
+                        + "WHERE reviewStatus='PUBLISHED' AND isDelete=0 AND courseCode=? LIMIT ?", courseCode, limit);
+        int done = 0;
+        for (int offset = 0; offset < chunks.size(); offset += 8) {
+            List<Map<String, Object>> batch = chunks.subList(offset, Math.min(offset + 8, chunks.size()));
+            List<String> texts = new ArrayList<>();
+            for (Map<String, Object> chunk : batch) {
+                texts.add(str(chunk.get("title")) + "\n" + snippet(str(chunk.get("contentMd")), 800));
+            }
+            List<double[]> vectors = embedTexts(texts);
+            for (int i = 0; i < batch.size(); i++) {
+                Map<String, Object> chunk = batch.get(i);
+                String json = objectMapper.valueToTree(vectors.get(i)).toString();
+                String hash = Integer.toHexString(texts.get(i).hashCode());
+                jdbc.update("INSERT INTO ai_chunk_embedding (chunkCode,courseCode,model,dim,vectorJson,textHash) "
+                                + "VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE model=VALUES(model),dim=VALUES(dim),"
+                                + "vectorJson=VALUES(vectorJson),textHash=VALUES(textHash)",
+                        chunk.get("chunkCode"), courseCode, embeddingModel, vectors.get(i).length, json, hash);
+                done++;
+            }
+        }
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("courseCode", courseCode);
+        result.put("indexed", done);
+        result.put("model", embeddingModel);
+        return result;
+    }
+
+    private List<double[]> embedTexts(List<String> texts) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("model", embeddingModel);
+        payload.put("input", texts);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(embeddingKey);
+        try {
+            ResponseEntity<Map> resp = restTemplate.postForEntity(
+                    trimRight(embeddingBase) + "/embeddings",
+                    new HttpEntity<>(objectMapper.writeValueAsString(payload), headers), Map.class);
+            Map body = resp.getBody();
+            List data = (List) body.get("data");
+            List<double[]> result = new ArrayList<>();
+            for (Object item : data) {
+                List raw = (List) ((Map) item).get("embedding");
+                double[] vec = new double[raw.size()];
+                for (int i = 0; i < raw.size(); i++) {
+                    vec[i] = ((Number) raw.get(i)).doubleValue();
+                }
+                result.add(vec);
+            }
+            return result;
+        } catch (Exception e) {
+            throw new IllegalStateException("embedding 调用失败：" + e.getMessage(), e);
+        }
+    }
+
+    private double cosine(double[] a, double[] b) {
+        int n = Math.min(a.length, b.length);
+        double dot = 0;
+        double na = 0;
+        double nb = 0;
+        for (int i = 0; i < n; i++) {
+            dot += a[i] * b[i];
+            na += a[i] * a[i];
+            nb += b[i] * b[i];
+        }
+        return na == 0 || nb == 0 ? 0 : dot / (Math.sqrt(na) * Math.sqrt(nb));
+    }
+
+    private List<Map<String, Object>> keywordRetrieve(String courseCode, String question, String nodeCode, int limit) {
         List<String> keywords = keywords(question);
         List<Map<String, Object>> rows = new ArrayList<>();
         if (courseCode != null && !keywords.isEmpty()) {
@@ -316,6 +466,10 @@ public class AiPlatformService {
         result.put("totalAttempts", total);
         result.put("correct", ok);
         result.put("needsReview", Math.max(0, total - ok));
+        Integer assisted = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM learning_attempt a WHERE a.userId=? AND a.hasViewedAnalysis=1",
+                Integer.class, userId);
+        result.put("assistedAttempts", assisted == null ? 0 : assisted);
         return result;
     }
 
@@ -471,6 +625,36 @@ public class AiPlatformService {
         result.put("note", questions.isEmpty()
                 ? "该节点没有可用于验证的短题，保留当前判断的不确定性。"
                 : "先用这两道短题验证，再更新薄弱点结论。");
+        return result;
+    }
+
+    public Map<String, Object> submitProbe(long userId, Map<String, Object> body) {
+        String nodeCode = str(body.get("nodeCode"));
+        Long questionId = body.get("questionId") == null ? null : Long.valueOf(String.valueOf(body.get("questionId")));
+        Object answerValue = body.get("answer");
+        if (questionId == null) {
+            throw new IllegalArgumentException("questionId 不能为空");
+        }
+        com.yupi.springbootinit.model.dto.learning.LearningAnswerRequest req =
+                new com.yupi.springbootinit.model.dto.learning.LearningAnswerRequest();
+        req.setQuestionId(questionId);
+        req.setAnswer(answerValue);
+        req.setSubmissionKey("probe-" + userId + "-" + questionId + "-" + System.currentTimeMillis());
+        com.yupi.springbootinit.model.entity.User user = new com.yupi.springbootinit.model.entity.User();
+        user.setId(userId);
+        user.setUserRole("user");
+        Map<String, Object> result = new LinkedHashMap<>();
+        try {
+            com.yupi.springbootinit.model.vo.learning.LearningAnswerResultVO vo =
+                    learningQuestionService.answerQuestion(req, user);
+            result.put("correct", vo == null ? null : vo.getCorrect());
+            result.put("analysis", vo == null ? null : vo.getAnalysis());
+            result.put("misconception", vo == null ? null : vo.getMisconception());
+        } catch (Exception e) {
+            result.put("correct", null);
+            result.put("error", e.getMessage());
+        }
+        result.put("diagnosis", diagnose(userId, nodeCode, null));
         return result;
     }
 
