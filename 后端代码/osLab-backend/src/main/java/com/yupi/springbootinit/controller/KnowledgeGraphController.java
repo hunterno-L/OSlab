@@ -31,13 +31,49 @@ public class KnowledgeGraphController {
     }
     @PostMapping("/getMultiple")
     public BaseResponse<GraphDataDTO> getKnowledgeGraphDataByList(@RequestBody List<String> names) {
-        // 1. 从数据库或其他数据源获取原始数据
-        List<String> allNames = knowledgeGraphService.getAllRelatedNames(names);
-        List<KnowledgeGraphNode> rawData = knowledgeGraphService.getKnowledgeGraph(allNames);
-        // 2. 转换为ECharts格式
-        GraphDataDTO graphData = knowledgeGraphService.convertToEChartsFormat(rawData);
-
-        return ResultUtils.success(graphData);
+        GraphDataDTO graphData = null;
+        try {
+            List<String> allNames = knowledgeGraphService.getAllRelatedNames(names);
+            List<KnowledgeGraphNode> rawData = knowledgeGraphService.getKnowledgeGraph(allNames);
+            graphData = knowledgeGraphService.convertToEChartsFormat(rawData);
+        } catch (Exception ignored) {
+            graphData = null;
+        }
+        if (graphData != null && graphData.getNodes() != null && !graphData.getNodes().isEmpty()) {
+            return ResultUtils.success(graphData);
+        }
+        // 标签不是图谱节点名时，按章节名回退成该章节的子图
+        GraphDataDTO snapshot = knowledgeGraphService.getGraphSnapshot();
+        java.util.Set<String> keys = new java.util.HashSet<>(names == null ? java.util.Collections.emptyList() : names);
+        java.util.List<com.yupi.springbootinit.model.dto.knowledgegraph.NodeDTO> nodes = new java.util.ArrayList<>();
+        java.util.Set<String> keep = new java.util.HashSet<>();
+        if (snapshot.getNodes() != null) {
+            for (com.yupi.springbootinit.model.dto.knowledgegraph.NodeDTO node : snapshot.getNodes()) {
+                boolean match = keys.contains(node.getName())
+                        || keys.contains(node.getDisplayName())
+                        || (node.getChapter() != null && keys.contains(node.getChapter()));
+                if (match) {
+                    nodes.add(node);
+                    keep.add(node.getId());
+                }
+            }
+        }
+        java.util.List<com.yupi.springbootinit.model.dto.knowledgegraph.LinkDTO> links = new java.util.ArrayList<>();
+        if (snapshot.getLinks() != null) {
+            for (com.yupi.springbootinit.model.dto.knowledgegraph.LinkDTO link : snapshot.getLinks()) {
+                if (keep.contains(link.getSource()) && keep.contains(link.getTarget())) {
+                    links.add(link);
+                }
+            }
+        }
+        GraphDataDTO fallback = new GraphDataDTO();
+        fallback.setNodes(nodes);
+        fallback.setLinks(links);
+        fallback.setTotalNodes(nodes.size());
+        fallback.setTotalLinks(links.size());
+        fallback.setCategories(snapshot.getCategories());
+        fallback.setChapterSummary(snapshot.getChapterSummary());
+        return ResultUtils.success(fallback);
     }
     @GetMapping("/getAll")
     public BaseResponse<GraphDataDTO> getAllKnowledgeGraphData()
