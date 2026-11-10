@@ -63,13 +63,31 @@
       <!-- 左：实验说明 / 关联图谱 / 向导师提问 -->
       <div class="panel panel-left">
         <a-tabs v-model:active-key="descriptionTab" @change="loadRelatedGraph">
-          <a-tab-pane key="desc" title="实验说明">
+          <a-tab-pane key="desc" title="题目">
             <a-spin :loading="loading" style="width: 100%">
               <MdViewer :value="question?.content || '暂无实验说明'" />
             </a-spin>
             <aside class="lab-margin-note">
               草稿自动保存；提交后可在右侧查看判题进度与结果。
             </aside>
+          </a-tab-pane>
+          <a-tab-pane key="submissions" title="我的提交">
+            <template v-if="submitDetail">
+              <div class="hint" style="margin-bottom: 8px">
+                最近一次提交 #{{ submitDetail.id }} · {{ submitDetail.status || statusText }}
+              </div>
+              <div class="hint">
+                语言：{{ submitDetail.language || form.language }}
+                <span v-if="submitDetail.judgeInfo?.time !== undefined">
+                  · 用时 {{ submitDetail.judgeInfo.time }} ms
+                </span>
+                <span v-if="submitDetail.judgeInfo?.memory !== undefined">
+                  · 内存 {{ submitDetail.judgeInfo.memory }} KB
+                </span>
+              </div>
+            </template>
+            <a-empty v-else description="还没有提交记录" />
+            <a-button style="margin-top: 10px" @click="goRecords">查看全部提交记录</a-button>
           </a-tab-pane>
           <a-tab-pane key="graph" title="关联图谱">
             <a-spin :loading="graphLoading" style="width: 100%">
@@ -85,7 +103,7 @@
               查看完整知识图谱
             </a-button>
           </a-tab-pane>
-          <a-tab-pane key="tutor" title="向导师提问">
+          <a-tab-pane key="tutor" title="算法小精灵">
             <template v-if="tutorNodeName">
               <div class="tutor-toolbar">
                 <span class="tutor-sub">
@@ -203,6 +221,15 @@
         <section class="status-card">
           <span class="panel-kicker">EVALUATION</span>
           <h3>评测结果</h3>
+          <div class="result-tabs">
+            <span :class="{ on: resultTab === 'cases' }" @click="resultTab = 'cases'">测试用例</span>
+            <span :class="{ on: resultTab === 'result' }" @click="resultTab = 'result'">测试结果</span>
+          </div>
+          <div v-show="resultTab === 'cases'">
+            <a-empty description="提交评测后，按判题用例展示每一组的输入、期望输出与实际结果" />
+          </div>
+          <div v-show="resultTab === 'result'">
+
           <template v-if="phase === 'idle' && !submitDetail">
             <a-empty description="提交评测后，在此查看判题进度与结果" />
           </template>
@@ -295,7 +322,8 @@
               </div>
             </div>
           </template>
-        </section>
+                  </div>
+</section>
       </div>
     </div>
   </div>
@@ -490,6 +518,7 @@ const loadRelatedGraph = async (key: string | number) => {
 
 // ---------- 提交与留页串行轮询 ----------
 const submitting = ref(false);
+const resultTab = ref("result");
 const submitId = ref<number | null>(null);
 const submitDetail = ref<QuestionSubmitVO | null>(null);
 const courseProgressError = ref("");
@@ -1343,5 +1372,24 @@ onBeforeUnmount(() => {
   .panel-left {
     grid-row: auto;
   }
+}
+
+.result-tabs {
+  display: flex;
+  gap: 18px;
+  margin: 6px 0 12px;
+  border-bottom: 1px solid #eee9d9;
+}
+.result-tabs span {
+  padding: 6px 2px 8px;
+  font-size: 13px;
+  color: #6b675c;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.result-tabs span.on {
+  color: #1d7a4d;
+  border-bottom-color: #1d7a4d;
+  font-weight: 600;
 }
 </style>
