@@ -2267,6 +2267,14 @@ const applyRouteQuery = async () => {
       queryText(route.query.nodeCode) || queryText(route.query.nodeName);
     const courseScope = queryText(route.query.scope) === "course";
 
+    // 没有指定单元/小节/节点时，回到课程总览，不自动跳上次学到的单元
+    if (!requestedUnit && !requestedSection && !requestedNode && !courseScope) {
+      if (selectedUnitCode.value || selectedSectionCode.value) {
+        selectCourseScope(false);
+      }
+      return;
+    }
+
     if (requestedUnit && unitByCode.value.has(requestedUnit)) {
       if (selectedUnitCode.value !== requestedUnit) {
         selectUnitScope(requestedUnit, false);
