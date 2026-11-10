@@ -96,6 +96,7 @@
                 :nodes="nodes"
                 :links="links"
                 :categories="categories"
+                @node-dblclick="onGraphNodeDblClick"
               />
               <a-empty v-else-if="!graphLoading" description="暂无关联节点" />
             </a-spin>
@@ -492,8 +493,19 @@ const loadData = async () => {
   }
 };
 
-const loadRelatedGraph = async (key: string | number) => {
-  if (key !== "graph" || graphLoaded || graphLoading.value) return;
+// 双击图谱节点，跳转到节点学习工作台（与课程学习页一致）
+const onGraphNodeDblClick = (payload: any) => {
+  const data = payload?.data || payload || {};
+  const code = data.nodeCode || data.nodeKey || "";
+  const name = data.name || data.displayName || "";
+  if (code) {
+    router.push(`/knowledge/concept/${encodeURIComponent(String(code))}`);
+  } else if (name) {
+    router.push(`/knowledge/node/${encodeURIComponent(String(name))}`);
+  }
+};
+
+const loadRelatedGraph = async (key: string | number) => {  if (key !== "graph" || graphLoaded || graphLoading.value) return;
   if (!question.value?.tags?.length) return;
   const requestId = props.id;
   graphLoading.value = true;
