@@ -17,8 +17,14 @@ public class CourseService {
 
     public List<Map<String,Object>> courses(long userId) {
         List<Map<String,Object>> out=new ArrayList<>();
+        Set<String> registryCodes=new HashSet<>();
+        for(Map<String,Object> r:db.rows("SELECT nodeCode FROM knowledge_node_registry WHERE isDelete=0")) registryCodes.add(db.value(r,"nodeCode"));
         for(Map<String,Object> row:db.rows("SELECT * FROM course_catalog WHERE isDelete=0 ORDER BY courseCode")) {
             String code=db.value(row,"courseCode");List<JsonNode> units=publishedUnits(code);int completed=0;
+            // hide demo courses whose units reference no registered node
+            boolean hasRegisteredNode=false;
+            for(JsonNode u:units){JsonNode nm=u.get("nodeMappings");if(nm==null)continue;for(JsonNode m:nm){String nc=m.path("nodeCode").asText("");if(!nc.isEmpty()&&registryCodes.contains(nc)){hasRegisteredNode=true;break;}}if(hasRegisteredNode)break;}
+            if(!hasRegisteredNode)continue;
             for(JsonNode u:units)if("COMPLETED".equals(progress(u,userId).get("status")))completed++;
             out.add(map("courseCode",code,"title",row.get("title"),"description",row.get("description"),"status",units.isEmpty()?"AWAITING_CONTENT":"AVAILABLE","publishedUnitCount",units.size(),"completedUnitCount",completed,"progressPercent",units.isEmpty()?0:Math.round(100.0*completed/units.size())));
         }
