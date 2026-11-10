@@ -42,7 +42,12 @@ axios.interceptors.response.use(
             window.location.href = `/user/login?redirect=${redirect}`;
           }
         } else {
-          Message.error(res.message || "请求失败");
+          const text = res.message || "";
+          if (text) {
+            Message.error(text);
+          } else {
+            console.warn("[api] business error without message:", response.config?.url, res.code);
+          }
         }
       }
     }
