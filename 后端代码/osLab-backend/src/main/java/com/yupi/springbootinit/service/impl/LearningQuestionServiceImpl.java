@@ -662,6 +662,10 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
     @Override
     public LearningCatalogVO questionCatalog(LearningCatalogRequest request, User user) {
         LearningCatalogRequest req = request == null ? new LearningCatalogRequest() : request;
+        // course isolation: default to operating systems when courseCode is blank
+        if (StringUtils.isBlank(req.getCourseCode())) {
+            req.setCourseCode("course.operating-systems");
+        }
         String chapterFilter = StringUtils.trimToNull(req.getChapter());
         String studyState = StringUtils.trimToNull(req.getStudyState());
         String cacheKey = null;
