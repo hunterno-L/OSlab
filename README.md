@@ -4,6 +4,15 @@
 
 > 当前产品品牌为 **ZhiCore**；仓库名、前端包名和部分历史文档仍沿用 `OSLab` / `oslab`。
 
+## 拿到这个包，先看三步
+
+1. **想立刻看效果**：浏览器打开 `http://47.93.185.191`（已部署实例）。
+2. **想在本机跑起来**：有 Docker 进 `deploy/`，`cp .env.example .env` 改好密码后 `docker compose --env-file .env up -d --build`；没有 Docker（如 2G 云主机）按 [`deploy/Ubuntu-2G-无Docker环境配置说明.md`](deploy/Ubuntu-2G-无Docker环境配置说明.md) 逐节安装。
+3. **想读代码**：后端 `后端代码/`（Spring Boot）、前端 `前端代码/osLab-frontend/`（Vue 3 + Vite，`dist/` 为已构建产物）、建库脚本 `数据库文件/`（基础库 + v3…v12 逐版升级 + Neo4j 图导出）、题库 `content/`。
+
+完整的部署细节、数据库初始化顺序、Neo4j 导入命令与演示账号，见下文「快速开始」与 `deploy/README.md`。
+
+
 公开入口为 `/welcome`（落地页 + 登录/注册弹层）；登录后学生默认进入 `/graph`（课程学习），`/home` 为学习首页，`/teaching/content` 为教师内容维护入口。教材驱动课程系统已实现，第一至第五章已完成教材内容编排；课程内容按章交付与发布，规范见 [课程与知识图谱总体设计](docs/教材驱动课程重构/01-课程与知识图谱总体设计.md)。
 
 ## 当前能力

@@ -17,6 +17,11 @@ set -eu
 #   9. oslab_upgrade_v8_teaching_tasks.sql 学习任务/私有执行副本/任务附件与证据来源
 #  10. oslab_upgrade_v9_learning_activities.sql 普通演示运行记录（与掌握证据分离）
 #  11. oslab_upgrade_v10_classes.sql 班级与成员管理
+#  12. oslab_upgrade_v11_experiment_nodes.sql 实验节点与清理
+#  13. oslab_upgrade_v12_practice_units.sql 练习单元与题目挂载
+#  14. oslab_upgrade_v13_ai.sql        AI 会话 / 用户模型配置 / 帮助事件
+#  15. oslab_upgrade_v14_embedding.sql 教材块语义索引
+#  16. oslab_upgrade_v15_kernel.sql    xv6 内核实验提交记录（kernel_submission）
 # 所有文件均为必需：缺挂载即失败退出，不再静默跳过（失败即失败，不吞错）。
 # 已有数据卷不会重跑本目录脚本；存量库请使用
 #   数据库文件/oslab_upgrade_existing_check.sql
@@ -50,7 +55,10 @@ load_required_seed /seed/oslab_upgrade_v8_teaching_tasks.sql "9/11 v8 学习任�
 load_required_seed /seed/oslab_upgrade_v9_learning_activities.sql "10/11 v9 普通演示运行记录"
 load_required_seed /seed/oslab_upgrade_v10_classes.sql "11/12 v10 班级与成员管理"
 load_required_seed /seed/oslab_upgrade_v11_experiment_nodes.sql "12/13 v11 实验节点与清理"
-load_required_seed /seed/oslab_upgrade_v12_practice_units.sql "13/13 v12 练习单元与题目挂载"
+load_required_seed /seed/oslab_upgrade_v12_practice_units.sql "13/16 v12 练习单元与题目挂载"
+load_required_seed /seed/oslab_upgrade_v13_ai.sql "14/16 v13 AI 会话/模型配置/帮助事件"
+load_required_seed /seed/oslab_upgrade_v14_embedding.sql "15/16 v14 教材块向量索引"
+load_required_seed /seed/oslab_upgrade_v15_kernel.sql "16/16 v15 内核实验提交记录"
 
 # ---------------------------------------------------------------------
 # 加载后契约校验（§6.1.2-6）：逐项核对 information_schema，任一不符即整体失败。

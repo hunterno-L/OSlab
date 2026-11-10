@@ -12,3 +12,7 @@ deploy/database-20261028/*.md text eol=lf
 deploy/database-20261028/*.json text eol=lf
 deploy/database-20261028/SHA256SUMS text eol=lf
 deploy/database-20261028/*.gz binary
+
+# 内核实验：xv6 源码在 WSL/Linux 里编译，换行必须 LF（Makefile 混入 CR 会直接编译失败）
+**/xv6-riscv/** text eol=lf
+内核实验/** text eol=lf
