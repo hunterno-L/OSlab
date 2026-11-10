@@ -2,6 +2,7 @@ package com.yupi.springbootinit.kernel;
 
 import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,10 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,9 +37,151 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/kernel")
 public class KernelLabController {
 
-    private static final String ST_ROOT = "G:\\ZhiCore\\kernel-lab";
-    private static final String STARTER = "/mnt/g/ZhiCore/kernel-lab/xv6-lab/xv6-riscv";
-    private static final String WORK = "/mnt/g/ZhiCore/kernel-lab/web-run";
+    /* ============ 路径解析：可配置 + 自动探测（原来四处硬编码） ============ */
+
+    /** 可在 application.yml 覆盖：kernellab.root */
+    @Value("${kernellab.root:}")
+    private String configuredRoot;
+
+    /** 可在 application.yml 覆盖：kernellab.distro（留空则自动探测非 docker-desktop 的发行版） */
+    @Value("${kernellab.distro:}")
+    private String configuredDistro;
+
+    /** Windows 侧根目录，如 G:\ZhiCore\kernel-lab */
+    private static Path ST_ROOT;
+    /** WSL 侧根目录，由 ST_ROOT 换算而来，如 /mnt/g/ZhiCore/kernel-lab */
+    private static String WSL_ROOT;
+    /** WSL 侧 xv6 源码目录 */
+    private static String STARTER;
+    /** WSL 侧构建工作目录 */
+    private static String WORK;
+    /** WSL 侧上传落盘目录 */
+    private static String UPLOAD_DIR;
+    /** WSL 发行版名；默认发行版可能是 docker-desktop，所以必须显式指定 */
+    private static String DISTRO = "Ubuntu-24.04";
+
+    @PostConstruct
+    public void initKernelPaths() {
+        List<String> candidates = new ArrayList<>();
+        if (configuredRoot != null && !configuredRoot.trim().isEmpty()) {
+            candidates.add(configuredRoot.trim());
+        }
+        String envRoot = System.getenv("KERNEL_LAB_ROOT");
+        if (envRoot != null && !envRoot.trim().isEmpty()) {
+            candidates.add(envRoot.trim());
+        }
+        candidates.add("G:\\ZhiCore\\kernel-lab");
+        candidates.add(Paths.get(System.getProperty("user.dir", "."), "kernel-lab").toString());
+        candidates.add(Paths.get(System.getProperty("user.dir", "."), "..", "kernel-lab").toString());
+
+        Path picked = null;
+        for (String c : candidates) {
+            try {
+                Path p = Paths.get(c).toAbsolutePath().normalize();
+                Path xv6 = p.resolve("xv6-lab").resolve("xv6-riscv");
+                if (Files.isDirectory(xv6) && Files.isRegularFile(xv6.resolve("Makefile"))) {
+                    picked = p;
+                    break;
+                }
+            } catch (Exception ignored) {
+                // 候选路径非法就跳过
+            }
+        }
+        if (picked == null) {
+            picked = Paths.get(candidates.get(0)).toAbsolutePath().normalize();
+            System.out.println("[kernel-lab] 警告：未找到含 xv6-lab/xv6-riscv/Makefile 的根目录，先按候选值 " + picked + " 启动");
+        }
+        ST_ROOT = picked;
+
+        if (configuredDistro != null && !configuredDistro.trim().isEmpty()) {
+            DISTRO = configuredDistro.trim();
+        } else {
+            String detected = detectDistro();
+            if (detected != null) {
+                DISTRO = detected;
+            }
+        }
+
+        WSL_ROOT = toWslPath(picked);
+        STARTER = WSL_ROOT + "/xv6-lab/xv6-riscv";
+        WORK = WSL_ROOT + "/web-run";
+        UPLOAD_DIR = WSL_ROOT + "/web-upload";
+
+        System.out.println("[kernel-lab] root=" + ST_ROOT + " | wslRoot=" + WSL_ROOT + " | distro=" + DISTRO);
+    }
+
+    /** Windows 路径 → WSL 路径。先用 wslpath 换算，失败再按盘符手工换算。 */
+    private static String toWslPath(Path winPath) {
+        String raw = winPath.toString();
+        try {
+            Process p = new ProcessBuilder("wsl", "-d", DISTRO, "-u", "root", "bash", "-lc",
+                    "wslpath -u " + shellQuote(raw)).redirectErrorStream(true).start();
+            String out = readAll(p, StandardCharsets.UTF_8).trim();
+            p.waitFor(15, TimeUnit.SECONDS);
+            for (String line : out.split("\\r?\\n")) {
+                if (line.trim().startsWith("/")) {
+                    return line.trim();
+                }
+            }
+        } catch (Exception ignored) {
+            // 没有 wsl 或调用失败，走手工换算
+        }
+        String s = raw.replace('\\', '/');
+        if (s.length() >= 2 && s.charAt(1) == ':') {
+            return "/mnt/" + Character.toLowerCase(s.charAt(0)) + s.substring(2);
+        }
+        return s;
+    }
+
+    /** 从 wsl -l -q 里挑第一个非 docker-desktop 的发行版。wsl.exe 输出是 UTF-16LE 且带 NUL。 */
+    private static String detectDistro() {
+        byte[] raw;
+        try {
+            Process p = new ProcessBuilder("wsl", "-l", "-q").redirectErrorStream(true).start();
+            raw = readAllBytes(p);
+            p.waitFor(15, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            return null;
+        }
+        for (Charset cs : new Charset[]{StandardCharsets.UTF_16LE, StandardCharsets.UTF_8}) {
+            String text = new String(raw, cs);
+            for (String line : text.split("\\r?\\n")) {
+                String name = line.replace("\u0000", "").replace("\uFEFF", "").trim();
+                if (name.isEmpty() || name.toLowerCase().startsWith("docker-desktop")) {
+                    continue;
+                }
+                if (name.matches("[A-Za-z0-9._\\-]+")) {
+                    return name;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String shellQuote(String s) {
+        return "'" + s.replace("'", "'\\''") + "'";
+    }
+
+    private static String readAll(Process p, Charset cs) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream(), cs))) {
+            String line;
+            while ((line = r.readLine()) != null) {
+                sb.append(line).append('\n');
+            }
+        }
+        return sb.toString();
+    }
+
+    private static byte[] readAllBytes(Process p) throws Exception {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] buf = new byte[4096];
+        int n;
+        while ((n = p.getInputStream().read(buf)) > 0) {
+            bos.write(buf, 0, n);
+        }
+        return bos.toByteArray();
+    }
 
     @Resource
     private JdbcTemplate jdbc;
@@ -137,7 +283,7 @@ public class KernelLabController {
 
         TASKS.put("hello", task("hello", "实验 5.1 hello 系统调用", "第五章 系统调用 · 用户态与内核态",
                 "kernel/sysproc.c", "HELLO=42", "sleep 4; printf 'echo\\n'; sleep 8", 30,
-                "cp -r /mnt/g/ZhiCore/kernel-lab/fixtures/hello/. .",
+                "cp -r %WSL_ROOT%/fixtures/hello/. .",
                 "系统调用是用户态进入内核的唯一入口。本实验实现 sys_hello() 返回 42，平台已预置系统调用号、分发表、用户态桩和测试程序，你只需要补全内核侧实现。",
                 "在 sysproc.c 末尾把 sys_hello 的返回值从 0 改成 42。判分会运行用户程序 echo，检查输出 HELLO=42。",
                 new String[]{"系统调用号与 syscall.h", "syscall() 如何按编号分发", "usys.pl 生成用户态桩", "返回值如何从内核传回用户态"},
@@ -236,7 +382,7 @@ public class KernelLabController {
         String content;
         try {
             content = new String(Files.readAllBytes(
-                    Paths.get(ST_ROOT, "xv6-lab", "xv6-riscv", spec.file.replace("/", "\\"))),
+                    ST_ROOT.resolve("xv6-lab").resolve("xv6-riscv").resolve(spec.file.replace("/", "\\"))),
                     StandardCharsets.UTF_8);
         } catch (Exception e) {
             content = "// 读取模板失败：" + e.getMessage();
@@ -287,7 +433,7 @@ public class KernelLabController {
             return result;
         }
 
-        Path tmp = Paths.get(ST_ROOT, "web-upload", task + ".txt");
+        Path tmp = ST_ROOT.resolve("web-upload").resolve(task + ".txt");
         try {
             Files.createDirectories(tmp.getParent());
             Files.write(tmp, content.getBytes(StandardCharsets.UTF_8));
@@ -296,7 +442,7 @@ public class KernelLabController {
             result.put("error", "写入失败：" + e.getMessage());
             return result;
         }
-        String upload = "/mnt/g/ZhiCore/kernel-lab/web-upload/" + task + ".txt";
+        String upload = UPLOAD_DIR + "/" + task + ".txt";
 
         List<String> script = new ArrayList<>();
         script.add("set -e");
@@ -304,7 +450,7 @@ public class KernelLabController {
         script.add("cp -r " + STARTER + " " + WORK);
         script.add("cd " + WORK);
         if (!spec.setup.isEmpty()) {
-            script.add(spec.setup);
+            script.add(spec.setup.replace("%WSL_ROOT%", WSL_ROOT));
         }
         script.add("cp '" + upload + "' '" + spec.file + "'");
         script.add("make TOOLPREFIX=riscv64-linux-gnu- -j2 >/tmp/kbuild.log 2>&1 || { echo BUILD_FAILED; tail -25 /tmp/kbuild.log; exit 3; }");
@@ -318,7 +464,7 @@ public class KernelLabController {
         long start = System.currentTimeMillis();
         List<String> lines = new ArrayList<>();
         try {
-            ProcessBuilder pb = new ProcessBuilder("wsl", "-d", "Ubuntu-24.04", "-u", "root", "bash", "-lc",
+            ProcessBuilder pb = new ProcessBuilder("wsl", "-d", DISTRO, "-u", "root", "bash", "-lc",
                     String.join("\n", script));
             pb.redirectErrorStream(true);
             Process process = pb.start();
