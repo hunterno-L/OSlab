@@ -1,0 +1,3690 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "UNITS",
+  "batchCode": "batch.units.memory.20261027",
+  "contributor": "J/L",
+  "courseCode": "course.operating-systems",
+  "units": [
+    {
+      "unitCode": "unit.memory.functions",
+      "sectionCode": "sec.memory.basic",
+      "title": "内存管理功能与程序的链接装入",
+      "objectives": [
+        "列出内存管理的五项功能",
+        "区分三种装入方式和三种链接方式",
+        "区分静态重定位与动态重定位"
+      ],
+      "sortOrder": 1,
+      "estimatedMinutes": 40,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.memory_management",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.loading_linking",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.logical_address",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_1.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.034.2",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.functions.read.1",
+          "title": "为什么需要内存管理，内存管理做什么",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.management.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.functions.read.2",
+          "title": "编译、链接与装入：程序怎样进入内存",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.loading.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.functions.read.3",
+          "title": "逻辑地址、物理地址与地址重定位",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.addresses.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.functions.practice.1",
+          "title": "练习：存储管理目标的错误说法",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.002"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.functions.practice.2",
+          "title": "练习：动态重定位发生的阶段",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.010"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [],
+      "demoResourceCodes": [],
+      "practiceGuidance": "按“编译→链接→装入”画一条流水线，在装入环节标注三种装入方式的地址转换时机。"
+    },
+    {
+      "unitCode": "unit.memory.image-protection",
+      "sectionCode": "sec.memory.basic",
+      "title": "进程内存映像与保护共享",
+      "objectives": [
+        "说出进程内存映像的组成区域",
+        "解释重定位寄存器与界地址寄存器的分工",
+        "说明只有只读区域才能共享"
+      ],
+      "sortOrder": 2,
+      "estimatedMinutes": 35,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.process_image",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.protection",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.sharing",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.logical_address",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.ext.s3_1.901",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.035",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.034.2",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.image-protection.read.1",
+          "title": "进程的内存映像由哪些部分组成",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.image.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.image-protection.read.2",
+          "title": "内存保护的两种硬件方案",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.protection.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.image-protection.read.3",
+          "title": "内存共享与可重入代码",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.sharing.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.image-protection.practice.1",
+          "title": "练习：进程映像的组成",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.ext.s3_1.901"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.image-protection.practice.2",
+          "title": "练习：可重入程序改善性能的途径",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.035"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.functions"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "对照图 3.3 复述地址布局；把“重定位寄存器用来加、界地址寄存器用来比”各举一个越界例子。"
+    },
+    {
+      "unitCode": "unit.memory.contiguous-partition",
+      "sectionCode": "sec.memory.contiguous",
+      "title": "固定分区与动态分区",
+      "objectives": [
+        "比较固定分区与动态分区的碎片类型",
+        "复述动态分区回收的四种合并情况",
+        "解释外部碎片与紧凑"
+      ],
+      "sortOrder": 3,
+      "estimatedMinutes": 35,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.fixed_partition",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.dynamic_partition",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.contiguous_allocation",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_1.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.016",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.036",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.037",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.042",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.060",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.contiguous-partition.read.1",
+          "title": "单一连续分配与固定分区分配",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.contiguous.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.contiguous-partition.read.2",
+          "title": "动态分区分配与外部碎片",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.dynamic.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.contiguous-partition.read.3",
+          "title": "动态分区回收的四种合并情况",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.reclaim.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.contiguous-partition.practice.1",
+          "title": "练习：固定分区分配中分区的大小",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.006"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.contiguous-partition.practice.2",
+          "title": "练习：回收后空闲区数减一的情形",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.007"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.functions"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "用教材 64MB 内存的例子走一遍换入换出，标出每次产生/合并的空闲块。"
+    },
+    {
+      "unitCode": "unit.memory.fit-algorithms",
+      "sectionCode": "sec.memory.contiguous",
+      "title": "动态分区分配算法",
+      "objectives": [
+        "比较四种顺序搜索算法",
+        "说明伙伴系统的分割与合并",
+        "复述快速适应与哈希算法"
+      ],
+      "sortOrder": 4,
+      "estimatedMinutes": 40,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.first_fit",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.next_fit",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.best_fit",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.worst_fit",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.indexed_allocation",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.buddy_system",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.dynamic_partition",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.ext.s3_1.902",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.022",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.023",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.062",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.067",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.070",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.002",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.fit-algorithms.read.1",
+          "title": "首次、邻近、最佳与最坏适应算法",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.sequential-fit.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.fit-algorithms.read.2",
+          "title": "快速适应、伙伴系统与哈希算法",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.indexed-fit.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.fit-algorithms.practice.1",
+          "title": "练习：伙伴系统的最小区块",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.ext.s3_1.902"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.fit-algorithms.practice.2",
+          "title": "练习：最佳适应算法得到的分区首址",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.008"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.contiguous-partition"
+      ],
+      "demoResourceCodes": [
+        "demo.allocation.first_fit",
+        "demo.allocation.best_fit",
+        "demo.allocation.worst_fit",
+        "demo.allocation.next_fit"
+      ],
+      "practiceGuidance": "同一空闲区序列分别用四种算法分配，比较剩余碎片；再用演示验证首次适应。"
+    },
+    {
+      "unitCode": "unit.memory.paging-basics",
+      "sectionCode": "sec.memory.paging",
+      "title": "分页概念与基本地址变换",
+      "objectives": [
+        "计算页号和页内偏移",
+        "走一遍基本地址变换过程",
+        "确定页表项大小"
+      ],
+      "sortOrder": 5,
+      "estimatedMinutes": 40,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.paging",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.page_table",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.address_translation",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_1.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.041",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.025",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.029",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.030",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.034.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.038",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.039",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.043",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.045",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.046",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.047",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.048",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.049",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.053",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.054",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.055",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.056",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.057",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.058",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.059",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.063",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.064",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.065",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.069",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.071",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.072",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.015",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.paging-basics.read.1",
+          "title": "页、页框、地址结构与页表",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.paging-concept.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.paging-basics.read.2",
+          "title": "基本分页的地址变换过程",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.paging-translation.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.paging-basics.read.3",
+          "title": "页表项大小怎样确定",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.pte-size.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.paging-basics.practice.1",
+          "title": "练习：内存保护描述中的错误项",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.003"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.paging-basics.practice.2",
+          "title": "练习：内存保护的实现者",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.004"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.contiguous-partition"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "把教材 L=1KB、A=2500 的例子改几个数重算；强调页表项地址与物理地址两个乘法的区别。"
+    },
+    {
+      "unitCode": "unit.memory.tlb-multilevel",
+      "sectionCode": "sec.memory.paging",
+      "title": "快表与多级页表",
+      "objectives": [
+        "说明快表加速的原因",
+        "画出两级页表的地址结构",
+        "计算两级页表的访存次数"
+      ],
+      "sortOrder": 6,
+      "estimatedMinutes": 35,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.tlb",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.multilevel_page_table",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.locality",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_2.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.038",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.042",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.047",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.020",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.tlb-multilevel.read.1",
+          "title": "具有快表的地址变换机构",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.tlb.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.tlb-multilevel.read.2",
+          "title": "两级页表与多级页表",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.two-level.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.tlb-multilevel.practice.1",
+          "title": "练习：虚存有效发挥作用的程序特性",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_2.006"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.tlb-multilevel.practice.2",
+          "title": "练习：二级页表下 TLB 命中的平均访存次数",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_2.013"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.paging-basics"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "分别计算快表命中、未命中、缺页三种情况的有效访问时间。"
+    },
+    {
+      "unitCode": "unit.memory.segmentation",
+      "sectionCode": "sec.memory.segmentation",
+      "title": "分段与段的共享保护",
+      "objectives": [
+        "说明段表项与页表项的区别",
+        "走一遍分段地址变换与两次越界检查",
+        "比较分页与分段"
+      ],
+      "sortOrder": 7,
+      "estimatedMinutes": 40,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.segmentation",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.page_table",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.address_translation",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.sharing",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_1.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.041",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.035",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.025",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.029",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.030",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.032",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.033",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.034.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.038",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.039",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.040",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.043",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.044",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.045",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.046",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.047",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.048",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.049",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.050",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.051",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.053",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.055",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.056",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.057",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.058",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.059",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.061",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.063",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.064",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.065",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.066",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.068",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.069",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.071",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.072",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.011",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.segmentation.read.1",
+          "title": "分段、段表与二维地址空间",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.segmentation.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.segmentation.read.2",
+          "title": "分段的地址变换与越界检查",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.segment-translation.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.segmentation.read.3",
+          "title": "分页与分段的区别",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.paging-vs-seg.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.segmentation.read.4",
+          "title": "段的共享与保护",
+          "activityType": "READING",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.segment-sharing.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.segmentation.practice.1",
+          "title": "练习：内存保护描述中的错误项",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.003"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.segmentation.practice.2",
+          "title": "练习：内存保护的实现者",
+          "activityType": "PRACTICE",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.004"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.paging-basics"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "用“能否只凭一个整数定地址”判断一维/二维；各举一个越界中断的例子。"
+    },
+    {
+      "unitCode": "unit.memory.segment-paging",
+      "sectionCode": "sec.memory.segment-paging",
+      "title": "段页式存储管理",
+      "objectives": [
+        "拆分段页式逻辑地址三部分",
+        "说明每进程段表数与页表数",
+        "走一遍段页式地址变换"
+      ],
+      "sortOrder": 8,
+      "estimatedMinutes": 25,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.segment_paging",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.paging",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.segmentation",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_1.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.032",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.033",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.040",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.044",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.050",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.051",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.052",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.054",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.061",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.066",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.068",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.015",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.segment-paging.read.1",
+          "title": "段页式存储管理",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.segment-paging.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.segment-paging.practice.1",
+          "title": "练习：段式系统逻辑地址转物理地址",
+          "activityType": "PRACTICE",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.009"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.segment-paging.practice.2",
+          "title": "练习：段式管理中共享段表的用途",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.026"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.segmentation"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "强调“一个进程一张段表、每段一张页表”；把三次访存与快表加速串起来。"
+    },
+    {
+      "unitCode": "unit.memory.summary-3-1",
+      "sectionCode": "sec.memory.summary-basic",
+      "title": "3.1 小结：三种管理方式对比",
+      "objectives": [
+        "回答内存管理为什么必要",
+        "用三个关键问题对比段式、页式、段页式"
+      ],
+      "sortOrder": 9,
+      "estimatedMinutes": 15,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.paging",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.segmentation",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.segment_paging",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.multilevel_page_table",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_1.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.032",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.033",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.040",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.044",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.050",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.051",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.052",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.054",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.061",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.066",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.068",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.038",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.020",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.summary-3-1.read.1",
+          "title": "3.1 本节小结：三个关键问题",
+          "activityType": "SUMMARY",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.summary-3-1.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.summary-3-1.practice.1",
+          "title": "练习：段式系统逻辑地址转物理地址",
+          "activityType": "PRACTICE",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.009"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.summary-3-1.practice.2",
+          "title": "练习：段式管理中共享段表的用途",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.026"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.segment-paging",
+        "unit.memory.fit-algorithms",
+        "unit.memory.tlb-multilevel"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "按“逻辑地址结构—表项结构—寻址过程”三列重做一张对比表。"
+    },
+    {
+      "unitCode": "unit.memory.virtual-concepts",
+      "sectionCode": "sec.memory.virtual-concepts",
+      "title": "虚拟内存基本概念",
+      "objectives": [
+        "解释一次性与驻留性的局限",
+        "举例说明时间/空间局部性",
+        "说出虚拟内存三大特征"
+      ],
+      "sortOrder": 10,
+      "estimatedMinutes": 35,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.virtual_memory",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.locality",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.demand_paging",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.paging",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_1.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.054",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.034",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.035",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.045",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.057",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.058",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.015",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.virtual-concepts.read.1",
+          "title": "传统存储管理的局限与局部性原理",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.virtual-concepts.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.virtual-concepts.read.2",
+          "title": "虚拟存储器的定义与三个特征",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.virtual-definition.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.virtual-concepts.read.3",
+          "title": "虚拟内存的实现方式与硬件支持",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.virtual-implementation.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.virtual-concepts.practice.1",
+          "title": "练习：关于存储管理的正确叙述",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.001"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.virtual-concepts.practice.2",
+          "title": "练习：页式存储管理论述的正误判断",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.054"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.paging-basics"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "辨析多次性与虚拟性：一个讲实现方式，一个讲外在效果。"
+    },
+    {
+      "unitCode": "unit.memory.demand-paging",
+      "sectionCode": "sec.memory.demand-paging",
+      "title": "请求分页的页表、缺页与地址变换",
+      "objectives": [
+        "说明请求页表项四个新增字段",
+        "复述缺页中断处理流程",
+        "对比缺页中断与一般中断"
+      ],
+      "sortOrder": 11,
+      "estimatedMinutes": 45,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.demand_paging",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.page_table",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.access_bit",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.dirty_bit",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.page_fault",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.address_translation",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.tlb",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_1.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.041",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.025",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.029",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.030",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.034.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.038",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.039",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.043",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.045",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.046",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.047",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.048",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.049",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.053",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.055",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.056",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.057",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.058",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.059",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.063",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.064",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.065",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.069",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.071",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.072",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.037",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.042",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.043",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.046",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.047",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.056",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.057",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.014",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.demand-paging.read.1",
+          "title": "请求页表项新增的四个字段",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.demand-pte.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.demand-paging.read.2",
+          "title": "缺页中断的处理过程",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.page-fault.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.demand-paging.read.3",
+          "title": "请求分页的地址变换过程",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.demand-translation.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.demand-paging.practice.1",
+          "title": "练习：内存保护描述中的错误项",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.003"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.demand-paging.practice.2",
+          "title": "练习：内存保护的实现者",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.004"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.virtual-concepts",
+        "unit.memory.tlb-multilevel"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "跟踪缺页时进程状态变化：运行→阻塞→就绪；再对照图 3.21 走一遍变换流程。"
+    },
+    {
+      "unitCode": "unit.memory.frame-allocation",
+      "sectionCode": "sec.memory.frame-allocation",
+      "title": "驻留集、分配策略与调页时机",
+      "objectives": [
+        "权衡驻留集大小",
+        "区分三种分配与置换策略",
+        "比较预调页与请求调页"
+      ],
+      "sortOrder": 12,
+      "estimatedMinutes": 40,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.resident_set",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.allocation_strategy",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.frame_allocation",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.demand_paging",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.page_fault",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.dirty_bit",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_2.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.029",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.032",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.037",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.043",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.046",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.049",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.056",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.057",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.006",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.frame-allocation.read.1",
+          "title": "驻留集大小怎样权衡",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.resident-set.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.frame-allocation.read.2",
+          "title": "三种页面分配与置换策略",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.allocation-strategy.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.frame-allocation.read.3",
+          "title": "物理块调入算法",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.frame-algorithms.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.frame-allocation.read.4",
+          "title": "调入页面的时机、来源与过程",
+          "activityType": "READING",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.page-in-timing.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.frame-allocation.practice.1",
+          "title": "练习：页面尺寸增大后缺页中断次数",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_2.001"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.frame-allocation.practice.2",
+          "title": "练习：缺页中断处理后恢复执行哪条指令",
+          "activityType": "PRACTICE",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_2.002"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.demand-paging"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "把“固定/可变”与“全局/局部”做成 2×2 表，指出哪一格不适用并说明原因。"
+    },
+    {
+      "unitCode": "unit.memory.replacement-opt-fifo",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "OPT 与 FIFO 置换算法",
+      "objectives": [
+        "推演 OPT 置换过程",
+        "推演 FIFO 并解释 Belady 异常",
+        "说明 OPT 为何不可实现"
+      ],
+      "sortOrder": 13,
+      "estimatedMinutes": 40,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.opt",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.fifo",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.belady",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.page_replacement",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_2.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.016",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.033",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.048",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.011",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.replacement-opt-fifo.read.1",
+          "title": "最佳（OPT）置换算法",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.opt.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.replacement-opt-fifo.read.2",
+          "title": "先进先出（FIFO）算法与 Belady 异常",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.fifo-belady.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.replacement-opt-fifo.practice.1",
+          "title": "练习：页面调度算法说法辨误",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_2.014"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.replacement-opt-fifo.practice.2",
+          "title": "练习：缺页次数的下界",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_2.015"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.frame-allocation"
+      ],
+      "demoResourceCodes": [
+        "demo.page.opt",
+        "demo.page.fifo"
+      ],
+      "practiceGuidance": "手算引用串的缺页次数，再用演示核对；用 Belady 例子说明块数变多缺页反而增加。"
+    },
+    {
+      "unitCode": "unit.memory.replacement-lru-clock",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "LRU 与 CLOCK 置换算法",
+      "objectives": [
+        "推演 LRU 置换过程",
+        "复述简单 CLOCK 的扫描规则",
+        "按四类页面执行改进型 CLOCK"
+      ],
+      "sortOrder": 14,
+      "estimatedMinutes": 45,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.lru",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.clock",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.clock_enhanced",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.access_bit",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.dirty_bit",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_2.022",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.023",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.050",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.051",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.053",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.055",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.008",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.replacement-lru-clock.read.1",
+          "title": "最近最久未使用（LRU）置换算法",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.lru.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.replacement-lru-clock.read.2",
+          "title": "简单 CLOCK 置换算法",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.clock.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.replacement-lru-clock.read.3",
+          "title": "改进型 CLOCK 置换算法",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.clock-enhanced.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.replacement-lru-clock.practice.1",
+          "title": "练习：LRU 置换下的页面失效次数",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_2.022"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.replacement-lru-clock.practice.2",
+          "title": "练习：LRU 实现开销高的原因",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_2.023"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.replacement-opt-fifo"
+      ],
+      "demoResourceCodes": [
+        "demo.page.lru"
+      ],
+      "practiceGuidance": "先手算 CLOCK 的替换指针扫描，再与 LRU 结果对比；改进型 CLOCK 按 1 类→2 类→清 0 重扫。"
+    },
+    {
+      "unitCode": "unit.memory.thrashing-workingset",
+      "sectionCode": "sec.memory.thrashing-workingset",
+      "title": "抖动与工作集",
+      "objectives": [
+        "解释抖动的成因",
+        "计算给定窗口下的工作集",
+        "说明驻留集与工作集的关系"
+      ],
+      "sortOrder": 15,
+      "estimatedMinutes": 30,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.thrashing",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.working_set",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.locality",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.resident_set",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.frame_allocation",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_2.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.025",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.029",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.039",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.040",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.041",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.044",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.052",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.016",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.thrashing-workingset.read.1",
+          "title": "抖动及其成因",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.thrashing.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.thrashing-workingset.read.2",
+          "title": "工作集与驻留集的关系",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.working-set.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.thrashing-workingset.practice.1",
+          "title": "练习：虚存有效发挥作用的程序特性",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_2.006"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.thrashing-workingset.practice.2",
+          "title": "练习：可能引起抖动的置换策略",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_2.025"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.frame-allocation"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "用教材访问序列把窗口 Δ 换成 4 再算一次工作集，体会窗口大小的影响。"
+    },
+    {
+      "unitCode": "unit.memory.mmap-performance",
+      "sectionCode": "sec.memory.mmap",
+      "title": "内存映射文件与虚拟存储性能",
+      "objectives": [
+        "说明内存映射文件的工作方式",
+        "列出缺页率的影响因素",
+        "解释已修改页面链表的作用"
+      ],
+      "sortOrder": 16,
+      "estimatedMinutes": 30,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.memory_mapped_file",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.virtual_performance",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.sharing",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.page_replacement",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.locality",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.dirty_bit",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_1.035",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.030",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.036",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.054",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.012",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.mmap-performance.read.1",
+          "title": "内存映射文件",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.mmap.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.mmap-performance.read.2",
+          "title": "虚拟存储器性能的影响因素",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.performance.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.mmap-performance.practice.1",
+          "title": "练习：可重入程序改善性能的途径",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.035"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.mmap-performance.practice.2",
+          "title": "练习：虚存有效发挥作用的程序特性",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_2.006"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.thrashing-workingset"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "对照图 3.28 说明两个进程如何通过映射同一文件共享内存。"
+    },
+    {
+      "unitCode": "unit.memory.address-translation",
+      "sectionCode": "sec.memory.address-translation",
+      "title": "虚实地址翻译综合例题",
+      "objectives": [
+        "划分虚拟地址与物理地址的位段",
+        "完成 TLB→页表→Cache 的查找",
+        "判断何时缺页"
+      ],
+      "sortOrder": 17,
+      "estimatedMinutes": 35,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.address_translation",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.tlb",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.demand_paging",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.page_fault",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_1.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.034.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.046",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.055",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.056",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.064",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.037",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.042",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.043",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.046",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.047",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.056",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.057",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.014",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.address-translation.read.1",
+          "title": "虚实地址翻译综合示例：TLB、页表与 Cache",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.address-translation.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.address-translation.practice.1",
+          "title": "练习：内存保护描述中的错误项",
+          "activityType": "PRACTICE",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.003"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.address-translation.practice.2",
+          "title": "练习：内存保护的实现者",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.004"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.demand-paging",
+        "unit.memory.tlb-multilevel"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "把三个地址 0x03d4、0x00f1、0x0229 各画一遍位段拆分，再按 TLB→页表→Cache 顺序查表。"
+    },
+    {
+      "unitCode": "unit.memory.summary-3-2",
+      "sectionCode": "sec.memory.summary-virtual",
+      "title": "3.2 小结：置换算法对比",
+      "objectives": [
+        "回答本节开头的三个问题",
+        "对比四种置换算法",
+        "说明虚存容量取交集"
+      ],
+      "sortOrder": 18,
+      "estimatedMinutes": 20,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.virtual_memory",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.demand_paging",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.page_replacement",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.working_set",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_1.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.034",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.035",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.039",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.045",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.052",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.057",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.058",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.016",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.summary-3-2.read.1",
+          "title": "3.2 本节小结：三个问题的答案",
+          "activityType": "SUMMARY",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.summary-3-2.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.summary-3-2.practice.1",
+          "title": "练习：关于存储管理的正确叙述",
+          "activityType": "PRACTICE",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.001"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.summary-3-2.practice.2",
+          "title": "练习：页面尺寸增大后缺页中断次数",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_2.001"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.replacement-lru-clock",
+        "unit.memory.mmap-performance",
+        "unit.memory.address-translation"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "合上资料复述：为什么要虚存、容量由什么决定、代价是什么；再做一张置换算法对比表。"
+    },
+    {
+      "unitCode": "unit.memory.difficulties",
+      "sectionCode": "sec.memory.difficulties",
+      "title": "本章疑难点辨析",
+      "objectives": [
+        "按目的、长度、地址空间、碎片对比分页与分段",
+        "自查十个易错点"
+      ],
+      "sortOrder": 19,
+      "estimatedMinutes": 30,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.paging",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.segmentation",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.segment_paging",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.multilevel_page_table",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.belady",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.clock_enhanced",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.working_set",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.memory.virtual_memory",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s3_1.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.032",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.033",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.040",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.044",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.050",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.051",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.052",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.054",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.061",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.066",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.068",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.033",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.034",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.035",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.038",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.039",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.045",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.048",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.051",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.052",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.055",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.058",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_1.app.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.016",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s3_2.app.020",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.memory.difficulties.read.1",
+          "title": "分页与分段的比较（表 3.6）",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.difficulties.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.difficulties.read.2",
+          "title": "第三章易错点辨析",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.memory.difficulties.002"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.memory.difficulties.practice.1",
+          "title": "练习：关于存储管理的正确叙述",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.001"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.memory.difficulties.practice.2",
+          "title": "练习：段式系统逻辑地址转物理地址",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s3_1.009"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.memory.summary-3-1",
+        "unit.memory.summary-3-2"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "把十个易错点做成“我原来怎么想—正确结论”两列自查表。"
+    }
+  ]
+}

@@ -1,0 +1,4030 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "UNITS",
+  "batchCode": "batch.units.process.20261027",
+  "contributor": "J/L",
+  "courseCode": "course.operating-systems",
+  "units": [
+    {
+      "unitCode": "unit.process.concept",
+      "sectionCode": "sec.process.process-concept",
+      "title": "进程的概念与特征",
+      "objectives": [
+        "说明为什么要引入进程",
+        "用自己的话概括进程的四个特征"
+      ],
+      "sortOrder": 1,
+      "estimatedMinutes": 25,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.process",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_2.023",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.2",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.3",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.4",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.5",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.033",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.concept.read.1",
+          "title": "为什么要引入进程，进程是什么",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.definition.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.concept.read.2",
+          "title": "进程的四个基本特征",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.features.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.concept.practice.1",
+          "title": "练习：作业与进程的区别",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.023"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.concept.practice.2",
+          "title": "练习：进程与程序的根本区别",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_1.004"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [],
+      "demoResourceCodes": [],
+      "practiceGuidance": "先回答“程序为什么不能作为独立运行单位”，再对照动态性、并发性、独立性和异步性逐条举例。"
+    },
+    {
+      "unitCode": "unit.process.composition",
+      "sectionCode": "sec.process.process-composition",
+      "title": "进程实体与 PCB",
+      "objectives": [
+        "说出进程实体的三部分",
+        "解释 PCB 为什么是进程存在的唯一标志"
+      ],
+      "sortOrder": 2,
+      "estimatedMinutes": 25,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.process",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.pcb",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_2.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.023",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.2",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.3",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.4",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.5",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.6",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.029",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.030",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.033",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.composition.read.1",
+          "title": "进程实体的三个组成部分",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.composition.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.composition.read.2",
+          "title": "PCB 的内容与组织方式",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.pcb.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.composition.practice.1",
+          "title": "练习：不属于进程上下文的内容",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.007"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.composition.practice.2",
+          "title": "练习：作业与进程的区别",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.023"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.concept"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "画出 PCB 的主要内容分类，并说明 PCB 的组织方式（链接、索引）各自的取舍。"
+    },
+    {
+      "unitCode": "unit.process.states",
+      "sectionCode": "sec.process.process-state",
+      "title": "进程状态与转换",
+      "objectives": [
+        "画出五状态转换图",
+        "判断给定事件会触发哪种状态转换"
+      ],
+      "sortOrder": 3,
+      "estimatedMinutes": 30,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.process_state",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_1.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.016",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.034",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.042",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.043",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.045",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.046",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.047",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.048",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.062",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.064",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.065",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.066",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.070",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.app.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.app.004",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.states.read.1",
+          "title": "进程的五种状态",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.states.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.states.read.2",
+          "title": "进程状态转换及触发事件",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.transitions.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.states.practice.1",
+          "title": "练习：进程调度与状态判断",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_1.006"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.states.practice.2",
+          "title": "练习：进程状态变化的关联性",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_1.012"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.composition"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "遮住图 2.1，先自己画一遍，再逐条核对就绪→运行、运行→阻塞等转换的触发条件。"
+    },
+    {
+      "unitCode": "unit.process.control",
+      "sectionCode": "sec.process.process-control",
+      "title": "进程控制原语",
+      "objectives": [
+        "区分创建、终止、阻塞、唤醒原语的作用",
+        "说明原语为什么不可中断"
+      ],
+      "sortOrder": 4,
+      "estimatedMinutes": 25,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.process_control",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.pcb",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.process_state",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_2.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.016",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.6",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.029",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.030",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.032",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.034",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.035",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.042",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.043",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.045",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.046",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.047",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.048",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.049",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.059",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.062",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.064",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.065",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.066",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.068",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.069",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.070",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.071",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.app.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.app.004",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.control.read.1",
+          "title": "进程控制原语：创建、终止、阻塞与唤醒",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.control.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.control.practice.1",
+          "title": "练习：不属于进程上下文的内容",
+          "activityType": "PRACTICE",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.007"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.control.practice.2",
+          "title": "练习：进程映像的组成",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_1.001"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.states"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "按“谁调用、改变什么状态、做哪些资源操作”整理四类原语。"
+    },
+    {
+      "unitCode": "unit.process.ipc",
+      "sectionCode": "sec.process.ipc",
+      "title": "进程通信的三种方式",
+      "objectives": [
+        "比较共享存储、消息传递和管道通信",
+        "判断给定场景适合哪种通信方式"
+      ],
+      "sortOrder": 5,
+      "estimatedMinutes": 30,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.ipc",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.shared_memory",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.message_passing",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.pipe",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_1.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.023",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.025",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.044",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.050",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.063",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.app.001",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.ipc.read.1",
+          "title": "进程通信的分类",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.ipc-overview.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.ipc.read.2",
+          "title": "共享存储通信",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.shared-memory.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.ipc.read.3",
+          "title": "消息传递通信",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.message-passing.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.ipc.read.4",
+          "title": "管道通信及其协调条件",
+          "activityType": "READING",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.pipe.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.ipc.practice.1",
+          "title": "练习：进程间交换数据的途径",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_1.003"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.ipc.practice.2",
+          "title": "练习：信箱通信的两个原语",
+          "activityType": "PRACTICE",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_1.023"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.control"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "围绕“数据拷贝次数、是否需同步、是否适合大量数据”做一张对比表。"
+    },
+    {
+      "unitCode": "unit.process.thread",
+      "sectionCode": "sec.process.thread",
+      "title": "线程与多线程模型",
+      "objectives": [
+        "说明线程与进程的区别",
+        "比较用户级线程与内核级线程",
+        "区分多对一、一对一、多对多模型"
+      ],
+      "sortOrder": 6,
+      "estimatedMinutes": 40,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.thread",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.thread_implementation",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.multithreading_model",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_1.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.022",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.036",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.037",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.038",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.039",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.040",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.041",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.051",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.052",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.053",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.054",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.055",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.056",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.057",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.058",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.060",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.061",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.067",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.072",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.app.002",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.thread.read.1",
+          "title": "线程是什么，为什么引入线程",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.thread-concept.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.thread.read.2",
+          "title": "线程与进程的比较",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.thread-vs-process.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.thread.read.3",
+          "title": "用户级线程、内核级线程与组合方式",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.thread-implementation.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.thread.read.4",
+          "title": "三种多线程模型",
+          "activityType": "READING",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.multithreading-model.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.thread.practice.1",
+          "title": "练习：线程基本特性的正误判断",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_1.002"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.thread.practice.2",
+          "title": "练习：线程与资源分配的关系",
+          "activityType": "PRACTICE",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_1.021"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.concept",
+        "unit.process.composition"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "用“切换开销、阻塞影响、并行能力”三个维度比较多线程模型。"
+    },
+    {
+      "unitCode": "unit.process.summary-2-1",
+      "sectionCode": "sec.process.process-thread",
+      "title": "2.1 小结：进程与线程",
+      "objectives": [
+        "串联进程概念、状态、控制、通信和线程",
+        "自查本章基础概念"
+      ],
+      "sortOrder": 7,
+      "estimatedMinutes": 15,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.process",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.thread",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_2.023",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.2",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.3",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.4",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.5",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.033",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.036",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.037",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.038",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.039",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.040",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.041",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.060",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.061",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.072",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.app.002",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.summary-2-1.read.1",
+          "title": "2.1 本节小结：进程与线程的主线",
+          "activityType": "SUMMARY",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.summary-2-1.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.summary-2-1.practice.1",
+          "title": "练习：作业与进程的区别",
+          "activityType": "PRACTICE",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.023"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.summary-2-1.practice.2",
+          "title": "练习：线程基本特性的正误判断",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_1.002"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.thread",
+        "unit.process.ipc",
+        "unit.process.control"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "合上资料，按“是什么—怎么描述—怎么控制—怎么通信—怎么并发”复述 2.1。"
+    },
+    {
+      "unitCode": "unit.process.scheduling-basics",
+      "sectionCode": "sec.process.scheduling-concept",
+      "title": "调度层次、调度程序与评价指标",
+      "objectives": [
+        "区分三级调度",
+        "说明调度程序组成与调度时机",
+        "计算周转时间等指标"
+      ],
+      "sortOrder": 8,
+      "estimatedMinutes": 45,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.cpu.scheduling",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.scheduling_level",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.scheduler",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.preemption",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.idle_process",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.scheduling_metrics",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.context_switch",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_2.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.037",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.038",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.041",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.048",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.ext.s2_2.901",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.scheduling-basics.read.1",
+          "title": "CPU 调度与三级调度",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.scheduling-concept.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.scheduling-basics.read.2",
+          "title": "调度程序的组成与调度时机",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.scheduler-structure.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.scheduling-basics.read.3",
+          "title": "抢占方式、闲逛进程与线程调度",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.preemption.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.scheduling-basics.read.4",
+          "title": "调度算法的评价指标与计算",
+          "activityType": "READING",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.scheduling-metrics.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.scheduling-basics.read.5",
+          "title": "上下文切换及其与模式切换的区别",
+          "activityType": "READING",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.context-switch.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.scheduling-basics.practice.1",
+          "title": "练习：中级调度的目的",
+          "activityType": "PRACTICE",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.001"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.scheduling-basics.practice.2",
+          "title": "练习：创建态到就绪态由哪级调度完成",
+          "activityType": "PRACTICE",
+          "sortOrder": 7,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.002"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.states"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "把“调度是决策、切换是执行”写在纸上，再用一个 I/O 阻塞例子走一遍完整流程。"
+    },
+    {
+      "unitCode": "unit.process.fcfs-sjf",
+      "sectionCode": "sec.process.cpu-algorithms",
+      "title": "FCFS 与 SJF 调度",
+      "objectives": [
+        "按到达顺序推演 FCFS",
+        "计算 SJF 的等待时间和周转时间",
+        "说明 SJF 的饥饿问题"
+      ],
+      "sortOrder": 9,
+      "estimatedMinutes": 40,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.cpu.fcfs",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.sjf",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_2.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.015.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.029",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.032",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.033",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.025",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.030",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.042",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.app.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.app.007",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.fcfs-sjf.read.1",
+          "title": "先来先服务调度与等待时间计算",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.fcfs.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.fcfs-sjf.read.2",
+          "title": "短作业优先与最短剩余时间优先",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.sjf.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.fcfs-sjf.practice.1",
+          "title": "练习：有利于 CPU 繁忙型作业的调度算法",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.009"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.fcfs-sjf.practice.2",
+          "title": "练习：照顾短作业用户应采用的调度算法",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.015.1"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.scheduling-basics"
+      ],
+      "demoResourceCodes": [
+        "demo.cpu.fcfs",
+        "demo.cpu.sjf"
+      ],
+      "practiceGuidance": "同一组作业分别用 FCFS 和 SJF 手算，比较平均等待时间；再用演示核对。"
+    },
+    {
+      "unitCode": "unit.process.hrrn-priority",
+      "sectionCode": "sec.process.cpu-algorithms",
+      "title": "HRRN 与优先级调度",
+      "objectives": [
+        "用响应比公式选择下一个作业",
+        "区分抢占式与非抢占式优先级调度"
+      ],
+      "sortOrder": 10,
+      "estimatedMinutes": 35,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.cpu.hrrn",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.priority_nonpreemptive",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.priority_preemptive",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_2.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.015.2",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.016",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.034",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.035",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.036",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.039",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.044",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.049",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.050",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.app.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.app.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.app.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.app.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.app.011",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.hrrn-priority.read.1",
+          "title": "高响应比优先调度",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.hrrn.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.hrrn-priority.read.2",
+          "title": "优先级调度：抢占、非抢占与优先级设置",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.priority.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.hrrn-priority.practice.1",
+          "title": "练习：实时系统的进程调度算法",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.011"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.hrrn-priority.practice.2",
+          "title": "练习：照顾紧急作业用户应采用的调度算法",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.015.2"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.fcfs-sjf"
+      ],
+      "demoResourceCodes": [
+        "demo.cpu.hrrn",
+        "demo.cpu.priority_nonpreemptive",
+        "demo.cpu.priority_preemptive"
+      ],
+      "practiceGuidance": "计算每个作业的响应比并说明它如何兼顾长短作业；再讨论低优先级饥饿与老化。"
+    },
+    {
+      "unitCode": "unit.process.rr-mlq-mlfq",
+      "sectionCode": "sec.process.cpu-algorithms",
+      "title": "轮转、多级队列与多级反馈队列",
+      "objectives": [
+        "说明时间片大小对 RR 的影响",
+        "区分多级队列与多级反馈队列",
+        "归纳各算法适用场景"
+      ],
+      "sortOrder": 11,
+      "estimatedMinutes": 45,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.cpu.rr",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.mlq",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.mlfq",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_2.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.015.3",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.015.4",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.022",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.040",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.043",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.045",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.046",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.047",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.ext.s2_2.902",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.app.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.app.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.app.008",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.rr-mlq-mlfq.read.1",
+          "title": "时间片轮转调度",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.rr.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.rr-mlq-mlfq.read.2",
+          "title": "多级队列调度",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.mlq.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.rr-mlq-mlfq.read.3",
+          "title": "多级反馈队列调度",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.mlfq.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.rr-mlq-mlfq.read.4",
+          "title": "典型调度算法对比",
+          "activityType": "SUMMARY",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.algorithm-comparison.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.rr-mlq-mlfq.practice.1",
+          "title": "练习：时间片轮转调度的目的",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.004"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.rr-mlq-mlfq.practice.2",
+          "title": "练习：实现人机交互应采用的调度算法",
+          "activityType": "PRACTICE",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.015.3"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.hrrn-priority"
+      ],
+      "demoResourceCodes": [
+        "demo.cpu.rr",
+        "demo.cpu.mlfq"
+      ],
+      "practiceGuidance": "画 MLFQ 的多级队列与降级路径，并解释为什么它不需要预知运行时间。"
+    },
+    {
+      "unitCode": "unit.process.summary-2-2",
+      "sectionCode": "sec.process.cpu-scheduling",
+      "title": "2.2 小结：调度决策与算法选择",
+      "objectives": [
+        "按目标选择合适的调度算法",
+        "识别各算法的典型陷阱"
+      ],
+      "sortOrder": 12,
+      "estimatedMinutes": 15,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.cpu.scheduling",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.scheduler",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.scheduling_metrics",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.cpu.context_switch",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_2.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.037",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.038",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.041",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_2.048",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.summary-2-2.read.1",
+          "title": "2.2 本节小结：调度决策与算法选择",
+          "activityType": "SUMMARY",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.summary-2-2.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.summary-2-2.practice.1",
+          "title": "练习：调度算法设计应考虑的指标",
+          "activityType": "PRACTICE",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.003"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.summary-2-2.practice.2",
+          "title": "练习：进程何时占用处理器及占用时长由谁决定",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.005"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.rr-mlq-mlfq"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "用“响应时间优先/吞吐量优先/公平性优先”三种需求各选一个算法并说明理由。"
+    },
+    {
+      "unitCode": "unit.process.sync-basics",
+      "sectionCode": "sec.process.sync-concept",
+      "title": "同步、互斥与临界区",
+      "objectives": [
+        "区分同步与互斥",
+        "说明临界区四部分",
+        "用四条准则评价同步机制"
+      ],
+      "sortOrder": 13,
+      "estimatedMinutes": 30,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.critical_section",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.synchronization",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_3.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.032.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.032.2",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.034",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.036",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.037",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.053",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.054",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.057",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.060",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.022",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.026",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.sync-basics.read.1",
+          "title": "临界资源、临界区与同步互斥",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.sync-basic.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.sync-basics.read.2",
+          "title": "临界区互斥应遵循的四条准则",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.sync-criteria.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.sync-basics.practice.1",
+          "title": "练习：临界区的正确定义",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_3.001"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.sync-basics.practice.2",
+          "title": "练习：不需要信号量的并发执行",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_3.002"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.states"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "针对打印机和单缓冲两个例子，分别指出临界资源、临界区和制约关系。"
+    },
+    {
+      "unitCode": "unit.process.mutex-methods",
+      "sectionCode": "sec.process.sync-methods",
+      "title": "软件方法、硬件方法与互斥锁",
+      "objectives": [
+        "比较四种软件互斥算法",
+        "说明 TS/Swap 的原子性",
+        "解释自旋锁的适用场景"
+      ],
+      "sortOrder": 14,
+      "estimatedMinutes": 45,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.software_mutex",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.peterson",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.hardware_mutex",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.mutex_lock",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_3.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.022",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.039",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.040",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.041",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.052",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.055",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.027",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.mutex-methods.read.1",
+          "title": "软件实现互斥：单标志、双标志与 Peterson 算法",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.software-mutex.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.mutex-methods.read.2",
+          "title": "硬件实现互斥：关中断、TS 指令与 Swap 指令",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.hardware-mutex.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.mutex-methods.read.3",
+          "title": "互斥锁与自旋锁",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.mutex-lock.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.mutex-methods.practice.1",
+          "title": "练习：互斥锁的适用范围",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_3.021"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.mutex-methods.practice.2",
+          "title": "练习：互斥锁导致死锁的情形",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_3.022"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.sync-basics"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "对每种方法逐条检查四条准则，重点说明双标志先检查法为何会同时进入。"
+    },
+    {
+      "unitCode": "unit.process.semaphore",
+      "sectionCode": "sec.process.semaphore",
+      "title": "信号量与 PV 操作",
+      "objectives": [
+        "区分整型与记录型信号量",
+        "用 PV 实现互斥、同步和前驱",
+        "判断信号量取值范围"
+      ],
+      "sortOrder": 15,
+      "estimatedMinutes": 50,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.semaphore",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.pv_operation",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_3.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.016",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.023",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.025",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.033",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.035",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.038",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.050",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.051",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.059",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.025",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.semaphore.read.1",
+          "title": "信号量：整型信号量与记录型信号量",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.semaphore.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.semaphore.read.2",
+          "title": "用信号量实现互斥与同步",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.pv-mutex.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.semaphore.read.3",
+          "title": "用信号量实现前驱关系",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.pv-precedence.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.semaphore.practice.1",
+          "title": "练习：信号量为−1时的等待数",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_3.003"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.semaphore.practice.2",
+          "title": "练习：PV 操作的实质",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_3.012"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.mutex-methods"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "先写互斥模板，再写同步模板，最后给前驱图逐条配信号量；检查 P/V 是否成对。"
+    },
+    {
+      "unitCode": "unit.process.classic-sync",
+      "sectionCode": "sec.process.classic-sync",
+      "title": "生产者-消费者、读者-写者、哲学家与吸烟者",
+      "objectives": [
+        "写出生产者-消费者的信号量设置与代码",
+        "说明读者优先与写者优先的差别",
+        "指出哲学家朴素解法的死锁原因"
+      ],
+      "sortOrder": 16,
+      "estimatedMinutes": 60,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.producer_consumer",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.reader_writer",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.philosopher",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.smoker",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_3.042",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.043",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.044",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.045",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.046",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.047",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.048",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.049",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.016",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.023",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.classic-sync.read.1",
+          "title": "生产者-消费者问题",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.producer-consumer.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.classic-sync.read.2",
+          "title": "读者-写者问题",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.reader-writer.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.classic-sync.read.3",
+          "title": "哲学家进餐问题",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.philosopher.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.classic-sync.read.4",
+          "title": "吸烟者问题",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.smoker.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.classic-sync.practice.1",
+          "title": "练习：生产者-消费者解决的问题",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_3.042"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.classic-sync.practice.2",
+          "title": "练习：消费者等待生产者的前提",
+          "activityType": "PRACTICE",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_3.043"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.semaphore"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "每个问题按“关系分析—思路—信号量设置—代码”四步重做一遍，特别检查 P 的先后顺序。"
+    },
+    {
+      "unitCode": "unit.process.monitor",
+      "sectionCode": "sec.process.monitor",
+      "title": "管程与条件变量",
+      "objectives": [
+        "说明管程的组成与互斥特性",
+        "区分条件变量与信号量"
+      ],
+      "sortOrder": 17,
+      "estimatedMinutes": 30,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.monitor",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.condition_variable",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_3.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.029",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.030",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.056",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.058",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.monitor.read.1",
+          "title": "管程的定义、组成与互斥特性",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.monitor.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.monitor.read.2",
+          "title": "条件变量及其与信号量的比较",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.condition-variable.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.monitor.practice.1",
+          "title": "练习：管程的定义",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_3.015"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.monitor.practice.2",
+          "title": "练习：管程的组成",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_3.029"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.classic-sync"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "用管程改写生产者-消费者，体会“进入即互斥、条件不满足时 wait 释放管程”。"
+    },
+    {
+      "unitCode": "unit.process.summary-2-3",
+      "sectionCode": "sec.process.synchronization",
+      "title": "2.3 小结：同步互斥机制与经典问题",
+      "objectives": [
+        "串联四类互斥实现与经典同步问题",
+        "识别死锁风险"
+      ],
+      "sortOrder": 18,
+      "estimatedMinutes": 15,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.synchronization",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.semaphore",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.producer_consumer",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_3.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.032.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.032.2",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.037",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.042",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.043",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.044",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.045",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.046",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.059",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.060",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.025",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.026",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.summary-2-3.read.1",
+          "title": "2.3 本节小结：同步互斥机制与经典问题",
+          "activityType": "SUMMARY",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.summary-2-3.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.summary-2-3.practice.1",
+          "title": "练习：不需要信号量的并发执行",
+          "activityType": "PRACTICE",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_3.002"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.summary-2-3.practice.2",
+          "title": "练习：同步机制的准则",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_3.007"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.monitor"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "用一张表列出各方法的四条准则满足情况，再口述生产者-消费者的 P 顺序要求。"
+    },
+    {
+      "unitCode": "unit.process.deadlock-concept",
+      "sectionCode": "sec.process.deadlock-concept",
+      "title": "死锁、饥饿与四个必要条件",
+      "objectives": [
+        "区分死锁与饥饿",
+        "说明死锁的四个必要条件",
+        "解释循环等待为何只是必要条件"
+      ],
+      "sortOrder": 19,
+      "estimatedMinutes": 35,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.deadlock",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.deadlock_conditions",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_4.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.022",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.023",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.025",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.032",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.036",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.040",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.042",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.009",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.deadlock-concept.read.1",
+          "title": "死锁的定义、实例及其与饥饿的区别",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.deadlock-concept.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.deadlock-concept.read.2",
+          "title": "死锁的四个必要条件",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.deadlock-conditions.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.deadlock-concept.practice.1",
+          "title": "练习：可能导致死锁的情形",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_4.001"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.deadlock-concept.practice.2",
+          "title": "练习：进程死锁描述辨错",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_4.003"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.sync-basics"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "用两台设备互相等待的例子说明死锁，再用资源分配图说明有圈但未死锁。"
+    },
+    {
+      "unitCode": "unit.process.deadlock-prevention",
+      "sectionCode": "sec.process.deadlock-strategy",
+      "title": "死锁处理策略与预防",
+      "objectives": [
+        "比较预防、避免、检测三类策略",
+        "说明破坏四个条件的具体手段及代价"
+      ],
+      "sortOrder": 20,
+      "estimatedMinutes": 35,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.deadlock_strategy",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.deadlock_prevention",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_4.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.037",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.005",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.deadlock-prevention.read.1",
+          "title": "死锁处理策略的比较",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.deadlock-strategy.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.deadlock-prevention.read.2",
+          "title": "死锁预防：破坏四个必要条件",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.deadlock-prevention.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.deadlock-prevention.practice.1",
+          "title": "练习：哲学家进餐的预防措施辨正",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_4.002"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.deadlock-prevention.practice.2",
+          "title": "练习：一次分配所有资源破坏的条件",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_4.004"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.deadlock-concept"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "对每个必要条件各写一种破坏方法，并指出该方法的主要缺点。"
+    },
+    {
+      "unitCode": "unit.process.banker",
+      "sectionCode": "sec.process.deadlock-banker",
+      "title": "安全状态与银行家算法",
+      "objectives": [
+        "判断系统是否处于安全状态",
+        "执行银行家算法的请求检查与安全性检查"
+      ],
+      "sortOrder": 21,
+      "estimatedMinutes": 60,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.safe_state",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.banker",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_4.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.029",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.030",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.033",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.034",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.035",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.039",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.041",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.043",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.008",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.banker.read.1",
+          "title": "系统安全状态与安全序列",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.safe-state.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.banker.read.2",
+          "title": "银行家算法的数据结构",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.banker-structures.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.banker.read.3",
+          "title": "银行家算法的请求检查与安全性算法",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.banker-algorithm.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.banker.read.4",
+          "title": "银行家算法完整算例",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.banker-example.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.banker.practice.1",
+          "title": "练习：死锁避免所依据的措施",
+          "activityType": "PRACTICE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_4.006"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.banker.practice.2",
+          "title": "练习：死锁与安全状态的关系",
+          "activityType": "PRACTICE",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_4.018"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.deadlock-concept"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "先独立完成 T0 安全序列，再分别判断 P1、P4、P0 的请求；每一步写清 Work 的更新。"
+    },
+    {
+      "unitCode": "unit.process.detection",
+      "sectionCode": "sec.process.deadlock-detection",
+      "title": "死锁检测与解除",
+      "objectives": [
+        "化简资源分配图",
+        "用死锁定理判断死锁",
+        "列举三种解除方法"
+      ],
+      "sortOrder": 22,
+      "estimatedMinutes": 30,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.deadlock_detection",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.deadlock_recovery",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_4.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.016",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.038",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.detection.read.1",
+          "title": "资源分配图、化简与死锁定理",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.deadlock-detection.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.detection.read.2",
+          "title": "死锁解除的三种方法",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.deadlock-recovery.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.detection.practice.1",
+          "title": "练习：解除死锁通常不采用的方法",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_4.012"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.detection.practice.2",
+          "title": "练习：可与剥夺法并列的解除方法",
+          "activityType": "PRACTICE",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_4.013"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.deadlock-prevention"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "按“找不阻塞进程—消边—释放资源—重复”化简图 2.15，并说明剩余边对应哪些死锁进程。"
+    },
+    {
+      "unitCode": "unit.process.summary-2-4",
+      "sectionCode": "sec.process.deadlock",
+      "title": "2.4 小结：死锁的条件、策略与算法",
+      "objectives": [
+        "按条件—策略—算法三层复述死锁",
+        "自查银行家算法的易错点"
+      ],
+      "sortOrder": 23,
+      "estimatedMinutes": 15,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.deadlock",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.banker",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.deadlock_detection",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_4.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.016",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.022",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.023",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.027",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.029",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.030",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.032",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.035",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.036",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.038",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.040",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.042",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.009",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.summary-2-4.read.1",
+          "title": "2.4 本节小结：死锁的条件、策略与算法",
+          "activityType": "SUMMARY",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.summary-2-4.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.summary-2-4.practice.1",
+          "title": "练习：系统产生死锁的可能原因",
+          "activityType": "PRACTICE",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_4.005"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.summary-2-4.practice.2",
+          "title": "练习：三进程四资源的最少资源数",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_4.009"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.banker",
+        "unit.process.detection"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "用“四个条件—三类策略—一个算法”的结构做思维导图。"
+    },
+    {
+      "unitCode": "unit.process.difficulties",
+      "sectionCode": "sec.process.difficulties",
+      "title": "本章疑难点",
+      "objectives": [
+        "辨析进程与程序",
+        "复述银行家算法思想",
+        "辨析同步与互斥"
+      ],
+      "sortOrder": 24,
+      "estimatedMinutes": 20,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.process",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.banker",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.process.synchronization",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s2_2.023",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.029",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.030",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.035",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.018",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.020",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.2",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.3",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.4",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.027.5",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.028",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.031",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_1.033",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.032.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.032.2",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.037",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.060",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.024",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_3.app.026",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s2_4.app.007",
+          "usage": "PRACTICE"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.process.difficulties.read.1",
+          "title": "本章疑难点：进程与程序、银行家算法、同步与互斥",
+          "activityType": "SUMMARY",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.process.chapter-difficulties.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.process.difficulties.practice.1",
+          "title": "练习：作业与进程的区别",
+          "activityType": "PRACTICE",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_2.023"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.process.difficulties.practice.2",
+          "title": "练习：银行家算法下最大需求之和",
+          "activityType": "PRACTICE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s2_4.028"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "prerequisiteUnitCodes": [
+        "unit.process.summary-2-4",
+        "unit.process.summary-2-1"
+      ],
+      "demoResourceCodes": [],
+      "practiceGuidance": "不看资料回答 2.5 的三个问题，再回到对应小节补漏。"
+    }
+  ]
+}

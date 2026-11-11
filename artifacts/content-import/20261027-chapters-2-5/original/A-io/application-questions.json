@@ -1,0 +1,2369 @@
+{
+  "schemaVersion": "oslab-application-authoring/1.0",
+  "packageType": "APPLICATION_QUESTIONS",
+  "batchCode": "batch.a.io.chapter.001.application",
+  "contributor": "A",
+  "courseCode": "course.operating-systems",
+  "note": "第五章综合应用题（教材原题，TEXTBOOK）。parts/rubric/分值为整理建议，书未印分值。",
+  "questions": [
+    {
+      "questionCode": "q.wd25.s5_1.app.001",
+      "title": "时钟中断的 CPU 时间开销比率",
+      "contentMd": "某计算机系统中，时钟中断处理程序每次执行时间为 2ms（包括进程切换开销），若时钟中断频率为 60Hz，问 CPU 用于时钟中断处理的时间比率为多少？",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.basics",
+        "pageStart": 314,
+        "pageEnd": 314,
+        "pageStatus": "VISIBLE",
+        "locator": "5.1.6 本节习题精选 二、综合应用题 第01题；解答见 5.1.7（印刷 315—318）",
+        "sourceQuestionNumber": "01"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.basics",
+        "pageStart": 317,
+        "pageEnd": 317,
+        "pageStatus": "VISIBLE",
+        "locator": "5.1.7 答案与解析 二、综合应用题 第01题【解答】",
+        "sourceQuestionNumber": "01"
+      },
+      "difficulty": 2,
+      "maxScore": 3,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.io.interrupt_driven_io",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.io.io_software_layers",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_1.app.001.p1",
+          "promptMd": "求 CPU 用于时钟中断处理的时间比率。",
+          "responseType": "CALCULATION",
+          "answerMd": "时钟中断频率为 60Hz，即每秒发生 60 次中断，中断周期为\n\nT = 1/60 s ≈ 16.67 ms。\n\n每个周期中 CPU 用于处理时钟中断（含进程切换开销）的时间为 2 ms，故时间比率为\n\n2 ms ÷ (1/60) s = 0.002 s ÷ 0.016667 s = 0.12 = 12%。\n\n即该系统约把 12% 的 CPU 时间花在时钟中断处理上。若这个比率过高，就应降低时钟中断频率或精简中断处理程序。",
+          "maxScore": 3,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.interrupt_driven_io",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.io_software_layers",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_1.app.001.p1.r1",
+              "description": "由 60Hz 正确得出中断周期 1/60 s（约 16.7ms），并明确每个周期内只处理一次时钟中断",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.interrupt_driven_io"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_1.app.001.p1.r2",
+              "description": "用「2ms ÷ 中断周期」求出比率并给出 12% 的结论（写成 0.12 或 12% 均可）",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.interrupt_driven_io",
+                "os.io.io_software_layers"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "把 60Hz 当作周期 60ms 或 60s，直接算成 2/60 得 3.3%，混淆了频率与周期。",
+            "漏掉题目给出的「包括进程切换开销」这一条件，只按中断处理本身估算，导致比率偏小。",
+            "把比率算成 2ms×(1/60)=0.033ms 这类量纲错配，没有把两个时间统一到同一时间单位。"
+          ],
+          "acceptableAlternatives": [
+            "用 1 秒为基准：1 秒内中断 60 次，共占 60×2ms=120ms，比率 120/1000=12%，与按周期计算等价。",
+            "结论写成 0.12、12%、约 1/8 的 CPU 时间均可，只要数值与推导过程一致。"
+          ]
+        }
+      ]
+    },
+    {
+      "questionCode": "q.wd25.s5_1.app.002",
+      "title": "调制解调器中断方式下的 CPU 开销比率",
+      "contentMd": "考虑 56kb/s 调制解调器的性能，驱动程序输出一个字符后就阻塞，当一个字符打印完毕后，产生一个中断通知阻塞的驱动程序，输出下一个字符，然后阻塞。若发消息、输出一个字符和阻塞的时间总和为 0.1ms，则由于处理调制解调器而占用的 CPU 时间比率是多少？假设每个字符有一个开始位和一个结束位，共占 10 位。",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.basics",
+        "pageStart": 315,
+        "pageEnd": 315,
+        "pageStatus": "VISIBLE",
+        "locator": "5.1.6 本节习题精选 二、综合应用题 第02题；解答见 5.1.7（印刷 315—318）",
+        "sourceQuestionNumber": "02"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.basics",
+        "pageStart": 317,
+        "pageEnd": 317,
+        "pageStatus": "VISIBLE",
+        "locator": "5.1.7 答案与解析 二、综合应用题 第02题【解答】",
+        "sourceQuestionNumber": "02"
+      },
+      "difficulty": 3,
+      "maxScore": 4,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.io.interrupt_driven_io",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.io.blocking_io",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.device_driver",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_1.app.002.p1",
+          "promptMd": "求处理调制解调器而占用的 CPU 时间比率。",
+          "responseType": "CALCULATION",
+          "answerMd": "每个字符占 10 位（8 个数据位加 1 个开始位、1 个结束位），故在 56kb/s 的速率下，每秒传送的字符数为\n\n56000 ÷ 10 = 5600 个字符，\n\n即每秒产生 5600 次「字符输出完毕」中断。每次中断后驱动程序要发消息、输出下一个字符并阻塞，共占用 CPU 0.1ms，于是每秒的 CPU 开销为\n\n5600 × 0.1ms = 560ms。\n\n比率 = 560ms ÷ 1000ms = 0.56 = 56%。\n\n数据位本身由调制解调器按位串行发送，不占 CPU；但字符率高、每字符都要驱动程序和中断介入，CPU 仍有 56% 的时间被这项 I/O 吃掉，这说明中断方式下若单位数据的处理开销不能随设备速率下降，中断频率本身就是负担。",
+          "maxScore": 4,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.interrupt_driven_io",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.blocking_io",
+              "role": "SECONDARY",
+              "weight": 0.3
+            },
+            {
+              "nodeCode": "os.io.device_driver",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_1.app.002.p1.r1",
+              "description": "用「10 位/字符」把 56kb/s 换算成 5600 字符/秒（即 5600 次中断/秒）",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.interrupt_driven_io"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_1.app.002.p1.r2",
+              "description": "用 5600×0.1ms 求出每秒 CPU 开销 560ms",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.interrupt_driven_io",
+                "os.io.blocking_io"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_1.app.002.p1.r3",
+              "description": "得出比率为 56%（0.56）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.interrupt_driven_io",
+                "os.io.device_driver"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "只按 8 个数据位算字符数（得 7000 字符/秒、70%），忽略题目明说的开始位与结束位。",
+            "把 56kb/s 当成 56kB/s，先乘 8 再除 10，字符数放大 8 倍。",
+            "把 0.1ms 理解为「每位的开销」而不是「每字符的开销」，多除一次 10。",
+            "只答「中断方式比程序直接控制方式好」而不给数值，未完成计算要求。"
+          ],
+          "acceptableAlternatives": [
+            "先算字符传输时间 10/56000 s ≈ 0.179ms，再用 0.1/0.179 得 56%，与按秒统计等价。",
+            "用 1 秒内 5600 次中断、每次 0.1ms 的累计法，或先求单字符占比再乘字符数，过程不同但结论 56% 一致。"
+          ]
+        }
+      ]
+    },
+    {
+      "questionCode": "q.wd25.s5_1.app.003",
+      "title": "键盘输入过程中的操作顺序、进程状态与软件层次",
+      "contentMd": "【2023 统考真题】进程 P 通过执行系统调用从键盘接收一个字符的输入，已知此过程中与进程 P 相关的操作包括：① 将进程 P 插入就绪队列；② 将进程 P 插入阻塞队列；③ 将字符从键盘控制器读入系统缓冲区；④ 启动键盘中断处理程序；⑤ 进程 P 从系统调用返回；⑥ 用户在键盘上输入字符。以上编号 ①～⑥ 仅用于标记操作，与操作的先后顺序无关。请回答下列问题。",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.basics",
+        "pageStart": 315,
+        "pageEnd": 315,
+        "pageStatus": "VISIBLE",
+        "locator": "5.1.6 本节习题精选 二、综合应用题 第03题；解答见 5.1.7（印刷 315—318）",
+        "sourceQuestionNumber": "03"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.basics",
+        "pageStart": 318,
+        "pageEnd": 318,
+        "pageStatus": "VISIBLE",
+        "locator": "5.1.7 答案与解析 二、综合应用题 第03题【解析】",
+        "sourceQuestionNumber": "03"
+      },
+      "difficulty": 3,
+      "maxScore": 8,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.io.interrupt_driven_io",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.io.blocking_io",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.device_driver",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.io_software_layers",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.buffer",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_1.app.003.p1",
+          "promptMd": "按照正确的操作顺序，操作 ① 的前一个和后一个操作分别是上述操作中的哪一个？操作 ⑥ 的后一个操作是上述操作中的哪一个？",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "正确顺序为 ②⑥④③①⑤：P 发出读键盘的系统调用后被插入阻塞队列 ②；CPU 转去运行其他进程，用户随后在键盘上敲入字符 ⑥；键盘控制器向 CPU 发中断，启动键盘中断处理程序 ④；中断处理程序调用键盘驱动程序把字符从键盘控制器读入系统缓冲区 ③；随后唤醒 P，将 P 插入就绪队列 ①；P 被调度后从系统调用返回，取得该字符 ⑤。\n\n因此：操作 ① 的前一个操作是 ③，后一个操作是 ⑤；操作 ⑥ 的后一个操作是 ④。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.interrupt_driven_io",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.io_software_layers",
+              "role": "SECONDARY",
+              "weight": 0.3
+            },
+            {
+              "nodeCode": "os.io.blocking_io",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_1.app.003.p1.r1",
+              "description": "给出完整正确顺序 ②⑥④③①⑤（或等价地同时答对两问所依赖的相邻关系）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.interrupt_driven_io",
+                "os.io.io_software_layers"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_1.app.003.p1.r2",
+              "description": "答出 ① 前为 ③、① 后为 ⑤，且 ⑥ 后为 ④",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.interrupt_driven_io",
+                "os.io.blocking_io"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "把 ③ 放在 ④ 之前，误以为驱动程序先读字符、后启动中断处理程序，颠倒了中断响应与设备服务的关系。",
+            "把 ① 与 ⑤ 的顺序写反，认为进程从系统调用返回后才会进入就绪队列，混淆了就绪与运行。",
+            "把 ⑥ 的后一个操作答成 ③，忽略必须先有中断响应才有中断处理程序执行。",
+            "把 ② 放在 ⑥ 之后，误以为要等用户敲键进程才阻塞。"
+          ],
+          "acceptableAlternatives": [
+            "顺序写成「②→⑥→④→③→①→⑤」或用箭头、表格、编号列表表达，只要相邻关系正确即可。",
+            "说明 ① 之前是「中断处理程序读入字符并把进程唤醒」这一步、① 之后是「返回用户态继续执行」，等价得分。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_1.app.003.p2",
+          "promptMd": "在上述哪个操作之后 CPU 一定从进程 P 切换到其他进程？在上述哪个操作之后 CPU 调度程序才能选中进程 P 执行？",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "在操作 ② 之后，即进程 P 被插入阻塞队列之后，CPU 一定从 P 切换到其他进程：P 已让出处理机且处于阻塞态，不可能继续运行，调度程序必须另选进程。\n\n在操作 ① 之后，即 P 被插入就绪队列之后，CPU 调度程序才能选中 P 执行：只有进入就绪队列，P 才具备被调度的资格。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.blocking_io",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.interrupt_driven_io",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_1.app.003.p2.r1",
+              "description": "答出在 ②（插入阻塞队列）之后 CPU 一定切换，并说明原因是 P 已阻塞、必须让出处理机",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.blocking_io"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_1.app.003.p2.r2",
+              "description": "答出在 ①（插入就绪队列）之后调度程序才能选中 P，并说明就绪是参与调度的前提",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.blocking_io",
+                "os.io.interrupt_driven_io"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "把「一定切换」答成 ④ 或 ③，混淆了中断处理与进程切换的时机。",
+            "认为 ⑤ 之后才能被选中，把返回用户态当作获得处理机的前提。",
+            "把阻塞与就绪混为一谈，答「②之后就能选中P」，忽略了阻塞态不可运行。"
+          ],
+          "acceptableAlternatives": [
+            "答「②之后发生进程切换，因为阻塞态进程不能占有CPU」「①之后P进入就绪队列，调度程序才可能选中P」的表述均可。",
+            "补充「若采用非抢占调度，切换发生在 P 主动阻塞时」不扣分。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_1.app.003.p3",
+          "promptMd": "完成上述哪个操作的代码属于键盘驱动程序？",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "操作 ③（将字符从键盘控制器读入系统缓冲区）的代码属于键盘驱动程序。\n\n理由：把字符从键盘控制器读入系统缓冲区，是与键盘硬件直接相关的具体操作，由设备驱动程序负责执行具体的 I/O 指令、控制设备控制器完成数据传送；而 ④ 启动中断处理程序属于中断机制与中断处理程序，①⑤ 属于进程管理与系统调用的返回，② 属于进程状态转换。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.device_driver",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.buffer",
+              "role": "SECONDARY",
+              "weight": 0.3
+            },
+            {
+              "nodeCode": "os.io.io_software_layers",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_1.app.003.p3.r1",
+              "description": "判定操作 ③ 属于键盘驱动程序",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.device_driver"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_1.app.003.p3.r2",
+              "description": "说明理由：③ 是与键盘硬件直接相关的具体 I/O 操作，由驱动程序执行具体 I/O 指令完成控制器到缓冲区的传送",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.device_driver",
+                "os.io.io_software_layers"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "答 ④，把「启动键盘中断处理程序」当成驱动程序的工作，混淆中断处理程序与设备驱动程序。",
+            "答 ⑥，把用户敲键这一外部事件当成驱动程序代码。",
+            "只写编号不给理由，或理由停留在「驱动管设备」而说不出与硬件直接相关的具体操作。"
+          ],
+          "acceptableAlternatives": [
+            "答「③，且该操作由键盘驱动程序（而非设备无关软件）完成」即可；若进一步说明驱动程序把抽象读请求转换为对控制器的具体命令，同样得分。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_1.app.003.p4",
+          "promptMd": "键盘中断处理程序执行时，进程 P 处于什么状态？CPU 是处于内核态还是处于用户态？",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "进程 P 处于阻塞态：它在系统调用中已被插入阻塞队列等待键盘输入，尚未被唤醒进入就绪队列（唤醒发生在中断处理程序把字符读入缓冲区之后）。\n\nCPU 处于内核态：中断处理程序、设备驱动程序、设备独立性软件都属于内核 I/O 软件层，执行这些代码时 CPU 运行在内核态。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.blocking_io",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.io_software_layers",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_1.app.003.p4.r1",
+              "description": "答出进程 P 处于阻塞态，并说明此时尚未被唤醒",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.blocking_io"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_1.app.003.p4.r2",
+              "description": "答出 CPU 处于内核态，并指出中断处理程序属于内核 I/O 软件层",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.io_software_layers"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "答「就绪态」，把中断处理程序已开始执行误当成 P 已被唤醒。",
+            "答「运行态」，误认为处理 P 的输入就等于 P 在运行。",
+            "答「用户态」，以为只有用户程序发起的系统调用前半段才在内核态。"
+          ],
+          "acceptableAlternatives": [
+            "状态答「阻塞（等待）态」、态答「核心态/管态/特权态」均为等价表述。"
+          ]
+        }
+      ]
+    },
+    {
+      "questionCode": "q.wd25.s5_2.app.001",
+      "title": "I/O 软件四个层次对具体工作的分工",
+      "contentMd": "输入/输出软件一般分为 4 个层次：用户层、与设备无关的软件层、设备驱动程序和中断处理程序。请说明以下各工作是在哪一层完成的：\n\n1）为磁盘读操作计算磁道、扇区和磁头。\n2）向设备寄存器写命令。\n3）检查用户是否有权使用设备。\n4）将二进制整数转换成 ASCII 码以便打印。",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.device-independent",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.device-independent",
+        "pageStart": 331,
+        "pageEnd": 331,
+        "pageStatus": "VISIBLE",
+        "locator": "5.2.7 本节习题精选 二、综合应用题 第01题；解答见 5.2.8（印刷 331—336）",
+        "sourceQuestionNumber": "01"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.device-independent",
+        "pageStart": 336,
+        "pageEnd": 336,
+        "pageStatus": "VISIBLE",
+        "locator": "5.2.8 答案与解析 二、综合应用题 第01题【解答】",
+        "sourceQuestionNumber": "01"
+      },
+      "difficulty": 3,
+      "maxScore": 8,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.io.io_software_layers",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.io.device_driver",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.device_independent_software",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.application_interface",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_2.app.001.p1",
+          "promptMd": "1）为磁盘读操作计算磁道、扇区和磁头。",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "由设备驱动程序完成。\n\n理由：把逻辑块号换算成柱面号、磁头（磁道）号、扇区号，依赖具体磁盘的物理参数与寻址方式，随磁盘型号不同而不同。若由操作系统内核统一完成，内核就必须记录每种磁盘的几何细节，代码会急剧膨胀，新型号设备也无法支持；因此这类与硬件相关的地址转换放在厂商编写的设备驱动程序中。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.device_driver",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.io_software_layers",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_2.app.001.p1.r1",
+              "description": "答出「设备驱动程序」这一层次",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.device_driver"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_2.app.001.p1.r2",
+              "description": "说明理由：地址换算与具体磁盘型号/几何参数相关，应由厂商提供的驱动程序完成，以免内核依赖硬件细节",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.device_driver",
+                "os.io.io_software_layers"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "答「与设备无关的软件层」，把它当成通用的地址映射。",
+            "答「中断处理程序」，把计算地址与中断响应混为一谈。",
+            "只写层次名称而不给为什么该层负责的理由。"
+          ],
+          "acceptableAlternatives": [
+            "答「设备驱动程序（厂商编写）」即可；补充「逻辑块号→柱面/磁头/扇区属于抽象请求到具体要求的转换」为加分表述。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_2.app.001.p2",
+          "promptMd": "2）向设备寄存器写命令。",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "由设备驱动程序完成。\n\n理由：向设备控制器中的命令/状态寄存器、数据寄存器写入命令和参数，是驱动程序把上层抽象请求转换成具体 I/O 操作后发出的动作，同样与具体设备类型紧密相关，因此属于设备驱动程序。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.device_driver",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.device_controller",
+              "role": "SECONDARY",
+              "weight": 0.3
+            },
+            {
+              "nodeCode": "os.io.io_port",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_2.app.001.p2.r1",
+              "description": "答出「设备驱动程序」这一层次",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.device_driver"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_2.app.001.p2.r2",
+              "description": "说明理由：写设备寄存器是驱动程序对设备控制器发出的具体命令，需知道该设备的寄存器含义",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.device_driver",
+                "os.io.device_controller"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "答「用户层」或「与设备无关的软件层」，误以为高层直接操作硬件寄存器。",
+            "答「中断处理程序」，把命令发布与中断服务混淆。"
+          ],
+          "acceptableAlternatives": [
+            "答「设备驱动程序」并可补充「通过 I/O 端口/内存映射寄存器写控制字」，层次判断相同即得分。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_2.app.001.p3",
+          "promptMd": "3）检查用户是否有权使用设备。",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "由与设备无关的软件层（设备独立性软件）完成。\n\n理由：使用权检查涉及安全与权限，是所有设备共有的、与具体硬件无关的公共操作，应由设备无关的系统软件统一完成，这样才能对各类设备实施一致的访问控制。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.device_independent_software",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.io_software_layers",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_2.app.001.p3.r1",
+              "description": "答出「与设备无关的软件层（设备独立性软件）」",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.device_independent_software"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_2.app.001.p3.r2",
+              "description": "说明理由：权限/安全检查属设备公有操作，与具体设备无关，需统一实施",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.device_independent_software",
+                "os.io.io_software_layers"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "答「用户层」，误以为由用户程序自行检查权限。",
+            "答「设备驱动程序」，把权限检查下放到与硬件相关的层，破坏了设备无关性。"
+          ],
+          "acceptableAlternatives": [
+            "答「设备独立性软件」「与设备无关的系统软件」「I/O 系统的设备无关层」均等价。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_2.app.001.p4",
+          "promptMd": "4）将二进制整数转换成 ASCII 码以便打印。",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "由用户层完成。\n\n理由：二进制整数要不要转成 ASCII、用十进制还是十六进制、有没有分隔符与填充位，取决于用户程序自己的输出格式需求，只有用户知道该用哪种格式；操作系统与驱动程序只负责把字节流送到设备，不负责数据的表示形式。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.application_interface",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.io_software_layers",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_2.app.001.p4.r1",
+              "description": "答出「用户层」",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.application_interface"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_2.app.001.p4.r2",
+              "description": "说明理由：数据的外部表示形式由用户程序决定，属用户层（库函数）职责",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.application_interface",
+                "os.io.io_software_layers"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "答「设备驱动程序」，把格式化输出当成设备的事。",
+            "答「与设备无关的软件层」，误认为字符编码转换是系统统一提供的公共服务。"
+          ],
+          "acceptableAlternatives": [
+            "答「用户层（用户级 I/O 软件、库函数）」均可；若提到 printf 一类格式化库函数在用户态完成，同样得分。"
+          ]
+        }
+      ]
+    },
+    {
+      "questionCode": "q.wd25.s5_2.app.002",
+      "title": "双缓冲区处理数据块的平均时间",
+      "contentMd": "在某系统中，若采用双缓冲区（每个缓冲区可存放一个数据块），将一个数据块从磁盘传送到缓冲区的时间为 80μs，从缓冲区传送到用户的时间为 20μs，CPU 计算一个数据块的时间为 50μs。总共处理 4 个数据块，每个数据块的平均处理时间是多少？",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.device-independent",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.device-independent",
+        "pageStart": 331,
+        "pageEnd": 331,
+        "pageStatus": "VISIBLE",
+        "locator": "5.2.7 本节习题精选 二、综合应用题 第02题；解答见 5.2.8（印刷 331—336）",
+        "sourceQuestionNumber": "02"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.device-independent",
+        "pageStart": 336,
+        "pageEnd": 336,
+        "pageStatus": "VISIBLE",
+        "locator": "5.2.8 答案与解析 二、综合应用题 第02题【解答】",
+        "sourceQuestionNumber": "02"
+      },
+      "difficulty": 4,
+      "maxScore": 6,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.io.double_buffer",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.io.buffer",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.disk_access_time",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_2.app.002.p1",
+          "promptMd": "总共处理 4 个数据块，每个数据块的平均处理时间是多少？",
+          "responseType": "CALCULATION",
+          "answerMd": "记 M_i 为第 i 块「磁盘→缓冲区」80μs，T_i 为「缓冲区→用户区」20μs，C_i 为「CPU 计算」50μs。双缓冲区下两块缓冲交替使用，磁盘可以连续工作：\n\n| 时间区间(μs) | 动作 |\n| --- | --- |\n| 0—80 | M1（缓冲区1） |\n| 80—100 | T1，同时 M2 开始（缓冲区2） |\n| 100—150 | C1 |\n| 80—160 | M2 |\n| 160—180 | T2，同时 M3 开始（缓冲区1） |\n| 180—230 | C2 |\n| 160—240 | M3 |\n| 240—260 | T3，同时 M4 开始（缓冲区2） |\n| 260—310 | C3 |\n| 240—320 | M4 |\n| 320—340 | T4 |\n| 340—390 | C4 |\n\n磁盘传输是连续的 4×80=320μs；最后一块还要再做一次「缓冲→用户」（20μs）和一次 CPU 计算（50μs），因此\n\n总时间 = 80×4 + 20 + 50 = 320 + 70 = 390μs。\n\n平均每块 = 390 ÷ 4 = 97.5μs。\n\n一般地，处理 n 块的总时间为 (80n+20+50) = (80n+70)μs，平均 (80n+70)/n μs。当 n 较大时平均值趋近 80μs，即瓶颈是磁盘到缓冲区这一段（80μs > 20+50=70μs），双缓冲只是把 CPU 的搬移与计算藏进了磁盘传输时间里。",
+          "maxScore": 6,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.double_buffer",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.buffer",
+              "role": "SECONDARY",
+              "weight": 0.3
+            },
+            {
+              "nodeCode": "os.io.disk_access_time",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_2.app.002.p1.r1",
+              "description": "画出或列出 4 个数据块的 M（80μs）、T（20μs）、C（50μs）时间区间，体现两块缓冲区交替、磁盘连续传输",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.double_buffer",
+                "os.io.buffer"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_2.app.002.p1.r2",
+              "description": "求出总时间 80×4+20+50 = 390μs（或等价地逐段累加到 390μs）",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.double_buffer",
+                "os.io.disk_access_time"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_2.app.002.p1.r3",
+              "description": "求出平均处理时间 390/4 = 97.5μs",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.double_buffer"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "把三段时间简单相加后乘块数：(80+20+50)×4=600μs，完全没有利用双缓冲的并行性。",
+            "只算 80×4=320μs，漏掉最后一块的 20μs 搬移和 50μs 计算这段「流水尾部」。",
+            "把 T 与 C 也当成可与磁盘传输重叠，算出 320μs 或 340μs，忽略了同一时刻 CPU 只能做一件事。",
+            "平均时间算成 390/4 的近似 100μs 却不说明舍入，或直接把 97.5μs 当总时间。"
+          ],
+          "acceptableAlternatives": [
+            "用甘特图、表格或文字列区间均可，只要体现「磁盘连续、T 紧随 M、C 紧随 T」的流水关系。",
+            "先给一般式 (80n+70)/n、再代入 n=4 得 97.5μs 同样满分。",
+            "答「约 97.5μs」或「97.5μs（n 大时趋近 80μs）」均可，不因保留小数方式扣分。"
+          ]
+        }
+      ]
+    },
+    {
+      "questionCode": "q.wd25.s5_3.app.001",
+      "title": "由逻辑记录号计算柱面、磁道与扇区",
+      "contentMd": "假定有一个磁盘组共有 100 个柱面，每个柱面有 8 个磁道，每个磁道划分成 8 个扇区。现有一个 5000 条逻辑记录的文件，逻辑记录的大小与扇区大小相等，该文件以顺序结构存放在磁盘组上，柱面、磁道、扇区均从 0 开始编址，逻辑记录的编号从 0 开始，文件信息从 0 柱面、0 磁道、0 扇区开始存放。试问，该文件编号为 3468 的逻辑记录应存放在哪个柱面的第几个磁道的第几个扇区上？",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.disk-algorithms",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 347,
+        "pageEnd": 347,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.6 本节习题精选 二、综合应用题 第01题；解答见 5.3.7（印刷 348—354）",
+        "sourceQuestionNumber": "01"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 352,
+        "pageEnd": 352,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.7 答案与解析 二、综合应用题 第01题【解答】",
+        "sourceQuestionNumber": "01"
+      },
+      "difficulty": 3,
+      "maxScore": 4,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.io.disk",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.io.disk_management",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_3.app.001.p1",
+          "promptMd": "该文件编号为 3468 的逻辑记录应存放在哪个柱面的第几个磁道的第几个扇区上？",
+          "responseType": "CALCULATION",
+          "answerMd": "逻辑记录大小等于扇区大小，故 1 条记录占 1 个扇区。地址按「柱面→磁道→扇区」由外向内、先填满扇区再填满磁道、最后填满柱面的顺序分配（顺序结构存放）。\n\n每个柱面的扇区数 = 8 磁道 × 8 扇区 = 64（即每柱面 64 条记录）。\n\n柱面号 = ⌊3468 ÷ 64⌋ = 54（54×64 = 3456）；\n柱面内余量 = 3468 − 3456 = 12；\n磁道号 = ⌊12 ÷ 8⌋ = 1；\n扇区号 = 12 mod 8 = 4。\n\n所以 3468 号逻辑记录存放在 54 号柱面、1 号磁道（盘面）、4 号扇区。",
+          "maxScore": 4,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.disk_management",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.001.p1.r1",
+              "description": "说明 1 条逻辑记录占 1 个扇区，并算出每柱面 8×8=64 个扇区（64 条记录）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.001.p1.r2",
+              "description": "正确求出柱面号 54（含商与余数 3456/12 的中间结果）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.001.p1.r3",
+              "description": "由余数 12 正确拆出磁道号 1 与扇区号 4",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk",
+                "os.io.disk_management"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.001.p1.r4",
+              "description": "结论完整且表述为「54 号柱面、1 号磁道、4 号扇区」（编号从 0 起，未多加 1）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "把柱面数当成每柱面记录数，直接用 3468÷8，忽略了 8 个磁道。",
+            "算完柱面号后忘记对 64 取余，直接拿 3468 除 8 求磁道。",
+            "因为题目说编号从 0 开始，仍习惯性给结果加 1，答成 55 柱面 2 磁道 5 扇区。",
+            "把「先存满盘面再存下一柱面」的顺序弄反，先算柱面内偏移再算柱面号。"
+          ],
+          "acceptableAlternatives": [
+            "用「记录号 = 柱面×64 + 磁道×8 + 扇区」列方程反解，或连续做两次除法取商取余，方法不同结论一致均可。",
+            "答「54 号柱面的 1 号磁道 4 号扇区」并可补充该记录是本柱面第 13 条（0 起算的第 12 条），不扣分。"
+          ]
+        }
+      ]
+    },
+    {
+      "questionCode": "q.wd25.s5_3.app.002",
+      "title": "同一磁道内记录的读取时间与存放位置",
+      "contentMd": "假设磁盘的每个磁道分成 9 个块，现在一个文件有 A, B, …, I 共 9 条记录，每条记录的大小与块的大小相等，设磁盘转速为 27 毫秒/转，每读出一块后需要 2ms 的处理时间。若忽略其他辅助时间，且一开始磁头在即将要读 A 记录的位置，试问：",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.disk-algorithms",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 347,
+        "pageEnd": 347,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.6 本节习题精选 二、综合应用题 第02题；解答见 5.3.7（印刷 348—354）",
+        "sourceQuestionNumber": "02"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 352,
+        "pageEnd": 352,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.7 答案与解析 二、综合应用题 第02题【解答】",
+        "sourceQuestionNumber": "02"
+      },
+      "difficulty": 4,
+      "maxScore": 8,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.io.disk_access_time",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.io.disk_latency_reduction",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.disk",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_3.app.002.p1",
+          "promptMd": "1）若将这些记录顺序放在一个磁道上，则顺序读取该文件要多少时间？",
+          "responseType": "CALCULATION",
+          "answerMd": "每转 27ms、每道 9 块，故读一块的时间为 27 ÷ 9 = 3ms。\n\n读 A 用 0—3ms，接着处理 2ms 到 5ms，此时磁头已越过 B（B 的起点在 3ms 处，早已扫过），必须等磁盘再转一圈才能读到 B。于是除最后一块外，每块实际占用 27+3 = 30ms（转一整圈 27ms 加上读出自身 3ms）；最后一块只需读出 3ms 与处理 2ms。\n\n总时间 = 8 × (27 + 3) + (3 + 2) = 240 + 5 = 245ms。\n\n校验：从开始读 A 到读完 I 共转了 9 圈，9×27 = 243ms，再加最后一块的 2ms 处理时间，243+2 = 245ms，一致。",
+          "maxScore": 4,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk_access_time",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.disk",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.002.p1.r1",
+              "description": "由 27ms/转、9 块/道算出读一块 3ms",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.002.p1.r2",
+              "description": "说明处理期间磁头已转过下一条记录，故必须再等（近）一整圈才能读下一块",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time",
+                "os.io.disk"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.002.p1.r3",
+              "description": "列出算式 8×(27+3)+(3+2)（或等价的 9×27+2）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.002.p1.r4",
+              "description": "得出 245ms",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "按 9×(3+2)=45ms 计算，误以为处理完正好落在下一条记录的起点。",
+            "把 27ms 当作每块读取时间，得 9×27=243ms 后忘记加处理时间。",
+            "用 8×30+3=243ms，漏掉最后一块的 2ms 处理。",
+            "把处理时间 2ms 也乘 9 后直接加在 243 上（得 261ms），重复计入最后一块。"
+          ],
+          "acceptableAlternatives": [
+            "答「9 圈共 243ms 再加最后 2ms 处理 = 245ms」或「8×30+5=245ms」均可。",
+            "若明确假设「处理时间与旋转重叠可忽略」，只算 245ms 的结论仍成立；给出 243ms 并说明未计最后处理时间，按评分点 r4 不给分但 r1—r3 可得分。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.002.p2",
+          "promptMd": "2）若要求顺序读取的时间最短，则应该如何安排文件的存放位置？",
+          "responseType": "CALCULATION",
+          "answerMd": "应把逻辑上相邻的记录按间隔 2 个盘块交叉存放，使磁头读完并处理完一条记录后正好到达下一条记录的起点。\n\n读出 A 用 3ms、处理用 2ms，共 5ms，即磁头已走过 1 又 2/3 个块，落在第 2 个盘块的中间；因此 A 放在第 1 块时，B 应放在第 3 块。依此每跳 2 块安放一条记录，9 块正好放满：\n\n| 盘块 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 记录 | A | F | B | G | C | H | D | I | E |\n\n这样读取次序为 A(1)→B(3)→C(5)→D(7)→E(9)→F(2)→G(4)→H(6)→I(8)，每条记录的处理周期为\n\n3（读出）+ 2（处理）+ 1（等待）= 6ms，\n\n前 8 个间隔共 6×8 = 48ms，最后一条只需 3+2 = 5ms，故\n\n总时间 = 48 + 5 = 53ms。\n\n这本质上就是磁道内扇区的交替（交叉）编号，用以减少旋转延迟。",
+          "maxScore": 4,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk_latency_reduction",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.disk_access_time",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.002.p2.r1",
+              "description": "指出应按间隔 2 个盘块交叉存放（即交替编号），使处理结束时磁头刚好到达下一条记录之前",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.disk_latency_reduction"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.002.p2.r2",
+              "description": "给出正确的盘块—记录对应关系（1~9 块依次为 A、F、B、G、C、H、D、I、E 或等价的循环移位）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_latency_reduction",
+                "os.io.disk_access_time"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.002.p2.r3",
+              "description": "算出最短总时间 53ms（6×8+5）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "仍按顺序存放，只答「把记录连续放」而没有改变块间间隔。",
+            "把间隔取成 1 个盘块（A、C、E…），处理 2ms 后磁头仍落后于下一块，仍需等待。",
+            "算出布局但忘记给出该布局下的总时间 53ms，未完成「时间最短」的验证。",
+            "把 9 块当成 10 块或把 A 放在 0 号块，导致对应表整体错位。"
+          ],
+          "acceptableAlternatives": [
+            "对应表整体循环移位（如 1 块放 E、从 E 开始读）只要间隔为 2 块即等价。",
+            "答「按交叉因子 3 编号（相邻逻辑块相隔 2 块）」或「交替编号以减少旋转延迟」均可。",
+            "总时间用 6×8+3+2 或 5+6×7+5 等不同拆法得出 53ms 均可。"
+          ]
+        }
+      ]
+    },
+    {
+      "questionCode": "q.wd25.s5_3.app.003",
+      "title": "六种磁盘调度算法的磁头移动量",
+      "contentMd": "在一个磁盘上，有 1000 个柱面，编号为 0～999，用下面的算法计算为满足磁盘队列中的所有请求，磁头臂必须移过的磁道的数目。假设最后服务的请求是在磁道 345 上，并且读/写头正在朝磁道 0 移动。在按 FCFS 顺序排列的队列中包含了如下磁道上的请求：123, 874, 692, 475, 105, 376。",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.disk-algorithms",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 347,
+        "pageEnd": 347,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.6 本节习题精选 二、综合应用题 第03题；解答见 5.3.7（印刷 348—354）",
+        "sourceQuestionNumber": "03"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 352,
+        "pageEnd": 353,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.7 答案与解析 二、综合应用题 第03题【解答】（第5）、6）问在印刷 353）",
+        "sourceQuestionNumber": "03"
+      },
+      "difficulty": 3,
+      "maxScore": 12,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.disk.scheduling",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.disk.fcfs",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.disk.sstf",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.disk.scan",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.disk.cscan",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.look_scheduling",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.disk_access_time",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_3.app.003.p1",
+          "promptMd": "1）FCFS",
+          "responseType": "CALCULATION",
+          "answerMd": "按请求到达顺序服务：345 → 123 → 874 → 692 → 475 → 105 → 376。\n\n移动量：|345−123|=222，|123−874|=751，|874−692|=182，|692−475|=217，|475−105|=370，|105−376|=271。\n\n合计 222+751+182+217+370+271 = 2013 个磁道。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.disk.fcfs",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.disk.scheduling",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.003.p1.r1",
+              "description": "给出 FCFS 服务顺序 345, 123, 874, 692, 475, 105, 376",
+              "points": 1,
+              "nodeCodes": [
+                "os.disk.fcfs"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.003.p1.r2",
+              "description": "移动量合计 2013 个磁道",
+              "points": 1,
+              "nodeCodes": [
+                "os.disk.fcfs",
+                "os.disk.scheduling"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "从 0 而不是从 345 起算，多加了 345 个磁道。",
+            "把 345→123 算成 123 个磁道（漏减后取绝对值时按错的顺序相减）。",
+            "把队列当成已排序直接求和 751+182+217+370+271，漏掉首段 222。"
+          ],
+          "acceptableAlternatives": [
+            "只给顺序与总数、中间各项用累加式表示均可；结果写作 2013 或 2013 个磁道。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.003.p2",
+          "promptMd": "2）SSTF",
+          "responseType": "CALCULATION",
+          "answerMd": "每次选距当前磁头最近的请求：\n\n从 345 出发，{123(222), 874(529), 692(347), 475(130), 105(240), 376(31)} 中最近是 376；\n从 376：475(99) 最近；从 475：692(217)；从 692：874(182)；从 874：123(751)；从 123：105(18)。\n\n顺序：345 → 376 → 475 → 692 → 874 → 123 → 105。\n移动量：31+99+217+182+751+18 = 1298 个磁道。\n\n（另法：从 345 一路增至 874 再一路减到 105，只需算 (874−345)+(874−105)=529+769=1298，可免逐段求和。）",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.disk.sstf",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.disk.scheduling",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.003.p2.r1",
+              "description": "给出 SSTF 服务顺序 345, 376, 475, 692, 874, 123, 105",
+              "points": 1,
+              "nodeCodes": [
+                "os.disk.sstf"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.003.p2.r2",
+              "description": "移动量合计 1298 个磁道",
+              "points": 1,
+              "nodeCodes": [
+                "os.disk.sstf",
+                "os.disk.scheduling"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "先服务 123（因磁头朝 0 方向就把「最近」理解成「先走递减方向」），把方向约束混入 SSTF。",
+            "在 874 之后先回 105 再回 123，多走 18 个磁道。",
+            "把 376→475 算成 130（沿用前面 475 距 345 的距离），未按当前位置重算。"
+          ],
+          "acceptableAlternatives": [
+            "用「当前最近者」逐步列表，或用 (874−345)+(874−105) 的折返求和，均等价。",
+            "若在并列距离时作不同取舍，需说明平局规则；本题不出现平局，结果唯一为 1298。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.003.p3",
+          "promptMd": "3）SCAN",
+          "responseType": "CALCULATION",
+          "answerMd": "磁头当前朝磁道 0 方向移动，按 SCAN 先沿该方向服务到端点 0，再折返。\n\n顺序：345 → 123 → 105 → 0 → 376 → 475 → 692 → 874。\n移动量：222（345→123）+ 18（123→105）+ 105（105→0）+ 376（0→376）+ 99 + 217 + 182 = 1219 个磁道。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.disk.scan",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.disk.scheduling",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.003.p3.r1",
+              "description": "给出 SCAN 顺序，且体现先到端点 0 再折返（345, 123, 105, 0, 376, 475, 692, 874）",
+              "points": 1,
+              "nodeCodes": [
+                "os.disk.scan"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.003.p3.r2",
+              "description": "移动量合计 1219 个磁道",
+              "points": 1,
+              "nodeCodes": [
+                "os.disk.scan",
+                "os.disk.scheduling"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "到 105 就折返（按 LOOK 处理），得 1009，混淆 SCAN 与 LOOK。",
+            "折返后仍按递减方向服务，顺序写错方向。",
+            "把 105→0 这段漏掉，得 1114。"
+          ],
+          "acceptableAlternatives": [
+            "若题目未特别说明而按 LOOK 处理，需在答案中明确所采用的定义；本教材此问按 SCAN 到端点 0 计，答案 1219。",
+            "给出「先到 0 再折返」的图示或区间描述均可。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.003.p4",
+          "promptMd": "4）LOOK",
+          "responseType": "CALCULATION",
+          "answerMd": "LOOK 只在有请求的磁道处折返，不必走到端点 0。\n\n顺序：345 → 123 → 105 → 376 → 475 → 692 → 874。\n移动量：222 + 18 + 271（105→376）+ 99 + 217 + 182 = 1009 个磁道。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.look_scheduling",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.disk.scan",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.003.p4.r1",
+              "description": "给出 LOOK 顺序（在最小请求 105 处折返，不到 0）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.look_scheduling"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.003.p4.r2",
+              "description": "移动量合计 1009 个磁道",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.look_scheduling",
+                "os.disk.scan"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "走到 0 再折返（当成 SCAN），得 1219 且多走 105+105 的往返。",
+            "折返点取 123 而非 105。"
+          ],
+          "acceptableAlternatives": [
+            "顺序写作 345,123,105,376,475,692,874 与图示折线等价；结果为 1009。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.003.p5",
+          "promptMd": "5）C-SCAN",
+          "responseType": "CALCULATION",
+          "answerMd": "C-SCAN 单向服务，回程直接快速返回起始端而不服务请求。\n\n去程（递减）：345 → 123 → 105 → 0；回程跳到 999；再递减：999 → 874 → 692 → 475 → 376。\n移动量：222 + 18 + 105 + 999（0→999 的回程）+ 125（999→874）+ 182 + 217 + 99 = 1967 个磁道。\n\n注：本问把回程 0→999 的 999 个磁道计入移动量，与本教材 5.3.7 第06题只按 120→30 计回程的算法不同，作答时应说明所采用的计法。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.disk.cscan",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.disk.scheduling",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.003.p5.r1",
+              "description": "给出 C-SCAN 顺序，体现到 0 后跳到 999 再单向递减服务（345,123,105,0,999,874,692,475,376）",
+              "points": 1,
+              "nodeCodes": [
+                "os.disk.cscan"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.003.p5.r2",
+              "description": "移动量合计 1967 个磁道（含回程 999）",
+              "points": 1,
+              "nodeCodes": [
+                "os.disk.cscan",
+                "os.disk.scheduling"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "回程不计入移动量，得 968，与「磁头臂必须移过的磁道数」的题意不符。",
+            "回程跳到 0 后从 0 递增服务，方向弄反。",
+            "把回程算成 105（从 105 直接跳到 999 之外）。"
+          ],
+          "acceptableAlternatives": [
+            "若采用 C-LOOK 式回程（0→874 再服务），则得 1842 并需说明所采用的变体；本教材此问按到 999 计，答案 1967。",
+            "顺序与总数一致即可，中间各项可不逐段列出。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.003.p6",
+          "promptMd": "6）C-LOOK",
+          "responseType": "CALCULATION",
+          "answerMd": "C-LOOK 单向服务，且回程只返回到最小请求处，不走到端点。\n\n去程：345 → 123 → 105；回程跳到最大请求 874；再递减：874 → 692 → 475 → 376。\n移动量：222（345→123）+ 18（123→105）+ 769（105→874 的回程）+ 182 + 217 + 99 = 1507 个磁道。\n\n顺序写作 345, 123, 105, 874, 692, 475, 376。",
+          "maxScore": 2,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.look_scheduling",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.disk.cscan",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.003.p6.r1",
+              "description": "给出 C-LOOK 顺序，体现回程只到最大请求 874（345,123,105,874,692,475,376）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.look_scheduling"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.003.p6.r2",
+              "description": "移动量合计 1507 个磁道（含回程 769）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.look_scheduling",
+                "os.disk.cscan"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "回程走到 999（按 C-SCAN 处理），得 1737。",
+            "回程只回到 105 不前进到 874 就结束，漏服务 874、692、475。",
+            "回程 105→874 算成 769 以外的值（如 874−105 又加 105）。"
+          ],
+          "acceptableAlternatives": [
+            "顺序与 1507 一致即可；回程距离写作 874−105=769 或分段累加均可。"
+          ]
+        }
+      ]
+    },
+    {
+      "questionCode": "q.wd25.s5_3.app.004",
+      "title": "非连续存放文件的读取时间与整理效果",
+      "contentMd": "某软盘有 40 个磁道，磁头从一个磁道移至相邻磁道需要 6ms。文件在磁盘上非连续存放，逻辑上相邻数据块的平均距离为 13 磁道，每块的旋转延迟时间及传输时间分别为 100ms 和 25ms。",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.disk-algorithms",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 347,
+        "pageEnd": 347,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.6 本节习题精选 二、综合应用题 第04题；解答见 5.3.7（印刷 348—354）",
+        "sourceQuestionNumber": "04"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 353,
+        "pageEnd": 353,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.7 答案与解析 二、综合应用题 第04题【解答】",
+        "sourceQuestionNumber": "04"
+      },
+      "difficulty": 2,
+      "maxScore": 6,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.io.disk_access_time",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.io.disk_latency_reduction",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.disk_io_speedup",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_3.app.004.p1",
+          "promptMd": "阅读一个 100 块的文件需要多少时间？",
+          "responseType": "CALCULATION",
+          "answerMd": "每读一块需 寻道时间 + 旋转延迟 + 传输时间，其中寻道时间 = 平均跨过的磁道数 × 单道移动时间。\n\n单块时间 = 13×6 + 100 + 25 = 78 + 125 = 203ms。\n\n100 块共 203×100 = 20300ms（约 20.3s）。",
+          "maxScore": 3,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk_access_time",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.disk_latency_reduction",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.004.p1.r1",
+              "description": "按「平均距离×单道时间 + 旋转延迟 + 传输时间」算出单块 203ms",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.disk_access_time"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.004.p1.r2",
+              "description": "乘 100 得 20300ms（或 20.3s）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "只用 100+25=125ms 乘 100，漏掉寻道时间。",
+            "把 13 磁道×6ms 当成 13×6×100 全部寻道、再漏加旋转延迟。",
+            "把 40 个磁道当成平均距离，用 40×6 计算。"
+          ],
+          "acceptableAlternatives": [
+            "先分项列 78ms、100ms、25ms 再相加，或直接写成一式均可；20300ms 与 20.3s 等价。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.004.p2",
+          "promptMd": "若系统对磁盘进行了整理，让同一文件的磁盘块尽可能靠拢，从而使逻辑上相邻数据块的平均距离降为 2 磁道，这时读取一个 100 块的文件需要多少时间？",
+          "responseType": "CALCULATION",
+          "answerMd": "平均距离降为 2 磁道，单块时间 = 2×6 + 100 + 25 = 12 + 125 = 137ms。\n\n100 块共 137×100 = 13700ms（约 13.7s）。\n\n可见整理后节省 20300 − 13700 = 6600ms，相对减少约 32.5%；减少的正是寻道时间（78ms→12ms），旋转延迟与传输时间不变。",
+          "maxScore": 3,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk_access_time",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.disk_io_speedup",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.004.p2.r1",
+              "description": "算出整理后单块 137ms",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.disk_access_time"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.004.p2.r2",
+              "description": "乘 100 得 13700ms（或 13.7s）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time",
+                "os.io.disk_io_speedup"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "把 2 磁道当成 2ms 的移动时间，漏乘 6。",
+            "整理后仍沿用 13 磁道的数据，两问答案相同。",
+            "把节省的时间算成 6600ms 后误当作新总时间。"
+          ],
+          "acceptableAlternatives": [
+            "答 13700ms 或 13.7s 均可；若另算出节省 6600ms 作为补充说明，不扣分。"
+          ]
+        }
+      ]
+    },
+    {
+      "questionCode": "q.wd25.s5_3.app.005",
+      "title": "交叉存放磁盘的读道时间与传输速率",
+      "contentMd": "有一个交叉存放信息的磁盘，信息在其上的存放方法如下图所示。每个磁道有 8 个扇区，每个扇区大小为 512B，旋转速度为 3000 转/分，顺时针读扇区。假定磁头已在读取信息的磁道上，0 扇区转到磁头下需要 1/2 转，且设备对应的控制器不能同时进行输入/输出，在数据从控制器传送至内存的这段时间内，从磁头下通过的扇区数为 2，请回答：\n\n> 原题配图（等价文字描述）：盘面均分为 8 个扇区，沿顺时针方向各扇区的标号依次为 0、3、6、1、4、7、2、5，即相邻编号的两个扇区之间隔着 2 个扇区（交叉因子为 3）。",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.disk-algorithms",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 347,
+        "pageEnd": 348,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.6 本节习题精选 二、综合应用题 第05题（题面与配图在印刷 347，两小问在印刷 348）；解答见 5.3.7（印刷 348—354）",
+        "sourceQuestionNumber": "05"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 353,
+        "pageEnd": 353,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.7 答案与解析 二、综合应用题 第05题【解答】",
+        "sourceQuestionNumber": "05"
+      },
+      "difficulty": 4,
+      "maxScore": 8,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.io.disk_access_time",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.io.disk_latency_reduction",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.disk_io_speedup",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_3.app.005.p1",
+          "promptMd": "1）依次读取一个磁道上的所有扇区需要多少时间？",
+          "responseType": "CALCULATION",
+          "answerMd": "转速 3000 转/分 = 50 转/秒，故转一圈 1/50 s = 20ms。\n\n每磁道 8 个扇区，读一个扇区 = 20/8 = 2.5ms。\n\n由于信息交叉存放（逻辑上连续的两个扇区物理上相隔 2 个扇区），控制器把数据送往内存期间磁头又扫过 2 个扇区，因此「读一个扇区并送入内存」实际占用 3 个扇区时间：2.5×3 = 7.5ms。这样下一逻辑扇区正好转到磁头下，磁头可连续读，不必等待整圈。\n\n起始等待：0 扇区转到磁头下还需 1/2 转 = 10ms。\n\n读完整条磁道 = 10 + 8×7.5 = 10 + 60 = 70ms。",
+          "maxScore": 4,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk_access_time",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.disk_latency_reduction",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.005.p1.r1",
+              "description": "由 3000 转/分得 50 转/秒、20ms/转",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.005.p1.r2",
+              "description": "算出单扇区 2.5ms，并说明交叉存放使「读并送内存」占 3 个扇区即 7.5ms",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time",
+                "os.io.disk_latency_reduction"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.005.p1.r3",
+              "description": "计入起始 1/2 转（10ms）的等待时间",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.005.p1.r4",
+              "description": "得 70ms（10+8×7.5）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "直接用 8×2.5=20ms，把整道读取当成正好一圈，忽略交叉存放导致的每扇区 3 倍占用。",
+            "忘记起始 1/2 转的 10ms 对齐时间，得 60ms。",
+            "把「控制器不能同时输入/输出」理解为要再加一整圈，得 80ms 或 90ms。",
+            "把 3000 转/分算成 20ms/转以外的值（如 18ms）。"
+          ],
+          "acceptableAlternatives": [
+            "先算 8 个扇区共占 24 个扇区位（24×2.5=60ms）再加 10ms，等价于 70ms。",
+            "答「约 70ms」或「0.07s」均可。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.005.p2",
+          "promptMd": "2）该磁盘的数据传输速率是多少？",
+          "responseType": "CALCULATION",
+          "answerMd": "每条磁道的数据量 = 8 × 512B = 4096B = 4KB。\n\n读完整条磁道需 0.07s，故数据传输速率\n\n= 4096B ÷ 0.07s ≈ 58514B/s ≈ 58.5kB/s。\n\n注意单位：表示存储容量时 1K=1024，表示传输速率时 1k=1000，故此处写作 58.5kB/s（若按 1024 折算则为约 57.1KB/s）。",
+          "maxScore": 4,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk_io_speedup",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.disk_access_time",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.005.p2.r1",
+              "description": "求出每磁道数据量 8×512B = 4KB",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_io_speedup"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.005.p2.r2",
+              "description": "用 4KB ÷ 0.07s 建立传输速率算式",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.disk_io_speedup",
+                "os.io.disk_access_time"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.005.p2.r3",
+              "description": "得约 58.5kB/s，并说明速率单位按 1k=1000 处理",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_io_speedup"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "用 4KB ÷ 0.06s（漏掉起始 10ms）得 68.3kB/s。",
+            "用 0.02s（一整圈）去除，得 204.8kB/s，把传输速率当成了接口速率。",
+            "容量与速率单位混用，把 4KB 折算成 4000B 又按 1024 除，结果数值自相矛盾。"
+          ],
+          "acceptableAlternatives": [
+            "答 58514B/s、58.5kB/s、约 58.5KB/s 均可（后者需说明按 1024 折算得 57.1KB/s 亦可接受）。",
+            "先算单扇区速率 512B/7.5ms 再折算为 68.3kB/s 者，只有在明确「不计起始对齐时间」的假设下才算等价，按 r3 不给分。"
+          ]
+        }
+      ]
+    },
+    {
+      "questionCode": "q.wd25.s5_3.app.006",
+      "title": "位示图管理磁盘块与 C-SCAN 读取时间",
+      "contentMd": "【2010 统考真题】如下图所示，假设计算机系统采用 C-SCAN（循环扫描）磁盘调度策略，使用 2KB 的内存空间记录 16384 个磁盘块的空闲状态。\n\n> 原题配图（等价文字描述）：盘面为一组同心圆磁道，0 号磁道在最外圈、100 号磁道在靠内处，磁头位于 100 号磁道处，箭头标出其移动方向沿磁道号增大的方向；图中另标出若干“随机分布的某扇区”。",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.disk-algorithms",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 348,
+        "pageEnd": 348,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.6 本节习题精选 二、综合应用题 第06题；解答见 5.3.7（印刷 348—354）",
+        "sourceQuestionNumber": "06"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 353,
+        "pageEnd": 354,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.7 答案与解析 二、综合应用题 第06题【解答】（2）末尾与 3）在印刷 354）",
+        "sourceQuestionNumber": "06"
+      },
+      "difficulty": 5,
+      "maxScore": 12,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.io.disk_management",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.disk.cscan",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.disk_access_time",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.ssd",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_3.app.006.p1",
+          "promptMd": "1）请说明在上述条件下如何进行磁盘块空闲状态的管理。",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "用位示图（bit map）管理空闲块：为 16384 个磁盘块各分配 1 个二进位，0/1 分别表示空闲与占用（或反之，只要前后一致）。\n\n所需空间 = 16384 bit = 16384/8 B = 2048B = 2KB，正好等于题目给出的 2KB 内存；若按字（32 位）组织，则需 16384/32 = 512 个字，每字 4B，512×4B = 2KB，同样吻合。\n\n定位规则：块号 b → 字号 i = ⌊b/32⌋、位号 j = b mod 32，第 i 字第 j 位即该块状态；分配时把该位置 1 并返回块号，回收时把该位置 0。",
+          "maxScore": 3,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk_management",
+              "role": "PRIMARY",
+              "weight": 1
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.006.p1.r1",
+              "description": "提出用位示图（每块 1 位）记录空闲状态",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_management"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.006.p1.r2",
+              "description": "算出 16384/32 = 512 字、512×4B = 2KB（或 16384 bit = 2KB），说明与给定内存吻合",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_management"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.006.p1.r3",
+              "description": "给出块号与字号/位号的换算及分配、回收时的置位规则",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_management"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "答「用空闲链表/成组链接」，与题目给定的 2KB 定长内存和 16384 块规模不符。",
+            "算成 16384 bit = 16KB（按每字节 1 位），与 2KB 对不上却不自查。",
+            "只说「用位示图」而不给空间核算与定位规则，未回答「如何管理」。"
+          ],
+          "acceptableAlternatives": [
+            "用「位示图 + 0 表示空闲」或「1 表示空闲」均可，只要说明前后一致。",
+            "按字节组织（每字节 8 块）或按 32 位字组织，只要空间核算得 2KB 即可。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.006.p2",
+          "promptMd": "2）设某单面磁盘的旋转速度为 6000 转/分，每个磁道有 100 个扇区，相邻磁道间的平均移动时间为 1ms。若在某时刻，磁头位于 100 号磁道处，并沿着磁道号增大的方向移动（见上图），磁道号请求队列为 50, 90, 30, 120，对请求队列中的每个磁道需读取 1 个随机分布的扇区，则读完这 4 个扇区点共需要多少时间？要求给出计算过程。",
+          "responseType": "CALCULATION",
+          "answerMd": "C-SCAN 单向服务，磁头先沿增大方向服务 120，再快速返回最小请求处继续单向递增：\n\n| 被访问的下一个磁道号 | 移动距离（磁道数） |\n| --- | --- |\n| 120 | 20 |\n| 30 | 90 |\n| 50 | 20 |\n| 90 | 40 |\n\n移动磁道数合计 = 20+90+20+40 = 170，相邻磁道 1ms，故寻道时间 = 170×1ms = 170ms。\n\n旋转延迟：6000 转/分 = 100 转/秒，转一圈 10ms，平均旋转延迟 5ms，4 个扇区共 4×5 = 20ms。\n\n扇区读取：每磁道 100 个扇区，一圈 10ms，故一个扇区 10/100 = 0.1ms，4 个扇区共 0.4ms。\n\n总时间 = 170 + 20 + 0.4 = 190.4ms。\n\n（说明：本问的回程距离按 120→30 的 90 个磁道计，与本教材 5.3.6 第03题把 0→999 的 999 个磁道计入的计法不同。）",
+          "maxScore": 5,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.disk.cscan",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.disk_access_time",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.006.p2.r1",
+              "description": "按 C-SCAN 给出访问顺序 120、30、50、90，并列出各段移动距离 20、90、20、40",
+              "points": 2,
+              "nodeCodes": [
+                "os.disk.cscan"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.006.p2.r2",
+              "description": "移动磁道合计 170，寻道时间 170ms",
+              "points": 1,
+              "nodeCodes": [
+                "os.disk.cscan",
+                "os.io.disk_access_time"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.006.p2.r3",
+              "description": "由 6000 转/分算出转一圈 10ms、平均旋转延迟 5ms，4 次共 20ms",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.006.p2.r4",
+              "description": "算出每扇区 0.1ms、4 个扇区 0.4ms，并得总时间 190.4ms",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_access_time"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "按 SSTF 或 FCFS 排顺序（120,90,50,30 等），忽略题目指定的 C-SCAN。",
+            "平均旋转延迟取整圈 10ms（未取一半），旋转延迟算成 40ms。",
+            "漏掉扇区读取时间 0.4ms，答 190ms。",
+            "把回程 120→30 按 120+30 或 999 之类计算，移动量算错。"
+          ],
+          "acceptableAlternatives": [
+            "顺序写 100→120→30→50→90 或列表格均可；若把 120→30 的回程按 999 计则需明确说明所用变体，数值按 170 一档判分。",
+            "旋转延迟用「平均半个周期」或「按最坏一整圈」的假设须声明；按 5ms 平均值得 190.4ms 为标准答案。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.006.p3",
+          "promptMd": "3）若将磁盘替换为随机访问的 Flash 半导体存储器（如 U 盘、固态硬盘等），是否有比 C-SCAN 更高效的磁盘调度策略？若有，给出磁盘调度策略的名称并说明理由；若无，说明理由。",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "有，采用先来先服务（FCFS）更高效。\n\n理由：Flash 半导体存储器是随机访问设备，没有磁头、没有盘片旋转，因而不存在寻道时间和旋转延迟，C-SCAN 所优化的「减少磁头移动」在这里没有对象；而 C-SCAN 还引入了单向服务与回程跳跃，反而会增加无意义的等待。按 I/O 请求到达的先后顺序直接服务（FCFS）最公平也最简单，开销最小。",
+          "maxScore": 4,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.ssd",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.disk_management",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.006.p3.r1",
+              "description": "明确回答「有」，并给出 FCFS（先来先服务）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.ssd"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.006.p3.r2",
+              "description": "说明 Flash 无机械部件，不存在寻道与旋转延迟，随机访问各块代价相近",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.ssd"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.006.p3.r3",
+              "description": "指出 C-SCAN 的单向服务与回程在此无收益甚至增加延迟",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.ssd",
+                "os.io.disk_management"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "答「没有，仍用 C-SCAN 更好」，把机械盘的结论直接搬到 Flash 上。",
+            "答「有，用 SSTF」，未意识到 SSTF 的排序依据是寻道距离，对 Flash 无意义。",
+            "只说「Flash 快」而不说明快的结构性原因（无机械寻道/旋转）。"
+          ],
+          "acceptableAlternatives": [
+            "答「FCFS（或简单的按到达顺序服务/无调度）」均可；若提到 Flash 内部还需做磨损均衡与垃圾回收而不影响本问结论，不扣分。"
+          ]
+        }
+      ]
+    },
+    {
+      "questionCode": "q.wd25.s5_3.app.007",
+      "title": "磁盘容量、SSTF 访问次序与簇地址转换",
+      "contentMd": "【2019 统考真题】某计算机系统中的磁盘有 300 个柱面，每个柱面有 10 个磁道，每个磁道有 200 个扇区，扇区大小为 512B。文件系统的每簇包含 2 个扇区。请回答下列问题：",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.disk-algorithms",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 348,
+        "pageEnd": 348,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.6 本节习题精选 二、综合应用题 第07题；解答见 5.3.7（印刷 348—354）",
+        "sourceQuestionNumber": "07"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 354,
+        "pageEnd": 354,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.7 答案与解析 二、综合应用题 第07题【解答】",
+        "sourceQuestionNumber": "07"
+      },
+      "difficulty": 4,
+      "maxScore": 12,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.io.disk",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.disk.sstf",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.device_driver",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.io.disk_access_time",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_3.app.007.p1",
+          "promptMd": "1）磁盘的容量是多少？",
+          "responseType": "CALCULATION",
+          "answerMd": "磁盘容量 = 柱面数 × 每柱面磁道数 × 每磁道扇区数 × 每扇区字节数\n\n= 300 × 10 × 200 × 512B = 307200000B；\n按 1KB = 1024B 折算：307200000/1024 = 300000KB = 3×10^5 KB（约 293MB）。",
+          "maxScore": 4,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk",
+              "role": "PRIMARY",
+              "weight": 1
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.007.p1.r1",
+              "description": "写出容量 = 柱面×磁道×扇区×扇区大小的正确算式（300×10×200×512B）",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.disk"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.007.p1.r2",
+              "description": "得 300000KB（3×10^5 KB，或 307200000B / 约 293MB）",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.disk"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "漏乘柱面数或磁道数，直接用 200×512B。",
+            "把每簇 2 个扇区代入容量计算，使容量翻倍或减半。",
+            "用 1KB=1000B 折算出 307200KB，与教材口径不一致。"
+          ],
+          "acceptableAlternatives": [
+            "答 3×10^5 KB、300000KB、307200000B、约 293MB 均可，单位与数值需自洽。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.007.p2",
+          "promptMd": "2）设磁头在 85 号柱面上，此时有 4 个磁盘访问请求，簇号分别为 100260, 60005, 101660 和 110560。采用最短寻道时间优先 SSTF 调度算法，系统访问簇的先后次序是什么？",
+          "responseType": "CALCULATION",
+          "answerMd": "先把簇号换算成柱面号。每柱面的簇数 = 10 磁道 × 200 扇区 ÷ 2 扇区/簇 = 1000 簇，故柱面号 = ⌊簇号/1000⌋：\n\n| 簇号 | 柱面号 |\n| --- | --- |\n| 100260 | 100 |\n| 60005 | 60 |\n| 101660 | 101 |\n| 110560 | 110 |\n\n磁头当前在 85 号柱面（对应簇 85000～85999）。按 SSTF 每次取最近柱面：\n\n85 → 100（15）→ 101（1）→ 110（9）→ 60（50，自 110 起为 50）。\n\n故访问次序为 100260 → 101660 → 110560 → 60005。",
+          "maxScore": 4,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.disk.sstf",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.disk_access_time",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.007.p2.r1",
+              "description": "由每柱面 1000 簇把四个簇号正确换算为柱面 100、60、101、110（并指出 85 号柱面对应簇 85000～85999）",
+              "points": 1,
+              "nodeCodes": [
+                "os.disk.sstf"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.007.p2.r2",
+              "description": "给出 SSTF 访问次序 100260, 101660, 110560, 60005",
+              "points": 2,
+              "nodeCodes": [
+                "os.disk.sstf"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.007.p2.r3",
+              "description": "以柱面距离说明每次为何选该请求（15、1、9、50）",
+              "points": 1,
+              "nodeCodes": [
+                "os.disk.sstf",
+                "os.io.disk_access_time"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "直接用簇号算距离而不换算柱面，得 60005 最近的错误结论。",
+            "先访问 60005（60 号柱面，距离 25 小于 100 号柱面的 15 之比较出错）。",
+            "把每柱面簇数算成 2000（忘记每簇 2 扇区）。",
+            "访问次序正确但在 110 之后选 100 重复访问，漏掉 60005。"
+          ],
+          "acceptableAlternatives": [
+            "先按簇号除以 1000 列表，或先算 85 号柱面对应的簇区间再比较，均等价；次序为 100260、101660、110560、60005。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.007.p3",
+          "promptMd": "3）簇号 100530 在磁盘上的物理地址是什么？将簇号转换成磁盘物理地址的过程由 I/O 系统的什么程序完成？",
+          "responseType": "CALCULATION",
+          "answerMd": "柱面号 = ⌊簇号 / 每柱面簇数⌋ = ⌊100530/1000⌋ = 100。\n\n柱面内偏移簇 = 100530 mod 1000 = 530；每磁道簇数 = 200/2 = 100，故\n\n磁头（磁道）号 = ⌊530/100⌋ = 5；\n扇区号 = (530 mod 100)×2 = 30×2 = 60（即簇内首扇区的编号）。\n\n所以 100530 号簇的物理地址为：100 号柱面、5 号磁头（磁道）、60 号扇区。\n\n把簇号（逻辑地址）转换成柱面号、磁头号、扇区号的工作由磁盘驱动程序（设备驱动程序）完成——它需要知道该磁盘的具体几何参数。",
+          "maxScore": 4,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.device_driver",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.007.p3.r1",
+              "description": "柱面号 100",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.007.p3.r2",
+              "description": "磁头（磁道）号 5（由 530÷100 取整）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.007.p3.r3",
+              "description": "扇区号 60（由 530 的柱面内偏移乘 2 后对 200 取余）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.007.p3.r4",
+              "description": "答出由磁盘驱动程序（设备驱动程序）完成转换",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.device_driver"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "把 530 直接当扇区号，得 5 号磁道 530 号扇区（扇区号越界）。",
+            "磁头号与扇区号颠倒：磁头 60、扇区 5。",
+            "忘记每簇 2 个扇区，扇区号算成 30。",
+            "答「由文件系统/系统调用处理程序完成转换」，把逻辑块号到物理地址的换算放错层次。"
+          ],
+          "acceptableAlternatives": [
+            "答「100 号柱面、5 号磁头、60 号扇区」或「C=100, H=5, S=60」均可；扇区号按 0 起算写出 60 即为教材答案（若按 1 起算写 61 需说明编号约定）。",
+            "转换程序答「磁盘驱动程序」「设备驱动程序」均可。"
+          ]
+        }
+      ]
+    },
+    {
+      "questionCode": "q.wd25.s5_3.app.008",
+      "title": "启动盘的多阶段引导与格式化次序",
+      "contentMd": "【2021 统考真题】某计算机用硬盘作为启动盘，硬盘的第一个扇区存放主引导记录，其中包含磁盘引导程序和分区表。磁盘引导程序用于选择引导哪个分区的操作系统，分区表记录硬盘上各分区的位置等描述信息。硬盘被划分成若干分区，每个分区的第一个扇区存放分区引导程序，用于引导该分区中的操作系统。系统采用多阶段引导方式，除了执行磁盘引导程序和分区引导程序，还需要执行 ROM 中的引导程序。回答下列问题：",
+      "type": "COMPREHENSIVE",
+      "sectionCode": "sec.io.disk-algorithms",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 348,
+        "pageEnd": 348,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.6 本节习题精选 二、综合应用题 第08题；解答见 5.3.7（印刷 348—354）",
+        "sourceQuestionNumber": "08"
+      },
+      "answerSourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.io.disk-algorithms",
+        "pageStart": 354,
+        "pageEnd": 354,
+        "pageStatus": "VISIBLE",
+        "locator": "5.3.7 答案与解析 二、综合应用题 第08题【解答】",
+        "sourceQuestionNumber": "08"
+      },
+      "difficulty": 3,
+      "maxScore": 9,
+      "nodeMappings": [
+        {
+          "nodeCode": "os.io.disk_management",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.io.disk",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.wd25.s5_3.app.008.p1",
+          "promptMd": "1）系统启动过程中操作系统的初始化程序、分区引导程序、ROM 中的引导程序、磁盘引导程序的执行顺序是什么？",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "执行顺序：ROM 中的引导程序 → 磁盘引导程序 → 分区引导程序 → 操作系统的初始化程序。\n\n理由：加电后 CPU 从 ROM 中的固化引导代码（bootstrap）开始执行，它把硬盘第一个扇区的主引导记录读入内存；磁盘引导程序依据分区表选定活动分区，再读入该分区第一个扇区的分区引导程序；分区引导程序把该分区中的操作系统内核装入并转去执行，最后运行操作系统的初始化程序。",
+          "maxScore": 3,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk_management",
+              "role": "PRIMARY",
+              "weight": 1
+            },
+            {
+              "nodeCode": "os.io.disk",
+              "role": "SECONDARY",
+              "weight": 0.3
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.008.p1.r1",
+              "description": "给出完整正确顺序 ROM 引导程序→磁盘引导程序→分区引导程序→操作系统初始化程序",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.disk_management"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.008.p1.r2",
+              "description": "说明 ROM 引导程序先于磁盘引导程序、分区引导程序先于操作系统初始化程序的依据（自举装入、MBR 与分区表的作用）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_management",
+                "os.io.disk"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "把磁盘引导程序放在 ROM 引导程序之前，以为硬盘先自举。",
+            "把分区引导程序与磁盘引导程序次序颠倒（磁盘引导程序只负责选分区）。",
+            "漏掉 ROM 中的引导程序，只答「MBR→分区引导→OS」。"
+          ],
+          "acceptableAlternatives": [
+            "答「ROM→MBR→分区引导记录→OS 初始化」等价；用箭头、编号列表表达均可。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.008.p2",
+          "promptMd": "2）将硬盘制作为启动盘时，需要完成操作系统的安装、磁盘的物理格式化、逻辑格式化、对磁盘进行分区，执行这 4 个操作的正确顺序是什么？",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "正确顺序：磁盘的物理格式化 → 对磁盘进行分区 → 逻辑格式化 → 操作系统的安装。\n\n理由：物理格式化（低级格式化）先划分出磁道与扇区并按扇区写入头部、数据区、尾部，是后续一切操作的基础；分区在已格式化的介质上划分出若干独立区域；逻辑格式化（高级格式化）在各分区内建立文件系统的数据结构（引导记录、文件分配表、文件目录表、数据区）；最后才能把操作系统文件写入并安装到相应分区。",
+          "maxScore": 3,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk_management",
+              "role": "PRIMARY",
+              "weight": 1
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.008.p2.r1",
+              "description": "给出顺序 物理格式化→分区→逻辑格式化→操作系统的安装",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.disk_management"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.008.p2.r2",
+              "description": "说明物理格式化必须先于分区（扇区是分区的基础），逻辑格式化必须在安装系统之前（需先有文件系统）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_management"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "先分区再物理格式化，把分区当成划分磁道扇区的手段。",
+            "把逻辑格式化放到安装系统之后。",
+            "把物理格式化与逻辑格式化混为一谈，只写三步。"
+          ],
+          "acceptableAlternatives": [
+            "用「低级格式化→分区→高级格式化→安装 OS」的术语表述同样正确。"
+          ]
+        },
+        {
+          "partCode": "q.wd25.s5_3.app.008.p3",
+          "promptMd": "3）磁盘扇区的划分和文件系统根目录的建立分别是在第 2）问的哪个操作中完成的？",
+          "responseType": "SHORT_ANSWER",
+          "answerMd": "磁盘扇区的划分在磁盘的物理格式化（低级格式化）中完成：该操作把每个磁道划分成扇区，并写入扇区的头部、数据区和尾部（含校验信息）。\n\n文件系统根目录的建立在逻辑格式化（高级格式化）中完成：该操作在分区内建立初始的文件系统数据结构，包括空闲与已分配空间的管理信息、文件分配表、文件目录表，并建立根目录。",
+          "maxScore": 3,
+          "nodeMappings": [
+            {
+              "nodeCode": "os.io.disk_management",
+              "role": "PRIMARY",
+              "weight": 1
+            }
+          ],
+          "rubric": [
+            {
+              "rubricCode": "q.wd25.s5_3.app.008.p3.r1",
+              "description": "扇区划分属于物理格式化（低级格式化）",
+              "points": 2,
+              "nodeCodes": [
+                "os.io.disk_management"
+              ]
+            },
+            {
+              "rubricCode": "q.wd25.s5_3.app.008.p3.r2",
+              "description": "根目录建立属于逻辑格式化（高级格式化）",
+              "points": 1,
+              "nodeCodes": [
+                "os.io.disk_management"
+              ]
+            }
+          ],
+          "commonErrors": [
+            "把根目录建立归到分区操作或操作系统安装。",
+            "把扇区划分归到逻辑格式化。",
+            "两问答成同一个操作，未区分低级/高级格式化。"
+          ],
+          "acceptableAlternatives": [
+            "答「扇区划分—物理（低级）格式化；根目录—逻辑（高级）格式化」即为标准答案，附加说明写入头部/尾部或建立文件分配表均不扣分。"
+          ]
+        }
+      ]
+    }
+  ]
+}

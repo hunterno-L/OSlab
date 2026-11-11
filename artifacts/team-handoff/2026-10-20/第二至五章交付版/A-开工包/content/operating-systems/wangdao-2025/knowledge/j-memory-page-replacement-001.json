@@ -1,0 +1,1136 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "KNOWLEDGE",
+  "batchCode": "batch.j.memory.page-replacement.001",
+  "contributor": "J（系统整理初稿，待成员复核）",
+  "courseCode": "course.operating-systems",
+  "note": "根据用户提供的2025版截图改写整理。正文页217/218为连续页推定，219/220可见；相邻知识仅由配套解析支撑。尚未导入或发布。",
+  "nodes": [
+    {
+      "nodeCode": "os.memory.page_replacement",
+      "name": "页面置换",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "请求页面不在内存且没有可用页框时，从驻留页中选出一页换出以容纳请求页。",
+      "aliases": [
+        "页面替换",
+        "Page Replacement"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 217,
+          "pageEnd": 217,
+          "pageStatus": "INFERRED",
+          "locator": "3.2.4 开头：页面换入与换出",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.page_fault",
+      "name": "缺页中断",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "访问页面不在内存时进入缺页处理；可能涉及分配页框、页面置换、磁盘读取及页表更新。",
+      "aliases": [
+        "Page Fault"
+      ],
+      "homeSectionCode": "sec.memory.demand-paging",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.demand-paging",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "43",
+          "locator": "3.2 习题精选第43题及对应解析；缺页处理可能执行的操作；两张截图均未包含印刷页码"
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.demand-paging",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "46",
+          "locator": "3.2 习题精选第46题及对应解析；缺页时先阻塞等待页面调入；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.opt",
+      "name": "OPT 页面置换算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "依据未来访问序列，换出下次访问最晚或以后不再使用的驻留页，作为缺页性能的理想比较基准。",
+      "aliases": [
+        "OPT",
+        "最佳页面置换"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 217,
+          "pageEnd": 217,
+          "pageStatus": "INFERRED",
+          "locator": "1. 最佳（OPT）置换算法与图3.22",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.fifo",
+      "name": "FIFO 页面置换算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "换出最早调入的驻留页，命中不改变调入顺序；在某些访问序列中会出现 Belady 异常。",
+      "aliases": [
+        "FIFO",
+        "先进先出页面置换"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 218,
+          "pageEnd": 218,
+          "pageStatus": "INFERRED",
+          "locator": "2. 先进先出（FIFO）页面置换算法与图3.23",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.lru",
+      "name": "LRU 页面置换算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "依据过去访问历史换出最近最久未访问的驻留页；命中同样更新最近访问状态。",
+      "aliases": [
+        "LRU",
+        "最近最久未使用"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 218,
+          "pageEnd": 218,
+          "pageStatus": "INFERRED",
+          "locator": "3. 最近最久未使用（LRU）置换算法开头",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 219,
+          "pageEnd": 219,
+          "pageStatus": "VISIBLE",
+          "locator": "图3.25及 LRU 的历史信息、实现代价说明",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.clock",
+      "name": "CLOCK 页面置换算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "使用环形页框队列、替换指针与访问位；扫描到访问位为1时清零并跳过，遇0时换出。",
+      "aliases": [
+        "简单 CLOCK",
+        "时钟置换",
+        "NRU（本教材简单 CLOCK 别名）"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 219,
+          "pageEnd": 219,
+          "pageStatus": "VISIBLE",
+          "locator": "4. 时钟（CLOCK）置换算法：（1）简单CLOCK",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 220,
+          "pageEnd": 220,
+          "pageStatus": "VISIBLE",
+          "locator": "图3.27及简单CLOCK推演续文",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.clock_enhanced",
+      "name": "改进型 CLOCK 页面置换算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "结合访问位A和修改位M分轮扫描，优先选择近期未访问且无需写回的页，兼顾命中历史与换出代价。",
+      "aliases": [
+        "Enhanced CLOCK"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 220,
+          "pageEnd": 220,
+          "pageStatus": "VISIBLE",
+          "locator": "（2）改进型CLOCK及四类页面、扫描步骤",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.access_bit",
+      "name": "访问位",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "本节用 A 表示页面近期是否被访问；访问置1，扫描时按算法规则清零。",
+      "aliases": [
+        "A 位",
+        "引用位"
+      ],
+      "homeSectionCode": "sec.memory.demand-paging",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 219,
+          "pageEnd": 219,
+          "pageStatus": "VISIBLE",
+          "locator": "简单CLOCK的访问位置1与清零规则",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 220,
+          "pageEnd": 220,
+          "pageStatus": "VISIBLE",
+          "locator": "改进型CLOCK中的A位",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.dirty_bit",
+      "name": "修改位",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "本节用 M 表示页面调入后是否被修改；被修改页换出前需要写回，未修改页通常无需写回。",
+      "aliases": [
+        "M 位",
+        "脏位"
+      ],
+      "homeSectionCode": "sec.memory.demand-paging",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 220,
+          "pageEnd": 220,
+          "pageStatus": "VISIBLE",
+          "locator": "改进型CLOCK中修改位与写回代价",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.belady",
+      "name": "Belady 异常",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "对同一访问序列，增加分配页框数反而造成更多缺页；FIFO可能出现，LRU与OPT不出现。",
+      "aliases": [
+        "Belady anomaly"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 218,
+          "pageEnd": 218,
+          "pageStatus": "INFERRED",
+          "locator": "图3.24：3页框9次缺页、4页框10次缺页",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "48",
+          "locator": "3.2 习题精选第48题及对应解析；FIFO与LRU、OPT的异常性质比较；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.virtual_memory",
+      "name": "虚拟内存",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "利用按需调入与换出扩大可用的逻辑地址空间；容量不再单纯受实际内存大小约束。",
+      "aliases": [
+        "虚拟存储器"
+      ],
+      "homeSectionCode": "sec.memory.virtual-concepts",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.virtual-concepts",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "45",
+          "locator": "3.2 习题精选第45题及对应解析；虚拟存储容量与连续分配限制；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.frame_allocation",
+      "name": "页框分配与置换范围",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "页框分配策略与局部或全局置换范围需要一致；本题中固定分配不能采用全局置换。",
+      "aliases": [
+        "局部置换",
+        "全局置换"
+      ],
+      "homeSectionCode": "sec.memory.frame-allocation",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.frame-allocation",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "49",
+          "locator": "3.2 习题精选第49题及对应解析；固定分配与全局置换的组合限制；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.thrashing",
+      "name": "抖动",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "进程频繁缺页使系统大量时间用于页面调入调出；降低并发进程数量是题目给定的有效缓解措施。",
+      "aliases": [
+        "颠簸",
+        "Thrashing"
+      ],
+      "homeSectionCode": "sec.memory.thrashing-workingset",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.thrashing-workingset",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "44",
+          "locator": "3.2 习题精选第44题及对应解析；撤销部分进程与其他措施的比较；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.address_translation",
+      "name": "地址翻译",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "将逻辑地址转换为物理地址；在题给选项中TLB容量与驻留内存页表有助于翻译，swap容量无直接作用。",
+      "aliases": [
+        "地址转换"
+      ],
+      "homeSectionCode": "sec.memory.address-translation",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.address-translation",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "47",
+          "locator": "3.2 习题精选第47题及对应解析；提高地址转换速度的措施；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.tlb",
+      "name": "TLB 快表",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "缓存部分页表项以加速地址翻译；增大快表容量可能提高命中率，但不等于改变页面置换范围。",
+      "aliases": [
+        "TLB",
+        "快表"
+      ],
+      "homeSectionCode": "sec.memory.paging",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.paging",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "47",
+          "locator": "3.2 习题精选第47题及对应解析；增大快表容量与地址转换；两张截图均未包含印刷页码"
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "chunkCode": "chunk.wd25.memory.replacement.trigger",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "缺页不一定发生页面置换",
+      "chunkType": "DEFINITION",
+      "contentMd": "访问的页面不在内存时，需要将它调入。若还有可用页框，直接装入即可；只有可用页框不足时，才需要先选择驻留页换出。\n\n缺页次数统计所有未命中的访问；置换次数只统计确实换出了旧页的访问。页面换入、必要的写回会带来磁盘 I/O，因此算法希望减少缺页，也要考虑换出代价。\n\n不要把“出现缺页”直接等同于“必须换出一个页面”。",
+      "nodeCodes": [
+        "os.memory.page_replacement",
+        "os.memory.page_fault"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 217,
+        "pageEnd": 217,
+        "pageStatus": "INFERRED",
+        "locator": "3.2.4 开头，改写为缺页与置换条件的对照说明",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.replacement.counts",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "统一计数条件：缺页、置换与初次装入",
+      "chunkType": "EXPLANATION",
+      "contentMd": "统一案例：3 个页框，初始为空，访问序列为 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`。\n\n|算法|缺页次数|页面置换次数|\n|---|---:|---:|\n|OPT|9|6|\n|FIFO|15|12|\n|LRU|12|9|\n\n初始为空且最终用满 3 个页框时，前 3 次不同页面的装入发生缺页但没有换出，所以本例“置换次数 = 缺页次数 − 3”。这个简式依赖初始状态与分配条件，不能套用到任意案例。\n\n教材 OPT 图下给出 9 次缺页、6 次置换；FIFO 段落中的 12 次是置换次数，不是缺页次数。LRU 与 FIFO 的其余数值由同一输入逐步复算，完整校验数据见本批案例文件。",
+      "nodeCodes": [
+        "os.memory.page_replacement",
+        "os.memory.opt",
+        "os.memory.fifo",
+        "os.memory.lru"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 217,
+        "pageEnd": 219,
+        "pageStatus": "INFERRED",
+        "locator": "图3.22；结合图3.23与图3.25作相同条件的计数汇总",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.opt.rule",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "OPT 如何选择换出页",
+      "chunkType": "ALGORITHM",
+      "contentMd": "页面未命中且页框已满时，查看各驻留页在未来序列中的下一次访问位置，换出下一次访问最远的页；以后不再访问的页优先。\n\nOPT 使用未来信息，不能在通常的在线运行中预知全部访问，因此主要作为理想比较基准。看的是未来的下一次访问距离，不是过去多久没访问，也不是访问总次数。\n\n若多个页都不再使用，任选其中一个都符合OPT；演示应固定并说明平局规则，以便步骤复现。",
+      "nodeCodes": [
+        "os.memory.opt"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 217,
+        "pageEnd": 217,
+        "pageStatus": "INFERRED",
+        "locator": "1. OPT 定义与不再访问／最长时间内不访问的说明",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.opt.example",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "OPT 的首个换出与计数",
+      "chunkType": "WORKED_EXAMPLE",
+      "contentMd": "条件：3 个页框，初始为空，序列为 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`。\n\n前三次访问装入 7、0、1。访问第4个页面2时，驻留页0和1之后仍会较早使用，页面7直到第18步才再次出现，因此换出7，装入2。\n\n继续推演可得9次缺页、6次换出。首轮3次装入不计换出。\n\n在本例确定的平局规则下，换出发生于第4、6、8、11、14、18步；以后不再访问的候选出现并列时，选择物理页框位置较小者。与教材某一步平局选页不同不必然说明算法错误，应先核对缺页总数及是否同为最优。",
+      "nodeCodes": [
+        "os.memory.opt",
+        "os.memory.page_replacement"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 217,
+        "pageEnd": 217,
+        "pageStatus": "INFERRED",
+        "locator": "图3.22，保留原案例条件，重新组织推演",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.fifo.rule",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "FIFO 维护的是调入顺序",
+      "chunkType": "ALGORITHM",
+      "contentMd": "按页面调入先后维护队列。命中时不改变调入顺序；发生缺页且没有空页框时，换出队首的最早调入页，新页进入队尾。\n\nFIFO 实现简单，但最早调入不等于近期不会再用。它不利用最近访问历史，不能把一次命中当作重新排到队尾。",
+      "nodeCodes": [
+        "os.memory.fifo"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 218,
+        "pageEnd": 218,
+        "pageStatus": "INFERRED",
+        "locator": "2. FIFO 原理与队列实现",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.fifo.example",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "FIFO 中命中与队首保持不变",
+      "chunkType": "WORKED_EXAMPLE",
+      "contentMd": "3个页框初始为空，使用统一序列 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`。先装入7、0、1；访问2时换出7，队列成为0、1、2。随后访问0命中，队列仍是0、1、2；再访问3时换出0。\n\n在第7步再次访问0时，此页已经不在内存，仍发生缺页。这解释了为什么 FIFO 与 LRU 的路径会分开。\n\n完整计算为15次缺页、12次换出。",
+      "nodeCodes": [
+        "os.memory.fifo"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 218,
+        "pageEnd": 218,
+        "pageStatus": "INFERRED",
+        "locator": "图3.23，改写开头队列推演并校核完整计数",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.belady.example",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "增加页框反而增加缺页：Belady 异常",
+      "chunkType": "WORKED_EXAMPLE",
+      "contentMd": "同一访问序列为 `3,2,1,0,3,2,4,3,2,1,0,4`，初始内存为空，均采用FIFO。\n\n|页框数|缺页次数|置换次数|\n|---|---:|---:|\n|3|9|6|\n|4|10|6|\n\n4页框的缺页比3页框更多，这就是Belady异常。注意这里比较的是缺页次数；两种配置的置换次数恰好相同，不能用它替代异常定义。\n\n在本节讨论的FIFO、LRU、OPT中，FIFO可能发生该异常；LRU和OPT不会发生。不要把“FIFO可能发生”扩大成任意置换算法都必然发生。",
+      "nodeCodes": [
+        "os.memory.belady",
+        "os.memory.fifo"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 218,
+        "pageEnd": 218,
+        "pageStatus": "INFERRED",
+        "locator": "图3.24与紧接的Belady性质结论",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.lru.rule",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "LRU 的访问历史与命中更新",
+      "chunkType": "ALGORITHM",
+      "contentMd": "LRU 换出过去最长时间未被访问的驻留页。对每次访问都更新最近使用状态：命中不是“什么也不做”。\n\n可用时间戳、栈或按最近访问排序的结构表达。算法依据是过去历史，OPT依据是未来信息，两者在部分步骤选中相同页面不表示算法等价。\n\n严格LRU需要维护访问顺序，实际实现开销较大，这也是引入CLOCK近似方法的动机。",
+      "nodeCodes": [
+        "os.memory.lru"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 218,
+        "pageEnd": 219,
+        "pageStatus": "INFERRED",
+        "locator": "218页LRU定义及219页图3.25后历史／未来、实现代价说明",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.lru.example",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "教材序列与 LRU 的第一次分歧",
+      "chunkType": "WORKED_EXAMPLE",
+      "contentMd": "条件：3个页框、初始为空，访问序列 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`。下表按“最近到最久”排列，不是物理页框位置。\n\n|步骤|访问|访问后顺序|结果|换出|\n|---|---|---|---|---|\n|1|7|7|缺页|无|\n|2|0|0,7|缺页|无|\n|3|1|1,0,7|缺页|无|\n|4|2|2,1,0|缺页|7|\n|5|0|0,2,1|命中|无|\n|6|3|3,0,2|缺页|1|\n\n第5步命中0改变最近使用顺序，因此第6步换出1；同条件FIFO会换出0。完整序列LRU为12次缺页、9次换出。\n\n后续练习使用另一条访问历史，检查你能否独立应用规则。",
+      "nodeCodes": [
+        "os.memory.lru"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 219,
+        "pageEnd": 219,
+        "pageStatus": "VISIBLE",
+        "locator": "图3.25，按最近访问顺序重新绘制前六步",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.clock.rule",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "简单 CLOCK：环、访问位和替换指针",
+      "chunkType": "ALGORITHM",
+      "contentMd": "为每个页框维护访问位A，页面装入或被访问时置1；替换指针在环形页框队列上移动。\n\n页框已满而需要换出时，从当前指针开始：\n\n1. 若A=0，选中该页框换出，装入新页并置A=1，指针移到下一页框。\n2. 若A=1，将它清为0，指针移到下一页框继续检查。\n3. 页面命中只把对应A置1，替换指针保持原位置。\n\n没有空页框时一次缺页可能扫描一整圈以上。简单CLOCK只近似最近使用，不维护LRU的精确次序。本教材也称它为NRU，但协作词表保留CLOCK为正式名称，避免把别处不同的NRU变体混入。",
+      "nodeCodes": [
+        "os.memory.clock",
+        "os.memory.access_bit"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 219,
+        "pageEnd": 219,
+        "pageStatus": "VISIBLE",
+        "locator": "（1）简单CLOCK定义及访问位／指针规则",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.clock.example",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "4 页框的 CLOCK 指针推演",
+      "chunkType": "WORKED_EXAMPLE",
+      "contentMd": "使用统一序列 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`，4个页框初始为空，按物理框1→2→3→4循环；填满后指针回到框1。\n\n装入7、0、1、2后，四个A均为1。访问0命中，不移动指针。访问3时扫描一圈，将四个A清0；回到框1换出7并装入3，指针移至框2。接着访问0命中，框2的A=1。访问4时从框2开始：先清框2的A，再选中A=0的框3，换出1。\n\n本例完整运行有9次缺页、5次换出。教材图3.27展示第5次与第6次缺页时的指针，不是第5步与第6步访问。\n\n![CLOCK替换指针示意](assets/wd25-memory-batch-001/fig-3_27-clock-pointer.png)",
+      "nodeCodes": [
+        "os.memory.clock",
+        "os.memory.access_bit"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 219,
+        "pageEnd": 220,
+        "pageStatus": "VISIBLE",
+        "locator": "图3.26及220页图3.27的连续推演",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+      },
+      "assets": [
+        {
+          "path": "assets/wd25-memory-batch-001/fig-3_27-clock-pointer.png",
+          "caption": "教材图3.27：第5、6次缺页的替换指针（从已授权截图裁剪）",
+          "sourceRef": {
+            "sourceCode": "book.wangdao.os.2025",
+            "origin": "TEXTBOOK",
+            "sectionCode": "sec.memory.page-replacement",
+            "pageStart": 220,
+            "pageEnd": 220,
+            "pageStatus": "VISIBLE",
+            "locator": "图3.27，局部裁剪",
+            "sourceQuestionNumber": null,
+            "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+          }
+        }
+      ]
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.clock-enhanced.classes",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "A/M 四类页面与写回代价",
+      "chunkType": "EXPLANATION",
+      "contentMd": "换出被修改过的页面，需要把更改写回；未修改页通常不必写回。改进型CLOCK因此在访问位A之外加入修改位M。\n\n|A|M|本节含义|\n|---:|---:|---|\n|0|0|近期未访问，且未修改；优先候选|\n|0|1|近期未访问，但已修改；换出前需写回|\n|1|0|近期访问过，未修改|\n|1|1|近期访问过，已修改|\n\n这些分类解释了选页动机；实际算法按分轮扫描执行，不能直接对四种类别做一次全局排序，就声称复现了教材算法。",
+      "nodeCodes": [
+        "os.memory.clock_enhanced",
+        "os.memory.access_bit",
+        "os.memory.dirty_bit"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 220,
+        "pageEnd": 220,
+        "pageStatus": "VISIBLE",
+        "locator": "改进型CLOCK引入修改位及四类页面",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.clock-enhanced.scan",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "改进型 CLOCK 的分轮扫描",
+      "chunkType": "ALGORITHM",
+      "contentMd": "本批采用截图中的算法，不混用其他实现变体。\n\n1. 从当前指针扫描一轮，找第一个(A=0,M=0)的页面；这一轮不改A。\n2. 若没找到，重新从原指针位置扫描，找第一个(A=0,M=1)的页面；在这一轮中，将扫描过的页面访问位A置0。找到后立即选中，不再继续清后面的页。\n3. 若仍未找到，回到原指针重复第1、2轮；先前被清零的A会使后续轮次出现候选。\n4. 换出后写入新页面状态，指针移到被选页框的下一位置。\n\n第2轮先判断当前页是否已经是(0,1)，再按规则处理未选中的页。因此把刚从(1,1)清成(0,1)的同一页立即选中，会改变教材的扫描语义。",
+      "nodeCodes": [
+        "os.memory.clock_enhanced"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 220,
+        "pageEnd": 220,
+        "pageStatus": "VISIBLE",
+        "locator": "改进型CLOCK三步扫描规则，补充一致的执行说明",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.page-comparison",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "按信息来源与维护代价比较算法",
+      "chunkType": "SUMMARY",
+      "contentMd": "|算法|决策依据|主要提醒|\n|---|---|---|\n|FIFO|调入先后|命中不变序，可能Belady|\n|LRU|过去最近访问|命中更新，维护次序有代价|\n|OPT|未来下一次访问|理想比较基准，需未来信息|\n|CLOCK|访问位与环形扫描|近似最近使用，指针规则明确|\n|改进型CLOCK|访问位及修改位|降低写回代价，分轮扫描|\n\n在同一案例比较时固定页框数、初始状态、访问序列和平局规则。总缺页、总换出、写回次数是不同指标。简单CLOCK与改进型CLOCK不能仅凭访问序列比较写回；后者还需给出读写信息或初始修改位。\n\n完成本节后，应能说出为什么选这个换出页，而不是只记住算法名称。",
+      "nodeCodes": [
+        "os.memory.fifo",
+        "os.memory.lru",
+        "os.memory.opt",
+        "os.memory.clock",
+        "os.memory.clock_enhanced"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 217,
+        "pageEnd": 220,
+        "pageStatus": "INFERRED",
+        "locator": "本节各算法对比整理",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.memory.review.neighbors",
+      "sectionCode": "sec.memory.page-replacement",
+      "title": "从本批题目认识相邻知识",
+      "chunkType": "EXPLANATION",
+      "contentMd": "本批习题还涉及缺页处理、抖动、虚拟内存、地址翻译与页框分配；这些不是本节所有算法的必需考查映射。\n\n- 缺页处理可能执行页框分配、磁盘I/O和页表更新（43题）；缺页时通常先阻塞当前进程，而不是直接重发原指令（46题）。\n- 撤销部分进程可缓解抖动；仅提高优先级或扩大交换区不是题给有效措施（44题）。\n- 虚拟内存不能简单由连续分配方式实现，其容量可超过实际内存，但也有地址位宽和外存等限制（45题）。\n- 在题给选项中，扩大TLB和让页表驻留内存可提高地址翻译速度，扩大swap不能直接加速翻译（47题）。\n- 固定分配与全局置换不相容（49题）。\n\n这些说明依据习题解析改写，不能替代相邻章节的完整正文。课程中作为补充阅读，后续由J补齐对应单元。",
+      "nodeCodes": [
+        "os.memory.page_fault",
+        "os.memory.thrashing",
+        "os.memory.virtual_memory",
+        "os.memory.address_translation",
+        "os.memory.frame_allocation"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "pageStatus": "NOT_VISIBLE",
+        "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+        "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+        "sourceQuestionNumber": "43",
+        "locator": "3.2 习题精选第43题及对应解析；综合43—49题解析的补充阅读；两张截图均未包含印刷页码"
+      },
+      "assets": []
+    }
+  ],
+  "relations": [
+    {
+      "fromNodeCode": "os.memory.page_replacement",
+      "toNodeCode": "os.memory.page_fault",
+      "relationType": "REQUIRES",
+      "reason": "先理解缺页与调入，再理解页框不足时的换出。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 217,
+        "pageEnd": 217,
+        "pageStatus": "INFERRED",
+        "locator": "3.2.4开头",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.fifo",
+      "toNodeCode": "os.memory.page_replacement",
+      "relationType": "REQUIRES",
+      "reason": "先理解页面置换任务，再学习具体换出策略。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 217,
+        "pageEnd": 217,
+        "pageStatus": "INFERRED",
+        "locator": "3.2.4具体算法的共同任务",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.page_replacement",
+      "toNodeCode": "os.memory.fifo",
+      "relationType": "CONTAINS",
+      "reason": "本节列出的页面置换方法。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 218,
+        "pageEnd": 218,
+        "pageStatus": "INFERRED",
+        "locator": "本节具体算法列表",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.lru",
+      "toNodeCode": "os.memory.page_replacement",
+      "relationType": "REQUIRES",
+      "reason": "先理解页面置换任务，再学习具体换出策略。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 217,
+        "pageEnd": 217,
+        "pageStatus": "INFERRED",
+        "locator": "3.2.4具体算法的共同任务",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.page_replacement",
+      "toNodeCode": "os.memory.lru",
+      "relationType": "CONTAINS",
+      "reason": "本节列出的页面置换方法。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 218,
+        "pageEnd": 218,
+        "pageStatus": "INFERRED",
+        "locator": "本节具体算法列表",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.opt",
+      "toNodeCode": "os.memory.page_replacement",
+      "relationType": "REQUIRES",
+      "reason": "先理解页面置换任务，再学习具体换出策略。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 217,
+        "pageEnd": 217,
+        "pageStatus": "INFERRED",
+        "locator": "3.2.4具体算法的共同任务",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.page_replacement",
+      "toNodeCode": "os.memory.opt",
+      "relationType": "CONTAINS",
+      "reason": "本节列出的页面置换方法。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 218,
+        "pageEnd": 218,
+        "pageStatus": "INFERRED",
+        "locator": "本节具体算法列表",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.clock",
+      "toNodeCode": "os.memory.page_replacement",
+      "relationType": "REQUIRES",
+      "reason": "先理解页面置换任务，再学习具体换出策略。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 217,
+        "pageEnd": 217,
+        "pageStatus": "INFERRED",
+        "locator": "3.2.4具体算法的共同任务",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.page_replacement",
+      "toNodeCode": "os.memory.clock",
+      "relationType": "CONTAINS",
+      "reason": "本节列出的页面置换方法。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 220,
+        "pageEnd": 220,
+        "pageStatus": "VISIBLE",
+        "locator": "CLOCK与改进型CLOCK",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.clock_enhanced",
+      "toNodeCode": "os.memory.page_replacement",
+      "relationType": "REQUIRES",
+      "reason": "先理解页面置换任务，再学习具体换出策略。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 217,
+        "pageEnd": 217,
+        "pageStatus": "INFERRED",
+        "locator": "3.2.4具体算法的共同任务",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.page_replacement",
+      "toNodeCode": "os.memory.clock_enhanced",
+      "relationType": "CONTAINS",
+      "reason": "本节列出的页面置换方法。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 220,
+        "pageEnd": 220,
+        "pageStatus": "VISIBLE",
+        "locator": "CLOCK与改进型CLOCK",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.clock",
+      "toNodeCode": "os.memory.access_bit",
+      "relationType": "REQUIRES",
+      "reason": "简单CLOCK的每次扫描依赖访问位。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 219,
+        "pageEnd": 219,
+        "pageStatus": "VISIBLE",
+        "locator": "简单CLOCK",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.clock_enhanced",
+      "toNodeCode": "os.memory.clock",
+      "relationType": "REQUIRES",
+      "reason": "在环形扫描及访问位的基础上理解改进方法。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 220,
+        "pageEnd": 220,
+        "pageStatus": "VISIBLE",
+        "locator": "改进型CLOCK",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.clock_enhanced",
+      "toNodeCode": "os.memory.dirty_bit",
+      "relationType": "REQUIRES",
+      "reason": "要理解为何优先换出不需写回的页。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 220,
+        "pageEnd": 220,
+        "pageStatus": "VISIBLE",
+        "locator": "修改位与写回代价",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.clock_enhanced",
+      "toNodeCode": "os.memory.clock",
+      "relationType": "BASED_ON",
+      "reason": "保留CLOCK环形扫描，加入修改位分轮选择。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 220,
+        "pageEnd": 220,
+        "pageStatus": "VISIBLE",
+        "locator": "改进型CLOCK引入",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.clock",
+      "toNodeCode": "os.memory.lru",
+      "relationType": "BASED_ON",
+      "reason": "教材用访问位和较少开销近似LRU。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 219,
+        "pageEnd": 219,
+        "pageStatus": "VISIBLE",
+        "locator": "CLOCK的设计动机",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.fifo",
+      "toNodeCode": "os.memory.lru",
+      "relationType": "CONTRASTS_WITH",
+      "reason": "调入先后与最近访问不同，命中是否改变顺序也不同。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 219,
+        "pageEnd": 219,
+        "pageStatus": "VISIBLE",
+        "locator": "LRU与FIFO实现比较",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.lru",
+      "toNodeCode": "os.memory.opt",
+      "relationType": "CONTRASTS_WITH",
+      "reason": "LRU看历史、OPT看未来；同一步选页相同不能证明两者等价。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 219,
+        "pageEnd": 219,
+        "pageStatus": "VISIBLE",
+        "locator": "图3.25后的说明",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+      }
+    },
+    {
+      "fromNodeCode": "os.memory.belady",
+      "toNodeCode": "os.memory.fifo",
+      "relationType": "RELATED_TO",
+      "reason": "FIFO可在相同访问序列、更多页框下出现更多缺页。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": 218,
+        "pageEnd": 218,
+        "pageStatus": "INFERRED",
+        "locator": "图3.24",
+        "sourceQuestionNumber": null,
+        "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+      }
+    }
+  ]
+}

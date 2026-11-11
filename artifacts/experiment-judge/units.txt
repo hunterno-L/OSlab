@@ -1,0 +1,108 @@
++-----------------------------------+-------------------------------------------------------------+---------------------------------+-----------+
+| unitCode                          | title                                                       | sectionCode                     | sortOrder |
++-----------------------------------+-------------------------------------------------------------+---------------------------------+-----------+
+| unit.overview.basic-concepts      | 操作系统是什么，有哪些基本特征                              | sec.overview.basic-concepts     |         1 |
+| unit.process.concept              | 进程的概念与特征                                            | sec.process.process-concept     |         1 |
+| unit.memory.functions             | 内存管理功能与程序的链接装入                                | sec.memory.basic                |         1 |
+| unit.files.concept                | 文件概念、属性与分类                                        | sec.files.concept               |         1 |
+| unit.io.device-classification     | 设备的定义与四种分类                                        | sec.io.device-basics            |         1 |
+| unit.overview.services            | 操作系统为谁服务、管理什么                                  | sec.overview.basic-concepts     |         2 |
+| unit.process.composition          | 进程实体与 PCB                                              | sec.process.process-composition |         2 |
+| unit.memory.image-protection      | 进程内存映像与保护共享                                      | sec.memory.basic                |         2 |
+| unit.files.fcb-inode              | 文件控制块与索引节点                                        | sec.files.fcb-inode             |         2 |
+| unit.io.controller-port           | 设备控制器与I/O端口                                         | sec.io.device-basics            |         2 |
+| unit.overview.history             | 从手工操作到现代操作系统                                    | sec.overview.history            |         3 |
+| unit.process.states               | 进程状态与转换                                              | sec.process.process-state       |         3 |
+| unit.memory.contiguous-partition  | 固定分区与动态分区                                          | sec.memory.contiguous           |         3 |
+| unit.files.operations             | 文件的基本操作与打开关闭                                    | sec.files.operations            |         3 |
+| unit.io.control-methods           | 四种I/O控制方式                                             | sec.io.control-methods          |         3 |
+| unit.overview.runtime-modes       | 程序如何在用户态与内核态运行                                | sec.overview.runtime            |         4 |
+| unit.process.control              | 进程控制原语                                                | sec.process.process-control     |         4 |
+| unit.memory.fit-algorithms        | 动态分区分配算法                                            | sec.memory.contiguous           |         4 |
+| unit.files.protection             | 文件保护：ACL 与口令密码                                    | sec.files.protection            |         4 |
+| unit.io.software-layers           | 四层I/O软件与逻辑设备名                                     | sec.io.io-software              |         4 |
+| unit.overview.interrupts          | 中断与异常怎样改变执行过程                                  | sec.overview.runtime            |         5 |
+| unit.process.ipc                  | 进程通信的三种方式                                          | sec.process.ipc                 |         5 |
+| unit.memory.paging-basics         | 分页概念与基本地址变换                                      | sec.memory.paging               |         5 |
+| unit.files.logical-overview       | 逻辑结构概览与顺序文件                                      | sec.files.logical-structure     |         5 |
+| unit.io.app-interface             | 接口分类与阻塞非阻塞I/O                                     | sec.io.application-interface    |         5 |
+| unit.overview.system-calls        | 应用如何请求操作系统服务                                    | sec.overview.runtime            |         6 |
+| unit.process.thread               | 线程与多线程模型                                            | sec.process.thread              |         6 |
+| unit.memory.tlb-multilevel        | 快表与多级页表                                              | sec.memory.paging               |         6 |
+| unit.files.logical-index          | 索引、索引顺序与散列文件                                    | sec.files.logical-structure     |         6 |
+| unit.io.summary-5-1               | 5.1 小结：I/O管理的四项功能                                 | sec.io.summary-basics           |         6 |
+| unit.overview.structure           | 操作系统如何组织内部结构                                    | sec.overview.structure          |         7 |
+| unit.process.summary-2-1          | 2.1 小结：进程与线程                                        | sec.process.process-thread      |         7 |
+| unit.memory.segmentation          | 分段与段的共享保护                                          | sec.memory.segmentation         |         7 |
+| unit.files.physical-overview      | 物理结构概览、连续与链接分配                                | sec.files.physical-structure    |         7 |
+| unit.io.device-ind                | 设备独立性软件                                              | sec.io.device-ind-concept       |         7 |
+| unit.overview.boot                | 计算机启动时发生什么                                        | sec.overview.boot               |         8 |
+| unit.process.scheduling-basics    | 调度层次、调度程序与评价指标                                | sec.process.scheduling-concept  |         8 |
+| unit.memory.segment-paging        | 段页式存储管理                                              | sec.memory.segment-paging       |         8 |
+| unit.files.fat-index              | FAT 显式链接与索引分配                                      | sec.files.physical-structure    |         8 |
+| unit.io.cache-buffer-concepts     | 磁盘高速缓存与缓冲区                                        | sec.io.cache-buffer             |         8 |
+| unit.overview.virtual-machine     | 虚拟机把什么抽象给用户                                      | sec.overview.virtual-machine    |         9 |
+| unit.process.fcfs-sjf             | FCFS 与 SJF 调度                                            | sec.process.cpu-algorithms      |         9 |
+| unit.memory.summary-3-1           | 3.1 小结：三种管理方式对比                                  | sec.memory.summary-basic        |         9 |
+| unit.files.mixed-index            | 混合索引与访盘次数计算                                      | sec.files.physical-structure    |         9 |
+| unit.io.single-double-buffer      | 单缓冲与双缓冲的时间计算                                    | sec.io.cache-buffer             |         9 |
+| unit.overview.review              | 本章复习与综合测评                                          | sec.overview.review             |        10 |
+| unit.process.hrrn-priority        | HRRN 与优先级调度                                           | sec.process.cpu-algorithms      |        10 |
+| unit.memory.virtual-concepts      | 虚拟内存基本概念                                            | sec.memory.virtual-concepts     |        10 |
+| unit.files.summary-4-1            | 4.1 小结：文件系统基础                                      | sec.files.summary-basics        |        10 |
+| unit.io.circular-pool             | 循环缓冲与缓冲池                                            | sec.io.cache-buffer             |        10 |
+| unit.process.rr-mlq-mlfq          | 轮转、多级队列与多级反馈队列                                | sec.process.cpu-algorithms      |        11 |
+| unit.memory.demand-paging         | 请求分页的页表、缺页与地址变换                              | sec.memory.demand-paging        |        11 |
+| unit.files.dir-concept            | 目录的基本概念                                              | sec.files.dir-concept           |        11 |
+| unit.io.cache-vs-buffer           | 高速缓存与缓冲区的对比                                      | sec.io.cache-buffer             |        11 |
+| unit.process.summary-2-2          | 2.2 小结：调度决策与算法选择                                | sec.process.cpu-scheduling      |        12 |
+| unit.memory.frame-allocation      | 驻留集、分配策略与调页时机                                  | sec.memory.frame-allocation     |        12 |
+| unit.files.dir-structure-basic    | 单级与两级目录结构                                          | sec.files.dir-structure         |        12 |
+| unit.io.alloc-structures          | 设备分配的数据结构与考虑因素                                | sec.io.device-allocation        |        12 |
+| unit.process.sync-basics          | 同步、互斥与临界区                                          | sec.process.sync-concept        |        13 |
+| unit.memory.replacement-opt-fifo  | OPT 与 FIFO 置换算法                                        | sec.memory.page-replacement     |        13 |
+| unit.files.dir-structure-tree     | 树形目录与无环图目录                                        | sec.files.dir-structure         |        13 |
+| unit.io.alloc-steps-lut           | 分配步骤与逻辑设备表                                        | sec.io.device-allocation        |        13 |
+| unit.process.mutex-methods        | 软件方法、硬件方法与互斥锁                                  | sec.process.sync-methods        |        14 |
+| unit.memory.replacement-lru-clock | LRU 与 CLOCK 置换算法                                       | sec.memory.page-replacement     |        14 |
+| unit.files.dir-ops-impl           | 目录的操作与实现                                            | sec.files.dir-operations        |        14 |
+| unit.io.spooling                  | SPOOLing技术                                                | sec.io.spooling                 |        14 |
+| unit.process.semaphore            | 信号量与 PV 操作                                            | sec.process.semaphore           |        15 |
+| unit.memory.thrashing-workingset  | 抖动与工作集                                                | sec.memory.thrashing-workingset |        15 |
+| unit.files.hard-link              | 硬链接与链接计数                                            | sec.files.sharing               |        15 |
+| unit.io.driver                    | 设备驱动程序接口                                            | sec.io.driver                   |        15 |
+| unit.process.classic-sync         | 生产者-消费者、读者-写者、哲学家与吸烟者                    | sec.process.classic-sync        |        16 |
+| unit.memory.mmap-performance      | 内存映射文件与虚拟存储性能                                  | sec.memory.mmap                 |        16 |
+| unit.files.symlink                | 软链接与共享方式对比                                        | sec.files.sharing               |        16 |
+| unit.io.summary-5-2               | 5.2 小结：缓冲技术与设备独立性                              | sec.io.summary-ind              |        16 |
+| unit.process.monitor              | 管程与条件变量                                              | sec.process.monitor             |        17 |
+| unit.memory.address-translation   | 虚实地址翻译综合例题                                        | sec.memory.address-translation  |        17 |
+| unit.files.summary-4-2            | 4.2 小结：目录                                              | sec.files.summary-directory     |        17 |
+| unit.io.disk-structure            | 磁盘的结构与类型                                            | sec.io.disk-basics              |        17 |
+| unit.process.summary-2-3          | 2.3 小结：同步互斥机制与经典问题                            | sec.process.synchronization     |        18 |
+| unit.memory.summary-3-2           | 3.2 小结：置换算法对比                                      | sec.memory.summary-virtual      |        18 |
+| unit.files.fs-structure           | 文件系统层次结构                                            | sec.files.fs-structure          |        18 |
+| unit.io.disk-management           | 格式化、分区、引导块与坏块                                  | sec.io.disk-management          |        18 |
+| unit.process.deadlock-concept     | 死锁、饥饿与四个必要条件                                    | sec.process.deadlock-concept    |        19 |
+| unit.memory.difficulties          | 本章疑难点辨析                                              | sec.memory.difficulties         |        19 |
+| unit.files.fs-layout              | 文件系统布局：磁盘与内存                                    | sec.files.fs-layout             |        19 |
+| unit.io.access-time               | 磁盘的存取时间                                              | sec.io.disk-algorithms          |        19 |
+| unit.process.deadlock-prevention  | 死锁处理策略与预防                                          | sec.process.deadlock-strategy   |        20 |
+| unit.files.free-space-basic       | 卷、空闲表法与空闲链表法                                    | sec.files.free-space            |        20 |
+| unit.io.sched-fcfs-sstf           | FCFS与SSTF调度                                              | sec.io.disk-algorithms          |        20 |
+| unit.process.banker               | 安全状态与银行家算法                                        | sec.process.deadlock-banker     |        21 |
+| unit.files.free-space-adv         | 位示图与成组链接法                                          | sec.files.free-space            |        21 |
+| unit.io.sched-scan-cscan          | SCAN与C-SCAN调度                                            | sec.io.disk-algorithms          |        21 |
+| unit.process.detection            | 死锁检测与解除                                              | sec.process.deadlock-detection  |        22 |
+| unit.files.vfs                    | 虚拟文件系统                                                | sec.files.vfs                   |        22 |
+| unit.io.sched-look                | LOOK与C-LOOK调度                                            | sec.io.disk-algorithms          |        22 |
+| unit.process.summary-2-4          | 2.4 小结：死锁的条件、策略与算法                            | sec.process.deadlock            |        23 |
+| unit.files.mounting               | 文件系统挂载                                                | sec.files.mounting              |        23 |
+| unit.io.latency-speedup           | 延迟优化与提高I/O速度                                       | sec.io.disk-algorithms          |        23 |
+| unit.process.difficulties         | 本章疑难点                                                  | sec.process.difficulties        |        24 |
+| unit.files.summary-4-3            | 4.3 小结：文件系统                                          | sec.files.summary-system        |        24 |
+| unit.io.ssd                       | 固态硬盘与磨损均衡                                          | sec.io.ssd                      |        24 |
+| unit.files.difficulties           | 本章疑难点                                                  | sec.files.difficulties          |        25 |
+| unit.io.summary-5-3               | 5.3 小结：存取时间与调度算法                                | sec.io.summary-disk             |        25 |
+| unit.io.difficulties              | 本章疑难点辨析                                              | sec.io.difficulties             |        26 |
++-----------------------------------+-------------------------------------------------------------+---------------------------------+-----------+

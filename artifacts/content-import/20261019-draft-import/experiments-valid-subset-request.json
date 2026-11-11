@@ -1,0 +1,387 @@
+{
+  "package" : {
+    "schemaVersion" : "oslab-experiment-maintenance/1.0",
+    "batchCode" : "batch.a.experiments.001",
+    "contributor" : "A",
+    "note" : "48 个历史实验的重新实测盘点与映射建议，依据 reference/experiments 原快照与各实验实际文件重新核对，不沿用旧包结论。本批未修改任何实验文件（contentChanges 全空）：缺的是起始代码框架本身，且需先与 L 确认工程材料。nodeMappings 只写题面明确要求实现、判题可观测的正式节点；教材没有对应编号的走 nodeProposals。unitMappings 全空：均依赖完整教学内核与交叉编译环境，按 07 §6 运行条件不具备时不纳入第一章概念单元。",
+    "experiments" : [ {
+      "questionId" : "1930155905954140162",
+      "resourceCode" : "exp.legacy.1930155905954140162",
+      "title" : "实验3.12 异常处理",
+      "sectionCode" : "sec.overview.runtime",
+      "contentChanges" : [ ],
+      "nodeMappings" : [ {
+        "nodeCode" : "os.runtime.exception",
+        "role" : "PRIMARY",
+        "weight" : 1.0,
+        "reason" : "题面要求在链接脚本设置异常处理程序入口 0x80000080 并编写异常分发代码；运行条件具备后，异常发生时跳转到分发代码处的地址可判题观测"
+      } ],
+      "unitMappings" : [ ],
+      "verification" : {
+        "fileReview" : "题面 1174 字节；原始代码 0 字节；参考解 0 字节；用例 1 条；判题配置 69 字节",
+        "runtime" : "尚未运行（本机无教学内核源码树、MIPS 交叉工具链与模拟器）",
+        "cases" : [ ],
+        "openItems" : [ "原始代码／代码框架为空（0 字节），学生没有起始代码", "参考解为空（0 字节）", "judge-cases 为占位数据（空输入/空输出），无一条真实用例", "判题契约未落实：judge-config 只有 timeLimit/memoryLimit/stackLimit 三个限额（项目 JudgeConfig 结构如此，语言随学生提交传入），缺的是可判题的输入输出约定、项目源码、构建与运行流程，需 L 设计" ]
+      },
+      "nodeProposals" : [ ],
+      "unitProposals" : [ {
+        "proposedUnitScope" : "后续章节实践（sec.overview.runtime 所属章节）",
+        "candidateUnitCode" : null,
+        "planType" : "后续章节必做实践",
+        "prerequisite" : "进程/内存管理基础、C 语言与内核态编程基础",
+        "textbookPosition" : "对应第一章 1.3 操作系统的运行环境（系统调用、中断与异常）；需完整教学内核源码树与 MIPS 交叉工具链，第一章不安排实践",
+        "taskGoal" : "在MIPS3000处理器中，配置异常处理机制，使得当CPU发生异常时，能够自动跳转到特定的异常处理程序入口地址进行处理。 知识要点 1. Cause Register ：了解MIPS3000中Cause Register的结构和作用，特别是",
+        "missingRuntimeConditions" : "缺教学内核完整源码树、MIPS 交叉工具链、MIPS 模拟器与可判题的输入输出约定；四项齐备前无法构建、运行或判题",
+        "reason" : "依赖完整教学内核与交叉编译环境，第一章以概念学习为主；按 07 §6 运行条件不具备时不纳入概念单元",
+        "suggestedCompletionRule" : "PASS"
+      } ]
+    }, {
+      "questionId" : "1930156027966443521",
+      "resourceCode" : "exp.legacy.1930156027966443521",
+      "title" : "实验3.13 时钟中断",
+      "sectionCode" : "sec.overview.runtime",
+      "contentChanges" : [ ],
+      "nodeMappings" : [ {
+        "nodeCode" : "os.runtime.interrupt",
+        "role" : "PRIMARY",
+        "weight" : 1.0,
+        "reason" : "题面要求实现 kclock_init 设置定时器频率并绑定时钟中断、编写 timer_irq 调用 sched_yield；运行条件具备后，时钟中断被触发及其后的进程调度可判题观测"
+      } ],
+      "unitMappings" : [ ],
+      "verification" : {
+        "fileReview" : "题面 1927 字节；原始代码 0 字节；参考解 0 字节；用例 1 条；判题配置 69 字节",
+        "runtime" : "尚未运行（本机无教学内核源码树、MIPS 交叉工具链与模拟器）",
+        "cases" : [ ],
+        "openItems" : [ "原始代码／代码框架为空（0 字节），学生没有起始代码", "参考解为空（0 字节）", "judge-cases 为占位数据（空输入/空输出），无一条真实用例", "判题契约未落实：judge-config 只有 timeLimit/memoryLimit/stackLimit 三个限额（项目 JudgeConfig 结构如此，语言随学生提交传入），缺的是可判题的输入输出约定、项目源码、构建与运行流程，需 L 设计" ]
+      },
+      "nodeProposals" : [ ],
+      "unitProposals" : [ {
+        "proposedUnitScope" : "后续章节实践（sec.overview.runtime 所属章节）",
+        "candidateUnitCode" : null,
+        "planType" : "后续章节必做实践",
+        "prerequisite" : "进程/内存管理基础、C 语言与内核态编程基础",
+        "textbookPosition" : "对应第一章 1.3 操作系统的运行环境（系统调用、中断与异常）；需完整教学内核源码树与 MIPS 交叉工具链，第一章不安排实践",
+        "taskGoal" : "在MIPS3000处理器中，配置和实现时钟中断机制，使得系统能够通过定时器产生的时钟中断进行进程调度。 知识要点 1. 时钟中断概念 ：理解时钟中断与操作系统时间片轮转算法的关系，以及时钟中断如何触发进程调度。 2. 定时器设置 ：了解如何",
+        "missingRuntimeConditions" : "缺教学内核完整源码树、MIPS 交叉工具链、MIPS 模拟器与可判题的输入输出约定；四项齐备前无法构建、运行或判题",
+        "reason" : "依赖完整教学内核与交叉编译环境，第一章以概念学习为主；按 07 §6 运行条件不具备时不纳入概念单元",
+        "suggestedCompletionRule" : "PASS"
+      } ]
+    }, {
+      "questionId" : "1930156360117571585",
+      "resourceCode" : "exp.legacy.1930156360117571585",
+      "title" : "实验4.1 实现用户空间到内核空间的系统调用机制",
+      "sectionCode" : "sec.overview.runtime",
+      "contentChanges" : [ ],
+      "nodeMappings" : [ {
+        "nodeCode" : "os.runtime.system_call",
+        "role" : "PRIMARY",
+        "weight" : 1.0,
+        "reason" : "题面要求在 user/syscall_wrap.S 实现 syscall 陷入指令与 mysyscall 的内核侧处理；运行条件具备后，用户态调用陷入内核并带回返回值的通路可判题观测"
+      } ],
+      "unitMappings" : [ ],
+      "verification" : {
+        "fileReview" : "题面 1027 字节；原始代码 0 字节；参考解 0 字节；用例 1 条；判题配置 69 字节",
+        "runtime" : "尚未运行（本机无教学内核源码树、MIPS 交叉工具链与模拟器）",
+        "cases" : [ ],
+        "openItems" : [ "原始代码／代码框架为空（0 字节），学生没有起始代码", "参考解为空（0 字节）", "judge-cases 为占位数据（空输入/空输出），无一条真实用例", "判题契约未落实：judge-config 只有 timeLimit/memoryLimit/stackLimit 三个限额（项目 JudgeConfig 结构如此，语言随学生提交传入），缺的是可判题的输入输出约定、项目源码、构建与运行流程，需 L 设计" ]
+      },
+      "nodeProposals" : [ ],
+      "unitProposals" : [ {
+        "proposedUnitScope" : "后续章节实践（sec.overview.runtime 所属章节）",
+        "candidateUnitCode" : null,
+        "planType" : "后续章节必做实践",
+        "prerequisite" : "进程/内存管理基础、C 语言与内核态编程基础",
+        "textbookPosition" : "对应第一章 1.3 操作系统的运行环境（系统调用、中断与异常）；需完整教学内核源码树与 MIPS 交叉工具链，第一章不安排实践",
+        "taskGoal" : "编写 `user/syscall_wrap.S` 中的 `syscall` 函数，以确保用户空间的系统调用能够正确地陷入内核态，并执行相应的内核函数。 知识要点 1. 用户空间和内核空间的概念及其交互方式。 2. 系统调用的流程，包括调用封",
+        "missingRuntimeConditions" : "缺教学内核完整源码树、MIPS 交叉工具链、MIPS 模拟器与可判题的输入输出约定；四项齐备前无法构建、运行或判题",
+        "reason" : "依赖完整教学内核与交叉编译环境，第一章以概念学习为主；按 07 §6 运行条件不具备时不纳入概念单元",
+        "suggestedCompletionRule" : "PASS"
+      } ]
+    }, {
+      "questionId" : "1930156493454495745",
+      "resourceCode" : "exp.legacy.1930156493454495745",
+      "title" : "实验4.2 实现内核的系统调用处理机制",
+      "sectionCode" : "sec.overview.runtime",
+      "contentChanges" : [ ],
+      "nodeMappings" : [ {
+        "nodeCode" : "os.runtime.system_call",
+        "role" : "PRIMARY",
+        "weight" : 1.0,
+        "reason" : "题面要求实现 handle_sys，解析系统调用号并查 sys_call_table 调用对应内核函数；运行条件具备后，按调用号分派并返回结果的行为可判题观测"
+      } ],
+      "unitMappings" : [ ],
+      "verification" : {
+        "fileReview" : "题面 1295 字节；原始代码 0 字节；参考解 0 字节；用例 1 条；判题配置 69 字节",
+        "runtime" : "尚未运行（本机无教学内核源码树、MIPS 交叉工具链与模拟器）",
+        "cases" : [ ],
+        "openItems" : [ "原始代码／代码框架为空（0 字节），学生没有起始代码", "参考解为空（0 字节）", "judge-cases 为占位数据（空输入/空输出），无一条真实用例", "判题契约未落实：judge-config 只有 timeLimit/memoryLimit/stackLimit 三个限额（项目 JudgeConfig 结构如此，语言随学生提交传入），缺的是可判题的输入输出约定、项目源码、构建与运行流程，需 L 设计" ]
+      },
+      "nodeProposals" : [ ],
+      "unitProposals" : [ {
+        "proposedUnitScope" : "后续章节实践（sec.overview.runtime 所属章节）",
+        "candidateUnitCode" : null,
+        "planType" : "后续章节必做实践",
+        "prerequisite" : "进程/内存管理基础、C 语言与内核态编程基础",
+        "textbookPosition" : "对应第一章 1.3 操作系统的运行环境（系统调用、中断与异常）；需完整教学内核源码树与 MIPS 交叉工具链，第一章不安排实践",
+        "taskGoal" : "编写 `handle_sys` 函数，完成内核部分的系统调用处理机制，使得用户空间的系统调用能够正确地在内核中执行并返回结果。 知识要点 1. 用户空间和内核空间的交互机制。 2. 系统调用的流程，包括用户空间的库函数调用、`syscall",
+        "missingRuntimeConditions" : "缺教学内核完整源码树、MIPS 交叉工具链、MIPS 模拟器与可判题的输入输出约定；四项齐备前无法构建、运行或判题",
+        "reason" : "依赖完整教学内核与交叉编译环境，第一章以概念学习为主；按 07 §6 运行条件不具备时不纳入概念单元",
+        "suggestedCompletionRule" : "PASS"
+      } ]
+    }, {
+      "questionId" : "1930156605618573314",
+      "resourceCode" : "exp.legacy.1930156605618573314",
+      "title" : "实验4.3 基础系统调用函数 `sys_mem_alloc`",
+      "sectionCode" : "sec.overview.runtime",
+      "contentChanges" : [ ],
+      "nodeMappings" : [ {
+        "nodeCode" : "os.runtime.system_call",
+        "role" : "PRIMARY",
+        "weight" : 1.0,
+        "reason" : "题面要求在 lib/syscall_all.c 实现 int sys_mem_alloc(int sysno, u_int envid, u_int va, u_int perm)，调用 pmap.c 的函数为指定进程建立映射；运行条件具备后，分配到的物理页与建立的映射可判题观测"
+      } ],
+      "unitMappings" : [ ],
+      "verification" : {
+        "fileReview" : "题面 1020 字节；原始代码 0 字节；参考解 0 字节；用例 1 条；判题配置 69 字节",
+        "runtime" : "尚未运行（本机无教学内核源码树、MIPS 交叉工具链与模拟器）",
+        "cases" : [ ],
+        "openItems" : [ "原始代码／代码框架为空（0 字节），学生没有起始代码", "参考解为空（0 字节）", "judge-cases 为占位数据（空输入/空输出），无一条真实用例", "判题契约未落实：judge-config 只有 timeLimit/memoryLimit/stackLimit 三个限额（项目 JudgeConfig 结构如此，语言随学生提交传入），缺的是可判题的输入输出约定、项目源码、构建与运行流程，需 L 设计" ]
+      },
+      "nodeProposals" : [ {
+        "proposedCode" : "os.memory.page_alloc_free",
+        "proposedName" : "物理页分配与回收",
+        "definition" : "以 4KB 页为单位的分配与释放。",
+        "textbookRange" : "3.1 内存管理概念（页框分配）",
+        "observable" : "sys_mem_alloc 能为调用者分配物理页并建立映射",
+        "difference" : "与连续分配算法无关"
+      } ],
+      "unitProposals" : [ {
+        "proposedUnitScope" : "后续章节实践（sec.overview.runtime 所属章节）",
+        "candidateUnitCode" : null,
+        "planType" : "后续章节必做实践",
+        "prerequisite" : "进程/内存管理基础、C 语言与内核态编程基础",
+        "textbookPosition" : "对应第一章 1.3 操作系统的运行环境（系统调用、中断与异常）；需完整教学内核源码树与 MIPS 交叉工具链，第一章不安排实践",
+        "taskGoal" : "在 `lib/syscall_all.c` 中实现 `int sys_mem_alloc(int sysno, u_int envid, u_int va, u_int perm)` 函数，该函数用于分配内存，是进程间通信（IPC）和 `f",
+        "missingRuntimeConditions" : "缺教学内核完整源码树、MIPS 交叉工具链、MIPS 模拟器与可判题的输入输出约定；四项齐备前无法构建、运行或判题",
+        "reason" : "依赖完整教学内核与交叉编译环境，第一章以概念学习为主；按 07 §6 运行条件不具备时不纳入概念单元",
+        "suggestedCompletionRule" : "PASS"
+      } ]
+    }, {
+      "questionId" : "1930156844614209538",
+      "resourceCode" : "exp.legacy.1930156844614209538",
+      "title" : "实验4.5 基础系统调用函数`sys_mem_unmap`",
+      "sectionCode" : "sec.overview.runtime",
+      "contentChanges" : [ ],
+      "nodeMappings" : [ {
+        "nodeCode" : "os.runtime.system_call",
+        "role" : "PRIMARY",
+        "weight" : 1.0,
+        "reason" : "题面要求在 lib/syscall_all.c 实现 int sys_mem_unmap(int sysno, u_int envid, u_int va)，删除该虚拟地址到物理页的映射；运行条件具备后，解除映射后访问该地址的行为可判题观测"
+      } ],
+      "unitMappings" : [ ],
+      "verification" : {
+        "fileReview" : "题面 1047 字节；原始代码 0 字节；参考解 0 字节；用例 1 条；判题配置 69 字节",
+        "runtime" : "尚未运行（本机无教学内核源码树、MIPS 交叉工具链与模拟器）",
+        "cases" : [ ],
+        "openItems" : [ "原始代码／代码框架为空（0 字节），学生没有起始代码", "参考解为空（0 字节）", "judge-cases 为占位数据（空输入/空输出），无一条真实用例", "判题契约未落实：judge-config 只有 timeLimit/memoryLimit/stackLimit 三个限额（项目 JudgeConfig 结构如此，语言随学生提交传入），缺的是可判题的输入输出约定、项目源码、构建与运行流程，需 L 设计" ]
+      },
+      "nodeProposals" : [ ],
+      "unitProposals" : [ {
+        "proposedUnitScope" : "后续章节实践（sec.overview.runtime 所属章节）",
+        "candidateUnitCode" : null,
+        "planType" : "后续章节必做实践",
+        "prerequisite" : "进程/内存管理基础、C 语言与内核态编程基础",
+        "textbookPosition" : "对应第一章 1.3 操作系统的运行环境（系统调用、中断与异常）；需完整教学内核源码树与 MIPS 交叉工具链，第一章不安排实践",
+        "taskGoal" : "在 `lib/syscall_all.c` 中实现 `int sys_mem_unmap(int sysno, u_int envid, u_int va)` 函数，该函数用于解除某个进程地址空间虚拟内存和物理内存之间的映射关系。 知识要点",
+        "missingRuntimeConditions" : "缺教学内核完整源码树、MIPS 交叉工具链、MIPS 模拟器与可判题的输入输出约定；四项齐备前无法构建、运行或判题",
+        "reason" : "依赖完整教学内核与交叉编译环境，第一章以概念学习为主；按 07 §6 运行条件不具备时不纳入概念单元",
+        "suggestedCompletionRule" : "PASS"
+      } ]
+    }, {
+      "questionId" : "1930157095085461505",
+      "resourceCode" : "exp.legacy.1930157095085461505",
+      "title" : "实验4.7 实现进程间通信（IPC）机制",
+      "sectionCode" : "sec.overview.runtime",
+      "contentChanges" : [ ],
+      "nodeMappings" : [ {
+        "nodeCode" : "os.runtime.system_call",
+        "role" : "PRIMARY",
+        "weight" : 1.0,
+        "reason" : "题面要求在 lib/syscall_all.c 实现 sys_ipc_recv 与 sys_ipc_can_send，完成接收阻塞与发送时的状态更新；运行条件具备后，两进程间的消息传递与状态迁移可判题观测"
+      } ],
+      "unitMappings" : [ ],
+      "verification" : {
+        "fileReview" : "题面 1225 字节；原始代码 0 字节；参考解 0 字节；用例 1 条；判题配置 69 字节",
+        "runtime" : "尚未运行（本机无教学内核源码树、MIPS 交叉工具链与模拟器）",
+        "cases" : [ ],
+        "openItems" : [ "原始代码／代码框架为空（0 字节），学生没有起始代码", "参考解为空（0 字节）", "judge-cases 为占位数据（空输入/空输出），无一条真实用例", "判题契约未落实：judge-config 只有 timeLimit/memoryLimit/stackLimit 三个限额（项目 JudgeConfig 结构如此，语言随学生提交传入），缺的是可判题的输入输出约定、项目源码、构建与运行流程，需 L 设计" ]
+      },
+      "nodeProposals" : [ {
+        "proposedCode" : "os.process.ipc",
+        "proposedName" : "进程间通信 IPC",
+        "definition" : "进程之间交换数据的机制（共享内存、消息传递等）。",
+        "textbookRange" : "2.1.5 进程的通信",
+        "observable" : "两个进程能通过实现的 IPC 机制正确传递数据",
+        "difference" : "通信是进程间协作语义，与系统调用通路本身不同"
+      } ],
+      "unitProposals" : [ {
+        "proposedUnitScope" : "后续章节实践（sec.overview.runtime 所属章节）",
+        "candidateUnitCode" : null,
+        "planType" : "后续章节必做实践",
+        "prerequisite" : "进程/内存管理基础、C 语言与内核态编程基础",
+        "textbookPosition" : "对应第一章 1.3 操作系统的运行环境（系统调用、中断与异常）；需完整教学内核源码树与 MIPS 交叉工具链，第一章不安排实践",
+        "taskGoal" : "在 `lib/syscall_all.c` 中实现进程间通信（IPC）相关的系统调用函数，包括 `sys_ipc_recv` 和 `sys_ipc_can_send`，以支持用户进程之间的消息传递和同步。 知识要点 1. 进程间通信（IPC",
+        "missingRuntimeConditions" : "缺教学内核完整源码树、MIPS 交叉工具链、MIPS 模拟器与可判题的输入输出约定；四项齐备前无法构建、运行或判题",
+        "reason" : "依赖完整教学内核与交叉编译环境，第一章以概念学习为主；按 07 §6 运行条件不具备时不纳入概念单元",
+        "suggestedCompletionRule" : "PASS"
+      } ]
+    }, {
+      "questionId" : "1930157212584693762",
+      "resourceCode" : "exp.legacy.1930157212584693762",
+      "title" : "实验4.8 进程创建系统调用 `sys_env_alloc`",
+      "sectionCode" : "sec.overview.runtime",
+      "contentChanges" : [ ],
+      "nodeMappings" : [ {
+        "nodeCode" : "os.runtime.system_call",
+        "role" : "PRIMARY",
+        "weight" : 1.0,
+        "reason" : "题面要求在 lib/syscall_all.c 实现 sys_env_alloc，分配并初始化新进程环境并置为不会被立即调度的状态；运行条件具备后，新建环境的状态与字段可判题观测"
+      } ],
+      "unitMappings" : [ ],
+      "verification" : {
+        "fileReview" : "题面 1178 字节；原始代码 0 字节；参考解 0 字节；用例 1 条；判题配置 69 字节",
+        "runtime" : "尚未运行（本机无教学内核源码树、MIPS 交叉工具链与模拟器）",
+        "cases" : [ ],
+        "openItems" : [ "原始代码／代码框架为空（0 字节），学生没有起始代码", "参考解为空（0 字节）", "judge-cases 为占位数据（空输入/空输出），无一条真实用例", "判题契约未落实：judge-config 只有 timeLimit/memoryLimit/stackLimit 三个限额（项目 JudgeConfig 结构如此，语言随学生提交传入），缺的是可判题的输入输出约定、项目源码、构建与运行流程，需 L 设计" ]
+      },
+      "nodeProposals" : [ {
+        "proposedCode" : "os.process.process_creation",
+        "proposedName" : "进程创建",
+        "definition" : "为新进程分配 PCB、页表与地址空间。",
+        "textbookRange" : "2.1.4 进程控制",
+        "observable" : "sys_env_alloc 能创建可运行的新环境",
+        "difference" : "原语级机制"
+      } ],
+      "unitProposals" : [ {
+        "proposedUnitScope" : "后续章节实践（sec.overview.runtime 所属章节）",
+        "candidateUnitCode" : null,
+        "planType" : "后续章节必做实践",
+        "prerequisite" : "进程/内存管理基础、C 语言与内核态编程基础",
+        "textbookPosition" : "对应第一章 1.3 操作系统的运行环境（系统调用、中断与异常）；需完整教学内核源码树与 MIPS 交叉工具链，第一章不安排实践",
+        "taskGoal" : "在 `lib/syscall_all.c` 中实现 `sys_env_alloc` 函数，该函数用于创建一个新的进程环境，并为 `fork` 系统调用提供支持。 知识要点 1. 进程创建的基本概念和方法。 2. 用户空间和内核空间的交互。 ",
+        "missingRuntimeConditions" : "缺教学内核完整源码树、MIPS 交叉工具链、MIPS 模拟器与可判题的输入输出约定；四项齐备前无法构建、运行或判题",
+        "reason" : "依赖完整教学内核与交叉编译环境，第一章以概念学习为主；按 07 §6 运行条件不具备时不纳入概念单元",
+        "suggestedCompletionRule" : "PASS"
+      } ]
+    }, {
+      "questionId" : "1930157404163723265",
+      "resourceCode" : "exp.legacy.1930157404163723265",
+      "title" : "实验4.9 实现 `fork` 系统调用中的 `sys_env_alloc` ",
+      "sectionCode" : "sec.overview.runtime",
+      "contentChanges" : [ ],
+      "nodeMappings" : [ {
+        "nodeCode" : "os.runtime.system_call",
+        "role" : "PRIMARY",
+        "weight" : 1.0,
+        "reason" : "题面要求在 user/fork.c 实现 fork，调用 sys_env_alloc 取得子进程 envid 并按返回值区分父子执行路径；运行条件具备后，父子进程各自的返回值与执行流可判题观测"
+      } ],
+      "unitMappings" : [ ],
+      "verification" : {
+        "fileReview" : "题面 995 字节；原始代码 0 字节；参考解 0 字节；用例 1 条；判题配置 69 字节",
+        "runtime" : "尚未运行（本机无教学内核源码树、MIPS 交叉工具链与模拟器）",
+        "cases" : [ ],
+        "openItems" : [ "原始代码／代码框架为空（0 字节），学生没有起始代码", "参考解为空（0 字节）", "judge-cases 为占位数据（空输入/空输出），无一条真实用例", "判题契约未落实：judge-config 只有 timeLimit/memoryLimit/stackLimit 三个限额（项目 JudgeConfig 结构如此，语言随学生提交传入），缺的是可判题的输入输出约定、项目源码、构建与运行流程，需 L 设计" ]
+      },
+      "nodeProposals" : [ {
+        "proposedCode" : "os.process.process_creation",
+        "proposedName" : "进程创建",
+        "definition" : "为新进程分配 PCB、页表与地址空间。",
+        "textbookRange" : "2.1.4 进程控制",
+        "observable" : "fork 能创建子进程并可运行",
+        "difference" : "原语级机制"
+      } ],
+      "unitProposals" : [ {
+        "proposedUnitScope" : "后续章节实践（sec.overview.runtime 所属章节）",
+        "candidateUnitCode" : null,
+        "planType" : "后续章节必做实践",
+        "prerequisite" : "进程/内存管理基础、C 语言与内核态编程基础",
+        "textbookPosition" : "对应第一章 1.3 操作系统的运行环境（系统调用、中断与异常）；需完整教学内核源码树与 MIPS 交叉工具链，第一章不安排实践",
+        "taskGoal" : "在 `user/fork.c` 中实现 `fork` 函数，包括调用 `sys_env_alloc` 创建子进程环境，并正确设置子进程的执行逻辑。 知识要点 1. 进程控制块（`struct Env`）的概念和作用。 2. `fork` 系",
+        "missingRuntimeConditions" : "缺教学内核完整源码树、MIPS 交叉工具链、MIPS 模拟器与可判题的输入输出约定；四项齐备前无法构建、运行或判题",
+        "reason" : "依赖完整教学内核与交叉编译环境，第一章以概念学习为主；按 07 §6 运行条件不具备时不纳入概念单元",
+        "suggestedCompletionRule" : "PASS"
+      } ]
+    }, {
+      "questionId" : "1930157984642813953",
+      "resourceCode" : "exp.legacy.1930157984642813953",
+      "title" : "实验4.14 实现进程状态设置系统调用 `sys_set_env_status`",
+      "sectionCode" : "sec.overview.runtime",
+      "contentChanges" : [ ],
+      "nodeMappings" : [ {
+        "nodeCode" : "os.runtime.system_call",
+        "role" : "PRIMARY",
+        "weight" : 1.0,
+        "reason" : "题面要求在 lib/syscall_all.c 实现 sys_set_env_status，更新 env_status 并在置为 RUNNABLE 时加入调度链表；运行条件具备后，目标进程的状态变化与可被调度可判题观测"
+      } ],
+      "unitMappings" : [ ],
+      "verification" : {
+        "fileReview" : "题面 872 字节；原始代码 0 字节；参考解 0 字节；用例 1 条；判题配置 69 字节",
+        "runtime" : "尚未运行（本机无教学内核源码树、MIPS 交叉工具链与模拟器）",
+        "cases" : [ ],
+        "openItems" : [ "原始代码／代码框架为空（0 字节），学生没有起始代码", "参考解为空（0 字节）", "judge-cases 为占位数据（空输入/空输出），无一条真实用例", "判题契约未落实：judge-config 只有 timeLimit/memoryLimit/stackLimit 三个限额（项目 JudgeConfig 结构如此，语言随学生提交传入），缺的是可判题的输入输出约定、项目源码、构建与运行流程，需 L 设计" ]
+      },
+      "nodeProposals" : [ ],
+      "unitProposals" : [ {
+        "proposedUnitScope" : "后续章节实践（sec.overview.runtime 所属章节）",
+        "candidateUnitCode" : null,
+        "planType" : "后续章节必做实践",
+        "prerequisite" : "进程/内存管理基础、C 语言与内核态编程基础",
+        "textbookPosition" : "对应第一章 1.3 操作系统的运行环境（系统调用、中断与异常）；需完整教学内核源码树与 MIPS 交叉工具链，第一章不安排实践",
+        "taskGoal" : "在 `lib/syscall_all.c` 中实现 `sys_set_env_status` 函数，该函数用于设置进程的状态，使其可以运行或处于其他状态。 知识要点 1. 进程状态的概念，包括 RUNNABLE 和其他可能的状态。 2. 用",
+        "missingRuntimeConditions" : "缺教学内核完整源码树、MIPS 交叉工具链、MIPS 模拟器与可判题的输入输出约定；四项齐备前无法构建、运行或判题",
+        "reason" : "依赖完整教学内核与交叉编译环境，第一章以概念学习为主；按 07 §6 运行条件不具备时不纳入概念单元",
+        "suggestedCompletionRule" : "PASS"
+      } ]
+    }, {
+      "questionId" : "1930158086405017602",
+      "resourceCode" : "exp.legacy.1930158086405017602",
+      "title" : "实验4.15 实现 `fork` 系统调用",
+      "sectionCode" : "sec.overview.runtime",
+      "contentChanges" : [ ],
+      "nodeMappings" : [ {
+        "nodeCode" : "os.runtime.system_call",
+        "role" : "PRIMARY",
+        "weight" : 1.0,
+        "reason" : "题面要求在 user/fork.c 完成 fork 的父进程部分：遍历地址空间调用 duppage、分配子进程异常处理栈、设置处理函数与运行状态并返回 envid；运行条件具备后，子进程被正确创建并进入可运行态可判题观测"
+      } ],
+      "unitMappings" : [ ],
+      "verification" : {
+        "fileReview" : "题面 982 字节；原始代码 0 字节；参考解 0 字节；用例 1 条；判题配置 69 字节",
+        "runtime" : "尚未运行（本机无教学内核源码树、MIPS 交叉工具链与模拟器）",
+        "cases" : [ ],
+        "openItems" : [ "原始代码／代码框架为空（0 字节），学生没有起始代码", "参考解为空（0 字节）", "judge-cases 为占位数据（空输入/空输出），无一条真实用例", "判题契约未落实：judge-config 只有 timeLimit/memoryLimit/stackLimit 三个限额（项目 JudgeConfig 结构如此，语言随学生提交传入），缺的是可判题的输入输出约定、项目源码、构建与运行流程，需 L 设计" ]
+      },
+      "nodeProposals" : [ {
+        "proposedCode" : "os.process.process_creation",
+        "proposedName" : "进程创建",
+        "definition" : "为新进程分配 PCB、页表与地址空间。",
+        "textbookRange" : "2.1.4 进程控制",
+        "observable" : "fork 完整流程能创建可运行子进程",
+        "difference" : "原语级机制"
+      } ],
+      "unitProposals" : [ {
+        "proposedUnitScope" : "后续章节实践（sec.overview.runtime 所属章节）",
+        "candidateUnitCode" : null,
+        "planType" : "后续章节必做实践",
+        "prerequisite" : "进程/内存管理基础、C 语言与内核态编程基础",
+        "textbookPosition" : "对应第一章 1.3 操作系统的运行环境（系统调用、中断与异常）；需完整教学内核源码树与 MIPS 交叉工具链，第一章不安排实践",
+        "taskGoal" : "在 `user/fork.c` 中完成 `fork` 函数中父进程部分的实现，包括地址空间的遍历、`duppage`、分配子进程的异常处理栈、设置子进程的处理函数、设置子进程的运行状态，并返回子进程的 `envid`。 知识要点 1. `f",
+        "missingRuntimeConditions" : "缺教学内核完整源码树、MIPS 交叉工具链、MIPS 模拟器与可判题的输入输出约定；四项齐备前无法构建、运行或判题",
+        "reason" : "依赖完整教学内核与交叉编译环境，第一章以概念学习为主；按 07 §6 运行条件不具备时不纳入概念单元",
+        "suggestedCompletionRule" : "PASS"
+      } ]
+    } ]
+  },
+  "assets" : [ ],
+  "files" : [ ]
+}

@@ -1,0 +1,41 @@
+{
+  "questionId": "1930156972624367618",
+  "resourceCode": "exp.legacy.1930156972624367618",
+  "title": "实验4.6 基础系统调用函数`sys_yield`",
+  "content": "### 任务描述\n\n在 `lib/syscall_all.c` 中实现 `void sys_yield(void)` 函数，该函数用于实现用户进程对CPU的放弃，以便操作系统调度器可以切换到其他进程。\n\n### 知识要点\n\n1. 系统调用的基本概念和作用。\n2. 用户空间和内核空间的交互。\n3. 进程调度的基本原理。\n4. `sys_yield` 函数的功能和实现方法。\n5. MIPS 调用规范。\n6. 进程切换机制和现场保存。\n\n### 实验任务\n\n1. 理解系统调用 `sys_yield` 的功能和作用。\n2. 在 `lib/syscall_all.c` 中编写 `sys_yield` 函数，实现进程让出CPU控制权的功能。\n3. 确保函数遵循 MIPS 调用规范，正确实现系统调用接口。\n4. 实现进程切换机制，包括保存当前进程的现场（如 `KERNEL_SP` 和 `TIMES_TACK`）。\n5. 测试 `sys_yield` 函数，验证其能够正确地让出CPU控制权，并触发进程调度器进行进程切换。\n6. 确保进程切换后，能够正确恢复进程的执行状态。",
+  "tags": [
+    "进程",
+    "系统调用",
+    "进程切换",
+    "进程调度",
+    "内核",
+    "用户进程",
+    "用户空间",
+    "内核空间",
+    "操作系统"
+  ],
+  "referenceAnswer": "",
+  "originalCode": "",
+  "judgeCase": [
+    {
+      "input": "",
+      "output": ""
+    }
+  ],
+  "judgeConfig": {
+    "timeLimit": 1000,
+    "memoryLimit": 1000,
+    "stackLimit": 1000
+  },
+  "legacySetIds": [
+    "4"
+  ],
+  "legacySets": [
+    {
+      "id": "4",
+      "title": "第四章 文件系统"
+    }
+  ],
+  "snapshotUpdatedTime": "2025-06-04 14:57:37",
+  "runtimeValidated": false
+}

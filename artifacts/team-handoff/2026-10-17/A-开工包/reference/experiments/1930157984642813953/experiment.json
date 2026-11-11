@@ -1,0 +1,39 @@
+{
+  "questionId": "1930157984642813953",
+  "resourceCode": "exp.legacy.1930157984642813953",
+  "title": "实验4.14 实现进程状态设置系统调用 `sys_set_env_status`",
+  "content": "### 任务描述\n\n在 `lib/syscall_all.c` 中实现 `sys_set_env_status` 函数，该函数用于设置进程的状态，使其可以运行或处于其他状态。\n\n### 知识要点\n\n1. 进程状态的概念，包括 RUNNABLE 和其他可能的状态。\n2. 用户空间和内核空间的交互。\n3. 系统调用的实现和调用规范。\n4. 进程控制块（`struct Env`）中的 `env_status` 字段。\n5. 进程调度机制。\n\n### 实验任务\n\n1. 理解 `sys_set_env_status` 函数的功能和作用。\n2. 在 `lib/syscall_all.c` 中编写 `sys_set_env_status` 函数，实现设置进程状态的功能。\n   - 检查传入的进程状态是否有效。\n   - 更新进程控制块中的 `env_status` 字段。\n   - 如果状态为 RUNNABLE，将进程加入调度链表。\n3. 确保 `sys_set_env_status` 函数遵循系统调用规范，正确处理错误情况。",
+  "tags": [
+    "进程",
+    "系统调用",
+    "进程调度",
+    "内核",
+    "进程控制块",
+    "用户空间",
+    "内核空间"
+  ],
+  "referenceAnswer": "",
+  "originalCode": "",
+  "judgeCase": [
+    {
+      "input": "",
+      "output": ""
+    }
+  ],
+  "judgeConfig": {
+    "timeLimit": 1000,
+    "memoryLimit": 1000,
+    "stackLimit": 1000
+  },
+  "legacySetIds": [
+    "4"
+  ],
+  "legacySets": [
+    {
+      "id": "4",
+      "title": "第四章 文件系统"
+    }
+  ],
+  "snapshotUpdatedTime": "2025-06-04 15:01:38",
+  "runtimeValidated": false
+}

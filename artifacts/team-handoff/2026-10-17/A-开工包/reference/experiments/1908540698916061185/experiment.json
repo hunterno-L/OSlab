@@ -1,0 +1,33 @@
+{
+  "questionId": "1908540698916061185",
+  "resourceCode": "exp.legacy.1908540698916061185",
+  "title": "实验2.8  TLB 管理",
+  "content": "### 任务描述\n\n本实验要求学生理解和实现 MIPS 架构中的 TLB（Translation Lookaside Buffer）管理功能。学生需要完成 `tlb_out` 汇编函数的编写，该函数用于处理 TLB 未命中（TLB Miss）的情况，并正确地插入 TLB 项或更新 TLB。\n\n### 知识要点\n\n1. **MIPS 架构**：理解 MIPS 架构的基本指令集和寄存器使用。\n2. **TLB 概念**：掌握 TLB 的作用、结构和工作原理。\n3. **汇编语言编程**：熟悉 MIPS 汇编语言的基本语法和指令。\n4. **异常处理**：理解 TLB 未命中异常的处理流程。\n5. **操作系统内核**：了解操作系统内核中内存管理的基本概念和实现方法。\n\n### 实验任务\n\n1. **理解 TLB 管理**：\n   - 理解 TLB 在虚拟内存管理中的作用，以及 TLB 未命中的处理流程。\n   - 理解 `tlbp` 和 `tlbwi` 指令的用途和执行效果。\n2. **分析 `tlb_out` 汇编函数**：\n   - 分析给定的 `tlb_out` 汇编函数，理解其跳转到 `NOFOUND` 的流程。\n   - 从 MIPS 手册中查找 `tlbp` 和 `tlbwi` 指令，明确其用途，并解释为何第 10 行处指令后有 4 条 `nop` 指令。\n3. **编写 `tlb_out` 函数**：\n   - 完成 `mm/tlb_asm.S` 中 `tlb_out` 函数的编写，正确处理 TLB 未命中的情况。\n   - 在空出的两行位置填入 `tlbp` 或 `tlbwi` 指令，确保 TLB 项的正确插入或更新。",
+  "tags": [
+    "TLB"
+  ],
+  "referenceAnswer": "",
+  "originalCode": "",
+  "judgeCase": [
+    {
+      "input": "",
+      "output": ""
+    }
+  ],
+  "judgeConfig": {
+    "timeLimit": 1000,
+    "memoryLimit": 1000,
+    "stackLimit": 1000
+  },
+  "legacySetIds": [
+    "2"
+  ],
+  "legacySets": [
+    {
+      "id": "2",
+      "title": "第二章 内存管理"
+    }
+  ],
+  "snapshotUpdatedTime": "2025-04-05 23:22:16",
+  "runtimeValidated": false
+}

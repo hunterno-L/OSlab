@@ -1,0 +1,347 @@
+{
+  "runId": "2120322139153997826",
+  "queue": [
+    {
+      "id": "2112165588673150978",
+      "type": "SINGLE",
+      "title": "操作系统管理对象的界定"
+    },
+    {
+      "id": "2115261063991390216",
+      "type": "SINGLE",
+      "title": "进程死锁描述辨错"
+    },
+    {
+      "id": "2115261066579275779",
+      "type": "SINGLE",
+      "title": "计数信号量的等待进程数"
+    },
+    {
+      "id": "2115261126461353993",
+      "type": "SINGLE",
+      "title": "【2023 统考真题】共享数据所在页号与页框号的关系"
+    },
+    {
+      "id": "2115261165598404616",
+      "type": "SINGLE",
+      "title": "文件名重名限制的适用范围"
+    }
+  ],
+  "hasAnalysisInActiveRun": false,
+  "hasCorrectInActiveRun": false,
+  "b05Detail": {
+    "status": 200,
+    "json": {
+      "code": 0,
+      "data": {
+        "id": "2112165588673150978",
+        "questionCode": "q.wd25.s1_1.001",
+        "sectionCode": "sec.overview.basic-concepts",
+        "nodeDisplayNames": [
+          "操作系统"
+        ],
+        "revision": 1,
+        "title": "操作系统管理对象的界定",
+        "content": "操作系统是对（　　）进行管理的软件。",
+        "type": "SINGLE",
+        "options": "[{\"key\": \"A\", \"value\": \"软件\"}, {\"key\": \"B\", \"value\": \"硬件\"}, {\"key\": \"C\", \"value\": \"计算机资源\"}, {\"key\": \"D\", \"value\": \"应用程序\"}]",
+        "chapter": "计算机系统概述",
+        "difficulty": 1,
+        "reviewStatus": "PUBLISHED",
+        "userId": "2104470171261014017",
+        "createTime": "2026-10-19T12:54:53.000+00:00",
+        "updateTime": "2026-10-20T12:03:48.000+00:00",
+        "nodeNames": [
+          "os.overview.operating_system"
+        ],
+        "attemptCount": 0,
+        "hasAttempted": false
+      },
+      "message": "ok"
+    }
+  },
+  "b05Answer": {
+    "status": 200,
+    "json": {
+      "code": 50001,
+      "data": null,
+      "message": "该题正在整组自测中，请先交卷后再作答"
+    }
+  },
+  "b05ListPage": {
+    "status": 200,
+    "json": {
+      "code": 0,
+      "data": {
+        "records": [
+          {
+            "id": "2115261198964092929",
+            "questionCode": "q.wd25.s5_1.app.001",
+            "sectionCode": "sec.io.basics",
+            "nodeDisplayNames": [
+              "中断驱动方式",
+              "I/O软件层次结构"
+            ],
+            "revision": 1,
+            "title": "时钟中断的 CPU 时间开销比率",
+            "content": "某计算机系统中，时钟中断处理程序每次执行时间为 2ms（包括进程切换开销），若时钟中断频率为 60Hz，问 CPU 用于时钟中断处理的时间比率为多少？\n\n1. 求 CPU 用于时钟中断处理的时间比率。",
+            "type": "COMPREHENSIVE",
+            "options": "[]",
+            "chapter": "输入／输出（I/O）管理",
+            "difficulty": 2,
+            "reviewStatus": "PUBLISHED",
+            "userId": "2104470171261014017",
+            "createTime": "2026-10-28T01:55:44.000+00:00",
+            "updateTime": "2026-10-28T01:55:46.000+00:00",
+            "nodeNames": [
+              "os.io.interrupt_driven_io",
+              "os.io.io_software_layers"
+            ],
+            "attemptCount": 0,
+            "hasAttempted": false
+          },
+          {
+            "id": "2115261198964092933",
+            "questionCode": "q.wd25.s5_1.app.002",
+            "sectionCode": "sec.io.basics",
+            "nodeDisplayNames": [
+              "阻塞I/O与非阻塞I/O",
+              "设备驱动程序",
+              "中断驱动方式"
+            ],
+            "revision": 1,
+            "title": "调制解调器中断方式下的 CPU 开销比率",
+            "content": "考虑 56kb/s 调制解调器的性能，驱动程序输出一个字符后就阻塞，当一个字符打印完毕后，产生一个中断通知阻塞的驱动程序，输出下一个字符，然后阻塞。若发消息、输出一个字符和阻塞的时间总和为 0.1ms，则由于处理调制解调器而占用的 CPU 时间比率是多少？假设每个字符有一个开始位和一个结束位，共占 10 位。\n\n1. 求处理调制解调器而占用的 CPU 时间比率。",
+            "type": "COMPREHENSIVE",
+            "options": "[]",
+            "chapter": "输入／输出（I/O）管理",
+            "difficulty": 3,
+            "reviewStatus": "PUBLISHED",
+            "userId": "2104470171261014017",
+            "createTime": "2026-10-28T01:55:44.000+00:00",
+            "updateTime": "2026-10-28T01:55:46.000+00:00",
+            "nodeNames": [
+              "os.io.blocking_io",
+              "os.io.device_driver",
+              "os.io.interrupt_driven_io"
+            ],
+            "attemptCount": 0,
+            "hasAttempted": false
+          },
+          {
+            "id": "2115261199027007491",
+            "questionCode": "q.wd25.s5_1.app.003",
+            "sectionCode": "sec.io.basics",
+            "nodeDisplayNames": [
+              "阻塞I/O与非阻塞I/O",
+              "缓冲区",
+              "设备驱动程序",
+              "中断驱动方式",
+              "I/O软件层次结构"
+            ],
+            "revision": 1,
+            "title": "键盘输入过程中的操作顺序、进程状态与软件层次",
+            "content": "【2023 统考真题】进程 P 通过执行系统调用从键盘接收一个字符的输入，已知此过程中与进程 P 相关的操作包括：① 将进程 P 插入就绪队列；② 将进程 P 插入阻塞队列；③ 将字符从键盘控制器读入系统缓冲区；④ 启动键盘中断处理程序；⑤ 进程 P 从系统调用返回；⑥ 用户在键盘上输入字符。以上编号 ①～⑥ 仅用于标记操作，与操作的先后顺序无关。请回答下列问题。\n\n1. 按照正确的操作顺序，操作 ① 的前一个和后一个操作分别是上述操作中的哪一个？操作 ⑥ 的后一个操作是上述操作中的哪一个？\n2. 在上述哪个操作之后 CPU 一定从进程 P 切换到其他进程？在上述哪个操作之后 CPU 调度程序才能选中进程 P 执行？\n3. 完成上述哪个操作的代码属于键盘驱动程序？\n4. 键盘中断处理程序执行时，进程 P 处于什么状态？CPU 是处于内核态还是处于用户态？",
+            "type": "COMPREHENSIVE",
+            "options": "[]",
+            "chapter": "输入／输出（I/O）管理",
+            "difficulty": 3,
+            "reviewStatus": "PUBLISHED",
+            "userId": "2104470171261014017",
+            "createTime": "2026-10-28T01:55:44.000+00:00",
+            "updateTime": "2026-10-28T01:55:46.000+00:00",
+            "nodeNames": [
+              "os.io.blocking_io",
+              "os.io.buffer",
+              "os.io.device_driver",
+              "os.io.interrupt_driven_io",
+              "os.io.io_software_layers"
+            ],
+            "attemptCount": 0,
+            "hasAttempted": false
+          },
+          {
+            "id": "2115261199027007498",
+            "questionCode": "q.wd25.s5_2.app.001",
+            "sectionCode": "sec.io.device-independent",
+            "nodeDisplayNames": [
+              "应用程序I/O接口",
+              "设备驱动程序",
+              "设备独立性软件",
+              "I/O软件层次结构"
+            ],
+            "revision": 1,
+            "title": "I/O 软件四个层次对具体工作的分工",
+            "content": "输入/输出软件一般分为 4 个层次：用户层、与设备无关的软件层、设备驱动程序和中断处理程序。请说明以下各工作是在哪一层完成的：\n\n1）为磁盘读操作计算磁道、扇区和磁头。\n2）向设备寄存器写命令。\n3）检查用户是否有权使用设备。\n4）将二进制整数转换成 ASCII 码以便打印。",
+            "type": "COMPREHENSIVE",
+            "options": "[]",
+            "chapter": "输入／输出（I/O）管理",
+            "difficulty": 3,
+            "reviewStatus": "PUBLISHED",
+            "userId": "2104470171261014017",
+            "createTime": "2026-10-28T01:55:44.000+00:00",
+            "updateTime": "2026-10-28T01:55:46.000+00:00",
+            "nodeNames": [
+              "os.io.application_interface",
+              "os.io.device_driver",
+              "os.io.device_independent_software",
+              "os.io.io_software_layers"
+            ],
+            "attemptCount": 0,
+            "hasAttempted": false
+          },
+          {
+            "id": "2115261199027007504",
+            "questionCode": "q.wd25.s5_2.app.002",
+            "sectionCode": "sec.io.device-independent",
+            "nodeDisplayNames": [
+              "缓冲区",
+              "磁盘存取时间",
+              "双缓冲"
+            ],
+            "revision": 1,
+            "title": "双缓冲区处理数据块的平均时间",
+            "content": "在某系统中，若采用双缓冲区（每个缓冲区可存放一个数据块），将一个数据块从磁盘传送到缓冲区的时间为 80μs，从缓冲区传送到用户的时间为 20μs，CPU 计算一个数据块的时间为 50μs。总共处理 4 个数据块，每个数据块的平均处理时间是多少？",
+            "type": "COMPREHENSIVE",
+            "options": "[]",
+            "chapter": "输入／输出（I/O）管理",
+            "difficulty": 4,
+            "reviewStatus": "PUBLISHED",
+            "userId": "2104470171261014017",
+            "createTime": "2026-10-28T01:55:44.000+00:00",
+            "updateTime": "2026-10-28T01:55:46.000+00:00",
+            "nodeNames": [
+              "os.io.buffer",
+              "os.io.disk_access_time",
+              "os.io.double_buffer"
+            ],
+            "attemptCount": 0,
+            "hasAttempted": false
+          }
+        ],
+        "total": "764",
+        "size": "5",
+        "current": "1",
+        "orders": [],
+        "optimizeCountSql": true,
+        "searchCount": true,
+        "countId": null,
+        "maxLimit": null,
+        "pages": "153"
+      },
+      "message": "ok"
+    }
+  },
+  "b06": {
+    "baseVersion": 3,
+    "bump": {
+      "code": 0,
+      "data": {
+        "rowVersion": 4,
+        "savedAt": "1794359410299",
+        "conflict": false,
+        "serverDrafts": []
+      },
+      "message": "ok"
+    },
+    "conflictSeen": true,
+    "pageText": "跳到主要内容\nZhiCore\nOPERATING SYSTEMS\n首页\n课程学习\n题目练习\n编程实验\n算法演示\n学习任务\n学习资源\n用\n用户\n学生 · 操作系统\n整组自测\n第 1 / 5 题 · 交卷后统一判分\n版本冲突\n暂存退出\n交卷\n草稿版本冲突\n另一标签页已更新草稿。为避免覆盖，本次保存未生效。 载入服务端草稿\n1\n2\n3\n4\n5\n操作系统管理对象的界定\n单选题\n计算机系统概述\n\n操作系统是对（　　）进行管理的软件。\n\nA\n\n软件\n\nB\n\n硬件\n\nC\n\n计算机资源\n\nD\n\n应用程序\n\n标记为不确定\n自测期间不显示对错与解析，交卷后统一查看\n上一题\n下一题\n\n自测期间不提供提示、答案与解析；标记不确定不扣分。需要辅导时请先交卷。",
+    "afterApply": false
+  },
+  "confirmText": "跳到主要内容\nZhiCore\nOPERATING SYSTEMS\n首页\n课程学习\n题目练习\n编程实验\n算法演示\n学习任务\n学习资源\n用\n用户\n学生 · 操作系统\n整组自测\n第 1 / 5 题 · 交卷后统一判分\n草稿已同步\n暂存退出\n交卷\n1\n2\n3\n4\n5\n操作系统管理对象的界定\n单选题\n计算机系统概述\n\n操作系统是对（　　）进行管理的软件。\n\nA\n\n软件\n\nB\n\n硬件\n\nC\n\n计算机资源\n\nD\n\n应用程序\n\n标记为不确定\n自测期间不显示对错与解析，交卷后统一查看\n上一题\n下一题\n\n自测期间不提供提示、答案与解析；标记不确定不扣分。需要辅导时请先交卷。\n\n确认交卷？\n未作答 2 题（第 4、5 题）；标记不确定 1 题。 交卷后统一判分并显示解析，答案不能再修改。\n继续答题交卷",
+  "finishEvents": [
+    {
+      "courseCode": "course.operating-systems",
+      "runId": "2120322139153997826",
+      "reason": "ASSESSMENT_FINISHED"
+    }
+  ],
+  "submissionKey": "b54a8a20-8808-49cd-ad53-20914f4a5e92",
+  "resultSummary": "有效 5 题：答对 1，答错 2，正确率 33%；未作答 2 题",
+  "resultStats": {
+    "total": 5,
+    "valid": 5,
+    "answered": 3,
+    "pending": 0,
+    "invalid": 0,
+    "accuracy": 0.3333333333333333
+  },
+  "repeatFinish": {
+    "code": 40400,
+    "data": null,
+    "message": "测评会话不存在"
+  },
+  "differentKeyFinish": {
+    "code": 40400,
+    "data": null,
+    "message": "测评会话不存在"
+  },
+  "repeatEqualsStored": "different-shape",
+  "returnButton": "返回原单元",
+  "returnUrl": "http://localhost:8081/assessments?courseCode=course.operating-systems",
+  "concurrentStart": {
+    "code": 0,
+    "data": {
+      "runId": "2120323200484876289",
+      "questionIds": [
+        "2112165588673150978"
+      ],
+      "mode": "SELF_TEST",
+      "rowVersion": 0
+    },
+    "message": "ok"
+  },
+  "concurrent": {
+    "runId2": "2120323200484876289",
+    "same": [
+      {
+        "code": 40400,
+        "data": null,
+        "message": "测评会话不存在"
+      },
+      {
+        "code": 40400,
+        "data": null,
+        "message": "测评会话不存在"
+      }
+    ],
+    "sameResultsEqual": true,
+    "differentKey": {
+      "code": 40400,
+      "data": null,
+      "message": "测评会话不存在"
+    }
+  },
+  "comprehensiveStart": {
+    "code": 0,
+    "data": {
+      "runId": "2120323200883335170",
+      "questionIds": [
+        "2115261066059182086",
+        "2115261066419892228",
+        "2115261066847711236",
+        "2115261070920380419",
+        "2115261071188815883"
+      ],
+      "mode": "SELF_TEST",
+      "rowVersion": 0
+    },
+    "message": "ok"
+  },
+  "comprehensiveTypes": [
+    "SINGLE",
+    "SINGLE",
+    "SINGLE",
+    "COMPREHENSIVE",
+    "COMPREHENSIVE"
+  ],
+  "comprehensiveFinish": {
+    "code": 40400,
+    "data": null,
+    "message": "测评会话不存在"
+  },
+  "comprehensiveStats": {
+    "statuses": []
+  },
+  "comprehensiveResultText": "跳到主要内容\nZhiCore\nOPERATING SYSTEMS\n首页\n课程学习\n题目练习\n编程实验\n算法演示\n学习任务\n学习资源\n用\n用户\n学生 · 操作系统\n整组自测\n第 1 / 5 题 · 交卷后统一判分\n草稿已同步\n暂存退出\n交卷\n1\n2\n3\n4\n5\n信号量为−1时的等待数\n单选题\n进程与线程\n\n若一个信号量的初值为 3，经过多次 PV 操作后当前值为 −1，这表示等待进入临界区的进程数是（ ）。\n\nA\n\n1\n\nB\n\n2\n\nC\n\n3\n\nD\n\n4\n\n标记为不确定\n自测期间不显示对错与解析，交卷后统一查看\n上一题\n下一题\n\n自测期间不提供提示、答案与解析；标记不确定不扣分。需要辅导时请先交卷。"
+}

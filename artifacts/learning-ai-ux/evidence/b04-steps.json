@@ -1,0 +1,38 @@
+{
+  "step1": {
+    "index": 0,
+    "qid": "2112165588673150978",
+    "picked": true,
+    "uiState": {
+      "navClass": "self-nav-item current answered",
+      "checked": 1,
+      "saveState": "有未保存修改"
+    },
+    "draftAnswer": "B",
+    "markedUnsure": false
+  },
+  "step2": {
+    "index": 1,
+    "qid": "2115261063991390216",
+    "picked": true,
+    "uiState": {
+      "navClass": "self-nav-item current answered",
+      "checked": 1,
+      "saveState": "有未保存修改"
+    },
+    "draftAnswer": "B",
+    "markedUnsure": true
+  },
+  "step3": {
+    "index": 2,
+    "qid": "2115261066579275779",
+    "picked": true,
+    "uiState": {
+      "navClass": "self-nav-item current answered",
+      "checked": 1,
+      "saveState": "有未保存修改"
+    },
+    "draftAnswer": "B",
+    "markedUnsure": false
+  }
+}

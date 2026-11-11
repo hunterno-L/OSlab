@@ -1,0 +1,44 @@
+{
+  "questionId": "1930157740261691394",
+  "resourceCode": "exp.legacy.1930157740261691394",
+  "title": "实验4.12 实现设置缺页处理函数的系统调用 `sys_set_pgfault_handler`",
+  "content": "### 任务描述\n\n在 `lib/syscall_all.c` 中实现 `sys_set_pgfault_handler` 函数，该函数允许用户进程设置自己的缺页处理函数。\n\n### 知识要点\n\n1. 缺页中断处理机制。\n2. 用户空间和内核空间的交互。\n3. 进程控制块（`struct Env`）中的 `env_pgfault_handler` 字段。\n4. 内存分配和异常处理。\n5. MIPS 调用规范。\n\n### 实验任务\n\n1. 理解 `sys_set_pgfault_handler` 函数的功能和作用。\n2. 在 `lib/syscall_all.c` 中编写 `sys_set_pgfault_handler` 函数，实现设置缺页处理函数的功能。\n   - 检查传入的处理函数指针是否有效。\n   - 调用 `syscall_mem_alloc` 为处理函数分配内存。\n   - 设置 `env_pgfault_handler` 字段为传入的处理函数。\n3. 确保 `sys_set_pgfault_handler` 函数遵循 MIPS 调用规范，正确处理错误情况。\n4. 实现内核部分的系统调用，以便在内核中设置和调用用户指定的缺页处理函数。",
+  "tags": [
+    "页",
+    "进程",
+    "系统调用",
+    "异常",
+    "中断",
+    "缺页中断",
+    "内核",
+    "进程控制块",
+    "用户进程",
+    "用户空间",
+    "内核空间",
+    "异常处理"
+  ],
+  "referenceAnswer": "",
+  "originalCode": "",
+  "judgeCase": [
+    {
+      "input": "",
+      "output": ""
+    }
+  ],
+  "judgeConfig": {
+    "timeLimit": 1000,
+    "memoryLimit": 1000,
+    "stackLimit": 1000
+  },
+  "legacySetIds": [
+    "4"
+  ],
+  "legacySets": [
+    {
+      "id": "4",
+      "title": "第四章 文件系统"
+    }
+  ],
+  "snapshotUpdatedTime": "2025-06-04 15:00:40",
+  "runtimeValidated": false
+}

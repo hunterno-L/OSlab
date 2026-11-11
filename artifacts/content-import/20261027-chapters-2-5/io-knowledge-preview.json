@@ -1,0 +1,594 @@
+{
+  "valid" : true,
+  "items" : [ {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.device.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.controller.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.controller-func.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.port.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.control-overview.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.programmed.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.interrupt-driven.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.dma.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.channel.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.layers.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.logical-name.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.app-interface.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.blocking.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.summary-5-1.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.device-ind.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.disk-cache.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.buffer.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.single-buffer.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.double-buffer.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.comm-buffers.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.circular-buffer.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.buffer-pool.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.cache-vs-buffer.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.alloc-tables.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.alloc-principles.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.alloc-steps.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.lut.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.spooling.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.driver.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.summary-5-2.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.disk-structure.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.disk-types.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.disk-init.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.disk-partition.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.boot-block.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.bad-block.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.access-time.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.scheduling-overview.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.fcfs.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.sstf.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.scan.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.cscan.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.look.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.latency-reduce.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.speedup.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.ssd.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.wear-leveling.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.summary-5-3.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.difficulties-alloc.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.io.difficulties-buffer.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.device",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.device_classification",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.device_controller",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.io_port",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.io_control",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.programmed_io",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.interrupt_driven_io",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.dma",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.channel_io",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.io_software_layers",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.logical_device_name",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.application_interface",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.blocking_io",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.device_independent_software",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.disk_cache",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.buffer",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.single_buffer",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.double_buffer",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.circular_buffer",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.buffer_pool",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.device_allocation",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.device_control_tables",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.lut",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.spooling",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.device_driver",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.disk",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.disk_management",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.disk_access_time",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.look_scheduling",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.disk_latency_reduction",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.disk_io_speedup",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.ssd",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.io.wear_leveling",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_classification→os.io.device:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_controller→os.io.device:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.io_port→os.io.device_controller:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.programmed_io→os.io.io_control:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.interrupt_driven_io→os.io.programmed_io:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.interrupt_driven_io→os.io.programmed_io:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.dma→os.io.interrupt_driven_io:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.dma→os.io.interrupt_driven_io:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.channel_io→os.io.dma:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.io_software_layers→os.io.io_control:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.io_software_layers→os.io.logical_device_name:CONTAINS",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.application_interface→os.io.device_classification:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.blocking_io→os.io.application_interface:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_independent_software→os.io.io_software_layers:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_independent_software→os.io.logical_device_name:CONTAINS",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_independent_software→os.io.buffer:CONTAINS",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_independent_software→os.io.device_allocation:CONTAINS",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.buffer→os.io.disk_cache:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.single_buffer→os.io.buffer:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.double_buffer→os.io.single_buffer:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.double_buffer→os.io.single_buffer:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.circular_buffer→os.io.double_buffer:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.buffer_pool→os.io.circular_buffer:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_allocation→os.io.device_control_tables:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_allocation→os.io.device_independent_software:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.lut→os.io.device_independent_software:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.lut→os.io.logical_device_name:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.spooling→os.io.buffer:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_allocation→os.io.spooling:RELATED_TO",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_driver→os.io.io_software_layers:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_driver→os.io.device_controller:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_driver→os.io.interrupt_driven_io:RELATED_TO",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.disk→os.io.device:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.disk_management→os.io.disk:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.disk_access_time→os.io.disk:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.disk.scheduling→os.io.disk_access_time:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.disk.fcfs→os.disk.scheduling:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.disk.sstf→os.disk.fcfs:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.disk.fcfs→os.disk.sstf:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.disk.scan→os.disk.sstf:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.disk.scan→os.disk.sstf:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.disk.cscan→os.disk.scan:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.disk.cscan→os.disk.scan:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.look_scheduling→os.disk.scan:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.look_scheduling→os.disk.cscan:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.disk_latency_reduction→os.io.disk_access_time:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.disk_io_speedup→os.disk.scheduling:CONTAINS",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.disk_cache→os.io.disk_io_speedup:RELATED_TO",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.disk→os.io.ssd:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.wear_leveling→os.io.ssd:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.io.device_allocation→os.io.logical_device_name:REQUIRES",
+    "action" : "CREATE"
+  } ],
+  "errors" : [ ],
+  "created" : 134,
+  "updated" : 0,
+  "unchanged" : 0
+}

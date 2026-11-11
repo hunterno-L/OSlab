@@ -1,0 +1,2339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>进程调度算法 | OSLab教学平台</title>
+    <!--
+      本文件AI辅助使用说明：
+      - 工具：Glm-5V-Turbo (Agent模式)，Trae.cn客户端调用
+      - 使用日期：2026-04-24 
+      - 辅助范围：CSS整体风格迁移（design tokens、组件配色、浅色学术风主题），HTML三栏布局骨架
+      - 人工贡献：五种调度算法核心逻辑、JavaScript动画模拟与可视化状态机、甘特图渲染、
+                 进程配置与交互控制、代码示例与教学文本；风格迁移后三处缺陷修复
+                 (body高度、日志区尺寸、代码区横向滚动链路重构)
+      - 综合AI代码采纳率：约30%
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&family=Noto+Serif+SC:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* AI辅助生成：Glm-5V-Turbo, 2026-04-24 — 设计令牌与全局样式（cream/indigo/coral浅色学术风主题） */
+        :root {
+            --cream:       #faf8f3;
+            --cream2:      #f3f0e8;
+            --cream3:      #ede9de;
+            --white:       #ffffff;
+            --indigo:      #1e3a5f;
+            --indigo-mid:  #2d5282;
+            --indigo-soft: #4a7ab5;
+            --indigo-pale: #dbe8f6;
+            --indigo-faint:#eef4fb;
+            --coral:       #e05c3a;
+            --coral-soft:  #f08060;
+            --coral-pale:  #fdeee9;
+            --teal:        #1a7f74;
+            --teal-pale:   #e0f5f3;
+            --gold:        #c9820a;
+            --gold-pale:   #fdf3e0;
+            --text-dark:   #1a1a2e;
+            --text-body:   #374151;
+            --text-muted:  #6b7280;
+            --text-light:  #9ca3af;
+            --border:      #e2ddd4;
+            --border-dark: #c9c3b8;
+            --shadow-sm:   0 1px 3px rgba(30,58,95,0.08);
+            --shadow-md:   0 4px 16px rgba(30,58,95,0.10);
+            --shadow-lg:   0 8px 32px rgba(30,58,95,0.14);
+            --radius:      12px;
+            --primary:     var(--indigo);
+            --primary-dark: var(--indigo-mid);
+            --primary-light: var(--indigo-pale);
+            --secondary:   var(--coral);
+            --success:     var(--teal);
+            --warning:     var(--gold);
+            --danger:      var(--coral);
+            --info:        var(--indigo-soft);
+            --bg:          var(--white);
+            --bg-card:     var(--white);
+            --bg-card2:    var(--cream2);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Lora', 'Noto Serif SC', serif;
+            background: linear-gradient(to bottom, #C2E0F0, #38A8E8);
+            color: var(--text-body);
+            height: 100vh;            /* 人工修复：保持100vh固定视口，防止AI生成min-height导致的溢出空白 */
+            overflow: hidden;          /* 人工修复：配合height锁定视口，确保单屏显示 */
+            display: flex;
+            flex-direction: column;
+        }
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-track { background:var(--cream2); }
+        ::-webkit-scrollbar-thumb { background:var(--border-dark); border-radius:3px; }
+
+        /* AI辅助生成：Glm-5V-Turbo, 2026-04-24 — 导航栏样式（匹配系统调用概念详解.html风格） */
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: sticky; top: 0; z-index: 200;
+            background: var(--white);
+            border-bottom: 2px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: stretch;
+            padding: 0 24px;
+            gap: 0;
+            flex-shrink: 0;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Playfair Display', 'Noto Serif SC', serif;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--indigo);
+            white-space: nowrap;
+            padding: 18px 24px 18px 0;
+            margin-right: 8px;
+        }
+        .brand-icon {
+            display: none;
+        }
+        .algo-tabs {
+            display: flex;
+            gap: 0;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+        }
+        .algo-tab {
+            padding: 18px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: 0;
+            cursor: pointer;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 14px;
+            font-weight: 400;
+            transition: color 0.2s, border-color 0.2s;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            position: relative; top: 2px;
+        }
+        .algo-tab.active { color: var(--indigo); border-bottom-color: var(--coral); font-weight: 600; }
+        .algo-tab:hover:not(.active) { color: var(--indigo); background:transparent; }
+        .nav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .badge {
+            background: var(--indigo-pale);
+            color: var(--indigo);
+            border: 1px solid transparent;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
+
+        /* AI辅助生成：Glm-5V-Turbo, 2026-04-24 — 三栏布局框架 */
+        /* ===== MAIN 3-COLUMN LAYOUT ===== */
+        .workspace {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 230px 1fr 340px;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ===== LEFT SIDEBAR ===== */
+        .sidebar {
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: var(--shadow-sm);
+        }
+        .s-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .s-section:last-child { border-bottom: none; flex:1; }
+        .s-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--coral);
+            margin-bottom: 10px;
+        }
+        .algo-intro {
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text-body);
+            border-left: 3px solid var(--indigo-soft);
+            padding-left: 12px;
+            background: var(--indigo-faint);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            padding: 14px 14px 14px 14px;
+        }
+        .complexity-row { display:flex; gap:5px; flex-wrap:wrap; }
+        .cbadge {
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 11px;
+            display: flex;
+            gap: 4px;
+        }
+        .cbadge .cl { color: var(--text-muted); font-family:'JetBrains Mono',monospace; }
+        .cbadge .cv { color: var(--coral); font-weight: 700; font-family:'JetBrains Mono',monospace; }
+        .pc-list { display:flex; flex-direction:column; gap:6px; }
+        .pc-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-body);
+        }
+        .pc-item .dot-p { color: var(--teal); flex-shrink:0; }
+        .pc-item .dot-c { color: var(--coral); flex-shrink:0; }
+        .param-desc { font-size: 13px; color: var(--text-body); line-height:1.9; }
+
+        /* ===== CENTER: VIZ + CONTROLS ===== */
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* VIZ AREA */
+        .viz-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 0;
+        }
+        .viz-row2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .vcard {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        .vcard-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--coral);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .vcard-title span { color: var(--text-muted); font-weight:400; font-family:'Noto Serif SC',serif; text-transform:none; letter-spacing:0; }
+
+        /* Ready Queue */
+        .queue-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 52px;
+            flex-wrap: wrap;
+        }
+        .proc-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 46px;
+            border-radius: 7px;
+            font-weight: 700;
+            font-size: 12px;
+            border: 2px solid transparent;
+            flex-shrink: 0;
+            transition: all 0.35s cubic-bezier(.34,1.56,.64,1);
+        }
+        .proc-block .pb-pid { font-size:13px; font-weight:800; }
+        .proc-block .pb-rem { font-size:10px; opacity:0.8; margin-top:1px; }
+        .q-arrow { color: var(--text-light); font-size:14px; flex-shrink:0; }
+        .q-empty { color: var(--text-light); font-size:12px; font-style:italic; }
+
+        /* CPU */
+        .cpu-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-height: 70px;
+        }
+        .cpu-box {
+            width: 100px;
+            height: 64px;
+            border: 2px solid var(--border);
+            border-radius: 9px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.35s ease;
+            background: var(--cream);
+        }
+        .cpu-box.active {
+            border-color: var(--teal);
+            box-shadow: 0 0 16px rgba(26,127,116,0.2);
+        }
+        .cpu-lbl {
+            font-size:9px;
+            color:var(--text-muted);
+            position:absolute;
+            top:-9px;
+            background:var(--white);
+            padding:0 5px;
+        }
+        .cpu-pid { font-size:18px; font-weight:800; }
+        .cpu-info { font-size:10px; color:var(--text-muted); }
+        .cpu-idle { font-size:11px; color:var(--text-light); }
+        .ts-wrap { width:100px; display:flex; flex-direction:column; gap:3px; }
+        .ts-label { font-size:10px; color:var(--text-light); display:flex; justify-content:space-between; }
+        .ts-track {
+            height:6px;
+            background:var(--bg);
+            border-radius:3px;
+            border:1px solid var(--border);
+            overflow:hidden;
+        }
+        .ts-fill { height:100%; border-radius:3px; transition:width 0.3s ease; }
+
+        /* Gantt */
+        .gantt-scroll { overflow-x:auto; padding-bottom:2px; }
+        .gantt-row { display:flex; height:30px; }
+        .g-block {
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:11px;
+            font-weight:700;
+            border-radius:3px;
+            margin:0 1px;
+            flex-shrink:0;
+            position:relative;
+            overflow:hidden;
+        }
+        .g-block.idle {
+            background:var(--cream);
+            border:1px dashed var(--border);
+            color:var(--text-light);
+            font-weight:400;
+        }
+        .g-block.current::after {
+            content:'';
+            position:absolute;
+            top:0; left:-100%;
+            width:100%; height:100%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+            animation: shine 1.2s infinite;
+        }
+        @keyframes shine { to { left:100%; } }
+        .gantt-tl { display:flex; height:16px; font-size:9px; color:var(--text-light); margin-top:2px; }
+        .g-tick { position:relative; flex-shrink:0; }
+        .g-tick::before {
+            content:'';
+            position:absolute;
+            top:-18px; left:0;
+            width:1px; height:5px;
+            background:var(--border);
+        }
+
+        /* Process Status */
+        .ps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px,1fr));
+            gap:6px;
+        }
+        .ps-card {
+            background:var(--cream);
+            border:1px solid var(--border);
+            border-radius:8px;
+            padding:10px;
+            transition:all 0.3s ease;
+        }
+        .ps-card.running { border-color:var(--teal); box-shadow:0 0 10px rgba(26,127,116,0.15); }
+        .ps-card.finished { opacity:0.5; }
+        .ps-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+        .ps-pid { font-weight:800; font-size:13px; }
+        .ps-state {
+            font-size:9px;
+            padding:1px 5px;
+            border-radius:8px;
+            font-weight:700;
+        }
+        .ps-state.running { background:var(--teal-pale); color:var(--teal); }
+        .ps-state.ready   { background:var(--indigo-pale); color:var(--indigo); }
+        .ps-state.waiting { background:var(--gold-pale); color:var(--gold); }
+        .ps-state.finished{ background:var(--cream3);color:var(--text-light); }
+        .ps-state.not-arrived{ background:var(--cream3);color:var(--text-light); }
+        .ps-info { font-size:10px; color:var(--text-muted); line-height:1.7; }
+
+        /* ===== STATS BAR ===== */
+        .stats-bar {
+            background: var(--white);
+            border-top: 1px solid var(--border);
+            padding: 10px 16px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+        }
+        .stat-item { display:flex; flex-direction:column; gap:1px; }
+        .stat-lbl { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; font-family:'JetBrains Mono',monospace; }
+        .stat-val { font-size:15px; font-weight:800; line-height:1; }
+        .stat-val.hi { color:var(--indigo); }
+        .stat-val.ok { color:var(--teal); }
+        .stat-val.wa { color:var(--gold); }
+        .stat-div { width:1px; height:28px; background:var(--border); flex-shrink:0; }
+
+        /* ===== CONTROL BAR ===== */
+        .ctrl-bar {
+            background: var(--white);
+            border-top: 1px solid var(--border);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .btn {
+            font-family:'Noto Serif SC',serif;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 14px;
+            border: 1.5px solid var(--border-dark);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            background: var(--white);
+            color: var(--text-body);
+        }
+        .btn:disabled { opacity:.35; cursor:not-allowed; }
+        .btn-primary { background:var(--indigo); color:#fff; border-color:var(--indigo); }
+        .btn-primary:hover:not(:disabled) { background:var(--indigo-mid); }
+        .btn-ghost {
+            background:var(--white);
+            color:var(--text-body);
+            border:1.5px solid var(--border-dark);
+        }
+        .btn-ghost:hover:not(:disabled) { background:var(--indigo-faint); border-color:var(--indigo-soft); color:var(--indigo); }
+        .btn-danger { background:var(--coral-pale); color:var(--coral); border:1.5px solid var(--coral-soft); }
+        .btn-danger:hover:not(:disabled) { background:var(--coral); color:#fff; }
+        .btn-success { background:var(--teal); color:#fff; border-color:var(--teal); }
+        .btn-success:hover:not(:disabled) { background:#15695f; }
+        .speed-ctrl { display:flex; align-items:center; gap:6px; margin-left:auto; }
+        .speed-lbl { font-size:11px; color:var(--text-muted); font-family:'Noto Serif SC',serif; }
+        input[type=range].sp {
+            -webkit-appearance:none;
+            width:80px; height:3px;
+            border-radius:2px;
+            background:var(--border);
+            outline:none;
+        }
+        input[type=range].sp::-webkit-slider-thumb {
+            -webkit-appearance:none;
+            width:12px; height:12px;
+            border-radius:50%;
+            background:var(--indigo);
+            cursor:pointer;
+        }
+        .speed-v { font-size:11px; color:var(--indigo); font-weight:700; min-width:22px; }
+
+        /* AI辅助生成：Glm-5V-Turbo, 2026-04-24 — 日志区样式 */
+        /* ===== LOG BAR ===== */
+        .log-bar {
+            background: var(--white);
+            border-top: 1px solid var(--border);
+            height: 140px;              /* 人工修复：从90px增大至140px，提升日志可读性 */
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .log-hdr {
+            padding: 6px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .log-hdr-title { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; color:var(--coral); text-transform:uppercase; letter-spacing:1px; }
+        .log-acts { display:flex; gap:5px; }
+        .btn-tiny {
+            font-family:'Noto Serif SC',serif;
+            font-size:11px;
+            padding:3px 10px;
+            border:1px solid var(--border-dark);
+            background:var(--white);
+            color:var(--text-muted);
+            border-radius:6px;
+            cursor:pointer;
+        }
+        .btn-tiny:hover { background:var(--indigo-faint); color:var(--indigo); }
+        .log-body {
+            flex:1;
+            overflow-y:auto;
+            padding:6px 16px;
+            font-family:'JetBrains Mono',monospace;
+            font-size:11px;
+            line-height:1.8;
+        }
+        .log-entry { display:flex; gap:8px; }
+        .le-time { color:var(--text-light); min-width:50px; flex-shrink:0; }
+        .le-type { min-width:55px; flex-shrink:0; font-weight:700; }
+        .le-type.schedule { color:var(--indigo); }
+        .le-type.arrive   { color:var(--teal); }
+        .le-type.finish   { color:var(--gold); }
+        .le-type.preempt  { color:var(--coral); }
+        .le-type.switch   { color:var(--indigo-soft); }
+        .le-type.info     { color:var(--text-light); }
+        .le-msg { color:var(--text-muted); }
+
+        /* AI辅助生成：Glm-5V-Turbo, 2026-04-24 — 右侧代码面板样式（含人工滚动修复） */
+        /* ===== RIGHT PANEL: CODE ===== */
+        .right-panel {
+            background: var(--white);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;          /* 外部隐藏，内部滚动由rp-content控制 */
+            min-width: 0;
+        }
+        .rp-tabs {
+            display: flex;
+            background: var(--cream2);
+            border-bottom: 1px solid var(--border);
+            padding: 0 12px;
+            gap: 0;
+            flex-shrink: 0;
+        }
+        .rp-tab {
+            padding: 10px 16px;
+            font-family:'Noto Serif SC',serif;
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            position: relative; top: 1px;
+        }
+        .rp-tab.active {
+            color: var(--indigo);
+            border-bottom-color: var(--indigo);
+            font-weight: 600;
+        }
+        .rp-tab:hover:not(.active) { color: var(--indigo); }
+
+        .rp-content { flex:1; overflow-x:scroll; overflow-y:auto; display:block; } /* 人工修复：overflow-x改为scroll使横向拖动条始终可见 */
+        .rp-pane { display:none; min-width:max-content; } /* 人工修复：移除flex约束，min-width:max-content确保内容可撑开宽度 */
+        .rp-pane.active { display:block; }
+
+        /* Code Editor Area */
+        .code-toolbar {
+            display: flex;
+            align-items: center;
+            padding: 8px 14px;
+            background: var(--cream2);
+            border-bottom: 1px solid var(--border);
+            gap: 8px;
+        }
+        .code-lang {
+            font-family:'JetBrains Mono',monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--indigo);
+            background: var(--indigo-pale);
+            padding: 3px 10px;
+            border-radius: 5px;
+        }
+        .code-filename {
+            font-family:'JetBrains Mono',monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            flex: 1;
+        }
+        .btn-copy {
+            font-family:'Noto Serif SC',serif;
+            font-size: 11px;
+            padding: 4px 12px;
+            background: var(--white);
+            border: 1px solid var(--border-dark);
+            color: var(--text-muted);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-copy:hover { background:var(--indigo-faint); border-color:var(--indigo-soft); color:var(--indigo); }
+        .btn-copy.copied { color:var(--teal); border-color:var(--teal); }
+
+        .code-scroll {
+            overflow-y: auto;
+            overflow-x: scroll;        /* 人工修复：横向滚动始终可见 */
+            position: relative;
+        }
+        .code-block {
+            display: flex;
+            min-height: 100%;
+        }
+        .line-nums {
+            padding: 14px 0;
+            background: var(--cream2);
+            border-right: 1px solid var(--border);
+            text-align: right;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .line-nums span {
+            display: block;
+            padding: 0 12px;
+            font-size: 12px;
+            line-height: 1.7;
+            color: var(--text-light);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .line-nums span.active-line { color: var(--indigo); background: rgba(30,58,95,0.08); }
+        .code-lines {
+            flex: 1;
+            padding: 14px 18px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #1e2837;
+            white-space: pre;
+            min-width: max-content;    /* 人工修复：确保代码行不会被flex收缩，超出时可滚动 */
+        }
+
+        /* 语法高亮 token（AI辅助迁移为浅色主题适配） */
+        .tk-kw  { color: #89b4fa; }
+        .tk-fn  { color: #cba6f7; }
+        .tk-str { color: #a6e3a1; }
+        .tk-cm  { color: #6c7086; font-style:italic; }
+        .tk-num { color: #fab387; }
+        .tk-op  { color: #f38ba8; }
+        .tk-id  { color: #f9e2af; }
+        .tk-cls { color: #a6e3a1; }
+        .tk-dc  { color: #f9e2af; }
+        .tk-pn  { color: #1e2837; }
+
+        /* 代码高亮行 */
+        .code-lines .hl-line {
+            display: block;
+            background: var(--indigo-faint);
+            border-left: 3px solid var(--indigo-soft);
+            margin: 0 -18px;
+            padding: 0 18px;
+        }
+        .code-lines .hl-line-run {
+            display: block;
+            background: var(--teal-pale);
+            border-left: 3px solid var(--teal);
+            margin: 0 -18px;
+            padding: 0 18px;
+        }
+
+        /* Complexity Table */
+        .cplx-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .cplx-table th {
+            text-align: left;
+            padding: 10px 14px;
+            font-family:'JetBrains Mono',monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--coral);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            border-bottom: 1px solid var(--border);
+            background: var(--cream2);
+        }
+        .cplx-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-body);
+        }
+        .cplx-table tr:last-child td { border-bottom:none; }
+        .cplx-table .mono { font-family:'JetBrains Mono',monospace; color:var(--gold); }
+
+        /* Config Drawer */
+        .overlay { display:none; position:fixed; inset:0; background:rgba(30,58,95,.3); z-index:200; }
+        .overlay.open { display:block; }
+        .drawer {
+            position:fixed; right:0; top:0; bottom:0;
+            width:360px;
+            background:var(--white);
+            border-left:1px solid var(--border);
+            box-shadow:var(--shadow-lg);
+            z-index:201;
+            transform:translateX(100%);
+            transition:transform .3s ease;
+            display:flex; flex-direction:column;
+        }
+        .drawer.open { transform:translateX(0); }
+        .drawer-hdr {
+            padding:16px 20px;
+            border-bottom:1px solid var(--border);
+            display:flex; align-items:center; justify-content:space-between;
+        }
+        .drawer-title { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:var(--indigo); }
+        .drawer-body { flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:14px; }
+        .fg { display:flex; flex-direction:column; gap:6px; }
+        .fl { font-family:'Noto Serif SC',serif; font-size:13px; font-weight:600; color:var(--text-body); }
+        .fi, .fs {
+            background:var(--cream); border:1px solid var(--border);
+            color:var(--text-dark); padding:8px 12px;
+            border-radius:8px; font-size:14px; outline:none;
+            font-family:'Noto Serif SC',serif;
+        }
+        .fi:focus, .fs:focus { border-color:var(--indigo-soft); box-shadow:0 0 0 3px var(--indigo-faint); }
+        .proc-tbl { width:100%; border-collapse:collapse; font-size:13px; }
+        .proc-tbl th {
+            text-align:left; padding:8px 10px;
+            font-family:'JetBrains Mono',monospace;
+            font-size:11px; font-weight:600; color:var(--coral);
+            text-transform:uppercase; letter-spacing:.5px;
+            border-bottom:1px solid var(--border);
+        }
+        .proc-tbl td { padding:6px 10px; border-bottom:1px solid var(--border); color:var(--text-body); }
+        .proc-tbl tr:last-child td { border-bottom:none; }
+        .ti {
+            background:transparent; border:1px solid transparent;
+            color:var(--text-dark); padding:3px 6px;
+            border-radius:5px; font-size:13px;
+            width:52px; outline:none; text-align:center; font-family:'JetBrains Mono',monospace;
+        }
+        .ti:focus { border-color:var(--indigo-soft); background:var(--cream); }
+        .pid-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; }
+        .btn-icon { background:none; border:none; color:var(--text-light); cursor:pointer; padding:3px; border-radius:4px; font-size:14px; }
+        .btn-icon:hover { color:var(--coral); background:var(--coral-pale); }
+        .btn-add {
+            font-family:'Noto Serif SC',serif;
+            font-size:12px; color:var(--indigo);
+            background:none; border:1px dashed var(--border-dark);
+            border-radius:8px; padding:6px 12px;
+            cursor:pointer; width:100%; margin-top:6px;
+        }
+        .btn-add:hover { background:var(--indigo-faint); border-color:var(--indigo-soft); }
+
+        /* Finish Modal */
+        .modal-overlay {
+            display:none; position:fixed; inset:0;
+            background:rgba(30,58,95,.25); z-index:300;
+            align-items:center; justify-content:center;
+        }
+        .modal-overlay.show { display:flex; }
+        .modal {
+            background:var(--white);
+            border:1px solid var(--border);
+            border-radius:var(--radius); padding:28px;
+            max-width:440px; width:90%;
+            box-shadow: var(--shadow-lg);
+            animation: mIn .3s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes mIn { from{transform:scale(.8);opacity:0} to{transform:scale(1);opacity:1} }
+        .modal-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; margin-bottom:16px; color:var(--indigo); }
+        .modal-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+        .modal-stat { background:var(--cream); border-radius:8px; padding:12px; border:1px solid var(--border); }
+        .modal-stat-lbl { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); margin-bottom:4px; }
+        .modal-stat-val { font-family:'Playfair Display',serif; font-size:22px; font-weight:900; color:var(--indigo); }
+
+        /* Process color classes */
+        .pc0 { background:var(--indigo-pale); color:var(--indigo); border-color:var(--indigo-soft); }
+        .pc1 { background:var(--teal-pale); color:var(--teal); border-color:#a8d5cc; }
+        .pc2 { background:var(--gold-pale); color:var(--gold); border-color:#e8c97a; }
+        .pc3 { background:var(--coral-pale); color:var(--coral); border-color:var(--coral-soft); }
+        .pc4 { background:#f3e8ff; color:#7c3aed; border-color:#c4b5fd; }
+        .pc5 { background:#e0f5f3; color:#0891b2; border-color:#67e8f9; }
+        .gc0 { background:var(--indigo); color:#fff; }
+        .gc1 { background:var(--teal); color:#fff; }
+        .gc2 { background:var(--gold); color:#fff; }
+        .gc3 { background:var(--coral); color:#fff; }
+        .gc4 { background:#7c3aed; color:#fff; }
+        .gc5 { background:#0891b2; color:#fff; }
+    </style>
+</head>
+<body>
+
+<!-- AI辅助生成：Glm-5V-Turbo, 2026-04-24 — 页面主体结构（三栏布局） -->
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="brand">
+        <div class="brand-icon">⚙️</div>
+        进程调度
+    </div>
+    <div class="algo-tabs">
+        <button class="algo-tab active" onclick="switchAlgo('fcfs')">FCFS</button>
+        <button class="algo-tab" onclick="switchAlgo('sjf')">SJF</button>
+        <button class="algo-tab" onclick="switchAlgo('srtf')">SRTF</button>
+        <button class="algo-tab" onclick="switchAlgo('rr')">轮转 RR</button>
+        <button class="algo-tab" onclick="switchAlgo('priority')">优先级</button>
+    </div>
+    <div class="nav-right">
+        <span class="badge" id="algoBadge">先来先服务</span>
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="openDrawer()">⚙️ 配置进程</button>
+    </div>
+</nav>
+
+<!-- WORKSPACE -->
+<div class="workspace">
+
+    <!-- LEFT: Algorithm Info -->
+    <aside class="sidebar">
+        <div class="s-section">
+            <div class="s-title">📖 算法简介</div>
+            <div class="algo-intro" id="sAlgoIntro">
+                先来先服务（FCFS）按进程到达就绪队列的先后顺序调度，先到达的进程先获得CPU，直到运行完毕。
+            </div>
+        </div>
+        <div class="s-section">
+            <div class="s-title">⚡ 性能特征</div>
+            <div class="complexity-row" id="sComplexity">
+                <div class="cbadge"><span class="cl">时间</span><span class="cv">O(n)</span></div>
+                <div class="cbadge"><span class="cl">抢占</span><span class="cv">否</span></div>
+                <div class="cbadge"><span class="cl">饥饿</span><span class="cv">无</span></div>
+            </div>
+        </div>
+        <div class="s-section">
+            <div class="s-title">✅ 优点 / ❌ 缺点</div>
+            <div class="pc-list" id="sProscons">
+                <div class="pc-item"><span class="dot-p">✓</span>实现简单，无饥饿</div>
+                <div class="pc-item"><span class="dot-p">✓</span>适合批处理系统</div>
+                <div class="pc-item"><span class="dot-c">✗</span>护航效应</div>
+                <div class="pc-item"><span class="dot-c">✗</span>平均等待时间长</div>
+            </div>
+        </div>
+        <div class="s-section">
+            <div class="s-title">💡 算法参数</div>
+            <div class="param-desc" id="sParamDesc">
+                • 无额外参数<br>• 按到达时间排序<br>• 非抢占执行
+            </div>
+        </div>
+    </aside>
+
+    <!-- CENTER: Visualization -->
+    <div class="center-panel">
+        <div class="viz-area">
+
+            <!-- Row1: Queue + CPU -->
+            <div class="viz-row2">
+                <div class="vcard">
+                    <div class="vcard-title">就绪队列 <span id="qCount">0 个进程</span></div>
+                    <div class="queue-wrap" id="readyQueue">
+                        <span class="q-empty">队列为空</span>
+                    </div>
+                </div>
+                <div class="vcard">
+                    <div class="vcard-title">CPU 状态 <span id="cpuStateSpan">空闲</span></div>
+                    <div class="cpu-wrap">
+                        <div class="cpu-box" id="cpuBox">
+                            <span class="cpu-lbl">CPU</span>
+                            <div class="cpu-idle" id="cpuInner">空闲 💤</div>
+                        </div>
+                        <div class="ts-wrap" id="tsWrap" style="display:none">
+                            <div class="ts-label"><span>时间片</span><span id="tsText">0/0</span></div>
+                            <div class="ts-track"><div class="ts-fill" id="tsFill" style="width:0%"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row2: Gantt -->
+            <div class="vcard">
+                <div class="vcard-title">甘特图 <span id="ganttTimeLabel">T = 0</span></div>
+                <div class="gantt-scroll">
+                    <div class="gantt-row" id="ganttRow"></div>
+                    <div class="gantt-tl" id="ganttTL"></div>
+                </div>
+            </div>
+
+            <!-- Row3: Process Status -->
+            <div class="vcard">
+                <div class="vcard-title">进程状态总览</div>
+                <div class="ps-grid" id="psGrid"></div>
+            </div>
+
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-lbl">当前时间</div>
+                <div class="stat-val hi" id="stTime">T=0</div>
+            </div>
+            <div class="stat-div"></div>
+            <div class="stat-item">
+                <div class="stat-lbl">CPU 利用率</div>
+                <div class="stat-val ok" id="stUtil">0%</div>
+            </div>
+            <div class="stat-div"></div>
+            <div class="stat-item">
+                <div class="stat-lbl">已完成</div>
+                <div class="stat-val" id="stDone">0/0</div>
+            </div>
+            <div class="stat-div"></div>
+            <div class="stat-item">
+                <div class="stat-lbl">平均等待</div>
+                <div class="stat-val wa" id="stWait">-</div>
+            </div>
+            <div class="stat-div"></div>
+            <div class="stat-item">
+                <div class="stat-lbl">平均周转</div>
+                <div class="stat-val" id="stTA">-</div>
+            </div>
+            <div class="stat-div"></div>
+            <div class="stat-item">
+                <div class="stat-lbl">吞吐量</div>
+                <div class="stat-val" id="stTP">-</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="ctrl-bar">
+            <button class="btn btn-danger" onclick="resetSim()">⏮ 重置</button>
+            <button class="btn btn-ghost" onclick="stepBack()" id="btnBack" disabled>⏪ 上一步</button>
+            <button class="btn btn-primary" onclick="togglePlay()" id="btnPlay">▶ 开始</button>
+            <button class="btn btn-ghost" onclick="stepFwd()" id="btnNext">⏩ 下一步</button>
+            <div style="width:1px;height:24px;background:var(--border)"></div>
+            <button class="btn btn-ghost" id="btnSS" onclick="toggleSS()" style="font-size:11px">单步 <span id="ssDot">○</span></button>
+            <div class="speed-ctrl">
+                <span class="speed-lbl">速度</span>
+                <input type="range" class="sp" min="1" max="10" value="5" id="speedSlider" oninput="updateSpeed(this.value)">
+                <span class="speed-v" id="speedVal">5x</span>
+            </div>
+        </div>
+
+        <!-- Log -->
+        <div class="log-bar">
+            <div class="log-hdr">
+                <span class="log-hdr-title">📝 执行日志</span>
+                <div class="log-acts">
+                    <button class="btn-tiny" onclick="clearLog()">清空</button>
+                    <button class="btn-tiny" onclick="exportLog()">导出</button>
+                </div>
+            </div>
+            <div class="log-body" id="logBody">
+                <div class="log-entry">
+                    <span class="le-time">[系统]</span>
+                    <span class="le-type info">INFO</span>
+                    <span class="le-msg">就绪，请配置进程后点击「开始」或「下一步」</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Code Panel -->
+    <div class="right-panel">
+        <div class="rp-tabs">
+            <div class="rp-tab active" onclick="switchRpTab('code',this)"> 代码实现</div>
+            <div class="rp-tab" onclick="switchRpTab('pseudo',this)"> 伪代码</div>
+            <div class="rp-tab" onclick="switchRpTab('cplx',this)"> 复杂度分析</div>
+        </div>
+        <div class="rp-content">
+
+            <!-- Code Pane -->
+            <div class="rp-pane active" id="pane-code">
+                <div class="code-toolbar">
+                    <span class="code-lang" id="codeLang">Python</span>
+                    <span class="code-filename" id="codeFilename">fcfs.py</span>
+                    <button class="btn-copy" id="btnCopy" onclick="copyCode()">复制代码</button>
+                </div>
+                <div class="code-scroll" id="codeScroll">
+                    <div class="code-block">
+                        <div class="line-nums" id="lineNums"></div>
+                        <div class="code-lines" id="codeLines"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pseudocode Pane -->
+            <div class="rp-pane" id="pane-pseudo">
+                <div style="padding:14px;overflow-y:auto;flex:1">
+                    <div style="font-size:11px;color:var(--coral);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;font-family:'JetBrains Mono',monospace">算法伪代码</div>
+                    <pre style="font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8;color:var(--text-dark);white-space:pre-wrap" id="pseudoArea"></pre>
+                </div>
+            </div>
+
+            <!-- Complexity Pane -->
+            <div class="rp-pane" id="pane-cplx">
+                <div style="padding:14px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:14px">
+                    <div>
+                        <div style="font-size:11px;color:var(--coral);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;font-family:'JetBrains Mono',monospace">复杂度对比</div>
+                        <table class="cplx-table">
+                            <thead>
+                                <tr><th>指标</th><th>值</th><th>说明</th></tr>
+                            </thead>
+                            <tbody id="cplxTable"></tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <div style="font-size:11px;color:var(--coral);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;font-family:'JetBrains Mono',monospace">算法比较</div>
+                        <table class="cplx-table">
+                            <thead>
+                                <tr><th>算法</th><th>时间</th><th>抢占</th><th>饥饿</th><th>最优场景</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr id="cmp-fcfs"><td>FCFS</td><td class="mono">O(n)</td><td>否</td><td>无</td><td>批处理</td></tr>
+                                <tr id="cmp-sjf"><td>SJF</td><td class="mono">O(n²)</td><td>否</td><td>可能</td><td>短任务多</td></tr>
+                                <tr id="cmp-srtf"><td>SRTF</td><td class="mono">O(n²)</td><td>是</td><td>可能</td><td>最优均值</td></tr>
+                                <tr id="cmp-rr"><td>RR</td><td class="mono">O(n)</td><td>是</td><td>无</td><td>分时系统</td></tr>
+                                <tr id="cmp-priority"><td>优先级</td><td class="mono">O(n²)</td><td>否</td><td>可能</td><td>实时系统</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="cplxDetail" style="font-size:12px;color:var(--text-muted);line-height:1.8;background:var(--bg-card);border-radius:8px;padding:12px;border-left:3px solid var(--primary)"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Config Drawer -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+    <div class="drawer-hdr">
+        <span class="drawer-title">⚙️ 参数配置</span>
+        <button class="btn btn-ghost" style="padding:3px 8px;font-size:11px" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-body">
+        <div class="fg" id="dRR" style="display:none">
+            <label class="fl">时间片大小 (ms)</label>
+            <input type="number" class="fi" id="dTQ" value="2" min="1" max="20">
+        </div>
+        <div class="fg" id="dPrio" style="display:none">
+            <label class="fl">优先级顺序</label>
+            <select class="fs" id="dPrioOrder">
+                <option value="high">数值越大优先级越高</option>
+                <option value="low">数值越小优先级越高</option>
+            </select>
+        </div>
+        <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:7px;display:flex;justify-content:space-between;align-items:center">
+                进程列表
+                <button class="btn btn-ghost" style="font-size:10px;padding:2px 8px" onclick="randomProcs()">🎲 随机</button>
+            </div>
+            <table class="proc-tbl">
+                <thead>
+                    <tr>
+                        <th>进程</th><th>到达</th><th>服务</th>
+                        <th id="dPrioCol" style="display:none">优先级</th>
+                        <th>删除</th>
+                    </tr>
+                </thead>
+                <tbody id="procTBody"></tbody>
+            </table>
+            <button class="btn-add" onclick="addProc()">+ 添加进程</button>
+        </div>
+        <button class="btn btn-success" style="width:100%" onclick="applyConfig()">✓ 应用配置</button>
+        <button class="btn btn-ghost" style="width:100%;font-size:11px" onclick="loadPreset()">📥 载入预设</button>
+    </div>
+</div>
+
+<!-- Finish Modal -->
+<div class="modal-overlay" id="finishModal">
+    <div class="modal">
+        <div class="modal-title">🎉 调度完成！</div>
+        <div class="modal-stats" id="modalStats"></div>
+        <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" style="flex:1" onclick="resetSim();closeModal()">重新开始</button>
+            <button class="btn btn-ghost" style="flex:1" onclick="closeModal()">查看结果</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  全部 JavaScript 逻辑为人工实现。
+//  AI辅助生成：Glm-5V-Turbo, 2026-04-24 — 仅参与初始 CSS 风格迁移，
+//  调度算法模拟、动画状态机、甘特图渲染、进程配置与交互控制均为人工编码。
+// ═══════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════
+//  ALGORITHM DATA
+// ═══════════════════════════════════════════════════════
+
+const ALGOS = {
+    fcfs: {
+        name: '先来先服务',
+        intro: '先来先服务（FCFS）按进程到达就绪队列的先后顺序调度，先到达的进程先获得CPU，直到运行完毕。',
+        complexity: [
+            {l:'时间复杂度',v:'O(n)',d:'只需扫描一次队列'},
+            {l:'空间复杂度',v:'O(n)',d:'存储进程队列'},
+            {l:'抢占性',v:'非抢占',d:'进程独占CPU直到完成'},
+            {l:'饥饿',v:'不会发生',d:'先到必然先执行'},
+        ],
+        pros: ['实现简单，无饥饿','适合批处理系统','实现公平'],
+        cons: ['护航效应：短进程等长进程','平均等待时间长','不适合交互系统'],
+        paramDesc: '• 无额外参数\n• 按到达时间排序\n• 非抢占执行',
+        cbadges: [{l:'时间',v:'O(n)'},{l:'抢占',v:'否'},{l:'饥饿',v:'无'}],
+        filename: 'fcfs.cpp',
+        cplxDetail: 'FCFS 是最简单的调度算法，时间复杂度 O(n)，只需维护一个 FIFO 队列。适合作业长度相似的批处理环境，但护航效应（Convoy Effect）是其主要缺陷：一个长进程会阻塞所有后续短进程。',
+        pseudocode: `算法: 先来先服务 (FCFS)
+输入: 进程集合 P，每个进程有到达时间 arrival，服务时间 burst
+输出: 每个进程的完成时间、等待时间、周转时间
+
+BEGIN
+  按 arrival 对 P 排序
+  time ← 0
+  ready_queue ← 空队列
+
+  WHILE 有进程未完成 DO
+    // 将已到达进程加入就绪队列
+    FOR EACH p IN P DO
+      IF p.arrival ≤ time AND p.state = 未开始 THEN
+        ENQUEUE(ready_queue, p)
+      END IF
+    END FOR
+
+    IF ready_queue 为空 THEN
+      time ← 下一个进程到达时间
+      CONTINUE
+    END IF
+
+    // 取队首进程
+    current ← DEQUEUE(ready_queue)
+    current.start_time ← time
+
+    // 运行直到完成（非抢占）
+    time ← time + current.burst
+
+    current.finish_time ← time
+    current.turnaround  ← time - current.arrival
+    current.wait_time   ← current.turnaround - current.burst
+  END WHILE
+END`,
+        code: `<span class="tk-kw">#include</span> <span class="tk-str">&lt;iostream&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;vector&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;queue&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;algorithm&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;string&gt;</span>
+<span class="tk-kw">using namespace</span> std;
+
+<span class="tk-cm">// 进程结构体</span>
+<span class="tk-kw">struct</span> <span class="tk-cls">Process</span> {
+    string pid;
+    <span class="tk-str">int</span> arrival;    <span class="tk-cm">// 到达时间</span>
+    <span class="tk-str">int</span> burst;      <span class="tk-cm">// 服务时间（CPU 执行时长）</span>
+    <span class="tk-str">int</span> priority = <span class="tk-num">0</span>; <span class="tk-cm">// 仅优先级算法使用</span>
+    <span class="tk-str">int</span> start_time  = -<span class="tk-num">1</span>;
+    <span class="tk-str">int</span> finish_time = <span class="tk-num">0</span>;
+    <span class="tk-str">int</span> <span class="tk-fn">turnaround</span>() <span class="tk-kw">const</span> { <span class="tk-kw">return</span> finish_time - arrival; }
+    <span class="tk-str">int</span> <span class="tk-fn">wait_time</span>()   <span class="tk-kw">const</span> { <span class="tk-kw">return</span> turnaround() - burst; }
+};
+
+<span class="tk-cm">// 先来先服务调度 (First Come First Served)
+// - 按到达时间排序，依次执行
+// - 非抢占：进程一旦获得 CPU 就运行到完成</span>
+vector&lt;Process&gt; <span class="tk-fn">fcfs</span>(vector&lt;Process&gt; procs) {
+    <span class="tk-cm">// 按到达时间升序排列</span>
+    sort(procs.begin(), procs.end(), [](<span class="tk-kw">const</span> Process&amp; a, <span class="tk-kw">const</span> Process&amp; b) {
+        <span class="tk-kw">return</span> a.arrival != b.arrival ? a.arrival &lt; b.arrival : a.pid &lt; b.pid;
+    });
+    <span class="tk-str">int</span> time = <span class="tk-num">0</span>, idx = <span class="tk-num">0</span>;
+    queue&lt;Process*&gt; ready;
+
+    <span class="tk-kw">while</span> (idx &lt; (<span class="tk-str">int</span>)procs.size() || !ready.empty()) {
+        <span class="tk-cm">// ① 将已到达的进程加入就绪队列</span>
+        <span class="tk-kw">while</span> (idx &lt; (<span class="tk-str">int</span>)procs.size() &amp;&amp; procs[idx].arrival &lt;= time)
+            ready.push(&amp;procs[idx++]);
+
+        <span class="tk-kw">if</span> (ready.empty()) { <span class="tk-cm">// CPU 空闲，跳到下一个到达时间</span>
+            time = procs[idx].arrival; <span class="tk-kw">continue</span>;
+        }
+        <span class="tk-cm">// ② 取队首（FIFO）</span>
+        Process* cur = ready.front(); ready.pop();
+
+        <span class="tk-cm">// ③ 记录开始时间，执行直到完成</span>
+        cur-&gt;start_time  = time;
+        time            += cur-&gt;burst;
+        cur-&gt;finish_time = time;
+    }
+    <span class="tk-kw">return</span> procs;
+}
+
+<span class="tk-kw">void</span> <span class="tk-fn">print_result</span>(<span class="tk-kw">const</span> vector&lt;Process&gt;&amp; procs) {
+    printf(<span class="tk-str">"%-6s %5s %5s %5s %5s %6s\n"</span>,<span class="tk-str">"PID"</span>,<span class="tk-str">"到达"</span>,<span class="tk-str">"服务"</span>,<span class="tk-str">"完成"</span>,<span class="tk-str">"等待"</span>,<span class="tk-str">"周转"</span>);
+    <span class="tk-kw">for</span> (<span class="tk-kw">auto</span>&amp; p : procs)
+        printf(<span class="tk-str">"%-6s %5d %5d %5d %5d %6d\n"</span>,
+               p.pid.c_str(), p.arrival, p.burst,
+               p.finish_time, p.wait_time(), p.turnaround());
+    <span class="tk-str">double</span> aw=<span class="tk-num">0</span>, at=<span class="tk-num">0</span>;
+    <span class="tk-kw">for</span> (<span class="tk-kw">auto</span>&amp; p : procs) { aw+=p.wait_time(); at+=p.turnaround(); }
+    printf(<span class="tk-str">"\n平均等待: %.2f  平均周转: %.2f\n"</span>, aw/procs.size(), at/procs.size());
+}
+
+<span class="tk-str">int</span> <span class="tk-fn">main</span>() {
+    vector&lt;Process&gt; procs = {
+        {<span class="tk-str">"P1"</span>, <span class="tk-num">0</span>, <span class="tk-num">6</span>}, {<span class="tk-str">"P2"</span>, <span class="tk-num">2</span>, <span class="tk-num">4</span>},
+        {<span class="tk-str">"P3"</span>, <span class="tk-num">4</span>, <span class="tk-num">2</span>}, {<span class="tk-str">"P4"</span>, <span class="tk-num">6</span>, <span class="tk-num">5</span>},
+    };
+    print_result(fcfs(procs));
+    <span class="tk-kw">return</span> <span class="tk-num">0</span>;
+}`,
+    },
+
+    sjf: {
+        name: '短作业优先',
+        intro: 'SJF 每次从就绪队列选择服务时间最短的进程运行，非抢占式。可证明是最优平均等待时间算法（非抢占版）。',
+        complexity: [
+            {l:'时间复杂度',v:'O(n²)',d:'每次需扫描就绪队列找最短'},
+            {l:'空间复杂度',v:'O(n)',d:'存储就绪队列'},
+            {l:'抢占性',v:'非抢占',d:'当前进程运行完才重新调度'},
+            {l:'饥饿',v:'可能发生',d:'长进程可能永远等待'},
+        ],
+        pros: ['最优平均等待时间','提高系统吞吐量'],
+        cons: ['长进程可能饥饿','需要预知服务时间','实际中难以实现'],
+        paramDesc: '• 选服务时间最短的进程\n• 非抢占，运行完成后调度\n• 服务时间相同按 FCFS',
+        cbadges: [{l:'时间',v:'O(n²)'},{l:'抢占',v:'否'},{l:'饥饿',v:'可能'}],
+        filename: 'sjf.cpp',
+        cplxDetail: 'SJF 理论上给出最优平均等待时间，但需要预知每个进程的服务时间（实践中常用历史平均值估算）。每次调度需扫描整个就绪队列找最小值，故时间复杂度为 O(n²)。若使用最小堆可优化到 O(n log n)。',
+        pseudocode: `算法: 短作业优先 (SJF) —— 非抢占版
+输入: 进程集合 P（含 arrival, burst）
+输出: 调度序列及各进程统计信息
+
+BEGIN
+  time ← 0
+  ready_queue ← 空列表
+
+  WHILE 有进程未完成 DO
+    // 将已到达进程加入就绪队列
+    FOR EACH p IN P WHERE p.arrival ≤ time DO
+      IF p ∉ ready_queue THEN
+        APPEND(ready_queue, p)
+      END IF
+    END FOR
+
+    IF ready_queue 为空 THEN
+      time ← 下一个到达时间
+      CONTINUE
+    END IF
+
+    // 选服务时间最短的进程（贪心选择）
+    current ← MIN(ready_queue, key = burst)
+    REMOVE(ready_queue, current)
+
+    current.start_time ← time
+    time ← time + current.burst   // 非抢占：直接运行完
+    current.finish_time ← time
+  END WHILE
+END`,
+         code: `<span class="tk-kw">#include</span> <span class="tk-str">&lt;iostream&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;vector&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;queue&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;algorithm&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;string&gt;</span>
+<span class="tk-kw">using namespace</span> std;
+
+<span class="tk-cm">// 进程结构体</span>
+<span class="tk-kw">struct</span> <span class="tk-cls">Process</span> {
+    string pid;
+    <span class="tk-str">int</span> arrival;    <span class="tk-cm">// 到达时间</span>
+    <span class="tk-str">int</span> burst;      <span class="tk-cm">// 服务时间（CPU 执行时长）</span>
+    <span class="tk-str">int</span> priority = <span class="tk-num">0</span>; <span class="tk-cm">// 仅优先级算法使用</span>
+    <span class="tk-str">int</span> start_time  = -<span class="tk-num">1</span>;
+    <span class="tk-str">int</span> finish_time = <span class="tk-num">0</span>;
+    <span class="tk-str">int</span> <span class="tk-fn">turnaround</span>() <span class="tk-kw">const</span> { <span class="tk-kw">return</span> finish_time - arrival; }
+    <span class="tk-str">int</span> <span class="tk-fn">wait_time</span>()   <span class="tk-kw">const</span> { <span class="tk-kw">return</span> turnaround() - burst; }
+};
+
+<span class="tk-cm">// 先来先服务调度 (First Come First Served)
+// - 按到达时间排序，依次执行
+// - 非抢占：进程一旦获得 CPU 就运行到完成</span>
+vector&lt;Process&gt; <span class="tk-fn">fcfs</span>(vector&lt;Process&gt; procs) {
+    <span class="tk-cm">// 按到达时间升序排列</span>
+    sort(procs.begin(), procs.end(), [](<span class="tk-kw">const</span> Process&amp; a, <span class="tk-kw">const</span> Process&amp; b) {
+        <span class="tk-kw">return</span> a.arrival != b.arrival ? a.arrival &lt; b.arrival : a.pid &lt; b.pid;
+    });
+    <span class="tk-str">int</span> time = <span class="tk-num">0</span>, idx = <span class="tk-num">0</span>;
+    queue&lt;Process*&gt; ready;
+
+    <span class="tk-kw">while</span> (idx &lt; (<span class="tk-str">int</span>)procs.size() || !ready.empty()) {
+        <span class="tk-cm">// ① 将已到达的进程加入就绪队列</span>
+        <span class="tk-kw">while</span> (idx &lt; (<span class="tk-str">int</span>)procs.size() &amp;&amp; procs[idx].arrival &lt;= time)
+            ready.push(&amp;procs[idx++]);
+
+        <span class="tk-kw">if</span> (ready.empty()) { <span class="tk-cm">// CPU 空闲，跳到下一个到达时间</span>
+            time = procs[idx].arrival; <span class="tk-kw">continue</span>;
+        }
+        <span class="tk-cm">// ② 取队首（FIFO）</span>
+        Process* cur = ready.front(); ready.pop();
+
+        <span class="tk-cm">// ③ 记录开始时间，执行直到完成</span>
+        cur-&gt;start_time  = time;
+        time            += cur-&gt;burst;
+        cur-&gt;finish_time = time;
+    }
+    <span class="tk-kw">return</span> procs;
+}
+
+<span class="tk-kw">void</span> <span class="tk-fn">print_result</span>(<span class="tk-kw">const</span> vector&lt;Process&gt;&amp; procs) {
+    printf(<span class="tk-str">"%-6s %5s %5s %5s %5s %6s\n"</span>,<span class="tk-str">"PID"</span>,<span class="tk-str">"到达"</span>,<span class="tk-str">"服务"</span>,<span class="tk-str">"完成"</span>,<span class="tk-str">"等待"</span>,<span class="tk-str">"周转"</span>);
+    <span class="tk-kw">for</span> (<span class="tk-kw">auto</span>&amp; p : procs)
+        printf(<span class="tk-str">"%-6s %5d %5d %5d %5d %6d\n"</span>,
+               p.pid.c_str(), p.arrival, p.burst,
+               p.finish_time, p.wait_time(), p.turnaround());
+    <span class="tk-str">double</span> aw=<span class="tk-num">0</span>, at=<span class="tk-num">0</span>;
+    <span class="tk-kw">for</span> (<span class="tk-kw">auto</span>&amp; p : procs) { aw+=p.wait_time(); at+=p.turnaround(); }
+    printf(<span class="tk-str">"\n平均等待: %.2f  平均周转: %.2f\n"</span>, aw/procs.size(), at/procs.size());
+}
+
+<span class="tk-str">int</span> <span class="tk-fn">main</span>() {
+    vector&lt;Process&gt; procs = {
+        {<span class="tk-str">"P1"</span>, <span class="tk-num">0</span>, <span class="tk-num">6</span>}, {<span class="tk-str">"P2"</span>, <span class="tk-num">2</span>, <span class="tk-num">4</span>},
+        {<span class="tk-str">"P3"</span>, <span class="tk-num">4</span>, <span class="tk-num">2</span>}, {<span class="tk-str">"P4"</span>, <span class="tk-num">6</span>, <span class="tk-num">5</span>},
+    };
+    print_result(fcfs(procs));
+    <span class="tk-kw">return</span> <span class="tk-num">0</span>;
+}`,
+    },
+
+    sjf: {
+        name: '短作业优先',
+        intro: 'SJF 每次从就绪队列选择服务时间最短的进程运行，非抢占式。可证明是最优平均等待时间算法（非抢占版）。',
+        complexity: [
+            {l:'时间复杂度',v:'O(n²)',d:'每次需扫描就绪队列找最短'},
+            {l:'空间复杂度',v:'O(n)',d:'存储就绪队列'},
+            {l:'抢占性',v:'非抢占',d:'当前进程运行完才重新调度'},
+            {l:'饥饿',v:'可能发生',d:'长进程可能永远等待'},
+        ],
+        pros: ['最优平均等待时间','提高系统吞吐量'],
+        cons: ['长进程可能饥饿','需要预知服务时间','实际中难以实现'],
+        paramDesc: '• 选服务时间最短的进程\n• 非抢占，运行完成后调度\n• 服务时间相同按 FCFS',
+        cbadges: [{l:'时间',v:'O(n²)'},{l:'抢占',v:'否'},{l:'饥饿',v:'可能'}],
+        filename: 'sjf.cpp',
+        cplxDetail: 'SJF 理论上给出最优平均等待时间，但需要预知每个进程的服务时间（实践中常用历史平均值估算）。每次调度需扫描整个就绪队列找最小值，故时间复杂度为 O(n²)。若使用最小堆可优化到 O(n log n)。',
+        pseudocode: `算法: 短作业优先 (SJF) —— 非抢占版
+输入: 进程集合 P（含 arrival, burst）
+输出: 调度序列及各进程统计信息
+
+BEGIN
+  time ← 0
+  ready_queue ← 空列表
+
+  WHILE 有进程未完成 DO
+    // 将已到达进程加入就绪队列
+    FOR EACH p IN P WHERE p.arrival ≤ time DO
+      IF p ∉ ready_queue THEN
+        APPEND(ready_queue, p)
+      END IF
+    END FOR
+
+    IF ready_queue 为空 THEN
+      time ← 下一个到达时间
+      CONTINUE
+    END IF
+
+    // 选服务时间最短的进程（贪心选择）
+    current ← MIN(ready_queue, key = burst)
+    REMOVE(ready_queue, current)
+
+    current.start_time ← time
+    time ← time + current.burst   // 非抢占：直接运行完
+    current.finish_time ← time
+  END WHILE
+END`,
+        code: `<span class="tk-kw">#include</span> <span class="tk-str">&lt;iostream&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;vector&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;queue&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;algorithm&gt;</span>
+<span class="tk-kw">using namespace</span> std;
+<span class="tk-cm">// 复用上文 Process 结构体</span>
+
+<span class="tk-cm">// 短作业优先 (Shortest Job First) —— 非抢占
+// 使用最小堆优化查找最短作业: O(n log n)</span>
+vector&lt;Process&gt; <span class="tk-fn">sjf</span>(vector&lt;Process&gt; procs) {
+    sort(procs.begin(), procs.end(), [](<span class="tk-kw">const</span> Process&amp; a, <span class="tk-kw">const</span> Process&amp; b) {
+        <span class="tk-kw">return</span> a.arrival &lt; b.arrival;
+    });
+    <span class="tk-cm">// 最小堆: (burst, arrival, index)</span>
+    <span class="tk-kw">using</span> T = tuple&lt;<span class="tk-str">int</span>,<span class="tk-str">int</span>,<span class="tk-str">int</span>&gt;;
+    priority_queue&lt;T, vector&lt;T&gt;, greater&lt;T&gt;&gt; heap;
+    <span class="tk-str">int</span> time = <span class="tk-num">0</span>, idx = <span class="tk-num">0</span>;
+
+    <span class="tk-kw">while</span> (idx &lt; (<span class="tk-str">int</span>)procs.size() || !heap.empty()) {
+        <span class="tk-cm">// ① 将已到达进程推入最小堆</span>
+        <span class="tk-kw">while</span> (idx &lt; (<span class="tk-str">int</span>)procs.size() &amp;&amp; procs[idx].arrival &lt;= time) {
+            heap.push({procs[idx].burst, procs[idx].arrival, idx});
+            idx++;
+        }
+        <span class="tk-kw">if</span> (heap.empty()) { time = procs[idx].arrival; <span class="tk-kw">continue</span>; }
+
+        <span class="tk-cm">// ② 弹出服务时间最短的进程</span>
+        <span class="tk-kw">auto</span> [b, a, i] = heap.top(); heap.pop();
+        Process&amp; cur = procs[i];
+
+        <span class="tk-cm">// ③ 执行（非抢占，直接运行到完成）</span>
+        cur.start_time  = time;
+        time           += cur.burst;
+        cur.finish_time = time;
+
+        <span class="tk-cm">// ④ 补充新到达进程</span>
+        <span class="tk-kw">while</span> (idx &lt; (<span class="tk-str">int</span>)procs.size() &amp;&amp; procs[idx].arrival &lt;= time) {
+            heap.push({procs[idx].burst, procs[idx].arrival, idx});
+            idx++;
+        }
+    }
+    <span class="tk-kw">return</span> procs;
+}`,
+
+    },
+
+    srtf: {
+        name: '最短剩余时间优先',
+        intro: 'SRTF 是 SJF 的抢占版本。每当新进程到达，若其剩余时间小于当前进程剩余时间，则立即抢占 CPU。',
+        complexity: [
+            {l:'时间复杂度',v:'O(n²)',d:'每个时间单元需重新检查'},
+            {l:'空间复杂度',v:'O(n)',d:'维护剩余时间信息'},
+            {l:'抢占性',v:'抢占式',d:'新进程到达即触发调度'},
+            {l:'饥饿',v:'可能发生',d:'长进程剩余时间始终大'},
+        ],
+        pros: ['最优平均等待时间（抢占版）','短进程响应快'],
+        cons: ['频繁上下文切换','长进程饥饿','需预知服务时间'],
+        paramDesc: '• 每时刻选剩余时间最短进程\n• 新进程到达触发抢占检查\n• 抢占时保存/恢复上下文',
+        cbadges: [{l:'时间',v:'O(n²)'},{l:'抢占',v:'是'},{l:'饥饿',v:'可能'}],
+        filename: 'srtf.cpp',
+        cplxDetail: 'SRTF 在理论上给出最优平均等待时间。由于每个时间单元都需重新选择剩余时间最短的进程，若使用简单数组实现为 O(n²)；使用最小堆可优化为 O(n log n)。上下文切换开销是实际使用中的主要代价。',
+        pseudocode: `算法: 最短剩余时间优先 (SRTF) —— 抢占版
+输入: 进程集合 P（含 arrival, burst）
+输出: 调度序列
+
+BEGIN
+  time ← 0
+  current ← NULL
+  heap ← 最小堆（按剩余时间）
+
+  WHILE 有进程未完成 DO
+    // 将当前时刻到达的进程加入堆
+    FOR EACH p WHERE p.arrival = time DO
+      HEAP_PUSH(heap, (p.remaining, p))
+    END FOR
+
+    // 检查是否需要抢占
+    IF heap 不空 THEN
+      candidate ← HEAP_TOP(heap)
+      IF current = NULL OR candidate.remaining < current.remaining THEN
+        IF current ≠ NULL THEN
+          HEAP_PUSH(heap, current)  // 当前进程放回堆
+        END IF
+        current ← HEAP_POP(heap)
+      END IF
+    END IF
+
+    // 执行 1 个时间单位
+    current.remaining ← current.remaining - 1
+    time ← time + 1
+
+    IF current.remaining = 0 THEN
+      current.finish_time ← time
+      current ← NULL
+    END IF
+  END WHILE
+END`,
+        code: `<span class="tk-kw">#include</span> <span class="tk-str">&lt;iostream&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;vector&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;queue&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;algorithm&gt;</span>
+<span class="tk-kw">using namespace</span> std;
+
+<span class="tk-cm">// 运行时进程状态（含剩余时间）</span>
+<span class="tk-kw">struct</span> <span class="tk-cls">ProcState</span> {
+    string pid;
+    <span class="tk-str">int</span> arrival, burst;
+    <span class="tk-str">int</span> remaining;
+    <span class="tk-str">int</span> start_time  = -<span class="tk-num">1</span>;
+    <span class="tk-str">int</span> finish_time = <span class="tk-num">0</span>;
+    ProcState(string id, <span class="tk-str">int</span> a, <span class="tk-str">int</span> b)
+        : pid(id), arrival(a), burst(b), remaining(b) {}
+    <span class="tk-str">int</span> turnaround() <span class="tk-kw">const</span> { <span class="tk-kw">return</span> finish_time - arrival; }
+    <span class="tk-str">int</span> wait_time()   <span class="tk-kw">const</span> { <span class="tk-kw">return</span> turnaround() - burst; }
+    <span class="tk-cm">// 堆比较（剩余时间最小优先）</span>
+    <span class="tk-kw">bool</span> <span class="tk-kw">operator</span>&gt;(<span class="tk-kw">const</span> ProcState&amp; o) <span class="tk-kw">const</span> { <span class="tk-kw">return</span> remaining &gt; o.remaining; }
+};
+
+<span class="tk-cm">// 最短剩余时间优先 (Shortest Remaining Time First)
+// 每个时间单位检查是否需要抢占当前进程</span>
+vector&lt;ProcState&gt; <span class="tk-fn">srtf</span>(vector&lt;ProcState&gt; procs) {
+    sort(procs.begin(), procs.end(), [](<span class="tk-kw">const</span> ProcState&amp; a, <span class="tk-kw">const</span> ProcState&amp; b) {
+        <span class="tk-kw">return</span> a.arrival &lt; b.arrival;
+    });
+    priority_queue&lt;ProcState*, vector&lt;ProcState*&gt;,
+        [](<span class="tk-kw">const</span> ProcState* a, <span class="tk-kw">const</span> ProcState* b){ <span class="tk-kw">return</span> a-&gt;remaining &gt; b-&gt;remaining; }&gt; heap;
+
+    <span class="tk-str">int</span> time = <span class="tk-num">0</span>, idx = <span class="tk-num">0</span>, done = <span class="tk-num">0</span>;
+    ProcState* current = <span class="tk-kw">nullptr</span>;
+    <span class="tk-str">int</span> n = (<span class="tk-str">int</span>)procs.size();
+
+    <span class="tk-kw">while</span> (done &lt; n) {
+        <span class="tk-cm">// ① 新到达进程入堆</span>
+        <span class="tk-kw">while</span> (idx &lt; n &amp;&amp; procs[idx].arrival &lt;= time)
+            heap.push(&amp;procs[idx++]);
+
+        <span class="tk-cm">// ② 抢占检查</span>
+        <span class="tk-kw">if</span> (!heap.empty()) {
+            ProcState* top = heap.top();
+            <span class="tk-kw">if</span> (!current || top-&gt;remaining &lt; current-&gt;remaining) {
+                <span class="tk-kw">if</span> (current) heap.push(current); <span class="tk-cm">// 被抢占，放回堆</span>
+                current = heap.top(); heap.pop();
+                <span class="tk-kw">if</span> (current-&gt;start_time == -<span class="tk-num">1</span>) current-&gt;start_time = time;
+            }
+        }
+        <span class="tk-kw">if</span> (!current) { time++; <span class="tk-kw">continue</span>; } <span class="tk-cm">// CPU 空闲</span>
+
+        <span class="tk-cm">// ③ 执行 1 个时间单位</span>
+        current-&gt;remaining--;
+        time++;
+
+        <span class="tk-cm">// ④ 判断完成</span>
+        <span class="tk-kw">if</span> (current-&gt;remaining == <span class="tk-num">0</span>) {
+            current-&gt;finish_time = time;
+            done++; current = <span class="tk-kw">nullptr</span>;
+        }
+    }
+    <span class="tk-kw">return</span> procs;
+}`,
+
+    },
+
+    rr: {
+        name: '轮转调度',
+        intro: 'RR 给每个进程分配固定时间片 Q，用完后放回队列末尾，轮流执行。是分时系统的基础调度算法。',
+        complexity: [
+            {l:'时间复杂度',v:'O(n)',d:'每个时间片只需队列出入操作'},
+            {l:'空间复杂度',v:'O(n)',d:'维护循环就绪队列'},
+            {l:'抢占性',v:'抢占式',d:'时间片到期即强制切换'},
+            {l:'饥饿',v:'不会发生',d:'每个进程都能得到轮转机会'},
+        ],
+        pros: ['公平，无饥饿','响应时间均匀','适合分时交互系统'],
+        cons: ['时间片大小影响性能','上下文切换频繁','平均等待时间可能长'],
+        paramDesc: '• 时间片 Q 可配置\n• 用完放回队列末尾\n• 新到达进程加末尾',
+        cbadges: [{l:'时间',v:'O(n)'},{l:'抢占',v:'是'},{l:'饥饿',v:'无'}],
+        filename: 'round_robin.cpp',
+        cplxDetail: '轮转调度的性能高度依赖时间片大小 Q。Q 过大退化为 FCFS；Q 过小则上下文切换开销占主导。经验法则：Q 应略大于一次典型 CPU 交互时间。时间复杂度为 O(n * T/Q)，其中 T 为总服务时间。',
+        pseudocode: `算法: 轮转调度 (Round Robin)
+输入: 进程集合 P，时间片 Q
+输出: 调度序列
+
+BEGIN
+  time ← 0
+  ready_queue ← FIFO 队列
+
+  // 初始加入 t=0 到达的进程
+  FOR EACH p WHERE p.arrival = 0 DO
+    ENQUEUE(ready_queue, p)
+  END FOR
+
+  WHILE ready_queue 不空 DO
+    current ← DEQUEUE(ready_queue)
+
+    // 执行一个时间片（或剩余时间，取小值）
+    run ← MIN(current.remaining, Q)
+    time ← time + run
+    current.remaining ← current.remaining - run
+
+    // 在执行期间加入新到达的进程
+    FOR EACH p WHERE p.arrival ∈ (time-run, time] DO
+      ENQUEUE(ready_queue, p)
+    END FOR
+
+    IF current.remaining > 0 THEN
+      ENQUEUE(ready_queue, current)   // 放回末尾
+    ELSE
+      current.finish_time ← time     // 完成
+    END IF
+  END WHILE
+END`,
+        code: `<span class="tk-kw">#include</span> <span class="tk-str">&lt;iostream&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;vector&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;queue&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;algorithm&gt;</span>
+<span class="tk-kw">using namespace</span> std;
+
+<span class="tk-cm">// 复用 Process 结构体（含 remaining 字段）</span>
+<span class="tk-kw">struct</span> <span class="tk-cls">RRProcess</span> {
+    string pid;
+    <span class="tk-str">int</span> arrival, burst, remaining;
+    <span class="tk-str">int</span> start_time  = -<span class="tk-num">1</span>;
+    <span class="tk-str">int</span> finish_time = <span class="tk-num">0</span>;
+    RRProcess(string id, <span class="tk-str">int</span> a, <span class="tk-str">int</span> b)
+        : pid(id), arrival(a), burst(b), remaining(b) {}
+    <span class="tk-str">int</span> turnaround() <span class="tk-kw">const</span> { <span class="tk-kw">return</span> finish_time - arrival; }
+    <span class="tk-str">int</span> wait_time()   <span class="tk-kw">const</span> { <span class="tk-kw">return</span> turnaround() - burst; }
+};
+
+<span class="tk-cm">// 轮转调度 (Round Robin)
+// quantum: 时间片大小（单位: ms）</span>
+vector&lt;RRProcess&gt; <span class="tk-fn">round_robin</span>(vector&lt;RRProcess&gt; procs, <span class="tk-str">int</span> quantum) {
+    sort(procs.begin(), procs.end(), [](<span class="tk-kw">const</span> RRProcess&amp; a, <span class="tk-kw">const</span> RRProcess&amp; b) {
+        <span class="tk-kw">return</span> a.arrival &lt; b.arrival;
+    });
+    queue&lt;RRProcess*&gt; ready;  <span class="tk-cm">// 就绪队列</span>
+    <span class="tk-str">int</span> time = <span class="tk-num">0</span>, idx = <span class="tk-num">0</span>;
+    <span class="tk-str">int</span> n = (<span class="tk-str">int</span>)procs.size();
+
+    <span class="tk-cm">// 将 t=0 到达的进程加入队列</span>
+    <span class="tk-kw">while</span> (idx &lt; n &amp;&amp; procs[idx].arrival &lt;= time)
+        ready.push(&amp;procs[idx++]);
+
+    <span class="tk-kw">while</span> (!ready.empty() || idx &lt; n) {
+        <span class="tk-kw">if</span> (ready.empty()) { <span class="tk-cm">// CPU 空闲，跳到下一个到达时间</span>
+            time = procs[idx].arrival;
+            <span class="tk-kw">while</span> (idx &lt; n &amp;&amp; procs[idx].arrival &lt;= time)
+                ready.push(&amp;procs[idx++]);
+            <span class="tk-kw">continue</span>;
+        }
+        RRProcess* cur = ready.front(); ready.pop(); <span class="tk-cm">// 取队首</span>
+        <span class="tk-kw">if</span> (cur-&gt;start_time == -<span class="tk-num">1</span>) cur-&gt;start_time = time;
+
+        <span class="tk-cm">// ① 计算本轮实际运行时间</span>
+        <span class="tk-str">int</span> run_time = min(cur-&gt;remaining, quantum);
+        time += run_time;
+        cur-&gt;remaining -= run_time;
+
+        <span class="tk-cm">// ② 将执行期间新到达的进程加入队列（先于当前进程放回）</span>
+        <span class="tk-kw">while</span> (idx &lt; n &amp;&amp; procs[idx].arrival &lt;= time)
+            ready.push(&amp;procs[idx++]);
+
+        <span class="tk-cm">// ③ 判断完成 or 放回队列</span>
+        <span class="tk-kw">if</span> (cur-&gt;remaining &gt; <span class="tk-num">0</span>)
+            ready.push(cur);  <span class="tk-cm">// 未完成，放队列末尾</span>
+        <span class="tk-kw">else</span>
+            cur-&gt;finish_time = time;
+    }
+    <span class="tk-kw">return</span> procs;
+}`,
+
+    },
+
+    priority: {
+        name: '优先级调度',
+        intro: '优先级调度根据进程优先级决定执行顺序，高优先级进程先执行（非抢占）。优先级相同时按 FCFS 处理。',
+        complexity: [
+            {l:'时间复杂度',v:'O(n²)',d:'每次调度需扫描队列找最高优先级'},
+            {l:'空间复杂度',v:'O(n)',d:'维护就绪队列'},
+            {l:'抢占性',v:'非抢占',d:'运行中进程不被打断'},
+            {l:'饥饿',v:'可能发生',d:'低优先级进程可能永久等待'},
+        ],
+        pros: ['重要进程优先','灵活可配置','适合实时系统'],
+        cons: ['低优先级进程饥饿','需合理设置优先级','可能不公平'],
+        paramDesc: '• 按优先级排序\n• 可配置大值/小值优先\n• 同优先级按 FCFS',
+        cbadges: [{l:'时间',v:'O(n²)'},{l:'抢占',v:'否'},{l:'饥饿',v:'可能'}],
+        filename: 'priority_scheduling.cpp',
+        cplxDetail: '优先级调度在嵌入式和实时操作系统中广泛应用。主要问题是低优先级进程饥饿（Starvation），解决方法是老化（Aging）：随时间推移逐步提升等待进程的优先级。使用最大堆可将每次调度优化至 O(log n)。',
+        pseudocode: `算法: 优先级调度 (Priority Scheduling) —— 非抢占
+输入: 进程集合 P（含 arrival, burst, priority）
+输出: 调度序列
+
+BEGIN
+  time ← 0
+  heap ← 最大优先级堆
+
+  WHILE 有进程未完成 DO
+    FOR EACH p WHERE p.arrival ≤ time AND p ∉ heap DO
+      HEAP_PUSH(heap, (-p.priority, p.arrival, p))
+    END FOR
+
+    IF heap 为空 THEN
+      time ← 下一个到达时间
+      CONTINUE
+    END IF
+
+    // 取优先级最高的进程
+    current ← HEAP_POP(heap)
+
+    current.start_time ← time
+    time ← time + current.burst     // 非抢占
+    current.finish_time ← time
+
+    // 补充新到达进程
+    FOR EACH p WHERE p.arrival ≤ time AND p ∉ heap DO
+      HEAP_PUSH(heap, (-p.priority, p.arrival, p))
+    END FOR
+  END WHILE
+END`,
+        code: `<span class="tk-kw">#include</span> <span class="tk-str">&lt;iostream&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;vector&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;queue&gt;</span>
+<span class="tk-kw">#include</span> <span class="tk-str">&lt;algorithm&gt;</span>
+<span class="tk-kw">using namespace</span> std;
+
+<span class="tk-kw">struct</span> <span class="tk-cls">PrioProcess</span> {
+    string pid;
+    <span class="tk-str">int</span> arrival, burst;
+    <span class="tk-str">int</span> priority;     <span class="tk-cm">// 值越大优先级越高</span>
+    <span class="tk-str">int</span> start_time  = -<span class="tk-num">1</span>;
+    <span class="tk-str">int</span> finish_time = <span class="tk-num">0</span>;
+    <span class="tk-str">int</span> <span class="tk-fn">turnaround</span>() <span class="tk-kw">const</span> { <span class="tk-kw">return</span> finish_time - arrival; }
+    <span class="tk-str">int</span> <span class="tk-fn">wait_time</span>()   <span class="tk-kw">const</span> { <span class="tk-kw">return</span> turnaround() - burst; }
+};
+
+<span class="tk-cm">// 优先级调度 (非抢占)
+// higher_is_better: true=大值优先, false=小值优先</span>
+vector&lt;PrioProcess&gt; <span class="tk-fn">priority_scheduling</span>(
+    vector&lt;PrioProcess&gt; procs, <span class="tk-kw">bool</span> higher_is_better = <span class="tk-kw">true</span>) {
+
+    sort(procs.begin(), procs.end(), [](<span class="tk-kw">const</span> PrioProcess&amp; a, <span class="tk-kw">const</span> PrioProcess&amp; b) {
+        <span class="tk-kw">return</span> a.arrival &lt; b.arrival;
+    });
+    <span class="tk-cm">// 堆元素: (heap_key, arrival, index)
+    // heap_key: 负优先级（大值优先）或正优先级（小值优先）</span>
+    <span class="tk-kw">using</span> T = tuple&lt;<span class="tk-str">int</span>,<span class="tk-str">int</span>,<span class="tk-str">int</span>&gt;;
+    priority_queue&lt;T, vector&lt;T&gt;, greater&lt;T&gt;&gt; heap;
+    <span class="tk-str">int</span> time = <span class="tk-num">0</span>, idx = <span class="tk-num">0</span>, n = (<span class="tk-str">int</span>)procs.size();
+
+    <span class="tk-kw">auto</span> key = [&amp;](<span class="tk-kw">const</span> PrioProcess&amp; p) {
+        <span class="tk-kw">return</span> higher_is_better ? -p.priority : p.priority;
+    };
+
+    <span class="tk-kw">while</span> (idx &lt; n || !heap.empty()) {
+        <span class="tk-cm">// ① 将已到达进程加入最小堆</span>
+        <span class="tk-kw">while</span> (idx &lt; n &amp;&amp; procs[idx].arrival &lt;= time) {
+            heap.push({key(procs[idx]), procs[idx].arrival, idx});
+            idx++;
+        }
+        <span class="tk-kw">if</span> (heap.empty()) { time = procs[idx].arrival; <span class="tk-kw">continue</span>; }
+
+        <span class="tk-cm">// ② 弹出优先级最高的进程</span>
+        <span class="tk-kw">auto</span> [k, a, i] = heap.top(); heap.pop();
+        PrioProcess&amp; cur = procs[i];
+        cur.start_time  = time;
+        time           += cur.burst;
+        cur.finish_time = time;
+
+        <span class="tk-cm">// ③ 补充新到达进程</span>
+        <span class="tk-kw">while</span> (idx &lt; n &amp;&amp; procs[idx].arrival &lt;= time) {
+            heap.push({key(procs[idx]), procs[idx].arrival, idx});
+            idx++;
+        }
+    }
+    <span class="tk-kw">return</span> procs;
+}
+
+<span class="tk-cm">// 老化机制：防止低优先级进程饥饿
+// 等待时间每超过 wait_threshold，优先级提升 1</span>
+<span class="tk-kw">void</span> <span class="tk-fn">aging</span>(vector&lt;PrioProcess&gt;&amp; procs, <span class="tk-str">int</span> wait_threshold = <span class="tk-num">10</span>) {
+    <span class="tk-kw">for</span> (<span class="tk-kw">auto</span>&amp; p : procs)
+        p.priority += p.wait_time() / wait_threshold;
+}`,
+    },
+};
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let procData = [
+    {pid:'P1', arrival:0, burst:6, priority:2, color:0},
+    {pid:'P2', arrival:2, burst:4, priority:1, color:1},
+    {pid:'P3', arrival:4, burst:2, priority:3, color:2},
+    {pid:'P4', arrival:6, burst:5, priority:2, color:3},
+];
+let curAlgo = 'fcfs';
+let tq = 2;
+let prioHigher = true;
+let simSteps = [];
+let curStep = -1;
+let playing = false;
+let singleStep = false;
+let playTimer = null;
+let playInterval = 600;
+
+// ═══════════════════════════════════════════════════════
+//  ALGO SWITCH
+// ═══════════════════════════════════════════════════════
+function switchAlgo(algo) {
+    curAlgo = algo;
+    document.querySelectorAll('.algo-tab').forEach((t,i) => {
+        t.classList.toggle('active', ['fcfs','sjf','srtf','rr','priority'][i] === algo);
+    });
+    const info = ALGOS[algo];
+    document.getElementById('algoBadge').textContent = info.name;
+    document.getElementById('sAlgoIntro').textContent = info.intro;
+    document.getElementById('sComplexity').innerHTML = info.cbadges
+        .map(b=>`<div class="cbadge"><span class="cl">${b.l}</span><span class="cv">${b.v}</span></div>`).join('');
+    document.getElementById('sProscons').innerHTML =
+        info.pros.map(p=>`<div class="pc-item"><span class="dot-p">✓</span>${p}</div>`).join('') +
+        info.cons.map(c=>`<div class="pc-item"><span class="dot-c">✗</span>${c}</div>`).join('');
+    document.getElementById('sParamDesc').innerHTML = info.paramDesc.replace(/\n/g,'<br>');
+    document.getElementById('dRR').style.display = algo==='rr' ? '':' none';
+    document.getElementById('dPrio').style.display = algo==='priority' ? '':'none';
+    document.getElementById('dPrioCol').style.display = algo==='priority' ? '':'none';
+    updateRightPanel(algo);
+    resetSim();
+}
+
+// ═══════════════════════════════════════════════════════
+//  RIGHT PANEL
+// ═══════════════════════════════════════════════════════
+let curRpTab = 'code';
+
+function switchRpTab(tab, el) {
+    curRpTab = tab;
+    document.querySelectorAll('.rp-tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.rp-pane').forEach(p=>p.classList.remove('active'));
+    document.getElementById('pane-'+tab).classList.add('active');
+}
+
+function updateRightPanel(algo) {
+    const info = ALGOS[algo];
+
+    // Code pane
+    document.getElementById('codeLang').textContent = 'C++';
+    document.getElementById('codeFilename').textContent = info.filename;
+    renderCode(info.code);
+
+    // Pseudo pane
+    document.getElementById('pseudoArea').textContent = info.pseudocode;
+
+    // Complexity pane
+    document.getElementById('cplxTable').innerHTML = info.complexity.map(r=>`
+        <tr>
+            <td style="color:var(--text-body)">${r.l}</td>
+            <td class="mono">${r.v}</td>
+            <td>${r.d}</td>
+        </tr>
+    `).join('');
+    document.getElementById('cplxDetail').textContent = info.cplxDetail;
+
+    // Highlight current algo in compare table
+    ['fcfs','sjf','srtf','rr','priority'].forEach(a=>{
+        const row = document.getElementById('cmp-'+a);
+        if (row) {
+            row.style.background = a===algo ? 'var(--indigo-faint)':'';
+            row.style.color = a===algo ? 'var(--text-body)':'';
+        }
+    });
+}
+
+function renderCode(html) {
+    const lines = html.split('\n');
+    const lineNums = document.getElementById('lineNums');
+    const codeLines = document.getElementById('codeLines');
+    lineNums.innerHTML = lines.map((_,i)=>`<span>${i+1}</span>`).join('');
+    codeLines.innerHTML = lines.join('\n');
+}
+
+function copyCode() {
+    const codeEl = document.getElementById('codeLines');
+    const text = codeEl.innerText;
+    navigator.clipboard.writeText(text).then(()=>{
+        const btn = document.getElementById('btnCopy');
+        btn.textContent = '✓ 已复制';
+        btn.classList.add('copied');
+        setTimeout(()=>{ btn.textContent='复制代码'; btn.classList.remove('copied'); }, 2000);
+    });
+}
+
+// ═══════════════════════════════════════════════════════
+//  CONFIG DRAWER
+// ═══════════════════════════════════════════════════════
+function openDrawer() {
+    renderProcTable();
+    document.getElementById('overlay').classList.add('open');
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('dRR').style.display = curAlgo==='rr' ? '':'none';
+    document.getElementById('dPrio').style.display = curAlgo==='priority' ? '':'none';
+    document.getElementById('dPrioCol').style.display = curAlgo==='priority' ? '':'none';
+}
+function closeDrawer() {
+    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('drawer').classList.remove('open');
+}
+function renderProcTable() {
+    const sp = curAlgo==='priority';
+    document.getElementById('dPrioCol').style.display = sp ? '':'none';
+    document.getElementById('procTBody').innerHTML = procData.map((p,i)=>`
+        <tr>
+            <td>
+                <span class="pid-dot" style="background:${colorHex(p.color)}"></span>
+                <input class="ti" style="width:42px" value="${p.pid}" onchange="updP(${i},'pid',this.value)">
+            </td>
+            <td><input class="ti" type="number" min="0" value="${p.arrival}" onchange="updP(${i},'arrival',+this.value)"></td>
+            <td><input class="ti" type="number" min="1" value="${p.burst}" onchange="updP(${i},'burst',+this.value)"></td>
+            ${sp?`<td><input class="ti" type="number" min="1" max="10" value="${p.priority}" onchange="updP(${i},'priority',+this.value)"></td>`:''}
+            <td><button class="btn-icon" onclick="delP(${i})">🗑</button></td>
+        </tr>
+    `).join('');
+}
+function updP(i,k,v){ procData[i][k]=v; }
+function delP(i){ if(procData.length>1){ procData.splice(i,1); renderProcTable(); }}
+function addProc(){
+    const used = procData.map(p=>p.color);
+    const c = [0,1,2,3,4,5].find(x=>!used.includes(x)) ?? procData.length%6;
+    procData.push({pid:`P${procData.length+1}`, arrival:0, burst:3, priority:1, color:c});
+    renderProcTable();
+}
+function randomProcs(){
+    procData=[];
+    const n=Math.floor(Math.random()*3)+3;
+    let t=0;
+    for(let i=0;i<n;i++){
+        t+=Math.floor(Math.random()*3);
+        procData.push({pid:`P${i+1}`,arrival:t,burst:Math.floor(Math.random()*6)+2,priority:Math.floor(Math.random()*5)+1,color:i%6});
+    }
+    renderProcTable();
+}
+function loadPreset(){
+    procData=[
+        {pid:'P1',arrival:0,burst:8,priority:2,color:0},
+        {pid:'P2',arrival:1,burst:4,priority:3,color:1},
+        {pid:'P3',arrival:2,burst:9,priority:1,color:2},
+        {pid:'P4',arrival:3,burst:5,priority:4,color:3},
+    ];
+    renderProcTable();
+}
+function applyConfig(){
+    tq = parseInt(document.getElementById('dTQ').value)||2;
+    prioHigher = document.getElementById('dPrioOrder').value==='high';
+    closeDrawer();
+    resetSim();
+    addLog('应用配置','info',`算法=${ALGOS[curAlgo].name}，进程数=${procData.length}`);
+}
+
+// ═══════════════════════════════════════════════════════
+//  STEP GENERATION
+// ═══════════════════════════════════════════════════════
+function initProcs(){
+    return procData.map(p=>({...p, remaining:p.burst, state:'not-arrived', waitTime:0, startTime:-1, finishTime:-1, turnaround:0}));
+}
+function snap(time,procs,runPid,queue,gantt,log,tsU,tsT){
+    return {time, procs:procs.map(p=>({...p})), runPid, queue:[...queue], gantt:gantt.map(g=>({...g})), log, tsU:tsU||0, tsT:tsT||0};
+}
+
+function genSteps(){
+    switch(curAlgo){
+        case 'fcfs':     return genFCFS();
+        case 'sjf':      return genSJF();
+        case 'srtf':     return genSRTF();
+        case 'rr':       return genRR();
+        case 'priority': return genPriority();
+    }
+}
+
+function genFCFS(){
+    const steps=[], procs=initProcs(), n=procs.length;
+    let t=0, queue=[], gantt=[], done=0;
+    steps.push(snap(0,procs,null,[],[],{type:'info',label:'初始化',msg:`FCFS 加载 ${n} 个进程`}));
+    while(done<n){
+        for(const p of procs){
+            if(p.arrival===t && p.state==='not-arrived'){
+                p.state='ready'; queue.push(p.pid);
+                steps.push(snap(t,procs,null,queue,gantt,{type:'arrive',label:'到达',msg:`${p.pid} 到达 (服务=${p.burst}ms)`}));
+            }
+        }
+        if(!queue.length){
+            gantt=[...gantt,{pid:'idle',start:t,end:t+1,ci:-1}]; t++; continue;
+        }
+        const pid=queue.shift(), proc=procs.find(p=>p.pid===pid);
+        proc.state='running'; if(proc.startTime===-1) proc.startTime=t;
+        steps.push(snap(t,procs,pid,queue,gantt,{type:'schedule',label:'调度',msg:`调度 ${pid} 运行 (剩余=${proc.remaining}ms)`}));
+        for(let k=0;k<proc.remaining;k++){
+            gantt=[...gantt,{pid,start:t+k,end:t+k+1,ci:proc.color}];
+            for(const p of procs) if(p.state==='ready') p.waitTime++;
+        }
+        t+=proc.remaining; proc.remaining=0; proc.state='finished';
+        proc.finishTime=t; proc.turnaround=t-proc.arrival; proc.waitTime=proc.turnaround-proc.burst; done++;
+        for(const p of procs) if(p.arrival<=t && p.state==='not-arrived'){p.state='ready'; queue.push(p.pid);}
+        steps.push(snap(t,procs,null,queue,gantt,{type:'finish',label:'完成',msg:`${pid} 完成！等待=${proc.waitTime}ms 周转=${proc.turnaround}ms`}));
+    }
+    return steps;
+}
+
+function genSJF(){
+    const steps=[], procs=initProcs(), n=procs.length;
+    let t=0, queue=[], gantt=[], done=0;
+    steps.push(snap(0,procs,null,[],[],{type:'info',label:'初始化',msg:`SJF 加载 ${n} 个进程`}));
+    while(done<n){
+        for(const p of procs) if(p.arrival===t && p.state==='not-arrived'){p.state='ready'; queue.push(p.pid); steps.push(snap(t,procs,null,queue,gantt,{type:'arrive',label:'到达',msg:`${p.pid} 到达 (服务=${p.burst}ms)`}));}
+        if(!queue.length){gantt=[...gantt,{pid:'idle',start:t,end:t+1,ci:-1}]; t++; continue;}
+        const rp=queue.map(pid=>procs.find(p=>p.pid===pid)).sort((a,b)=>a.burst-b.burst||a.arrival-b.arrival);
+        const sel=rp[0]; queue=queue.filter(x=>x!==sel.pid);
+        sel.state='running'; if(sel.startTime===-1) sel.startTime=t;
+        steps.push(snap(t,procs,sel.pid,queue,gantt,{type:'schedule',label:'调度',msg:`SJF 选 ${sel.pid} (服务时间=${sel.burst}ms 最短)`}));
+        for(let k=0;k<sel.remaining;k++){gantt=[...gantt,{pid:sel.pid,start:t+k,end:t+k+1,ci:sel.color}]; for(const p of procs) if(p.state==='ready') p.waitTime++;}
+        t+=sel.remaining; sel.remaining=0; sel.state='finished'; sel.finishTime=t; sel.turnaround=t-sel.arrival; sel.waitTime=sel.turnaround-sel.burst; done++;
+        for(const p of procs) if(p.arrival<=t && p.state==='not-arrived'){p.state='ready'; queue.push(p.pid);}
+        steps.push(snap(t,procs,null,queue,gantt,{type:'finish',label:'完成',msg:`${sel.pid} 完成！等待=${sel.waitTime}ms 周转=${sel.turnaround}ms`}));
+    }
+    return steps;
+}
+
+function genSRTF(){
+    const steps=[], procs=initProcs(), n=procs.length;
+    let t=0, queue=[], gantt=[], done=0, curPid=null;
+    steps.push(snap(0,procs,null,[],[],{type:'info',label:'初始化',msg:`SRTF 抢占式调度 ${n} 个进程`}));
+    const maxT=procs.reduce((s,p)=>s+p.burst,0)+procs.reduce((m,p)=>Math.max(m,p.arrival),0)+5;
+    while(done<n && t<maxT){
+        for(const p of procs) if(p.arrival===t && p.state==='not-arrived'){p.state='ready'; queue.push(p.pid); steps.push(snap(t,procs,curPid,queue,gantt,{type:'arrive',label:'到达',msg:`${p.pid} 到达 (剩余=${p.burst}ms)`}));}
+        const rl=queue.map(pid=>procs.find(p=>p.pid===pid));
+        let sel=null;
+        if(rl.length) sel=[...rl].sort((a,b)=>a.remaining-b.remaining||a.arrival-b.arrival)[0];
+        const cur=curPid?procs.find(p=>p.pid===curPid):null;
+        if(cur && sel && sel.remaining<cur.remaining){
+            cur.state='ready'; queue.push(cur.pid);
+            steps.push(snap(t,procs,null,queue,gantt,{type:'preempt',label:'抢占',msg:`${sel.pid}(${sel.remaining}ms) 抢占 ${cur.pid}(${cur.remaining}ms)`}));
+            queue=queue.filter(x=>x!==sel.pid); sel.state='running'; if(sel.startTime===-1) sel.startTime=t; curPid=sel.pid;
+        } else if(!cur){
+            if(!sel){t++; continue;}
+            queue=queue.filter(x=>x!==sel.pid); sel.state='running'; if(sel.startTime===-1) sel.startTime=t; curPid=sel.pid;
+            steps.push(snap(t,procs,curPid,queue,gantt,{type:'schedule',label:'调度',msg:`调度 ${curPid} (剩余=${sel.remaining}ms)`}));
+        }
+        const rp=procs.find(p=>p.pid===curPid);
+        if(rp){
+            gantt=[...gantt,{pid:curPid,start:t,end:t+1,ci:rp.color}]; rp.remaining--;
+            for(const p of procs) if(p.state==='ready') p.waitTime++;
+            if(rp.remaining===0){rp.state='finished'; rp.finishTime=t+1; rp.turnaround=(t+1)-rp.arrival; rp.waitTime=rp.turnaround-rp.burst; done++; curPid=null; steps.push(snap(t+1,procs,null,queue,gantt,{type:'finish',label:'完成',msg:`${rp.pid} 完成！等待=${rp.waitTime}ms 周转=${rp.turnaround}ms`}));}
+        }
+        t++;
+    }
+    return steps;
+}
+
+function genRR(){
+    const steps=[], procs=initProcs(), n=procs.length, Q=tq;
+    let t=0, queue=[], gantt=[], done=0;
+    steps.push(snap(0,procs,null,[],[],{type:'info',label:'初始化',msg:`RR 时间片Q=${Q}ms，${n} 个进程`}));
+    for(const p of procs) if(p.arrival===0){p.state='ready'; queue.push(p.pid);}
+    const maxT=procs.reduce((s,p)=>s+p.burst,0)+Math.max(...procs.map(p=>p.arrival))+Q*n+10;
+    while(done<n && t<maxT){
+        if(!queue.length){
+            gantt=[...gantt,{pid:'idle',start:t,end:t+1,ci:-1}]; t++;
+            for(const p of procs) if(p.arrival===t && p.state==='not-arrived'){p.state='ready'; queue.push(p.pid); steps.push(snap(t,procs,null,queue,gantt,{type:'arrive',label:'到达',msg:`${p.pid} 到达`}));}
+            continue;
+        }
+        const pid=queue.shift(), proc=procs.find(p=>p.pid===pid);
+        proc.state='running'; if(proc.startTime===-1) proc.startTime=t;
+        steps.push(snap(t,procs,pid,queue,gantt,{type:'schedule',label:'调度',msg:`${pid} 获得CPU 时间片=${Q}ms 剩余=${proc.remaining}ms`},0,Q));
+        const run=Math.min(Q,proc.remaining);
+        for(let k=0;k<run;k++){
+            gantt=[...gantt,{pid,start:t+k,end:t+k+1,ci:proc.color}]; proc.remaining--;
+            for(const p of procs) if(p.state==='ready') p.waitTime++;
+            const nt=t+k+1;
+            for(const p of procs) if(p.arrival===nt && p.state==='not-arrived'){p.state='ready'; queue.push(p.pid);}
+            steps.push(snap(t+k+1,procs,pid,queue,gantt,{type:'switch',label:'执行',msg:`${pid} tick${k+1}/${run} 剩余=${proc.remaining}ms`},k+1,Q));
+        }
+        t+=run;
+        if(proc.remaining===0){proc.state='finished'; proc.finishTime=t; proc.turnaround=t-proc.arrival; proc.waitTime=proc.turnaround-proc.burst; done++; steps.push(snap(t,procs,null,queue,gantt,{type:'finish',label:'完成',msg:`${pid} 完成！等待=${proc.waitTime}ms 周转=${proc.turnaround}ms`}));}
+        else{proc.state='ready'; queue.push(pid); steps.push(snap(t,procs,null,queue,gantt,{type:'switch',label:'时间片到',msg:`${pid} 时间片用完 剩余=${proc.remaining}ms 放回队列`}));}
+    }
+    return steps;
+}
+
+function genPriority(){
+    const steps=[], procs=initProcs(), n=procs.length;
+    let t=0, queue=[], gantt=[], done=0;
+    steps.push(snap(0,procs,null,[],[],{type:'info',label:'初始化',msg:`优先级调度 ${n} 个进程`}));
+    while(done<n){
+        for(const p of procs) if(p.arrival===t && p.state==='not-arrived'){p.state='ready'; queue.push(p.pid); steps.push(snap(t,procs,null,queue,gantt,{type:'arrive',label:'到达',msg:`${p.pid} 到达 (优先级=${p.priority})`}));}
+        if(!queue.length){gantt=[...gantt,{pid:'idle',start:t,end:t+1,ci:-1}]; t++; continue;}
+        const rp=queue.map(pid=>procs.find(p=>p.pid===pid)).sort((a,b)=>prioHigher?(b.priority-a.priority||a.arrival-b.arrival):(a.priority-b.priority||a.arrival-b.arrival));
+        const sel=rp[0]; queue=queue.filter(x=>x!==sel.pid); sel.state='running'; if(sel.startTime===-1) sel.startTime=t;
+        steps.push(snap(t,procs,sel.pid,queue,gantt,{type:'schedule',label:'调度',msg:`选 ${sel.pid} (优先级=${sel.priority} 最高)`}));
+        for(let k=0;k<sel.remaining;k++){gantt=[...gantt,{pid:sel.pid,start:t+k,end:t+k+1,ci:sel.color}]; for(const p of procs) if(p.state==='ready') p.waitTime++;}
+        t+=sel.remaining; sel.remaining=0; sel.state='finished'; sel.finishTime=t; sel.turnaround=t-sel.arrival; sel.waitTime=sel.turnaround-sel.burst; done++;
+        for(const p of procs) if(p.arrival<=t && p.state==='not-arrived'){p.state='ready'; queue.push(p.pid);}
+        steps.push(snap(t,procs,null,queue,gantt,{type:'finish',label:'完成',msg:`${sel.pid} 完成！等待=${sel.waitTime}ms 周转=${sel.turnaround}ms`}));
+    }
+    return steps;
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════
+function renderStep(idx){
+    if(idx<0||idx>=simSteps.length) return;
+    const s=simSteps[idx];
+    const {time,procs,runPid,queue,gantt,log,tsU,tsT}=s;
+
+    document.getElementById('ganttTimeLabel').textContent=`T = ${time}`;
+    document.getElementById('stTime').textContent=`T=${time}`;
+
+    renderQueue(queue,procs);
+    renderCPU(runPid,procs,tsU,tsT);
+    renderGantt(gantt,time);
+    renderPS(procs);
+    renderStats(procs,time,gantt);
+    if(log) addLog(log.label,log.type,log.msg);
+
+    document.getElementById('btnBack').disabled=idx<=0;
+    document.getElementById('btnNext').disabled=idx>=simSteps.length-1;
+
+    if(idx===simSteps.length-1 && procs.every(p=>p.state==='finished'))
+        setTimeout(()=>showModal(procs,time,gantt),500);
+}
+
+function renderQueue(queue,procs){
+    const el=document.getElementById('readyQueue');
+    document.getElementById('qCount').textContent=`${queue.length} 个进程`;
+    if(!queue.length){el.innerHTML='<span class="q-empty">队列为空</span>'; return;}
+    el.innerHTML=queue.map((pid,i)=>{
+        const p=procs.find(x=>x.pid===pid);
+        return `<div class="proc-block pc${p.color}"><span class="pb-pid">${pid}</span><span class="pb-rem">${p.remaining}ms</span></div>${i<queue.length-1?'<span class="q-arrow">→</span>':''}`;
+    }).join('');
+}
+
+function renderCPU(pid,procs,tsU,tsT){
+    const box=document.getElementById('cpuBox'), inner=document.getElementById('cpuInner');
+    const tsw=document.getElementById('tsWrap'), lbl=document.getElementById('cpuStateSpan');
+    if(pid){
+        const p=procs.find(x=>x.pid===pid);
+        box.className='cpu-box active';
+        inner.innerHTML=`<div class="cpu-pid" style="color:${colorHex(p.color)}">${pid}</div><div class="cpu-info">剩余 ${p.remaining}ms</div>`;
+        lbl.textContent=`运行: ${pid}`;
+        if(curAlgo==='rr'&&tsT>0){
+            tsw.style.display='';
+            document.getElementById('tsText').textContent=`${tsU}/${tsT}`;
+            const fill=document.getElementById('tsFill');
+            fill.style.width=(tsU/tsT*100)+'%';
+            fill.style.background=colorHex(p.color);
+        } else tsw.style.display='none';
+    } else {
+        box.className='cpu-box';
+        inner.innerHTML='<div class="cpu-idle">空闲 💤</div>';
+        lbl.textContent='空闲';
+        tsw.style.display='none';
+    }
+}
+
+function renderGantt(gantt,curT){
+    const row=document.getElementById('ganttRow'), tl=document.getElementById('ganttTL');
+    if(!gantt.length){row.innerHTML=''; tl.innerHTML=''; return;}
+    const UW=24;
+    const merged=[];
+    for(const b of gantt){
+        const last=merged[merged.length-1];
+        if(last&&last.pid===b.pid) last.end=b.end;
+        else merged.push({...b});
+    }
+    row.innerHTML=merged.map((b,i)=>{
+        const w=(b.end-b.start)*UW, cur=i===merged.length-1;
+        return b.pid==='idle'
+            ? `<div class="g-block idle${cur?' current':''}" style="min-width:${w}px;width:${w}px">idle</div>`
+            : `<div class="g-block gc${b.ci}${cur?' current':''}" style="min-width:${w}px;width:${w}px">${b.pid}</div>`;
+    }).join('');
+    tl.innerHTML=`<div class="g-tick" style="min-width:${(merged[0]?.start||0)*UW}px">0</div>`+
+        merged.map(b=>`<div class="g-tick" style="min-width:${(b.end-b.start)*UW}px">${b.end}</div>`).join('');
+    setTimeout(()=>{ const s=row.parentElement; s.scrollLeft=s.scrollWidth; },30);
+}
+
+function renderPS(procs){
+    const stateMap={
+        'not-arrived':['not-arrived','未到达'],
+        'ready':['ready','就绪'],
+        'running':['running','运行'],
+        'finished':['finished','完成'],
+    };
+    document.getElementById('psGrid').innerHTML=procs.map(p=>{
+        const [cls,lbl]=stateMap[p.state]||['ready','就绪'];
+        return `
+            <div class="ps-card ${cls}">
+                <div class="ps-head">
+                    <span class="ps-pid" style="color:${colorHex(p.color)}">${p.pid}</span>
+                    <span class="ps-state ${cls}">${lbl}</span>
+                </div>
+                <div class="ps-info">
+                    <div>剩余: ${p.remaining}ms</div>
+                    <div>到达: ${p.arrival}ms</div>
+                    ${p.state==='finished'?`<div>等待: ${p.waitTime}ms</div><div>周转: ${p.turnaround}ms</div>`:''}
+                    ${curAlgo==='priority'?`<div>优先级: ${p.priority}</div>`:''}
+                </div>
+            </div>`;
+    }).join('');
+}
+
+function renderStats(procs,time,gantt){
+    const done=procs.filter(p=>p.state==='finished');
+    const busy=gantt.filter(b=>b.pid!=='idle').length;
+    const total=gantt.length;
+    const util=total>0?(busy/total*100).toFixed(1):0;
+    document.getElementById('stUtil').textContent=`${util}%`;
+    document.getElementById('stDone').textContent=`${done.length}/${procs.length}`;
+    if(done.length){
+        const aw=(done.reduce((s,p)=>s+p.waitTime,0)/done.length).toFixed(1);
+        const at=(done.reduce((s,p)=>s+p.turnaround,0)/done.length).toFixed(1);
+        document.getElementById('stWait').textContent=`${aw}ms`;
+        document.getElementById('stTA').textContent=`${at}ms`;
+        if(done.length===procs.length&&time>0)
+            document.getElementById('stTP').textContent=`${(procs.length/time).toFixed(2)}/ms`;
+    } else {
+        document.getElementById('stWait').textContent='-';
+        document.getElementById('stTA').textContent='-';
+        document.getElementById('stTP').textContent='-';
+    }
+}
+
+// ═══════════════════════════════════════════════════════
+//  CONTROLS
+// ═══════════════════════════════════════════════════════
+function resetSim(){
+    stopPlay();
+    simSteps=genSteps(); curStep=-1;
+    document.getElementById('readyQueue').innerHTML='<span class="q-empty">队列为空</span>';
+    document.getElementById('qCount').textContent='0 个进程';
+    document.getElementById('cpuBox').className='cpu-box';
+    document.getElementById('cpuInner').innerHTML='<div class="cpu-idle">空闲 💤</div>';
+    document.getElementById('cpuStateSpan').textContent='空闲';
+    document.getElementById('tsWrap').style.display='none';
+    document.getElementById('ganttRow').innerHTML='';
+    document.getElementById('ganttTL').innerHTML='';
+    document.getElementById('ganttTimeLabel').textContent='T = 0';
+    document.getElementById('stTime').textContent='T=0';
+    document.getElementById('stUtil').textContent='0%';
+    document.getElementById('stDone').textContent=`0/${procData.length}`;
+    document.getElementById('stWait').textContent='-';
+    document.getElementById('stTA').textContent='-';
+    document.getElementById('stTP').textContent='-';
+    renderPS(initProcs());
+    document.getElementById('btnBack').disabled=true;
+    document.getElementById('btnNext').disabled=false;
+    document.getElementById('btnPlay').textContent='▶ 开始';
+    document.getElementById('btnPlay').className='btn btn-primary';
+    addLog('重置','info',`共 ${simSteps.length} 步，算法: ${ALGOS[curAlgo].name}`);
+}
+
+function stepFwd(){
+    if(curStep<simSteps.length-1){ curStep++; renderStep(curStep); }
+    else stopPlay();
+}
+function stepBack(){
+    if(curStep>0){ curStep--; renderStep(curStep); }
+}
+function togglePlay(){
+    if(playing) stopPlay(); else startPlay();
+}
+function startPlay(){
+    if(curStep>=simSteps.length-1) curStep=-1;
+    playing=true;
+    document.getElementById('btnPlay').textContent='⏸ 暂停';
+    document.getElementById('btnPlay').className='btn btn-ghost';
+    function tick(){
+        if(!playing) return;
+        if(curStep>=simSteps.length-1){ stopPlay(); return; }
+        stepFwd();
+        playTimer=setTimeout(tick,playInterval);
+    }
+    tick();
+}
+function stopPlay(){
+    playing=false; clearTimeout(playTimer);
+    document.getElementById('btnPlay').textContent='▶ 开始';
+    document.getElementById('btnPlay').className='btn btn-primary';
+}
+function toggleSS(){
+    singleStep=!singleStep;
+    document.getElementById('ssDot').textContent=singleStep?'●':'○';
+    document.getElementById('btnSS').style.color=singleStep?'var(--primary)':'';
+    if(singleStep) stopPlay();
+}
+function updateSpeed(v){
+    document.getElementById('speedVal').textContent=v+'x';
+    playInterval=Math.round(1200/parseInt(v));
+}
+
+// ═══════════════════════════════════════════════════════
+//  LOG
+// ═══════════════════════════════════════════════════════
+function addLog(label,type,msg){
+    const body=document.getElementById('logBody');
+    const s=curStep>=0?simSteps[curStep]:null;
+    const t=s?`[T=${s.time}]`:'[系统]';
+    const el=document.createElement('div');
+    el.className='log-entry';
+    el.innerHTML=`<span class="le-time">${t}</span><span class="le-type ${type}">${label}</span><span class="le-msg">${msg}</span>`;
+    body.appendChild(el);
+    body.scrollTop=body.scrollHeight;
+}
+function clearLog(){ document.getElementById('logBody').innerHTML=''; }
+function exportLog(){
+    const entries=document.querySelectorAll('.log-entry');
+    let text=`进程调度日志 - ${ALGOS[curAlgo].name}\n${'='.repeat(40)}\n`;
+    entries.forEach(e=>{
+        text+=`${e.querySelector('.le-time').textContent} [${e.querySelector('.le-type').textContent}] ${e.querySelector('.le-msg').textContent}\n`;
+    });
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'}));
+    a.download=`log_${curAlgo}.txt`; a.click();
+}
+
+// ═══════════════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════════════
+function showModal(procs,time,gantt){
+    const done=procs.filter(p=>p.state==='finished');
+    const busy=gantt.filter(b=>b.pid!=='idle').length;
+    const util=gantt.length>0?(busy/gantt.length*100).toFixed(1):100;
+    const aw=(done.reduce((s,p)=>s+p.waitTime,0)/done.length).toFixed(2);
+    const at=(done.reduce((s,p)=>s+p.turnaround,0)/done.length).toFixed(2);
+    document.getElementById('modalStats').innerHTML=`
+        <div class="modal-stat"><div class="modal-stat-lbl">完成时间</div><div class="modal-stat-val">${time}ms</div></div>
+        <div class="modal-stat"><div class="modal-stat-lbl">CPU利用率</div><div class="modal-stat-val">${util}%</div></div>
+        <div class="modal-stat"><div class="modal-stat-lbl">平均等待</div><div class="modal-stat-val">${aw}ms</div></div>
+        <div class="modal-stat"><div class="modal-stat-lbl">平均周转</div><div class="modal-stat-val">${at}ms</div></div>
+        <div class="modal-stat"><div class="modal-stat-lbl">吞吐量</div><div class="modal-stat-val">${time>0?(done.length/time).toFixed(3):'-'}</div></div>
+        <div class="modal-stat"><div class="modal-stat-lbl">算法</div><div class="modal-stat-val" style="font-size:13px">${ALGOS[curAlgo].name}</div></div>
+    `;
+    document.getElementById('finishModal').classList.add('show');
+}
+function closeModal(){ document.getElementById('finishModal').classList.remove('show'); }
+
+// ═══════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════
+function colorHex(ci){
+    return ['#818cf8','#34d399','#fbbf24','#f87171','#a78bfa','#22d3ee'][ci%6];
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+window.addEventListener('load',()=>{
+    renderProcTable();
+    updateRightPanel('fcfs');
+    resetSim();
+    document.addEventListener('keydown',e=>{
+        if(e.target.tagName==='INPUT') return;
+        if(e.key==='ArrowRight'||e.key===' '){ e.preventDefault(); stepFwd(); }
+        if(e.key==='ArrowLeft'){ e.preventDefault(); stepBack(); }
+        if(e.key==='r'||e.key==='R') resetSim();
+    });
+});
+</script>
+</body>
+</html>

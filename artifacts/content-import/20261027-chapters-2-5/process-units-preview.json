@@ -1,0 +1,128 @@
+{
+  "valid" : true,
+  "items" : [ {
+    "type" : "units",
+    "code" : "unit.process.concept",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.composition",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.states",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.control",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.ipc",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.thread",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.summary-2-1",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.scheduling-basics",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.fcfs-sjf",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.hrrn-priority",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.rr-mlq-mlfq",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.summary-2-2",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.sync-basics",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.mutex-methods",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.semaphore",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.classic-sync",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.monitor",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.summary-2-3",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.deadlock-concept",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.deadlock-prevention",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.banker",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.detection",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.summary-2-4",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.process.difficulties",
+    "action" : "CREATE",
+    "id" : null
+  } ],
+  "errors" : [ ],
+  "created" : 24,
+  "updated" : 0,
+  "unchanged" : 0
+}

@@ -1,0 +1,26 @@
+{
+  "url": "http://localhost:8081/assessments/run/2120322139153997826?returnTo=/assessments?courseCode=course.operating-systems&courseCode=course.operating-systems",
+  "saveState": "草稿已同步",
+  "nav": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+  ],
+  "answeredMarks": [
+    "self-nav-item current answered",
+    "self-nav-item answered marked",
+    "self-nav-item answered",
+    "self-nav-item",
+    "self-nav-item"
+  ],
+  "cardText": "操作系统管理对象的界定\n单选题\n计算机系统概述\n\n操作系统是对（　　）进行管理的软件。\n\nA\n\n软件\n\nB\n\n硬件\n\nC\n\n计算机资源\n\nD\n\n应用程序\n\n标记为不确定\n自测期间不显示对错与解析，交卷后统一查看",
+  "textValues": [],
+  "checkedRadios": [
+    false,
+    true,
+    false,
+    false
+  ]
+}

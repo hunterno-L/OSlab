@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "oslab-application-authoring/1.0",
+  "packageType": "APPLICATION_QUESTIONS",
+  "batchCode": "batch.a.files.chapter.001.application",
+  "contributor": "A",
+  "courseCode": "course.operating-systems",
+  "note": "综合应用题内容整理协议，当前平台导入与主观评分待接入。正式交付包含完整小问、参考解、评分点与分值。",
+  "questions": []
+}

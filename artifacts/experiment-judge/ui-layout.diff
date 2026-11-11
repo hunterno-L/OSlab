@@ -1,0 +1,199 @@
+--- artifacts\experiment-judge\ViewQuestionView.before.vue
++++ 前端代码\osLab-frontend\src\views\question\ViewQuestionView.vue
+@@ -50,14 +50,19 @@
+         <a-button
+           type="primary"
+           :loading="submitting"
+-          :disabled="phase === 'polling' || loading"
++          :disabled="isLocalBuild || phase === 'polling' || loading"
+           @click="doSubmit"
+         >
+-          提交评测
++          {{ isLocalBuild ? "本地构建实验" : "提交评测" }}
+         </a-button>
+         <a-button type="text" @click="goRecords">查看提交记录</a-button>
+       </a-space>
+     </div>
++
++    <a-alert v-if="isLocalBuild" type="info" class="local-build-notice">
++      本实验需在本地 MIPS
++      环境构建与验证。请按实验说明完成操作；代码草稿会自动保存。
++    </a-alert>
+ 
+     <div class="workbench-body">
+       <!-- 左：实验说明 / 关联图谱 / 向导师提问 -->
+@@ -68,7 +73,11 @@
+               <MdViewer :value="question?.content || '暂无实验说明'" />
+             </a-spin>
+             <aside class="lab-margin-note">
+-              草稿自动保存；提交后可在右侧查看判题进度与结果。
++              {{
++                isLocalBuild
++                  ? "草稿自动保存；请在本地环境查看构建与运行结果。"
++                  : "草稿自动保存；提交后可在右侧查看判题进度与结果。"
++              }}
+             </aside>
+           </a-tab-pane>
+           <a-tab-pane key="graph" title="关联图谱">
+@@ -205,7 +214,13 @@
+           <span class="panel-kicker">EVALUATION</span>
+           <h3>评测结果</h3>
+           <template v-if="phase === 'idle' && !submitDetail">
+-            <a-empty description="提交评测后，在此查看判题进度与结果" />
++            <a-empty
++              :description="
++                isLocalBuild
++                  ? '按实验说明在本地环境验证，本实验不自动判分'
++                  : '提交评测后，在此查看判题进度与结果'
++              "
++            />
+           </template>
+ 
+           <template v-else-if="phase === 'polling'">
+@@ -377,6 +392,9 @@
+ 
+ // ---------- 题面与关联图谱 ----------
+ const question = ref<QuestionVO | null>(null);
++const isLocalBuild = computed(
++  () => question.value?.judgeMode === "LOCAL_BUILD"
++);
+ const loading = ref(false);
+ const chapter = ref("");
+ const nodes = ref<NodeDTO[]>([]);
+@@ -620,6 +638,10 @@
+   if (disposed || submitting.value || !question.value?.id) {
+     return;
+   }
++  if (isLocalBuild.value) {
++    message.info("请按实验说明在本地 MIPS 环境构建与验证");
++    return;
++  }
+   if (!form.value.code || !form.value.code.trim()) {
+     message.warning("请先编写代码再提交");
+     return;
+@@ -1235,4 +1257,125 @@
+     grid-row: auto;
+   }
+ }
++
++/* 实验工作台：长文与编辑区域分别滚动，窄屏恢复自然页面流。 */
++.experiment-workbench {
++  --lab-workbench-gap: 16px;
++  --lab-reading-height: clamp(440px, calc(100vh - 205px), 900px);
++}
++
++.workbench-body {
++  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
++  gap: var(--lab-workbench-gap);
++}
++
++.panel-left {
++  max-height: var(--lab-reading-height);
++  overflow: auto;
++  overscroll-behavior: contain;
++  scrollbar-gutter: stable;
++}
++
++.panel-left :deep(.arco-tabs) {
++  overflow: visible;
++}
++
++.panel-left :deep(.arco-tabs-nav) {
++  position: sticky;
++  top: 0;
++  z-index: 2;
++  background: var(--oslab-lab-panel, #fff);
++}
++
++.oslab-lab-b :deep(.arco-btn-primary.arco-btn-disabled) {
++  color: #525b66;
++  background: #dbe2ea;
++  border-color: #c3cedb;
++  cursor: not-allowed;
++}
++
++.panel-left :deep(.markdown-body) {
++  font-size: 15px;
++  line-height: 1.7;
++  overflow-wrap: anywhere;
++}
++
++.panel-left :deep(.markdown-body h1),
++.panel-left :deep(.markdown-body h2),
++.panel-left :deep(.markdown-body h3) {
++  line-height: 1.35;
++  margin-top: 1.4em;
++}
++
++.oslab-lab-b .panel-left :deep(.markdown-body h2) {
++  font-size: 18px;
++}
++
++.oslab-lab-b .panel-left :deep(.markdown-body h3) {
++  font-size: 16px;
++}
++
++.panel-left :deep(.markdown-body pre),
++.panel-left :deep(.markdown-body table) {
++  display: block;
++  max-width: 100%;
++  overflow-x: auto;
++}
++
++.panel-left :deep(.markdown-body pre),
++.panel-left :deep(.markdown-body code) {
++  font-size: 13px;
++}
++
++.panel-editor :deep(.code-editor-container) {
++  height: clamp(340px, 52vh, 600px);
++}
++
++.panel-result {
++  max-height: 360px;
++  overflow: auto;
++  overscroll-behavior: contain;
++}
++
++@media (max-width: 1024px) {
++  .workbench-body {
++    grid-template-columns: minmax(0, 1fr);
++  }
++
++  .panel-left,
++  .panel-result {
++    max-height: none;
++    overflow: visible;
++  }
++
++  .panel-left :deep(.arco-tabs-nav) {
++    position: static;
++  }
++}
++
++@media (max-width: 480px) {
++  .oslab-lab-b.experiment-workbench {
++    padding: 8px;
++  }
++
++  .workbench-body {
++    gap: 12px;
++  }
++
++  .panel-left {
++    padding: 0 12px 12px;
++  }
++
++  .panel-editor :deep(.code-editor-container) {
++    height: 360px;
++  }
++}
++
++@media (pointer: coarse) {
++  .experiment-workbench :deep(.arco-btn),
++  .experiment-workbench :deep(.arco-tabs-tab),
++  .experiment-workbench :deep(.arco-select-view) {
++    min-height: 44px;
++  }
++}
+ </style>

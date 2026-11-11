@@ -1,0 +1,104 @@
+{
+  "valid" : true,
+  "items" : [ {
+    "type" : "units",
+    "code" : "unit.memory.functions",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.image-protection",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.contiguous-partition",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.fit-algorithms",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.paging-basics",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.tlb-multilevel",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.segmentation",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.segment-paging",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.summary-3-1",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.virtual-concepts",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.demand-paging",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.frame-allocation",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.replacement-opt-fifo",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.replacement-lru-clock",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.thrashing-workingset",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.mmap-performance",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.address-translation",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.summary-3-2",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "units",
+    "code" : "unit.memory.difficulties",
+    "action" : "CREATE",
+    "id" : null
+  } ],
+  "errors" : [ ],
+  "created" : 19,
+  "updated" : 0,
+  "unchanged" : 0,
+  "importRunCode" : "import.2115261157155270690"
+}

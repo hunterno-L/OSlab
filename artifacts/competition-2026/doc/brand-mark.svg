@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <title>知识内核</title>
+  <rect width="64" height="64" rx="16" fill="#20242B"/>
+  <path d="M24 18 10 32l14 14M40 18l14 14-14 14" stroke="#F7F8F2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="26" y="26" width="12" height="12" rx="3" fill="#F2D64B"/>
+</svg>

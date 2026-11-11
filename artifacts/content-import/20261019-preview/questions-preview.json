@@ -1,0 +1,317 @@
+{
+  "valid" : false,
+  "items" : [ ],
+  "errors" : [ {
+    "path" : "questions[0]",
+    "message" : "未知 nodeCode: os.overview.operating_system"
+  }, {
+    "path" : "questions[1]",
+    "message" : "未知 nodeCode: os.overview.operating_system"
+  }, {
+    "path" : "questions[2]",
+    "message" : "未知 nodeCode: os.overview.operating_system"
+  }, {
+    "path" : "questions[3]",
+    "message" : "未知 nodeCode: os.overview.resource_management"
+  }, {
+    "path" : "questions[4]",
+    "message" : "未知 nodeCode: os.overview.concurrency"
+  }, {
+    "path" : "questions[5]",
+    "message" : "未知 nodeCode: os.overview.concurrency"
+  }, {
+    "path" : "questions[6]",
+    "message" : "未知 nodeCode: os.overview.user_interface"
+  }, {
+    "path" : "questions[7]",
+    "message" : "未知 nodeCode: os.overview.user_interface"
+  }, {
+    "path" : "questions[8]",
+    "message" : "未知 nodeCode: os.overview.user_interface"
+  }, {
+    "path" : "questions[9]",
+    "message" : "未知 nodeCode: os.runtime.system_call"
+  }, {
+    "path" : "questions[10]",
+    "message" : "未知 nodeCode: os.overview.user_interface"
+  }, {
+    "path" : "questions[11]",
+    "message" : "未知 nodeCode: os.overview.operating_system"
+  }, {
+    "path" : "questions[12]",
+    "message" : "未知 nodeCode: os.overview.parallelism"
+  }, {
+    "path" : "questions[13]",
+    "message" : "未知 nodeCode: os.runtime.system_call"
+  }, {
+    "path" : "questions[14]",
+    "message" : "未知 nodeCode: os.overview.batch_system"
+  }, {
+    "path" : "questions[15]",
+    "message" : "未知 nodeCode: os.overview.batch_system"
+  }, {
+    "path" : "questions[16]",
+    "message" : "未知 nodeCode: os.overview.batch_system"
+  }, {
+    "path" : "questions[17]",
+    "message" : "未知 nodeCode: os.overview.batch_system"
+  }, {
+    "path" : "questions[18]",
+    "message" : "未知 nodeCode: os.overview.real_time_system"
+  }, {
+    "path" : "questions[19]",
+    "message" : "未知 nodeCode: os.overview.real_time_system"
+  }, {
+    "path" : "questions[20]",
+    "message" : "未知 nodeCode: os.overview.real_time_system"
+  }, {
+    "path" : "questions[21]",
+    "message" : "未知 nodeCode: os.overview.time_sharing_system"
+  }, {
+    "path" : "questions[22]",
+    "message" : "未知 nodeCode: os.overview.time_sharing_system"
+  }, {
+    "path" : "questions[23]",
+    "message" : "未知 nodeCode: os.overview.time_sharing_system"
+  }, {
+    "path" : "questions[24]",
+    "message" : "未知 nodeCode: os.overview.time_sharing_system"
+  }, {
+    "path" : "questions[25]",
+    "message" : "未知 nodeCode: os.overview.time_sharing_system"
+  }, {
+    "path" : "questions[26]",
+    "message" : "未知 nodeCode: os.overview.time_sharing_system"
+  }, {
+    "path" : "questions[27]",
+    "message" : "未知 nodeCode: os.overview.batch_system"
+  }, {
+    "path" : "questions[28]",
+    "message" : "未知 nodeCode: os.overview.real_time_system"
+  }, {
+    "path" : "questions[29]",
+    "message" : "未知 nodeCode: os.overview.personal_os"
+  }, {
+    "path" : "questions[30]",
+    "message" : "未知 nodeCode: os.overview.parallelism"
+  }, {
+    "path" : "questions[31]",
+    "message" : "未知 nodeCode: os.overview.real_time_system"
+  }, {
+    "path" : "questions[32]",
+    "message" : "未知 nodeCode: os.overview.batch_system"
+  }, {
+    "path" : "questions[33]",
+    "message" : "未知 nodeCode: os.overview.batch_system"
+  }, {
+    "path" : "questions[34]",
+    "message" : "未知 nodeCode: os.overview.batch_system"
+  }, {
+    "path" : "questions[35]",
+    "message" : "未知 nodeCode: os.overview.concurrency"
+  }, {
+    "path" : "questions[36]",
+    "message" : "未知 nodeCode: os.overview.batch_system"
+  }, {
+    "path" : "questions[37]",
+    "message" : "未知 nodeCode: os.overview.operating_system"
+  }, {
+    "path" : "questions[38]",
+    "message" : "未知 nodeCode: os.runtime.privileged_instruction"
+  }, {
+    "path" : "questions[39]",
+    "message" : "未知 nodeCode: os.runtime.system_call"
+  }, {
+    "path" : "questions[40]",
+    "message" : "未知 nodeCode: os.runtime.interrupt"
+  }, {
+    "path" : "questions[41]",
+    "message" : "未知 nodeCode: os.runtime.exception"
+  }, {
+    "path" : "questions[42]",
+    "message" : "未知 nodeCode: os.runtime.privileged_instruction"
+  }, {
+    "path" : "questions[43]",
+    "message" : "未知 nodeCode: os.runtime.interrupt"
+  }, {
+    "path" : "questions[44]",
+    "message" : "未知 nodeCode: os.runtime.mode_switch"
+  }, {
+    "path" : "questions[45]",
+    "message" : "未知 nodeCode: os.runtime.user_mode"
+  }, {
+    "path" : "questions[46]",
+    "message" : "未知 nodeCode: os.runtime.privileged_instruction"
+  }, {
+    "path" : "questions[47]",
+    "message" : "未知 nodeCode: os.runtime.kernel_mode"
+  }, {
+    "path" : "questions[48]",
+    "message" : "未知 nodeCode: os.runtime.trap_instruction"
+  }, {
+    "path" : "questions[49]",
+    "message" : "未知 nodeCode: os.runtime.kernel_mode"
+  }, {
+    "path" : "questions[50]",
+    "message" : "未知 nodeCode: os.runtime.privileged_instruction"
+  }, {
+    "path" : "questions[51]",
+    "message" : "未知 nodeCode: os.runtime.privileged_instruction"
+  }, {
+    "path" : "questions[52]",
+    "message" : "未知 nodeCode: os.runtime.kernel_mode"
+  }, {
+    "path" : "questions[53]",
+    "message" : "未知 nodeCode: os.runtime.privileged_instruction"
+  }, {
+    "path" : "questions[54]",
+    "message" : "未知 nodeCode: os.runtime.interrupt"
+  }, {
+    "path" : "questions[55]",
+    "message" : "未知 nodeCode: os.runtime.system_call"
+  }, {
+    "path" : "questions[56]",
+    "message" : "未知 nodeCode: os.runtime.system_call"
+  }, {
+    "path" : "questions[57]",
+    "message" : "未知 nodeCode: os.runtime.system_call"
+  }, {
+    "path" : "questions[58]",
+    "message" : "未知 nodeCode: os.runtime.user_mode"
+  }, {
+    "path" : "questions[59]",
+    "message" : "未知 nodeCode: os.runtime.mode_switch"
+  }, {
+    "path" : "questions[60]",
+    "message" : "未知 nodeCode: os.runtime.interrupt"
+  }, {
+    "path" : "questions[61]",
+    "message" : "未知 nodeCode: os.runtime.mode_switch"
+  }, {
+    "path" : "questions[62]",
+    "message" : "未知 nodeCode: os.runtime.privileged_instruction"
+  }, {
+    "path" : "questions[63]",
+    "message" : "未知 nodeCode: os.runtime.interrupt_handling"
+  }, {
+    "path" : "questions[64]",
+    "message" : "未知 nodeCode: os.runtime.mode_switch"
+  }, {
+    "path" : "questions[65]",
+    "message" : "未知 nodeCode: os.runtime.interrupt"
+  }, {
+    "path" : "questions[66]",
+    "message" : "未知 nodeCode: os.runtime.system_call"
+  }, {
+    "path" : "questions[67]",
+    "message" : "未知 nodeCode: os.runtime.interrupt_handling"
+  }, {
+    "path" : "questions[68]",
+    "message" : "未知 nodeCode: os.runtime.system_call"
+  }, {
+    "path" : "questions[69]",
+    "message" : "未知 nodeCode: os.runtime.interrupt_handling"
+  }, {
+    "path" : "questions[70]",
+    "message" : "未知 nodeCode: os.runtime.privileged_instruction"
+  }, {
+    "path" : "questions[71]",
+    "message" : "未知 nodeCode: os.runtime.system_call"
+  }, {
+    "path" : "questions[72]",
+    "message" : "未知 nodeCode: os.runtime.user_mode"
+  }, {
+    "path" : "questions[73]",
+    "message" : "未知 nodeCode: os.runtime.system_call"
+  }, {
+    "path" : "questions[74]",
+    "message" : "未知 nodeCode: os.runtime.interrupt_handling"
+  }, {
+    "path" : "questions[75]",
+    "message" : "未知 nodeCode: os.structure.layered"
+  }, {
+    "path" : "questions[76]",
+    "message" : "未知 nodeCode: os.structure.layered"
+  }, {
+    "path" : "questions[77]",
+    "message" : "未知 nodeCode: os.structure.layered"
+  }, {
+    "path" : "questions[78]",
+    "message" : "未知 nodeCode: os.structure.modular"
+  }, {
+    "path" : "questions[79]",
+    "message" : "未知 nodeCode: os.structure.monolithic_kernel"
+  }, {
+    "path" : "questions[80]",
+    "message" : "未知 nodeCode: os.structure.microkernel"
+  }, {
+    "path" : "questions[81]",
+    "message" : "未知 nodeCode: os.structure.microkernel"
+  }, {
+    "path" : "questions[82]",
+    "message" : "未知 nodeCode: os.structure.microkernel"
+  }, {
+    "path" : "questions[83]",
+    "message" : "未知 nodeCode: os.structure.os_structure"
+  }, {
+    "path" : "questions[84]",
+    "message" : "未知 nodeCode: os.structure.microkernel"
+  }, {
+    "path" : "questions[85]",
+    "message" : "未知 nodeCode: os.structure.exokernel"
+  }, {
+    "path" : "questions[86]",
+    "message" : "未知 nodeCode: os.boot.boot_process"
+  }, {
+    "path" : "questions[87]",
+    "message" : "未知 nodeCode: os.boot.boot_process"
+  }, {
+    "path" : "questions[88]",
+    "message" : "未知 nodeCode: os.boot.boot_process"
+  }, {
+    "path" : "questions[89]",
+    "message" : "未知 nodeCode: os.boot.boot_process"
+  }, {
+    "path" : "questions[90]",
+    "message" : "未知 nodeCode: os.boot.boot_process"
+  }, {
+    "path" : "questions[91]",
+    "message" : "未知 nodeCode: os.virtualization.virtual_machine"
+  }, {
+    "path" : "questions[92]",
+    "message" : "未知 nodeCode: os.virtualization.virtual_machine"
+  }, {
+    "path" : "questions[93]",
+    "message" : "未知 nodeCode: os.virtualization.vmm"
+  }, {
+    "path" : "questions[94]",
+    "message" : "未知 nodeCode: os.boot.boot_process"
+  }, {
+    "path" : "questions[95]",
+    "message" : "未知 nodeCode: os.boot.boot_process"
+  }, {
+    "path" : "questions[96]",
+    "message" : "未知 nodeCode: os.structure.microkernel"
+  }, {
+    "path" : "questions[97]",
+    "message" : "未知 nodeCode: os.overview.manual_operation"
+  }, {
+    "path" : "questions[98]",
+    "message" : "未知 nodeCode: os.overview.network_os"
+  }, {
+    "path" : "questions[99]",
+    "message" : "未知 nodeCode: os.overview.distributed_os"
+  }, {
+    "path" : "questions[100]",
+    "message" : "未知 nodeCode: os.runtime.primitive"
+  }, {
+    "path" : "questions[101]",
+    "message" : "未知 nodeCode: os.runtime.system_call"
+  }, {
+    "path" : "questions[102]",
+    "message" : "未知 nodeCode: os.runtime.kernel"
+  } ],
+  "created" : 0,
+  "updated" : 0,
+  "unchanged" : 0
+}

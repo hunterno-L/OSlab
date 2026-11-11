@@ -1,0 +1,37 @@
+{
+  "questionId": "1930156605618573314",
+  "resourceCode": "exp.legacy.1930156605618573314",
+  "title": "实验4.3 基础系统调用函数 `sys_mem_alloc`",
+  "content": "### 任务描述\n\n在 `lib/syscall_all.c` 中实现 `int sys_mem_alloc(int sysno, u_int envid, u_int va, u_int perm)` 函数，该函数用于分配内存，是进程间通信（IPC）和 `fork` 等系统调用的基础。\n\n### 知识要点\n\n1. 系统调用的基本概念和作用。\n2. 用户空间和内核空间的交互。\n3. 内存分配的基本原理。\n4. MIPS 调用规范和参数传递。\n5. 虚拟内存到物理内存的映射。\n6. `pmap.c` 中相关函数的使用。\n\n### 实验任务\n\n1. 理解系统调用 `sys_mem_alloc` 的功能和参数含义。\n2. 在 `lib/syscall_all.c` 中编写 `sys_mem_alloc` 函数，实现内存分配功能。\n3. 调用 `pmap.c` 中定义的相关函数，完成虚拟内存到物理内存的映射。\n4. 确保函数遵循 MIPS 调用规范，正确传递参数和返回结果。\n5. 测试 `sys_mem_alloc` 函数，验证其能够正确分配内存并映射到物理内存。\n6. 确保 `sys_mem_alloc` 函数能够作为 IPC 和 `fork` 等系统调用的基础支持。",
+  "tags": [
+    "进程",
+    "系统调用",
+    "内核",
+    "用户空间",
+    "内核空间"
+  ],
+  "referenceAnswer": "",
+  "originalCode": "",
+  "judgeCase": [
+    {
+      "input": "",
+      "output": ""
+    }
+  ],
+  "judgeConfig": {
+    "timeLimit": 1000,
+    "memoryLimit": 1000,
+    "stackLimit": 1000
+  },
+  "legacySetIds": [
+    "4"
+  ],
+  "legacySets": [
+    {
+      "id": "4",
+      "title": "第四章 文件系统"
+    }
+  ],
+  "snapshotUpdatedTime": "2025-06-04 14:56:10",
+  "runtimeValidated": false
+}
