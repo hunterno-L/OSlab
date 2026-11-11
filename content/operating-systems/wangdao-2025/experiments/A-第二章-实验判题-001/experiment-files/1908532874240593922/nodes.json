@@ -1,0 +1,26 @@
+{
+  "questionId": "1908532874240593922",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.paging",
+      "nodeName": "基本分页存储管理",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "mips_detect_memory() 由 basemem_kb/extmem_kb 两个 CMOS 读数算出 maxpa 与 npage，npage = maxpa/BY2PG 就是 4KB 分页管理的页框总数上限。"
+    },
+    {
+      "nodeCode": "os.memory.memory_management",
+      "nodeName": "内存管理",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "maxpa/basemem/extmem/npage 四个全局变量界定内核可用物理内存的大小与范围，此后 page_init/page_alloc 都不得越过 npage。"
+    },
+    {
+      "nodeCode": "os.memory.logical_address",
+      "nodeName": "逻辑地址与物理地址",
+      "role": "RELATED",
+      "weight": 0.5,
+      "reason": "basemem 与 extmem 分别对应 1MB 以下与 1MB 以上的物理内存范围，子任务输出四个十进制数正是物理地址空间划分的直接量化。"
+    }
+  ]
+}

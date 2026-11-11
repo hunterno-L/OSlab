@@ -1,0 +1,26 @@
+{
+  "questionId": "1930154331844431873",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.boot.boot_process",
+      "nodeName": "操作系统引导过程",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "boot/start.S 是内核引导的第一段汇编：必须先把 $sp 设到 bootstacktop、清 $fp，才能 jal main 进入 C 世界；缺栈指针时任何 C 函数调用都会踩坏内存。"
+    },
+    {
+      "nodeCode": "os.runtime.kernel_mode",
+      "nodeName": "内核态",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "启动汇编运行在 kseg0 内核态，分析对象 fib/main 经 mips-linux-gnu-gcc -S 生成的 slti/bnez 条件跳转与 jal/jr 调用返回都是内核态代码。"
+    },
+    {
+      "nodeCode": "os.runtime.kernel",
+      "nodeName": "操作系统内核",
+      "role": "RELATED",
+      "weight": 0.5,
+      "reason": "实验要求观察 C 的递归与循环在汇编层的栈操作（压栈/弹栈），这是理解内核为何不能依赖宿主 libc、必须自带启动代码的前提。"
+    }
+  ]
+}

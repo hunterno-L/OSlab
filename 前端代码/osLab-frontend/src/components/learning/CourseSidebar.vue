@@ -1,6 +1,7 @@
 <template>
   <aside
     class="course-sidebar"
+    :aria-label="navKey === 'teaching' ? '教学管理导航' : '课程导航'"
     :class="{ 'course-sidebar--compact': navKey === 'experiments' }"
   >
     <div class="sidebar-block">
@@ -76,6 +77,11 @@ const activeItemPath = computed(() => {
   // A simulation is a sibling of the experiment catalog, not its detail.
   if (route.path.startsWith("/experiments/code/")) return "/experiments";
   if (route.path.startsWith("/assessments/run/")) return "/assessments";
+  if (route.path.startsWith("/teaching/")) {
+    return candidates
+      .filter((item) => route.path.startsWith(`${item.resolved.path}/`))
+      .sort((a, b) => b.resolved.path.length - a.resolved.path.length)[0]?.path;
+  }
   return "";
 });
 

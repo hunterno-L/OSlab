@@ -1,17 +1,31 @@
 <template>
   <div class="teaching-tasks">
+    <header class="task-page-head">
+      <div>
+        <h1 class="oslab-page-title">学习任务</h1>
+        <p class="task-page-description">
+          布置学习与验证任务，跟进提交并完成批阅。
+          <span v-if="filters.className"
+            >当前按「{{ filters.className }}」统计。</span
+          >
+        </p>
+      </div>
+      <a-button @click="backToWorkspace">返回教学工作台</a-button>
+    </header>
     <a-card>
       <div class="toolbar">
         <a-space wrap>
           <a-input
             v-model="filters.title"
             placeholder="任务标题"
+            aria-label="按任务标题筛选"
             allow-clear
             style="width: 200px"
           />
           <a-select
             v-model="filters.status"
             placeholder="状态"
+            aria-label="按任务状态筛选"
             allow-clear
             style="width: 140px"
           >
@@ -22,6 +36,7 @@
           <a-select
             v-model="filters.className"
             placeholder="班级"
+            aria-label="按班级筛选"
             allow-clear
             style="width: 160px"
           >
@@ -37,16 +52,19 @@
           <a-button type="primary" @click="reload">筛选</a-button>
         </a-space>
         <a-space>
-          <a-button @click="router.push('/teaching/tasks/new')"
-            >新建任务</a-button
-          >
+          <a-button @click="newTask">新建任务</a-button>
           <a-button @click="load">刷新</a-button>
         </a-space>
       </div>
 
+      <div v-if="listError" class="oslab-error" role="alert">
+        <span>{{ listError }}</span>
+        <a-button size="small" @click="load">重试</a-button>
+      </div>
       <a-table
         :data="records"
         :loading="loading"
+        :scroll="{ x: 1190 }"
         :pagination="{
           current,
           pageSize,
@@ -65,7 +83,11 @@
                 <button
                   type="button"
                   class="task-title"
-                  @click="openReview(record)"
+                  @click="
+                    record.status === 'DRAFT'
+                      ? edit(record)
+                      : openReview(record)
+                  "
                 >
                   {{ record.title }}
                 </button>
@@ -173,7 +195,11 @@
           </a-table-column>
         </template>
         <template #empty>
-          <a-empty description="还没有创建学习任务" />
+          <a-empty
+            :description="
+              listError ? '任务列表暂不可用，请重试' : '当前筛选下暂无学习任务'
+            "
+          />
         </template>
       </a-table>
     </a-card>
@@ -181,8 +207,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
-import { useRouter } from "vue-router";
+import { onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message, Modal } from "@arco-design/web-vue";
 import {
   archiveTeachingTask,
@@ -195,7 +221,12 @@ import {
 } from "@/api/tasks";
 
 const router = useRouter();
+const route = useRoute();
+const queryText = (value: unknown) =>
+  String((Array.isArray(value) ? value[0] : value) || "").trim();
 const loading = ref(false);
+const listError = ref("");
+let listSeq = 0;
 const records = ref<any[]>([]);
 const total = ref(0);
 const current = ref(1);
@@ -204,12 +235,16 @@ const classes = ref<any[]>([]);
 const filters = reactive({
   title: "",
   status: "",
-  className: "",
+  className: queryText(route.query.className),
   archived: false,
 });
 
 const load = async () => {
+  const seq = ++listSeq;
   loading.value = true;
+  listError.value = "";
+  records.value = [];
+  total.value = 0;
   try {
     const params: Record<string, unknown> = {
       current: current.value,
@@ -220,16 +255,17 @@ const load = async () => {
     if (filters.status) params.status = filters.status;
     if (filters.className) params.className = filters.className;
     const res = await listTeachingTasks(params);
+    if (seq !== listSeq) return;
     if (res.data?.code === 0) {
       records.value = res.data.data?.records || [];
       total.value = Number(res.data.data?.total || 0);
     } else {
-      Message.error(res.data?.message || "任务列表加载失败");
+      listError.value = res.data?.message || "任务列表加载失败，请重试";
     }
   } catch {
-    Message.error("任务列表加载失败");
+    if (seq === listSeq) listError.value = "任务列表加载失败，请检查网络后重试";
   } finally {
-    loading.value = false;
+    if (seq === listSeq) loading.value = false;
   }
 };
 
@@ -244,8 +280,21 @@ const loadClasses = async () => {
 
 const reload = () => {
   current.value = 1;
+  router.replace({
+    query: { ...route.query, className: filters.className || undefined },
+  });
   load();
 };
+watch(
+  () => route.query.className,
+  (value) => {
+    const next = queryText(value);
+    if (next === filters.className) return;
+    filters.className = next;
+    current.value = 1;
+    void load();
+  }
+);
 
 const onPageChange = (page: number) => {
   current.value = page;
@@ -257,10 +306,27 @@ const onPageSizeChange = (size: number) => {
   load();
 };
 
+const taskQuery = () => ({
+  className: filters.className || undefined,
+  courseCode: queryText(route.query.courseCode) || undefined,
+});
+const newTask = () =>
+  router.push({ path: "/teaching/tasks/new", query: taskQuery() });
+const backToWorkspace = () =>
+  router.push({ path: "/teaching/overview", query: taskQuery() });
 const edit = (record: any) =>
-  router.push(`/teaching/tasks/${record.taskCode}/edit`);
+  router.push({
+    path: `/teaching/tasks/${record.taskCode}/edit`,
+    query: taskQuery(),
+  });
 const openReview = (record: any) =>
-  router.push(`/teaching/tasks/${record.taskCode}/review`);
+  router.push({
+    path: `/teaching/tasks/${record.taskCode}/review`,
+    query: {
+      ...taskQuery(),
+      pendingReview: Number(record.pendingReviewCount) > 0 ? "1" : undefined,
+    },
+  });
 
 const publish = (record: any) => {
   Modal.confirm({
@@ -300,7 +366,10 @@ const duplicate = async (record: any) => {
   const res = await duplicateTeachingTask(record.taskCode);
   if (res.data?.code === 0) {
     Message.success("已复制为新草稿");
-    router.push(`/teaching/tasks/${res.data.data.taskCode}/edit`);
+    router.push({
+      path: `/teaching/tasks/${res.data.data.taskCode}/edit`,
+      query: taskQuery(),
+    });
   } else {
     Message.error(res.data?.message || "复制失败");
   }
@@ -371,6 +440,24 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.task-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--oslab-space-3);
+  margin-bottom: var(--oslab-space-4);
+}
+.task-page-description {
+  margin: var(--oslab-space-1) 0 0;
+  color: var(--oslab-muted-strong);
+}
+.teaching-tasks {
+  min-width: 0;
+}
+.teaching-tasks :deep(.arco-table) {
+  max-width: 100%;
+}
 .teaching-tasks :deep(.arco-card) {
   border-radius: var(--oslab-radius-lg, 8px);
 }

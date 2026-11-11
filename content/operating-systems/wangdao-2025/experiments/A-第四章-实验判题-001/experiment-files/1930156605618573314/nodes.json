@@ -1,0 +1,26 @@
+{
+  "questionId": "1930156605618573314",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.runtime.system_call",
+      "nodeName": "系统调用",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "sys_mem_alloc(sysno, envid, va, perm) 是暴露给用户态的内存分配系统调用，内部用 envid2env 取目标 PCB 后调 pmap.c 的 page_alloc + page_insert。"
+    },
+    {
+      "nodeCode": "os.memory.virtual_memory",
+      "nodeName": "虚拟内存",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "为指定进程的指定虚拟地址按需分配一页物理内存并建立映射，是虚拟内存按需调页的内核侧实现，也是 IPC 与 fork 的基础。"
+    },
+    {
+      "nodeCode": "os.memory.page_table",
+      "nodeName": "页表",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "实际落地是 pmap.c 的 page_insert，perm 决定页表项的权限位，返回码必须遵循 MIPS 调用规范传回用户态。"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "questionId": "1908538371526131713",
+  "unitMappings": [
+    {
+      "unitCode": "unit.memory.paging-basics",
+      "required": false,
+      "completionRule": "PASS"
+    }
+  ]
+}

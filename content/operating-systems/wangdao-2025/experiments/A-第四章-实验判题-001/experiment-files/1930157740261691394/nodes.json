@@ -1,0 +1,26 @@
+{
+  "questionId": "1930157740261691394",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.page_fault",
+      "nodeName": "缺页中断",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "sys_set_pgfault_handler 校验用户传入的处理函数指针，用 syscall_mem_alloc 为异常处理栈分配内存，并把 handler 写进 Env 的 env_pgfault_handler。"
+    },
+    {
+      "nodeCode": "os.runtime.system_call",
+      "nodeName": "系统调用",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "用户态无法直接改内核里的 PCB 字段，必须经该系统调用登记自己的缺页处理函数，且内核须按 MIPS 调用规范正确处理错误情况。"
+    },
+    {
+      "nodeCode": "os.process.pcb",
+      "nodeName": "进程控制块",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "登记结果落在 struct Env 的 env_pgfault_handler 字段，缺页发生时内核据此把控制流转交给用户态处理函数。"
+    }
+  ]
+}

@@ -84,6 +84,8 @@ public class QuestionVO implements Serializable {
      * 原始代码
      */
     private String originalCode;
+    /** AUTO, CONCEPT_HARNESS, or LOCAL_BUILD; no judge cases or answers are exposed. */
+    private String judgeMode;
     /**
      * 题目集
      */

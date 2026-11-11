@@ -9,12 +9,15 @@ import com.yupi.springbootinit.common.ErrorCode;
 import com.yupi.springbootinit.exception.BusinessException;
 import com.yupi.springbootinit.mapper.AiLearningSessionMapper;
 import com.yupi.springbootinit.mapper.AiTutorTurnMapper;
+import com.yupi.springbootinit.mapper.LearningQuestionMapper;
 import com.yupi.springbootinit.model.dto.ai.AiRequests;
 import com.yupi.springbootinit.model.entity.AiLearningSession;
 import com.yupi.springbootinit.model.entity.AiTutorTurn;
+import com.yupi.springbootinit.model.entity.LearningQuestion;
 import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.model.vo.ai.AiCourseContext;
 import com.yupi.springbootinit.model.vo.ai.AiTurnVO;
+import com.yupi.springbootinit.ai.tutor.TutorAssessmentGuardPort;
 import com.yupi.springbootinit.ai.tutor.TutorOrchestrator;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +51,7 @@ class AiSessionTurnContractTest {
     private final ModelProfileService profileService = mock(ModelProfileService.class);
     private final TutorOrchestrator orchestrator = mock(TutorOrchestrator.class);
     private final AiActionService actionService = mock(AiActionService.class);
+    private final LearningQuestionMapper learningQuestionMapper = mock(LearningQuestionMapper.class);
     private final ThreadPoolExecutor executor = mock(ThreadPoolExecutor.class);
 
     private final AiSessionService sessions = new AiSessionService();
@@ -56,6 +60,19 @@ class AiSessionTurnContractTest {
     private final User owner = new User();
     private final User intruder = new User();
     private AiLearningSession session;
+
+    @Test
+    void disabledCourseCannotCreateSessionOrSubmitNewTurn() {
+        AiRequests.CreateSession create = new AiRequests.CreateSession();
+        create.setCourseCode("course.database-systems");
+        assertThrows(BusinessException.class, () -> sessions.create(owner, create));
+        session.setCourseCode("course.database-systems");
+        when(sessionMapper.selectById(31L)).thenReturn(session);
+        AiRequests.CreateTurn body = new AiRequests.CreateTurn();
+        assertThrows(BusinessException.class, () -> turns.submit(owner, "31", body));
+        verify(sessionMapper, never()).insert(any());
+        verify(turnMapper, never()).insert(any());
+    }
 
     @BeforeEach
     void setUp() {
@@ -79,6 +96,12 @@ class AiSessionTurnContractTest {
         session.setRowVersion(0);
         session.setIsDelete(0);
 
+        com.yupi.springbootinit.course.EnabledCourses enabled = new com.yupi.springbootinit.course.EnabledCourses("course.operating-systems");
+        com.yupi.springbootinit.learning.PublishedCourseScopeService scope = mock(com.yupi.springbootinit.learning.PublishedCourseScopeService.class);
+        ReflectionTestUtils.setField(sessions, "courseScope", scope);
+        ReflectionTestUtils.setField(turns, "courseScope", scope);
+        ReflectionTestUtils.setField(sessions, "enabledCourses", enabled);
+        ReflectionTestUtils.setField(turns, "enabledCourses", enabled);
         ReflectionTestUtils.setField(sessions, "sessionMapper", sessionMapper);
         ReflectionTestUtils.setField(sessions, "modelProfileService", profileService);
 
@@ -88,6 +111,7 @@ class AiSessionTurnContractTest {
         ReflectionTestUtils.setField(turns, "orchestrator", orchestrator);
         ReflectionTestUtils.setField(turns, "properties", new AiProperties());
         ReflectionTestUtils.setField(turns, "actionService", actionService);
+        ReflectionTestUtils.setField(turns, "learningQuestionMapper", learningQuestionMapper);
         ReflectionTestUtils.setField(turns, "executor", executor);
 
         when(sessionMapper.selectById(31L)).thenReturn(session);
@@ -266,7 +290,7 @@ class AiSessionTurnContractTest {
         concurrent.setMode(AiTutorTurn.MODE_FALLBACK);
         // doThrow 而不是 when(...).thenThrow：后者会真的调用一次已注册的 thenAnswer
         doThrow(new DuplicateKeyException("uk_ai_turn_idempotency")).when(turnMapper).insert(any());
-        when(turnMapper.selectList(any())).thenReturn(Collections.emptyList(), List.of(concurrent));
+        when(turnMapper.selectList(any())).thenReturn(Collections.emptyList(), Collections.emptyList(), List.of(concurrent));
 
         AiTurnVO vo = turns.submit(owner, "31", turnRequest("req-1"));
         assertEquals("900", vo.getTurnId());
@@ -358,7 +382,7 @@ class AiSessionTurnContractTest {
         result.setMode(AiTutorTurn.MODE_FALLBACK);
         result.setErrorMessage("模型调用失败：鉴权失败");
         result.setRetryable(true);
-        when(orchestrator.run(any(), any(), any(), any(), any())).thenReturn(result);
+        when(orchestrator.runWithHistory(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(result);
 
         turns.submit(owner, "31", turnRequest("req-1"));
 
@@ -376,7 +400,7 @@ class AiSessionTurnContractTest {
         AiTutorTurn stored = runningTurn();
         when(turnMapper.selectById(900L)).thenReturn(stored);
         when(profileService.resolveEndpoint(7L, null)).thenReturn(new ModelEndpoint());
-        when(orchestrator.run(any(), any(), any(), any(), any()))
+        when(orchestrator.runWithHistory(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new IllegalStateException("boom"));
 
         turns.submit(owner, "31", turnRequest("req-1"));
@@ -394,13 +418,84 @@ class AiSessionTurnContractTest {
                 .thenThrow(new BusinessException(ErrorCode.OPERATION_ERROR, "模型配置尚未测试通过"));
         TutorOrchestrator.TurnResult result = new TutorOrchestrator.TurnResult();
         result.setAnswer("规则回答");
-        when(orchestrator.run(any(), any(), any(), any(), isNull())).thenReturn(result);
+        when(orchestrator.runWithHistory(any(), any(), any(), any(), isNull(), any(), any(), any(), any())).thenReturn(result);
 
         turns.submit(owner, "31", turnRequest("req-1"));
 
         // 端点解析失败后仍以 null 端点执行（降级），并把原因写进轮次
-        verify(orchestrator).run(any(), any(), any(), any(), isNull());
+        verify(orchestrator).runWithHistory(any(), any(), any(), any(), isNull(), any(), any(), any(), any());
         assertTrue(stored.getErrorMessage().contains("尚未测试通过"));
+    }
+
+    @Test
+    void questionStemIsAddedToModelInputWithoutLeakingAnswer() {
+        runInline();
+        AiTutorTurn stored = runningTurn();
+        when(turnMapper.selectById(900L)).thenReturn(stored);
+        when(profileService.resolveEndpoint(7L, null)).thenReturn(new ModelEndpoint());
+        LearningQuestion question = new LearningQuestion();
+        question.setId(55L);
+        question.setTitle("属性闭包题");
+        question.setContent("R(A,B,C)，F={A→B}，A+ 是什么？");
+        question.setOptions("[{\"key\":\"A\",\"text\":\"{A,B}\"}]");
+        question.setAnswer("{\"value\":\"A\"}");
+        question.setAnalysis("答案解释不应进入提示词");
+        question.setReviewStatus("PUBLISHED");
+        question.setIsDelete(0);
+        when(learningQuestionMapper.selectById(55L)).thenReturn(question);
+        TutorOrchestrator.TurnResult result = new TutorOrchestrator.TurnResult();
+        result.setAnswer("先回忆闭包定义");
+        result.setMode(AiTutorTurn.MODE_AI);
+        when(orchestrator.runWithHistory(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(result);
+
+        AiRequests.CreateTurn request = turnRequest("req-1");
+        AiCourseContext context = new AiCourseContext();
+        context.setResourceRef("question:55");
+        request.setContext(context);
+        turns.submit(owner, "31", request);
+
+        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
+        verify(orchestrator).runWithHistory(any(), any(), messageCaptor.capture(),
+                any(), any(), any(), any(), any(), any());
+        String prompt = messageCaptor.getValue();
+        assertTrue(prompt.contains("属性闭包题"), "模型需要看到题目标题");
+        assertTrue(prompt.contains("R(A,B,C)"), "模型需要看到题干");
+        assertFalse(prompt.contains("答案解释"), "解析不得进入提示词");
+        assertFalse(prompt.contains("{\"value\":\"A\"}"), "正确答案不得进入提示词");
+    }
+
+    @Test
+    void taskScopedQuestionStemIsNotInjectedByGuessingId() {
+        runInline();
+        AiTutorTurn stored = runningTurn();
+        when(turnMapper.selectById(900L)).thenReturn(stored);
+        when(profileService.resolveEndpoint(7L, null)).thenReturn(new ModelEndpoint());
+        LearningQuestion question = new LearningQuestion();
+        question.setId(55L);
+        question.setTitle("任务私有题");
+        question.setContent("班级 A 的内部题面");
+        question.setReviewStatus("PUBLISHED");
+        question.setResourceScope("TASK");
+        when(learningQuestionMapper.selectById(55L)).thenReturn(question);
+        TutorOrchestrator.TurnResult result = new TutorOrchestrator.TurnResult();
+        result.setAnswer("ok");
+        result.setMode(AiTutorTurn.MODE_AI);
+        when(orchestrator.runWithHistory(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(result);
+
+        AiRequests.CreateTurn request = turnRequest("req-1");
+        AiCourseContext context = new AiCourseContext();
+        context.setResourceRef("question:55");
+        request.setContext(context);
+        turns.submit(owner, "31", request);
+
+        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
+        verify(orchestrator).runWithHistory(any(), any(), messageCaptor.capture(),
+                any(), any(), any(), any(), any(), any());
+        assertFalse(messageCaptor.getValue().contains("任务私有题"),
+                "任务私有题不能因前端传入 id 被注入");
+        assertFalse(messageCaptor.getValue().contains("班级 A 的内部题面"));
     }
 
     @Test
@@ -408,6 +503,133 @@ class AiSessionTurnContractTest {
         AiProperties properties = new AiProperties();
         assertEquals(3, properties.getTurn().getMaxToolCalls(), "每轮最多 3 次工具执行");
         assertEquals(2, properties.getTurn().getMaxModelCalls(), "每轮最多 2 次模型调用");
+    }
+
+    // endregion
+
+    // region A2：导师指令、并发、守卫与历史
+
+    @Test
+    void hintWithoutAttemptContextIsRejectedBeforeInsert() {
+        AiRequests.CreateTurn request = turnRequest("req-hint");
+        AiRequests.TutorDirective tutor = new AiRequests.TutorDirective();
+        tutor.setScene("QUESTION");
+        tutor.setIntent("HINT");
+        request.setTutor(tutor);
+        assertEquals(ErrorCode.PARAMS_ERROR.getCode(), assertThrows(BusinessException.class,
+                () -> turns.submit(owner, "31", request)).getCode());
+        verify(turnMapper, never()).insert(any());
+    }
+
+    @Test
+    void unknownTutorSceneOrIntentIsRejected() {
+        AiRequests.CreateTurn scene = turnRequest("req-scene");
+        AiRequests.TutorDirective badScene = new AiRequests.TutorDirective();
+        badScene.setScene("MONITOR");
+        scene.setTutor(badScene);
+        assertEquals(ErrorCode.PARAMS_ERROR.getCode(), assertThrows(BusinessException.class,
+                () -> turns.submit(owner, "31", scene)).getCode());
+
+        AiRequests.CreateTurn intent = turnRequest("req-intent");
+        AiRequests.TutorDirective badIntent = new AiRequests.TutorDirective();
+        badIntent.setIntent("EXAM");
+        intent.setTutor(badIntent);
+        assertEquals(ErrorCode.PARAMS_ERROR.getCode(), assertThrows(BusinessException.class,
+                () -> turns.submit(owner, "31", intent)).getCode());
+        verify(turnMapper, never()).insert(any());
+    }
+
+    @Test
+    void oversizedAttachmentIsRejectedNotSilentlyTruncated() {
+        AiRequests.CreateTurn request = turnRequest("req-attach");
+        AiRequests.TutorDirective tutor = new AiRequests.TutorDirective();
+        AiRequests.TutorAttachment attachment = new AiRequests.TutorAttachment();
+        attachment.setKind("CODE");
+        attachment.setLabel("当前代码");
+        attachment.setText(org.apache.commons.lang3.StringUtils.repeat("x", 8001));
+        tutor.setAttachments(java.util.Collections.singletonList(attachment));
+        request.setTutor(tutor);
+        assertEquals(ErrorCode.PARAMS_ERROR.getCode(), assertThrows(BusinessException.class,
+                () -> turns.submit(owner, "31", request)).getCode());
+        verify(turnMapper, never()).insert(any());
+    }
+
+    @Test
+    void anotherRunningTurnInSameSessionIsBusyNotQueued() {
+        AiTutorTurn running = new AiTutorTurn();
+        running.setId(901L);
+        running.setUserId(7L);
+        running.setSessionId(31L);
+        running.setStatus(AiTutorTurn.STATUS_RUNNING);
+        when(turnMapper.selectList(any())).thenReturn(Collections.emptyList(), List.of(running));
+
+        BusinessException error = assertThrows(BusinessException.class,
+                () -> turns.submit(owner, "31", turnRequest("req-second")));
+        assertEquals(ErrorCode.OPERATION_ERROR.getCode(), error.getCode());
+        assertTrue(error.getMessage().contains("正在处理"));
+        verify(turnMapper, never()).insert(any());
+        verifyNoInteractions(executor);
+    }
+
+    @Test
+    void guardDenialEndsTurnFailedWithoutModelCall() {
+        runInline();
+        TutorAssessmentGuardPort guard = mock(TutorAssessmentGuardPort.class);
+        when(guard.check(any(), any(), any(), any(), any()))
+                .thenReturn(TutorAssessmentGuardPort.Decision.deny("整组自测进行中，本组题不提供提示"));
+        ReflectionTestUtils.setField(turns, "assessmentGuard", guard);
+        AiTutorTurn stored = runningTurn();
+        when(turnMapper.selectById(900L)).thenReturn(stored);
+
+        AiRequests.CreateTurn request = turnRequest("req-hint");
+        AiRequests.TutorDirective tutor = new AiRequests.TutorDirective();
+        tutor.setScene("QUESTION");
+        tutor.setIntent("HINT");
+        request.setTutor(tutor);
+        AiCourseContext context = new AiCourseContext();
+        context.setAttemptContextId("555");
+        request.setContext(context);
+
+        turns.submit(owner, "31", request);
+
+        assertEquals(AiTutorTurn.STATUS_FAILED, stored.getStatus());
+        assertTrue(stored.getErrorMessage().contains("自测"));
+        verifyNoInteractions(orchestrator);
+    }
+
+    @Test
+    void historyIsLimitedTruncatedAndChronological() {
+        AiProperties properties = new AiProperties();
+        properties.getTurn().setHistoryMaxTurns(2);
+        properties.getTurn().setHistoryMaxChars(1000);
+        properties.getTurn().setHistoryTurnChars(120);
+        ReflectionTestUtils.setField(turns, "properties", properties);
+        AiTutorTurn newer = storedTurn(899L, org.apache.commons.lang3.StringUtils.repeat("问", 500), org.apache.commons.lang3.StringUtils.repeat("答", 500));
+        AiTutorTurn older = storedTurn(898L, org.apache.commons.lang3.StringUtils.repeat("旧问", 200), org.apache.commons.lang3.StringUtils.repeat("旧答", 200));
+        // 服务按 id 倒序取最近 2 条；返回时反转为时间正序
+        when(turnMapper.selectList(any())).thenReturn(java.util.Arrays.asList(newer, older));
+
+        java.util.List<TutorOrchestrator.ConversationTurn> history =
+                turns.loadHistory(7L, 31L, 900L);
+
+        assertEquals(2, history.size());
+        assertTrue(history.get(0).getUserMessage().startsWith("旧问"));
+        assertTrue(history.get(1).getUserMessage().startsWith("问"));
+        // 单轮字符上限有 200 的下限保护：问题 1/3、回答 2/3
+        assertTrue(history.get(1).getAnswer().length() <= 133);
+        assertTrue(history.get(1).getUserMessage().length() <= 67);
+    }
+
+    private AiTutorTurn storedTurn(Long id, String message, String answer) {
+        AiTutorTurn turn = new AiTutorTurn();
+        turn.setId(id);
+        turn.setUserId(7L);
+        turn.setSessionId(31L);
+        turn.setStatus(AiTutorTurn.STATUS_SUCCEEDED);
+        turn.setMessage(message);
+        turn.setAnswer(answer);
+        turn.setIsDelete(0);
+        return turn;
     }
 
     // endregion

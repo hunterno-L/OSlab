@@ -15,16 +15,21 @@ $BackendJar = Join-Path $BackendDir "target\springboot-init-0.0.1-SNAPSHOT.jar"
 $FrontendDir = Join-Path $Root "前端代码\osLab-frontend"
 $FrontendCli = Join-Path $FrontendDir "node_modules\@vue\cli-service\bin\vue-cli-service.js"
 $LogDir = Join-Path $Root "tmp"
+$RuntimeJar = Join-Path $LogDir "backend-runtime\springboot-init-0.0.1-SNAPSHOT.jar"
 $StartedProcesses = @()
 
 function Get-ProjectProcess {
     param([string]$Kind)
     $name = if ($Kind -eq "backend") { "java.exe" } else { "node.exe" }
-    $path = if ($Kind -eq "backend") { $BackendJar } else { $FrontendCli }
     Get-CimInstance Win32_Process -Filter "Name='$name'" | Where-Object {
-        $_.CommandLine -and
-        $_.CommandLine.IndexOf($path, [StringComparison]::OrdinalIgnoreCase) -ge 0 -and
-        ($Kind -eq "backend" -or $_.CommandLine -match 'vue-cli-service.+\bserve\b')
+        if (-not $_.CommandLine) { return $false }
+        if ($Kind -eq "backend") {
+            $_.CommandLine.IndexOf($BackendJar, [StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+                $_.CommandLine.IndexOf($RuntimeJar, [StringComparison]::OrdinalIgnoreCase) -ge 0
+        } else {
+            $_.CommandLine.IndexOf($FrontendDir, [StringComparison]::OrdinalIgnoreCase) -ge 0 -and
+                $_.CommandLine -match 'node_modules[\\/](?:\.bin[\\/]+\.\.[\\/])?@vue[\\/]cli-service[\\/]bin[\\/]vue-cli-service\.js.*\bserve\b'
+        }
     }
 }
 
@@ -198,20 +203,12 @@ try {
         foreach ($port in @(8080..8090) + @($FrontendPort)) {
             $origins += "http://localhost:$port", "http://127.0.0.1:$port"
         }
-        $backendArgs = @("-jar", "`"$BackendJar`"", "--server.port=$BackendPort", "--cors.allowed-origins=$($origins -join ',')")
-        # 本机 Neo4j 需要口令；判题默认指向本地回显 stub（可用同名环境变量覆盖）
-        $backendEnv = @{
-            SPRING_NEO4J_AUTHENTICATION_PASSWORD = "11111111"
-            CODESANDBOX_TYPE = "remote"
-            CODESANDBOX_REMOTE_URL = "http://127.0.0.1:8090/executeCode"
-            CODESANDBOX_REMOTE_AUTH_SECRET = "smoke-secret"
-        }
-        foreach ($key in @($backendEnv.Keys)) {
-            $override = [Environment]::GetEnvironmentVariable($key, "Process")
-            if ($override) { $backendEnv[$key] = $override }
-        }
+        # A running JAR is locked on Windows; execute a copy so Maven can rebuild target.
+        New-Item -ItemType Directory -Path (Split-Path $RuntimeJar -Parent) -Force | Out-Null
+        Copy-Item -LiteralPath $BackendJar -Destination $RuntimeJar -Force
+        $backendArgs = @("-Dfile.encoding=UTF-8", "-jar", "`"$RuntimeJar`"", "--server.port=$BackendPort", "--cors.allowed-origins=$($origins -join ',')")
         Write-Host "[后端] 启动中；日志：tmp\backend.log"
-        $process = Start-ProjectProcess (Join-Path $resolvedJavaHome "bin\java.exe") $backendArgs $Root "backend" -Environment $backendEnv
+        $process = Start-ProjectProcess (Join-Path $resolvedJavaHome "bin\java.exe") $backendArgs $Root "backend"
         $StartedProcesses += $process
         Wait-ProjectHttp $process $BackendPort "/api/health/liveness" 120 -Health
     } else {

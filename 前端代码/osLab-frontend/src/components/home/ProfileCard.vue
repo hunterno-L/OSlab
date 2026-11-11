@@ -42,8 +42,17 @@
       </router-link>
 
       <div class="profile-links">
-        <router-link to="/records">查看学习记录</router-link>
-        <router-link v-if="hasRemedy" to="/records?view=review">
+        <router-link
+          :to="{ path: '/records', query: courseCode ? { courseCode } : {} }"
+          >查看学习记录</router-link
+        >
+        <router-link
+          v-if="hasRemedy"
+          :to="{
+            path: '/records',
+            query: { view: 'review', ...(courseCode ? { courseCode } : {}) },
+          }"
+        >
           去巩固
         </router-link>
       </div>
@@ -62,6 +71,8 @@ const props = defineProps<{
     recommendedNodeName?: string | null;
   } | null;
   recommend: string | null;
+  recommendCode?: string | null;
+  courseCode?: string;
   state: "loading" | "ready" | "empty" | "error";
 }>();
 
@@ -108,11 +119,12 @@ const hasRemedy = computed(() =>
   )
 );
 
-const nodeHref = computed(() =>
-  props.recommend
-    ? `/knowledge/node/${encodeURIComponent(props.recommend)}`
-    : ""
-);
+const nodeHref = computed(() => ({
+  path: props.recommendCode
+    ? `/knowledge/concept/${encodeURIComponent(props.recommendCode)}`
+    : `/knowledge/node/${encodeURIComponent(props.recommend || "")}`,
+  query: props.courseCode ? { courseCode: props.courseCode } : {},
+}));
 </script>
 
 <style scoped>

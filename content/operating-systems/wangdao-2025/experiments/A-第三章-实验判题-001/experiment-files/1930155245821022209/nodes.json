@@ -1,0 +1,26 @@
+{
+  "questionId": "1930155245821022209",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.process_image",
+      "nodeName": "进程内存映像",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "load_icode_mapper() 把 ELF 每个 Program Header 描述的段按 p_vaddr 逐页映射进进程地址空间，p_filesz 部分拷内容、p_memsz 多出的部分清零。"
+    },
+    {
+      "nodeCode": "os.memory.loading_linking",
+      "nodeName": "程序的链接与装入",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "load_elf 解析 ELF 程序头并把 (va, size, 文件内容) 交给 mapper，正是「装入」阶段把可执行文件搬进内存的过程。"
+    },
+    {
+      "nodeCode": "os.memory.page_table",
+      "nodeName": "页表",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "每映射一页都要 page_alloc + page_insert 并增加 pp_ref；段边界不对齐时同一物理页可能被两个段共用。"
+    }
+  ]
+}

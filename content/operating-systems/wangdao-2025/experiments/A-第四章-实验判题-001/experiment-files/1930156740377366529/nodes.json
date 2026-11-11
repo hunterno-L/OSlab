@@ -1,0 +1,26 @@
+{
+  "questionId": "1930156740377366529",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.sharing",
+      "nodeName": "内存共享",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "sys_mem_map 把源进程 srcva 处的物理页映射到目标进程 dstva，两进程从此共享同一物理页、pp_ref 增 1；content 明确要求「确保内存映射后两个进程能够共享同一物理内存页」。"
+    },
+    {
+      "nodeCode": "os.runtime.system_call",
+      "nodeName": "系统调用",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "它是 IPC 传页的基础系统调用，参数含两个 envid，内核必须先用 envid2env 校验两个进程都存在再操作页表。"
+    },
+    {
+      "nodeCode": "os.memory.page_table",
+      "nodeName": "页表",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "实现上先 pgdir_walk 取源页表项拿到物理页，再 page_insert 到目标页目录，perm 决定目标侧权限。"
+    }
+  ]
+}

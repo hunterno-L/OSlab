@@ -37,6 +37,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Map;
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -126,6 +128,9 @@ public class LearningTutorServiceImpl implements LearningTutorService {
     @Resource
     private AiContentScopeService contentScope;
 
+    @Resource private com.yupi.springbootinit.course.EnabledCourses enabledCourses;
+    @Resource private com.yupi.springbootinit.learning.PublishedCourseScopeService courseScope;
+
     @Override
     public TutorAnswerVO ask(TutorAskRequest request, User user) {
         String question = request == null ? null : request.getQuestion();
@@ -134,6 +139,27 @@ public class LearningTutorServiceImpl implements LearningTutorService {
         }
         List<String> trace = new ArrayList<>();
         String seedIdentity = StringUtils.defaultIfBlank(request.getNodeCode(),request.getNodeName());
+        if (StringUtils.isBlank(seedIdentity)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请指定当前课程的知识节点");
+        }
+        com.yupi.springbootinit.learning.NodeIdentityService.Identity requested = nodeIdentities.resolve(seedIdentity);
+        String selectedCourse = null;
+        Map<String, com.yupi.springbootinit.learning.NodeIdentityService.Identity> selectedNodes = null;
+        if (requested != null) {
+            for (String code : new java.util.TreeSet<>(enabledCourses.all())) {
+                Map<String, com.yupi.springbootinit.learning.NodeIdentityService.Identity> candidate = courseScope.nodes(code);
+                if (candidate.containsKey(requested.nodeCode)) {
+                    if (selectedCourse != null) throw new BusinessException(ErrorCode.PARAMS_ERROR, "节点属于多个启用课程，请使用课程导师");
+                    selectedCourse = code;
+                    selectedNodes = candidate;
+                }
+            }
+        }
+        if (selectedCourse == null) throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "课程节点当前不可用");
+        Set<String> allowedKeys = new HashSet<>();
+        for (com.yupi.springbootinit.learning.NodeIdentityService.Identity identity : selectedNodes.values()) {
+            allowedKeys.add(identity.nodeCode); allowedKeys.add(identity.storageKey);
+        }
         String seedNode = seedIdentity;
         if (nodeIdentities!=null&&StringUtils.isNotBlank(seedNode)) seedNode=nodeIdentities.storageKey(seedNode);
         TutorIntent intent = classifyIntent(question);
@@ -155,7 +181,7 @@ public class LearningTutorServiceImpl implements LearningTutorService {
 
         // 2. 一跳相关节点（前置/后续关系，配额内；同时扩展检索范围供题目/事件命中）
         int relatedQuota = intent == TutorIntent.CONCEPT ? 2 : 1;
-        List<TutorSourceVO> relatedSources = findRelatedNodeSources(seedIdentity, nodeScope, relatedQuota);
+        List<TutorSourceVO> relatedSources = findRelatedNodeSources(seedIdentity, nodeScope, relatedQuota, allowedKeys);
         if (!relatedSources.isEmpty()) {
             trace.add("图谱扩展 " + relatedSources.size() + " 个一跳相关节点");
         } else if (StringUtils.isNotBlank(seedNode)) {
@@ -180,7 +206,7 @@ public class LearningTutorServiceImpl implements LearningTutorService {
 
         // 6. 可执行下一步（既有 LearningPathService；失败不阻塞问答）
         TutorSourceVO nextStepSource = StringUtils.isBlank(seedNode)
-                ? null : buildNextStepSource(user, seedIdentity, trace);
+                ? null : buildNextStepSource(user, seedIdentity, trace, selectedCourse);
 
         // 7. 按意图决定组顺序组装（引用编号 = 列表序号 + 1，与 AI/fallback 引用一致）
         List<TutorSourceVO> seedSources = StringUtils.isBlank(seedNode)
@@ -198,7 +224,7 @@ public class LearningTutorServiceImpl implements LearningTutorService {
             com.yupi.springbootinit.learning.NodeIdentityService.Identity identity=nodeIdentities.byStorageKey(name);
             if(identity!=null)codes.add(identity.nodeCode);
         }
-        List<TutorSourceVO> textbookSources=retrieveTextbookSources(user,codes,question,2,trace);
+        List<TutorSourceVO> textbookSources=retrieveTextbookSources(user,codes,question,2,trace,selectedCourse);
         trace.add("检索到 "+textbookSources.size()+" 个已发布教材片段（保留正文块、版本与出处）");
         // Textbook material shares the content quota; personal evidence and next action keep their reserved places.
         List<TutorSourceVO> contentSources=new ArrayList<>(textbookSources);
@@ -334,7 +360,7 @@ public class LearningTutorServiceImpl implements LearningTutorService {
      * 一跳相关节点（前置/后续）：配额内组装为 NODE 来源，并扩展 nodeScope
      * 供题目/事件检索命中。Neo4j 不可用时降级为空列表，不阻塞问答。
      */
-    private List<TutorSourceVO> findRelatedNodeSources(String seedNode, Set<String> nodeScope, int quota) {
+    private List<TutorSourceVO> findRelatedNodeSources(String seedNode, Set<String> nodeScope, int quota, Set<String> allowedKeys) {
         List<TutorSourceVO> result = new ArrayList<>();
         if (StringUtils.isBlank(seedNode) || quota <= 0) {
             return result;
@@ -345,7 +371,7 @@ public class LearningTutorServiceImpl implements LearningTutorService {
                 if (result.size() >= quota) {
                     break;
                 }
-                if (StringUtils.isBlank(name) || name.equals(seedNode) || nodeScope.contains(name)) {
+                if (StringUtils.isBlank(name) || !allowedKeys.contains(name) || name.equals(seedNode) || nodeScope.contains(name)) {
                     continue;
                 }
                 nodeScope.add(name);
@@ -411,9 +437,9 @@ public class LearningTutorServiceImpl implements LearningTutorService {
      * 取第一项组装为结构化行动来源（kind=EXPERIMENT 指向实验，其余指向节点）。
      * 路径服务不可用或无路径项时返回 null（不伪造动作）。
      */
-    private TutorSourceVO buildNextStepSource(User user, String seedNode, List<String> trace) {
+    private TutorSourceVO buildNextStepSource(User user, String seedNode, List<String> trace, String courseCode) {
         try {
-            LearningPathVO path = learningPathService.buildPath(user, seedNode);
+            LearningPathVO path = learningPathService.buildPath(user, seedNode, courseCode);
             if (path == null || CollectionUtils.isEmpty(path.getItems())) {
                 return null;
             }
@@ -506,8 +532,7 @@ public class LearningTutorServiceImpl implements LearningTutorService {
      * 因此这里显式 {@code includePersonal=false}，避免把个人材料混进旧响应。
      */
     private List<TutorSourceVO> retrieveTextbookSources(User user, List<String> codes, String question,
-                                                        int quota, List<String> trace) {
-        String courseCode = resolveCourseCode(codes);
+                                                        int quota, List<String> trace, String courseCode) {
         if (retrieval != null && user != null && StringUtils.isNotBlank(courseCode)) {
             try {
                 HybridRetrievalService.Scope scope = new HybridRetrievalService.Scope();
@@ -538,7 +563,7 @@ public class LearningTutorServiceImpl implements LearningTutorService {
                 trace.add("统一检索失败，退回既有发布内容检索");
             }
         }
-        return publishedContent == null ? Collections.emptyList() : publishedContent.sources(codes, question, quota);
+        return publishedContent == null ? Collections.emptyList() : publishedContent.sourcesForCourse(courseCode, codes, question, quota);
     }
 
     /**

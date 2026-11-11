@@ -1,0 +1,25 @@
+{
+  "description": "实验 4.9 fork(void)（user/fork.c，侧重子进程分支）。七步：syscall_env_alloc 取 envid；envid==0 走子进程分支（env 指向自己的 PCB 后 return 0）；否则父进程分支遍历地址空间调 duppage、为子进程申请异常栈、登记 PGFAULT_ENTRY、置 ENV_RUNNABLE、返回子进程 envid。驱动操作符（CH4_USER_DRIVER + CH4_FORK_DRIVER + CH4_DUPPAGE_DRIVER）：I=env_init 打印空闲 PCB 数；A parent=env_alloc 打印 返回码/下标/env_id；U idx=同时设 curenv 与用户态全局 env；P idx va perm=page_alloc+page_insert 建真实映射，打印 返回码/物理页基址；V=调 fork() 打印 返回值/子进程下标(ENVX)/env 下标；Y=【子进程分支夹具】令 syscall_env_alloc 返回 0 模拟子进程带 $v0=0 恢复执行，先把 env 置 NULL 作哨兵再调 fork()，打印 返回值/env 下标（正确实现必须返回 0 且 env 下标等于 curenv 下标；漏写 env 赋值留下 -1，误用返回的 envid 会得到 0）；W dst src n=user_memcpy 打印返回码；T idx=env_id/parent/status/pri/cr3；E idx=env_pgfault_handler/env_ipc_receiving/env_ipc_dstva/env_ipc_from/env_ipc_value；Q idx va=物理页基址（无有效映射 4294967295）；O idx va=页表项原始值（无页表 4294967295）；C=空闲物理页数；L=就绪链表下标；H=就绪链表头（空表 -1）。本实验不装配 pgfault，故 X/Z 操作符不可用。关键常量：ENVX(envid)=envid&63，envid=(生成号<<7)|下标，故 ENVX 恒等于 PCB 下标；USTACKTOP=UTOP=1073741824，VPN(USTACKTOP)=262144；UXSTACKTOP=1056964608，异常栈页 va=1056960512；PGFAULT_ENTRY=4198400；ENV_RUNNABLE=2，ENV_NOT_RUNNABLE=1。错误码：-2=E_BAD_ENV，-3=E_INVAL，-4=E_NO_MEM，-5=E_NO_FREE_ENV。宿主物理页账本：np=256/fm=8192 初始空闲 252 页，np=5 时 1 页；空闲链表 LIFO，头是最高号页；每次 env_alloc 占 1 页作页目录；首次进入某 4MB 区间额外占 1 页作页表；fork 里 set_pgfault_handler 会再申请一页栈并把前一次 mem_alloc 的栈页回收（pp_ref 归零），故一次空 fork 净耗 3 页（子进程页目录 + 异常栈页表 + 栈页）。",
+  "cases": [
+    {
+      "name": "子进程分支：env 哨兵必须被改写成自己的 PCB 且返回 0，全程不创建进程、不申请物理页、不动就绪链表；换 curenv 后必须跟着换",
+      "input": "256 8192\n14\nI\nA 0\nU 63\nC\nY\nC\nT 63\nE 63\nL\nA 0\nU 62\nY\nC\nL\n"
+    },
+    {
+      "name": "父进程分支返回子进程 envid：连续两次 fork 各自创建 PCB、parent 指向调用者、异常栈与 handler 装到子进程身上，就绪链表按头插累积",
+      "input": "256 8192\n14\nI\nA 0\nU 63\nV\nT 62\nT 63\nC\nV\nT 61\nL\nH\nY\nC\nE 62\n"
+    },
+    {
+      "name": "子进程分支不得执行任何父进程动作：不申请异常栈、不登记 handler、不置 RUNNABLE、不建新 PCB，空闲页数与就绪链表都不变",
+      "input": "256 8192\n16\nI\nA 0\nA 0\nU 62\nC\nY\nC\nT 62\nE 62\nQ 62 1056960512\nL\nH\nT 61\nY\nU 63\nY\n"
+    },
+    {
+      "name": "物理页耗尽：np=5 时 syscall_env_alloc 返回 -E_NO_MEM，负值不得被当成子进程分支，父进程动作也不得崩溃；随后 Y 仍能正确走子进程分支",
+      "input": "5 8192\n14\nI\nA 0\nU 63\nC\nV\nC\nT 62\nL\nH\nE 63\nQ 63 1056960512\nY\nC\nT 63\n"
+    },
+    {
+      "name": "子进程分支之后 env 必须可用于访存：fork 共享的可写页父子都标 COW，切到子进程身份后 Y 改写的 env 必须落在它自己的地址空间",
+      "input": "256 8192\n18\nI\nA 0\nU 63\nP 63 4194304 3\nV\nC\nU 62\nY\nQ 62 4194304\nO 62 4194304\nW 4198400 4194304 4096\nO 63 4194304\nT 62\nE 62\nL\nC\nU 63\nY\n"
+    }
+  ]
+}

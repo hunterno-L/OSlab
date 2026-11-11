@@ -1,0 +1,4 @@
+{
+  "judgeMode": "LOCAL_BUILD",
+  "reason": "实验目标是 boot/start.S 里的 MIPS 汇编：设置栈指针 $sp 后跳转到 main，并观察 C 代码（fib 递归、main 循环）经 mips 交叉编译器生成的汇编中的栈操作、slti/bnez 条件跳转与 jal/jr 调用返回。沙箱只有 x86-64 gcc、无 MIPS 交叉编译器、无 gxemul，且单文件 C 无法承载 .S 汇编与特权启动时序，故无法在沙箱内功能判题。平台不自动判分，完成规则为 SUBMIT。"
+}

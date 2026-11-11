@@ -201,7 +201,13 @@ export const routes: Array<RouteRecordRaw> = [
         path: "/records",
         name: "学习记录",
         component: LearningRecordsView,
-        meta: { access: ACCESS_ENUM.USER, navKey: "records" },
+        // 我的学习页已经提供概况 / 历史记录 / 待巩固三个页内视图，
+        // 隐藏旧的时间线侧栏，避免同一组入口重复出现。
+        meta: {
+          access: ACCESS_ENUM.USER,
+          navKey: "records",
+          hideSidebar: true,
+        },
       },
       {
         path: "/resources",
@@ -279,9 +285,13 @@ export const routes: Array<RouteRecordRaw> = [
       },
       {
         path: "/teaching/overview",
-        name: "班级分析",
+        name: "教学工作台",
         component: TeacherDashboardView,
-        meta: { access: ACCESS_ENUM.ADMIN, navKey: "teaching" },
+        meta: {
+          access: ACCESS_ENUM.ADMIN,
+          navKey: "teaching",
+          pageTitle: "教学工作台",
+        },
       },
       {
         path: "/teaching/knowledge",

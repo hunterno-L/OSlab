@@ -14,7 +14,15 @@
 // 使用 editor.api 入口 + MonacoWebpackPlugin 的 languages 白名单，
 // 避免把全部基础语言与 css/html/json/ts 语言服务打进产物（见 vue.config.js）。
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-import { onMounted, ref, toRaw, withDefaults, defineProps, watch } from "vue";
+import {
+  onMounted,
+  onBeforeUnmount,
+  ref,
+  toRaw,
+  withDefaults,
+  defineProps,
+  watch,
+} from "vue";
 
 /**
  * 定义组件属性类型
@@ -38,6 +46,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const codeEditorRef = ref();
 const codeEditor = ref();
+let applyingValue = false;
 
 // const fillValue = () => {
 //   if (!codeEditor.value) {
@@ -58,19 +67,6 @@ watch(
     }
   }
 );
-// 新增：监听语言变化
-watch(
-  () => props.language,
-  () => {
-    if (codeEditor.value) {
-      monaco.editor.setModelLanguage(
-        toRaw(codeEditor.value).getModel(),
-        props.language
-      );
-    }
-  }
-);
-
 // 新增：监听 value 变化
 watch(
   () => props.value,
@@ -78,7 +74,12 @@ watch(
     if (codeEditor.value) {
       const editor = toRaw(codeEditor.value);
       if (newValue !== editor.getValue()) {
-        editor.setValue(newValue);
+        applyingValue = true;
+        try {
+          editor.setValue(newValue);
+        } finally {
+          applyingValue = false;
+        }
       }
     }
   },
@@ -106,8 +107,16 @@ onMounted(() => {
 
   // 编辑 监听内容变化
   codeEditor.value.onDidChangeModelContent(() => {
-    props.handleChange(toRaw(codeEditor.value).getValue());
+    if (!applyingValue) props.handleChange(toRaw(codeEditor.value).getValue());
   });
+});
+onBeforeUnmount(() => {
+  const editor = codeEditor.value && toRaw(codeEditor.value);
+  if (!editor) return;
+  const model = editor.getModel();
+  editor.dispose();
+  if (model && !model.isDisposed()) model.dispose();
+  codeEditor.value = undefined;
 });
 </script>
 

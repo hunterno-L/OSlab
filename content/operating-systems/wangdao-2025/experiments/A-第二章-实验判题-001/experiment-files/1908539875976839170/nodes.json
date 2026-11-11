@@ -1,0 +1,26 @@
+{
+  "questionId": "1908539875976839170",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.page_table",
+      "nodeName": "页表",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "boot_pgdir_walk()/pgdir_walk() 用 PDX(va) 取页目录项、PTX(va) 取页表项，create 为真时还要 page_alloc 一页作二级页表并令其 pp_ref++。"
+    },
+    {
+      "nodeCode": "os.memory.multilevel_page_table",
+      "nodeName": "多级页表",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "PDX/PTX 两级索引就是 MIPS 两级页表的具体实现；判题输出「页表物理地址 PTX」正是二级索引的两个分量。"
+    },
+    {
+      "nodeCode": "os.memory.address_translation",
+      "nodeName": "地址翻译",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "walk 的结果是 va→pa 翻译链上的中间节点；boot 期与运行期两条路径的区别在于能否为新页表分配物理页。"
+    }
+  ]
+}

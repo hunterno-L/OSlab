@@ -1,0 +1,26 @@
+{
+  "questionId": "1908900051330306049",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.process.pcb",
+      "nodeName": "进程控制块",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "mips_vm_init 为 envs[NENV] 分配物理内存并映射到 UENVS；Env 的 env_tf/env_link/env_id/env_parent_id/env_status/env_pgdir/env_cr3/env_sched_link/env_pri 就是 PCB 的全部字段。"
+    },
+    {
+      "nodeCode": "os.memory.process_image",
+      "nodeName": "进程内存映像",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "envs 数组被映射到用户可见的 UENVS 区域，是内核为进程管理预留的内存映像的一部分，分配方式参照已写好的 pages 数组。"
+    },
+    {
+      "nodeCode": "os.process.process_state",
+      "nodeName": "进程状态与转换",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "content 明确列出 ENV_FREE/ENV_NOT_RUNNABLE/ENV_RUNNABLE 三种状态，envs 分配完成后全部 PCB 处于 ENV_FREE。"
+    }
+  ]
+}

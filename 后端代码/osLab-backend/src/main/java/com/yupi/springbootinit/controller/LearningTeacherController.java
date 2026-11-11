@@ -9,6 +9,7 @@ import com.yupi.springbootinit.model.vo.learning.ClassOptionVO;
 import com.yupi.springbootinit.model.vo.learning.NodeDrillVO;
 import com.yupi.springbootinit.model.vo.learning.TeacherDashboardVO;
 import com.yupi.springbootinit.model.vo.learning.TimelineVO;
+import com.yupi.springbootinit.model.vo.learning.TeacherFollowUpsVO;
 import com.yupi.springbootinit.service.LearningTeacherService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +38,13 @@ public class LearningTeacherController {
     @GetMapping("/dashboard")
     public BaseResponse<TeacherDashboardVO> dashboard(@RequestParam("className") String className) {
         return ResultUtils.success(learningTeacherService.dashboard(className));
+    }
+
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @GetMapping("/follow-ups")
+    public BaseResponse<TeacherFollowUpsVO> followUps(@RequestParam("className") String className,
+                                                      @RequestParam("courseCode") String courseCode) {
+        return ResultUtils.success(learningTeacherService.followUps(className, courseCode));
     }
 
     /**

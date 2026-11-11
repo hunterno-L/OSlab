@@ -72,7 +72,7 @@
           </a-doption>
           <a-doption value="records">
             <template #icon><icon-history /></template>
-            学习记录
+            我的学习
           </a-doption>
           <a-doption value="models">
             <template #icon><icon-settings /></template>
