@@ -326,7 +326,7 @@ const GRAPH_TOKENS = Object.freeze({
     GREEN: "#e6f2ec",
     YELLOW: "#f6edd9",
     RED: "#f6e3de",
-    GRAY: "#eeefe9",
+    GRAY: "#eceff4",
   }),
 });
 

@@ -1,0 +1,585 @@
+{
+  "schemaVersion": "oslab-experiment-maintenance/1.0",
+  "batchCode": "batch.a.experiments.ch2.judge.001",
+  "contributor": "A",
+  "experiments": [
+    {
+      "questionId": "1908449571747745793",
+      "resourceCode": "exp.legacy.1908449571747745793",
+      "title": "实验2.1 内存控制块",
+      "sectionCode": "sec.memory.paging",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1908449571747745793/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1908449571747745793/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1908449571747745793/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1908449571747745793/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1908449571747745793/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.paging",
+          "nodeName": "基本分页存储管理",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "实现 include/queue.h 的 LIST_INSERT_AFTER/LIST_INSERT_TAIL，操作对象是 Page 结构体的 pp_link；判题观测量是遍历得到的 pp_ref 序列，即 4KB 物理页框在 page_free_list 中的挂链顺序。"
+        },
+        {
+          "nodeCode": "os.memory.memory_management",
+          "nodeName": "内存管理",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "Page 的 pp_ref 记录一页被多少页表项引用，是物理内存管理的元数据；宏写成 do{...}while(0) 才能保证链表操作在 if/else 分支中语义正确。"
+        },
+        {
+          "nodeCode": "os.memory.page_table",
+          "nodeName": "页表",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "pp_ref 的增减由 page_insert/page_remove 维护，这两个链表宏是页表项引用计数得以正确工作的基础设施。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.paging-basics",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.memory.functions",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1908532874240593922",
+      "resourceCode": "exp.legacy.1908532874240593922",
+      "title": "实验2.2 初始化全局变量",
+      "sectionCode": "sec.memory.basic",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1908532874240593922/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1908532874240593922/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1908532874240593922/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1908532874240593922/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1908532874240593922/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.paging",
+          "nodeName": "基本分页存储管理",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "mips_detect_memory() 由 basemem_kb/extmem_kb 两个 CMOS 读数算出 maxpa 与 npage，npage = maxpa/BY2PG 就是 4KB 分页管理的页框总数上限。"
+        },
+        {
+          "nodeCode": "os.memory.memory_management",
+          "nodeName": "内存管理",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "maxpa/basemem/extmem/npage 四个全局变量界定内核可用物理内存的大小与范围，此后 page_init/page_alloc 都不得越过 npage。"
+        },
+        {
+          "nodeCode": "os.memory.logical_address",
+          "nodeName": "逻辑地址与物理地址",
+          "role": "SECONDARY",
+          "weight": 0.5,
+          "reason": "basemem 与 extmem 分别对应 1MB 以下与 1MB 以上的物理内存范围，子任务输出四个十进制数正是物理地址空间划分的直接量化。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.functions",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.memory.paging-basics",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1908538371526131713",
+      "resourceCode": "exp.legacy.1908538371526131713",
+      "title": "实验2.3 空闲内存管理",
+      "sectionCode": "sec.memory.paging",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1908538371526131713/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1908538371526131713/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1908538371526131713/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1908538371526131713/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1908538371526131713/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.paging",
+          "nodeName": "基本分页存储管理",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "page_init() 把内核占用之外、npage 之内的物理页用 queue.h 宏头插进 page_free_list；判题输出空闲链表页号序列（真实源码头插故为递减序）与 used/free/other 计数。"
+        },
+        {
+          "nodeCode": "os.memory.memory_management",
+          "nodeName": "内存管理",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "区分已分配（内核占用）与未分配页、并统计各自数量，是物理内存管理的基本职责；pp_ref 非 0 的页不得进空闲链表。"
+        },
+        {
+          "nodeCode": "os.memory.logical_address",
+          "nodeName": "逻辑地址与物理地址",
+          "role": "SECONDARY",
+          "weight": 0.5,
+          "reason": "page_init 以物理页号为单位遍历 [0, npage)，处理的是物理地址 i*BY2PG 而非虚拟地址，体现物理地址空间与逻辑地址空间的分离。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.paging-basics",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1908539177407119361",
+      "resourceCode": "exp.legacy.1908539177407119361",
+      "title": "实验2.4 内存分配与释放管理",
+      "sectionCode": "sec.memory.paging",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1908539177407119361/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1908539177407119361/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1908539177407119361/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1908539177407119361/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1908539177407119361/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.paging",
+          "nodeName": "基本分页存储管理",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "page_alloc() 从 page_free_list 摘一页并清零，page_free() 把 pp_ref 归零的页重新挂回；判题观测量是分配返回的页号、首字是否为 0（驱动先写 0xDEADBEEF）与末态空闲链表序列。"
+        },
+        {
+          "nodeCode": "os.memory.memory_management",
+          "nodeName": "内存管理",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "分配与释放必须成对且维护 pp_ref，否则同一物理页会被两个页表项同时占用；实验还要求在 mips_init 中注释掉 page_check 以便逐步验证。"
+        },
+        {
+          "nodeCode": "os.memory.sharing",
+          "nodeName": "内存共享",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "page_free 只有在 pp_ref 归零时才能真正回收物理页，这是共享页安全回收的前提；子任务的 S 操作显式设置 pp_ref 来检验这一点。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.paging-basics",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1908539875976839170",
+      "resourceCode": "exp.legacy.1908539875976839170",
+      "title": "实验2.5 页表创建",
+      "sectionCode": "sec.memory.paging",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1908539875976839170/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1908539875976839170/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1908539875976839170/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1908539875976839170/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1908539875976839170/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page_table",
+          "nodeName": "页表",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "boot_pgdir_walk()/pgdir_walk() 用 PDX(va) 取页目录项、PTX(va) 取页表项，create 为真时还要 page_alloc 一页作二级页表并令其 pp_ref++。"
+        },
+        {
+          "nodeCode": "os.memory.multilevel_page_table",
+          "nodeName": "多级页表",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "PDX/PTX 两级索引就是 MIPS 两级页表的具体实现；判题输出「页表物理地址 PTX」正是二级索引的两个分量。"
+        },
+        {
+          "nodeCode": "os.memory.address_translation",
+          "nodeName": "地址翻译",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "walk 的结果是 va→pa 翻译链上的中间节点；boot 期与运行期两条路径的区别在于能否为新页表分配物理页。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.paging-basics",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.memory.tlb-multilevel",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1908540360305704962",
+      "resourceCode": "exp.legacy.1908540360305704962",
+      "title": "实验2.6 地址映射",
+      "sectionCode": "sec.memory.paging",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1908540360305704962/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1908540360305704962/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1908540360305704962/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1908540360305704962/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1908540360305704962/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.address_translation",
+          "nodeName": "地址翻译",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "boot_map_segment(pgdir, va, size, pa, perm) 逐页调用 boot_pgdir_walk 并写入 pa|perm|PTE_V；判题观测量是区间首页与末页的页表项原值。"
+        },
+        {
+          "nodeCode": "os.memory.page_table",
+          "nodeName": "页表",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "映射的落地形式就是页表项：所属页表不存在时槽位读作 4294967295(~0)，页表已存在但未映射读作 0，已映射读作 pa|perm|PTE_V。"
+        },
+        {
+          "nodeCode": "os.memory.logical_address",
+          "nodeName": "逻辑地址与物理地址",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "内核启动期把 kseg0 虚拟地址映射到对应物理地址（va − 0x80000000），是逻辑地址与物理地址关系的直接构造。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.paging-basics",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.memory.address-translation",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1908540572415852545",
+      "resourceCode": "exp.legacy.1908540572415852545",
+      "title": "实验2.7 页表项插入与移除",
+      "sectionCode": "sec.memory.paging",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1908540572415852545/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1908540572415852545/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1908540572415852545/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1908540572415852545/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1908540572415852545/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page_table",
+          "nodeName": "页表",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "page_insert()/page_remove() 维护页表项与 pp_ref：插入前若该 va 已映射旧页必须先 page_remove，移除后 pp_ref--；判题输出返回码、物理地址与 pp_ref。"
+        },
+        {
+          "nodeCode": "os.memory.tlb",
+          "nodeName": "TLB 快表",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "content 明确要求在 page_insert 中调用 tlb_invalidate 更新 TLB，否则 CPU 仍用旧快表项访问已被换出的物理页。"
+        },
+        {
+          "nodeCode": "os.memory.sharing",
+          "nodeName": "内存共享",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "判题的 P 操作直接查询 pp_ref：同一物理页被多个 va 或多个页目录映射时 pp_ref>1，page_remove 只能减引用而不能直接回收。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.paging-basics",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.memory.tlb-multilevel",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1908540698916061185",
+      "resourceCode": "exp.legacy.1908540698916061185",
+      "title": "实验2.8  TLB 管理",
+      "sectionCode": "sec.memory.paging",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1908540698916061185/content.md",
+          "reason": "提供原实验说明及本地实验材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1908540698916061185/starter.c",
+          "reason": "提供原实验说明及本地实验材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.tlb",
+          "nodeName": "TLB 快表",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "在 mm/tlb_asm.S 的 tlb_out 空出的两行填 tlbp/tlbwi：tlbp 按 EntryHi 的 VPN 查 TLB 并写 Index，未命中时 Index 最高位置 1 后跳 NOFOUND；tlbwi 把 EntryLo0/1 写入 Index 指定项。"
+        },
+        {
+          "nodeCode": "os.memory.address_translation",
+          "nodeName": "地址翻译",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "TLB 是 va→pa 翻译的硬件缓存，tlb_out 处理的正是翻译失败（TLB Miss / TLB Invalid）路径。"
+        },
+        {
+          "nodeCode": "os.runtime.exception",
+          "nodeName": "异常",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "TLB Miss 由 CP0 触发异常进入 0x80000000 的 TLB Refill 入口，tlb_out 是该异常处理链上的一环；tlbp 之后 4 条 nop 是 CP0 冒险间隔而非分支延迟槽。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.tlb-multilevel",
+          "required": false,
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "judgeMode": "LOCAL_BUILD",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "本地构建实验；未在平台自动判分",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    }
+  ]
+}

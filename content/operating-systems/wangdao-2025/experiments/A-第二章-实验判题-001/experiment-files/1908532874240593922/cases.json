@@ -1,0 +1,25 @@
+{
+  "description": "驱动 mm/pmap.c 的 mips_detect_memory()。stdin 两个 KB 读数模拟 CMOS：basemem_kb extmem_kb。输出一行四个十进制数：maxpa basemem extmem npage（前三者字节，npage 页数）。",
+  "cases": [
+    {
+      "name": "官方 64MB 全基本内存（maxpa=0x4000000, npage=16384）",
+      "input": "65536 0\n"
+    },
+    {
+      "name": "基本 640KB + 扩展 127MB（base/ext 拆分）",
+      "input": "640 130048\n"
+    },
+    {
+      "name": "非页对齐 KB 数（字节转页数需整除）",
+      "input": "1000 0\n"
+    },
+    {
+      "name": "零内存边界",
+      "input": "0 0\n"
+    },
+    {
+      "name": "仅扩展内存（basemem 为 0）",
+      "input": "0 4096\n"
+    }
+  ]
+}

@@ -737,3 +737,17 @@ body .arco-btn,
   --arcoblue-7: 18, 58, 120;
   --red-6: 182, 72, 58;
 }
+
+/* ---------- AI 导师侧边停靠 ----------
+   仅桌面宽屏（≥1180px）挤压主内容，保证正文仍有 ≥720px 可用宽度；
+   覆盖/全屏模式不改页面布局，避免遮挡编辑器与题卡。 */
+@media (min-width: 1180px) {
+  body[data-tutor-dock="on"] #learningLayout .content {
+    padding-right: calc(var(--tutor-dock-width, 460px) + 24px);
+  }
+}
+@media (min-width: 1180px) and (prefers-reduced-motion: no-preference) {
+  #learningLayout .content {
+    transition: padding-right 180ms var(--oslab-ease);
+  }
+}

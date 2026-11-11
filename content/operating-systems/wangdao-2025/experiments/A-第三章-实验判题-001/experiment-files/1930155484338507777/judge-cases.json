@@ -1,0 +1,22 @@
+[
+  {
+    "input": "256 8192\n15\nI\nB\nG\nS 4096 4096 3\nE 4096\nA A\nH\nT 63\nL\nF\nC\nQ 63 4096\nD 63 4096\nQ 63 1073737728\nR 63 1073737728\n",
+    "output": "I 64\nB\nG\nS 1\nE 4096\nA A\nH 63\nT 63 191 0 2 1 4096 1073741824\nL 63\nF 63\nC 247\nQ 1040384\nD 50462976\nQ 1032192\nR 1"
+  },
+  {
+    "input": "256 8192\n15\nI\nB\nG\nS 4096 4096 3\nE 4096\nP B 5\nP C 0\nA A\nH\nL\nT 63\nT 62\nT 61\nF\nC\n",
+    "output": "I 64\nB\nG\nS 1\nE 4096\nP B 5\nP C 0\nA A\nH 61\nL 61 62 63\nT 63 191 0 2 5 4096 1073741824\nT 62 318 0 2 0 4096 1073741824\nT 61 445 0 2 1 4096 1073741824\nF 61\nC 237"
+  },
+  {
+    "input": "256 8192\n16\nI\nB\nG\nS 6144 8192 3\nS 32768 4096 2\nE 8192\nA B\nH\nT 63\nQ 63 6144\nD 63 6144\nQ 63 32768\nD 63 32768\nQ 63 1073737728\nR 63 1073737728\nC\n",
+    "output": "I 64\nB\nG\nS 1\nS 2\nE 8192\nA B\nH 63\nT 63 191 0 2 1 8192 1073741824\nQ 1040384\nD 50462976\nQ 1024000\nD 50462976\nQ 1019904\nR 1\nC 244"
+  },
+  {
+    "input": "256 8192\n76\nI\nG\nE 0\nA A\nT 63\nQ 63 1073737728\nF\nC\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nA A\nH\nF\nC\nQ 63 1073737728\n",
+    "output": "I 64\nG\nE 0\nA A\nT 63 191 0 2 1 0 1073741824\nQ 1040384\nF 63\nC 249\nJ 0 62\nJ 0 61\nJ 0 60\nJ 0 59\nJ 0 58\nJ 0 57\nJ 0 56\nJ 0 55\nJ 0 54\nJ 0 53\nJ 0 52\nJ 0 51\nJ 0 50\nJ 0 49\nJ 0 48\nJ 0 47\nJ 0 46\nJ 0 45\nJ 0 44\nJ 0 43\nJ 0 42\nJ 0 41\nJ 0 40\nJ 0 39\nJ 0 38\nJ 0 37\nJ 0 36\nJ 0 35\nJ 0 34\nJ 0 33\nJ 0 32\nJ 0 31\nJ 0 30\nJ 0 29\nJ 0 28\nJ 0 27\nJ 0 26\nJ 0 25\nJ 0 24\nJ 0 23\nJ 0 22\nJ 0 21\nJ 0 20\nJ 0 19\nJ 0 18\nJ 0 17\nJ 0 16\nJ 0 15\nJ 0 14\nJ 0 13\nJ 0 12\nJ 0 11\nJ 0 10\nJ 0 9\nJ 0 8\nJ 0 7\nJ 0 6\nJ 0 5\nJ 0 4\nJ 0 3\nJ 0 2\nJ 0 1\nJ 0 0\nA A\nH 63\nF 0\nC 186\nQ 1040384"
+  },
+  {
+    "input": "256 8192\n15\nI\nB\nG\nS 4096 4096 3\nE 4096\nZ 0\nY\nH\nF\nC\nA A\nH\nT 63\nF\nC\n",
+    "output": "I 64\nB\nG\nS 1\nE 4096\nZ 0\nY\nH -1\nF 64\nC 252\nA A\nH 63\nT 63 191 0 2 1 4096 1073741824\nF 63\nC 247"
+  }
+]

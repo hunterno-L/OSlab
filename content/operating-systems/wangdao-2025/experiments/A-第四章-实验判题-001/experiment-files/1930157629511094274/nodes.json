@@ -1,0 +1,26 @@
+{
+  "questionId": "1930157629511094274",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.page_fault",
+      "nodeName": "缺页中断",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "lib/traps.c 的 page_fault_handler 取引发缺页的虚拟地址、校验合法性、为缺失页分配物理内存、更新页表项建立映射，并处理内存不足等异常后恢复被中断进程。"
+    },
+    {
+      "nodeCode": "os.memory.demand_paging",
+      "nodeName": "请求分页存储管理",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "缺页中断是请求分页的核心机制：页不在内存时由中断驱动调入，而不是预先全部装入。"
+    },
+    {
+      "nodeCode": "os.runtime.exception",
+      "nodeName": "异常",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "缺页在 MIPS 上是 TLB Miss/Mod 异常，处理程序运行在异常处理栈（Exception Stack Frame）上，content 明确要求理解异常现场保存。"
+    }
+  ]
+}

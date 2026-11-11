@@ -187,6 +187,15 @@ async function assertCatalogLoadsEveryCourse() {
     (name) => {
       if (name === "vue") return vue;
       if (name === "@/api/course") return api;
+      if (name === "@/composables/useCurrentCourse")
+        return evaluate(
+          transpile(read("src/composables/useCurrentCourse.ts")),
+          (dep) => {
+            if (dep === "vue") return vue;
+            if (dep === "@/api/course") return api;
+            throw new Error(`unexpected dependency: ${dep}`);
+          }
+        );
       throw new Error(`unexpected dependency: ${name}`);
     }
   );

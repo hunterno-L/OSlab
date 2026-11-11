@@ -1,0 +1,26 @@
+{
+  "questionId": "1930156844614209538",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.sharing",
+      "nodeName": "内存共享",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "sys_mem_unmap(envid, va) 解除该进程 va 的映射，page_remove 令 pp_ref--；只有 pp_ref 归零物理页才真正回收，共享页不能因一方解映射而失效。"
+    },
+    {
+      "nodeCode": "os.runtime.system_call",
+      "nodeName": "系统调用",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "用户态通过它归还 IPC 收到的页，是 sys_mem_map 的逆操作系统调用；content 要求「解除映射后进程不再能访问之前映射的物理内存页」。"
+    },
+    {
+      "nodeCode": "os.memory.tlb",
+      "nodeName": "TLB 快表",
+      "role": "RELATED",
+      "weight": 0.5,
+      "reason": "解除映射后必须 tlb_invalidate，否则快表里仍留着旧翻译，进程还能访问已归还的物理页。"
+    }
+  ]
+}

@@ -1,11 +1,251 @@
 <template>
   <div class="learning-records-view">
     <header class="records-heading">
-      <h1>{{ activeView === "review" ? "待巩固" : "学习记录" }}</h1>
-      <span v-if="activeView !== 'review'" class="hint"
-        >{{ total }} 条学习活动</span
-      >
+      <h1>{{ activeView === "review" ? "待巩固" : "我的学习" }}</h1>
+      <nav class="records-tabs" aria-label="学习面板">
+        <button
+          type="button"
+          :class="{ active: activeView === 'overview' }"
+          @click="setActiveView('overview')"
+        >
+          概况
+        </button>
+        <button
+          type="button"
+          :class="{ active: activeView === 'timeline' }"
+          @click="setActiveView('timeline')"
+        >
+          历史记录
+        </button>
+        <button
+          type="button"
+          :class="{ active: activeView === 'review' }"
+          @click="setActiveView('review')"
+        >
+          待巩固
+        </button>
+      </nav>
     </header>
+
+    <div v-if="activeView === 'overview'" class="learning-overview">
+      <section
+        class="overview-section overview-metrics"
+        aria-label="学习进展摘要"
+      >
+        <div class="overview-stat">
+          <span class="overview-stat-label">已完成单元</span>
+          <strong>{{
+            coursesLoading || coursesError || !courses.length
+              ? "—"
+              : completedUnitTotal
+          }}</strong>
+          <span class="hint">{{
+            courses.length
+              ? `/${publishedUnitTotal} 个已发布单元`
+              : "暂无课程数据"
+          }}</span>
+        </div>
+        <div class="overview-stat">
+          <span class="overview-stat-label">有学习证据</span>
+          <strong>{{
+            graphLoading || graphError ? "—" : evidencedNodeCount
+          }}</strong>
+          <span class="hint">{{
+            graphLoading
+              ? "知识点加载中"
+              : graphError
+              ? "知识点加载失败"
+              : `共 ${overviewNodes.length} 个知识点`
+          }}</span>
+        </div>
+        <div class="overview-stat">
+          <span class="overview-stat-label">待巩固或薄弱</span>
+          <strong>{{
+            graphLoading || graphError ? "—" : reviewNodeCount
+          }}</strong>
+          <span class="hint">{{
+            graphError ? "知识点加载失败" : "来自个人图谱状态"
+          }}</span>
+        </div>
+      </section>
+
+      <section class="overview-section" aria-labelledby="progress-title">
+        <div class="overview-heading">
+          <div>
+            <h2 id="progress-title">学习概况</h2>
+            <p class="hint">课程进度按已发布单元统计</p>
+          </div>
+          <a-button size="small" @click="router.push('/records?view=review')">
+            查看待巩固
+          </a-button>
+        </div>
+        <p v-if="coursesLoading" class="overview-message">正在加载课程进度…</p>
+        <div v-else-if="coursesError" class="overview-message" role="alert">
+          {{ coursesError }}
+          <a-button size="small" @click="loadCourses">重试</a-button>
+        </div>
+        <p v-else-if="!courses.length" class="overview-message">暂无课程进度</p>
+        <div v-else class="course-progress-list">
+          <div
+            v-for="course in courses"
+            :key="course.courseCode"
+            class="course-progress-row"
+          >
+            <div class="course-progress-name">{{ course.title }}</div>
+            <div class="course-progress-track" aria-hidden="true">
+              <span
+                :style="{
+                  width: `${Math.max(
+                    0,
+                    Math.min(100, course.progressPercent || 0)
+                  )}%`,
+                }"
+              ></span>
+            </div>
+            <span class="course-progress-value">
+              {{ course.completedUnitCount }} /
+              {{ course.publishedUnitCount }} 单元
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="overview-section activity-trend"
+        aria-labelledby="activity-trend-title"
+      >
+        <div class="overview-heading">
+          <div>
+            <h2 id="activity-trend-title">近 7 天学习活动</h2>
+            <p class="hint">按活动发生日期统计</p>
+          </div>
+          <a-button size="small" @click="setActiveView('timeline')"
+            >全部记录</a-button
+          >
+        </div>
+        <p v-if="activityTrendLoading" class="overview-message">
+          正在加载最近活动…
+        </p>
+        <div
+          v-else-if="activityTrendError"
+          class="overview-message"
+          role="alert"
+        >
+          {{ activityTrendError }}
+          <a-button size="small" @click="loadActivityTrend">重试</a-button>
+        </div>
+        <p v-else-if="!activityTrendTotal" class="overview-message">
+          最近 7 天暂无学习活动
+        </p>
+        <template v-else>
+          <div
+            class="trend-chart"
+            role="img"
+            :aria-label="activityTrendDescription"
+          >
+            <div
+              v-for="day in activityTrendDays"
+              :key="day.key"
+              class="trend-day"
+            >
+              <span class="trend-count">{{ day.count || "" }}</span>
+              <div class="trend-track">
+                <span
+                  :style="{ height: `${trendBarHeight(day.count)}%` }"
+                ></span>
+              </div>
+              <span class="trend-label">{{ day.label }}</span>
+            </div>
+          </div>
+          <p class="hint trend-footnote">
+            {{
+              activityTrendTotal > ACTIVITY_TREND_LIMIT
+                ? `近 7 天共 ${activityTrendTotal} 条；图表展示最近 ${ACTIVITY_TREND_LIMIT} 条活动。`
+                : `共 ${activityTrendTotal} 条活动。`
+            }}
+          </p>
+        </template>
+      </section>
+
+      <section
+        class="overview-section mastery-section"
+        aria-labelledby="mastery-title"
+      >
+        <div class="overview-heading">
+          <div>
+            <h2 id="mastery-title">知识点掌握</h2>
+            <p class="hint">个人图谱 · 全部课程；分数以已有学习证据为准</p>
+          </div>
+          <a-button size="small" @click="router.push('/graph')"
+            >查看图谱</a-button
+          >
+        </div>
+        <p v-if="graphLoading" class="overview-message">正在加载知识点…</p>
+        <div v-else-if="graphError" class="overview-message" role="alert">
+          {{ graphError }}
+          <a-button size="small" @click="loadOverviewGraph">重试</a-button>
+        </div>
+        <p v-else-if="!overviewNodes.length" class="overview-message">
+          暂无知识点数据
+        </p>
+        <template v-else>
+          <div class="mastery-summary">
+            <span
+              >有学习证据 <strong>{{ evidencedNodeCount }}</strong> /
+              {{ overviewNodes.length }} 个节点</span
+            >
+            <span
+              >待巩固或薄弱 <strong>{{ reviewNodeCount }}</strong> 个节点</span
+            >
+          </div>
+          <div class="mastery-table" role="table" aria-label="知识点掌握情况">
+            <div class="mastery-row mastery-header" role="row">
+              <span role="columnheader">知识点</span>
+              <span role="columnheader">理论</span>
+              <span role="columnheader">实践</span>
+              <span role="columnheader">状态</span>
+            </div>
+            <div
+              v-for="node in visibleOverviewNodes"
+              :key="node.nodeCode || node.id || node.name"
+              class="mastery-row"
+              role="row"
+            >
+              <button
+                class="mastery-node"
+                type="button"
+                @click="goOverviewNode(node)"
+              >
+                {{ node.displayName || node.name }}
+              </button>
+              <span role="cell">{{
+                masteryScoreText(node.conceptScore, node.conceptEvidenceCount)
+              }}</span>
+              <span role="cell">{{
+                masteryScoreText(node.practiceScore, node.practiceEvidenceCount)
+              }}</span>
+              <span
+                role="cell"
+                :class="['status-pill', statusPillClass(node.status)]"
+                >{{ statusText(node.status) }}</span
+              >
+            </div>
+          </div>
+          <div
+            v-if="overviewNodes.length > masteryPageSize"
+            class="overview-pager"
+          >
+            <a-pagination
+              :current="masteryPage"
+              :page-size="masteryPageSize"
+              :total="overviewNodes.length"
+              size="small"
+              @change="masteryPage = $event"
+            />
+          </div>
+        </template>
+      </section>
+    </div>
 
     <section
       class="section-card records-ai-panel"
@@ -15,7 +255,7 @@
         <div>
           <h2 id="records-ai-title">AI 诊断与复习</h2>
           <p class="hint">
-            诊断只引用本人已记录的证据；帮助情况、复测与下次复习以服务端返回为准。
+            诊断只引用本人已记录的证据；复测与下次复习以服务端返回为准。
           </p>
         </div>
         <span v-if="dueReviewCount" class="records-ai-due"
@@ -31,7 +271,7 @@
           lastSubmitResult.judgeMessage
         }}</span>
         <span v-else class="hint"
-          >历史帮助等级以作答前后平台记录为准；普通练习不生成帮助快照。</span
+          >完成练习后，这里会显示与当前记录相关的帮助和复习信息。</span
         >
         <span v-if="lastSubmitResult?.nextReviewDueAt" class="hint"
           >下次复习：{{ lastSubmitResult.nextReviewDueAt }}</span
@@ -82,7 +322,7 @@
       </template>
       <AiNextActions
         :actions="nextActions"
-        :course-code="filters.courseCode || 'course.operating-systems'"
+        :course-code="currentCourseCode"
         :loading="nextActionsLoading"
         :error="nextActionsError"
         :due-count="dueReviewCount"
@@ -96,6 +336,15 @@
     </section>
 
     <section v-if="activeView === 'timeline'">
+      <div class="history-heading">
+        <div>
+          <h2>学习记录</h2>
+          <p class="hint">按时间查看活动、复习与回放</p>
+        </div>
+        <span v-if="!loading && !loadError" class="hint"
+          >{{ total }} 条匹配记录</span
+        >
+      </div>
       <div class="filter-bar">
         <a-input
           v-model:model-value="filters.nodeName"
@@ -356,7 +605,7 @@
     </section>
 
     <!-- ======== 待巩固 ======== -->
-    <section v-else>
+    <section v-else-if="activeView === 'review'">
       <div v-if="weakError" class="section-card empty-state">
         <div class="empty-title">待巩固清单加载失败</div>
         <div class="hint">{{ weakError }}</div>
@@ -815,11 +1064,13 @@ import {
   masterySnapshot,
   masteryTimeline,
   masteryWeakness,
+  personalGraph,
   type LastFailureVO,
   type ActivityNodeRefVO,
   type LearningActivityVO,
   type LearningEventVO,
   type MasterySnapshotVO,
+  type MasteryNodeVO,
   type WeakNodeVO,
 } from "@/api/learning";
 import {
@@ -842,7 +1093,6 @@ import AiNextActions from "@/components/ai/AiNextActions.vue";
 import { useAiActions } from "@/composables/useAiActions";
 import { askAi, useAiConversation } from "@/composables/useAiConversation";
 import {
-  getAiPageContext,
   registerAiPageContext,
   unregisterAiPageContext,
 } from "@/composables/useAiPageContext";
@@ -853,6 +1103,10 @@ import {
   openAiMaterialSource,
 } from "@/utils/aiSources";
 import { scoreText } from "@/utils/masteryDisplay";
+import {
+  currentCourseCode,
+  selectAvailableCourse,
+} from "@/composables/useCurrentCourse";
 
 const route = useRoute();
 const router = useRouter();
@@ -866,9 +1120,25 @@ const updateViewport = () => {
 };
 window.addEventListener("resize", updateViewport);
 
-const activeView = computed(() =>
-  route.query.view === "review" ? "review" : "timeline"
-);
+type RecordsView = "overview" | "timeline" | "review";
+const activeView = computed<RecordsView>(() => {
+  if (route.query.view === "overview") return "overview";
+  if (route.query.view === "review") return "review";
+  if (route.query.view === "timeline") return "timeline";
+  if (route.query.nodeName || route.query.eventType || route.query.eventId)
+    return "timeline";
+  return "overview";
+});
+const setActiveView = (view: RecordsView) => {
+  const query = { ...route.query };
+  query.view = view;
+  if (view === "overview") {
+    delete query.nodeName;
+    delete query.eventType;
+    delete query.eventId;
+  }
+  void router.push({ path: "/records", query });
+};
 
 // ---------- 时间线：筛选、分页、数据 ----------
 
@@ -891,6 +1161,160 @@ let timelineSequence = 0;
 
 const courses = ref<CourseSummary[]>([]);
 const courseUnits = ref<UnitSummary[]>([]);
+const coursesLoading = ref(false);
+const coursesError = ref("");
+const ACTIVITY_TREND_LIMIT = 100;
+const activityTrendLoading = ref(false);
+const activityTrendError = ref("");
+const activityTrendRecords = ref<LearningActivityVO[]>([]);
+const activityTrendTotal = ref(0);
+const completedUnitTotal = computed(() =>
+  courses.value.reduce(
+    (sum, course) => sum + (Number(course.completedUnitCount) || 0),
+    0
+  )
+);
+const publishedUnitTotal = computed(() =>
+  courses.value.reduce(
+    (sum, course) => sum + (Number(course.publishedUnitCount) || 0),
+    0
+  )
+);
+const localDateKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+const activityTrendDays = computed(() => {
+  const counts = new Map<string, number>();
+  activityTrendRecords.value.forEach((activity) => {
+    const key = localDateKey(new Date(activity.occurredAt));
+    counts.set(key, (counts.get(key) || 0) + 1);
+  });
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setHours(12, 0, 0, 0);
+    date.setDate(date.getDate() - (6 - index));
+    const key = localDateKey(date);
+    return {
+      key,
+      label: `${date.getMonth() + 1}/${date.getDate()}`,
+      count: counts.get(key) || 0,
+    };
+  });
+});
+const activityTrendDescription = computed(() =>
+  activityTrendDays.value
+    .map((day) => `${day.label} ${day.count} 条`)
+    .join("，")
+);
+const trendBarHeight = (count: number) => {
+  const max = Math.max(1, ...activityTrendDays.value.map((day) => day.count));
+  return count ? Math.max(8, Math.round((count / max) * 100)) : 0;
+};
+const loadActivityTrend = async () => {
+  activityTrendLoading.value = true;
+  activityTrendError.value = "";
+  const end = new Date();
+  end.setHours(23, 59, 59, 0);
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - 6);
+  try {
+    const res = await learningActivities({
+      startTime: `${localDateKey(start)} 00:00:00`,
+      endTime: `${localDateKey(end)} 23:59:59`,
+      current: 1,
+      pageSize: ACTIVITY_TREND_LIMIT,
+    });
+    if (res.data?.code !== 0 || !res.data.data) {
+      throw new Error(res.data?.message || "近 7 天活动加载失败");
+    }
+    activityTrendRecords.value = res.data.data.records || [];
+    activityTrendTotal.value = Number(res.data.data.total || 0);
+  } catch (error) {
+    activityTrendRecords.value = [];
+    activityTrendTotal.value = 0;
+    activityTrendError.value =
+      error instanceof Error
+        ? error.message
+        : "近 7 天活动加载失败，请稍后重试";
+  } finally {
+    activityTrendLoading.value = false;
+  }
+};
+const graphLoading = ref(false);
+const graphError = ref("");
+const overviewNodes = ref<MasteryNodeVO[]>([]);
+const masteryPage = ref(1);
+const masteryPageSize = 8;
+const evidencedNodeCount = computed(
+  () =>
+    overviewNodes.value.filter(
+      (node) =>
+        (node.conceptEvidenceCount || 0) + (node.practiceEvidenceCount || 0) > 0
+    ).length
+);
+const reviewNodeCount = computed(
+  () =>
+    overviewNodes.value.filter(
+      (node) => node.status === "RED" || node.status === "YELLOW"
+    ).length
+);
+const visibleOverviewNodes = computed(() => {
+  const start = (masteryPage.value - 1) * masteryPageSize;
+  return overviewNodes.value.slice(start, start + masteryPageSize);
+});
+const masteryScoreText = (
+  score: number | null | undefined,
+  evidenceCount: number | null | undefined
+) => {
+  if (!evidenceCount || evidenceCount <= 0) return "尚未测评";
+  if (score === null || score === undefined) return "暂无分数";
+  return scoreText(score, evidenceCount);
+};
+const goOverviewNode = (node: MasteryNodeVO) => {
+  const path = node.nodeCode ? "/knowledge/concept/" : "/knowledge/node/";
+  void router.push({
+    path: `${path}${encodeURIComponent(node.nodeCode || node.name)}`,
+    query: currentCourseCode.value
+      ? { courseCode: currentCourseCode.value }
+      : {},
+  });
+};
+const loadOverviewGraph = async () => {
+  const course = currentCourseCode.value;
+  if (!course) {
+    overviewNodes.value = [];
+    graphError.value = "暂无可用课程";
+    return;
+  }
+  graphLoading.value = true;
+  graphError.value = "";
+  try {
+    const res = await personalGraph(course);
+    if (course !== currentCourseCode.value) return;
+    if (res.data?.code !== 0 || !res.data.data) {
+      throw new Error(res.data?.message || "知识点加载失败");
+    }
+    overviewNodes.value = [...(res.data.data.nodes || [])].sort((a, b) => {
+      const order: Record<string, number> = {
+        RED: 0,
+        YELLOW: 1,
+        GREEN: 2,
+        GRAY: 3,
+      };
+      return (order[a.status] ?? 4) - (order[b.status] ?? 4);
+    });
+    masteryPage.value = 1;
+  } catch (error) {
+    graphError.value =
+      error instanceof Error ? error.message : "知识点加载失败，请稍后重试";
+  } finally {
+    graphLoading.value = false;
+  }
+};
 
 const EVENT_TYPE_OPTIONS = [
   "ATTEMPT",
@@ -911,10 +1335,22 @@ const hasActiveFilter = computed(
 );
 
 const loadCourses = async () => {
+  coursesLoading.value = true;
+  coursesError.value = "";
   try {
     courses.value = await listCourses();
+    selectAvailableCourse(
+      courses.value,
+      typeof route.query.courseCode === "string"
+        ? route.query.courseCode
+        : undefined
+    );
   } catch {
     courses.value = [];
+    currentCourseCode.value = "";
+    coursesError.value = "课程进度加载失败，请稍后重试";
+  } finally {
+    coursesLoading.value = false;
   }
 };
 
@@ -1225,9 +1661,9 @@ async function requestDiagnosis() {
 }
 
 function refreshRecordsPlan() {
+  if (!currentCourseCode.value) return;
   void refreshNextActions({
-    courseCode:
-      filters.courseCode || getAiPageContext()?.courseCode || undefined,
+    courseCode: currentCourseCode.value,
     limit: 5,
   });
 }
@@ -1241,7 +1677,7 @@ function openDiagnosisSource(source: AiSourceRef) {
 
 const aiRecordsContextProvider = () => ({
   pageName: "学习记录",
-  courseCode: filters.courseCode || undefined,
+  courseCode: currentCourseCode.value || undefined,
   nodeName: filters.nodeName || undefined,
 });
 
@@ -1803,7 +2239,15 @@ const failureSummary = (failure: LastFailureVO) => {
 };
 
 const goNode = (nodeName: string) => {
-  router.push(`/knowledge/node/${encodeURIComponent(nodeName)}`);
+  const code = nodeName.startsWith("os.");
+  router.push({
+    path: `/knowledge/${code ? "concept" : "node"}/${encodeURIComponent(
+      nodeName
+    )}`,
+    query: currentCourseCode.value
+      ? { courseCode: currentCourseCode.value }
+      : {},
+  });
 };
 
 // ---------- 初始化：route query 预筛选（兼容 /question_submit 旧跳转） ----------
@@ -1841,8 +2285,10 @@ watch(
   },
   { immediate: true }
 );
-onMounted(() => {
-  void loadCourses();
+onMounted(async () => {
+  await loadCourses();
+  void loadOverviewGraph();
+  void loadActivityTrend();
   refreshRecordsPlan();
 });
 onBeforeUnmount(() => {
@@ -1861,14 +2307,259 @@ onBeforeUnmount(() => {
 }
 .records-heading {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 24px;
   padding: 4px 0 18px;
 }
 .records-heading h1 {
   margin: 0;
   font-size: 22px;
   color: var(--oslab-text-title);
+}
+.records-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.records-tabs button {
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--oslab-muted-strong);
+  font: inherit;
+  cursor: pointer;
+}
+.records-tabs button.active {
+  border-bottom-color: var(--oslab-primary);
+  color: var(--oslab-primary);
+  font-weight: 600;
+}
+.records-tabs button:focus-visible,
+.mastery-node:focus-visible {
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: 2px;
+}
+.tab-count {
+  margin-left: 6px;
+  color: var(--oslab-review-text);
+}
+.learning-overview {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.8fr) minmax(0, 1.2fr);
+  gap: 16px;
+  margin-bottom: 18px;
+  align-items: start;
+}
+.overview-section {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--oslab-line);
+  border-radius: 8px;
+  background: var(--oslab-panel);
+}
+.overview-metrics {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 14px 18px;
+}
+.overview-stat {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 5px 8px;
+  min-width: 0;
+}
+.overview-stat-label {
+  flex-basis: 100%;
+  color: var(--oslab-muted-strong);
+  font-size: 12px;
+}
+.overview-stat strong {
+  color: var(--oslab-ink);
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+}
+.overview-heading,
+.history-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.overview-heading h2,
+.history-heading h2 {
+  margin: 0;
+  color: var(--oslab-ink);
+  font-size: 18px;
+  font-weight: 600;
+}
+.overview-heading p,
+.history-heading p {
+  margin: 4px 0 0;
+}
+.overview-message {
+  margin: 18px 0 0;
+  color: var(--oslab-muted-strong);
+}
+.course-progress-list {
+  display: grid;
+  gap: 18px;
+  margin-top: 20px;
+}
+.course-progress-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  align-items: center;
+}
+.course-progress-name {
+  min-width: 0;
+  color: var(--oslab-ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.course-progress-track {
+  grid-row: 2;
+  height: 6px;
+  overflow: hidden;
+  background: var(--oslab-line-soft);
+  border-radius: 3px;
+}
+.course-progress-track span {
+  display: block;
+  height: 100%;
+  background: var(--oslab-primary);
+}
+.course-progress-value {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  color: var(--oslab-muted-strong);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.mastery-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin: 18px 0 12px;
+  color: var(--oslab-muted-strong);
+  font-size: 13px;
+}
+.mastery-section {
+  grid-column: 1 / -1;
+}
+.mastery-summary strong {
+  color: var(--oslab-ink);
+}
+.mastery-table {
+  border-top: 1px solid var(--oslab-line-soft);
+}
+.mastery-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 2fr) minmax(70px, 1fr) minmax(70px, 1fr) minmax(
+      60px,
+      auto
+    );
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border-bottom: 1px solid var(--oslab-line-soft);
+  font-size: 13px;
+}
+.mastery-header {
+  min-height: 34px;
+  color: var(--oslab-muted-strong);
+  font-size: 12px;
+}
+.mastery-node {
+  min-width: 0;
+  padding: 5px 0;
+  border: 0;
+  background: transparent;
+  color: var(--oslab-primary);
+  font: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.mastery-node:hover {
+  text-decoration: underline;
+}
+.overview-pager {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.trend-chart {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+  height: 132px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-bottom: 1px solid var(--oslab-line);
+}
+.trend-day {
+  display: grid;
+  grid-template-rows: 18px 1fr 22px;
+  align-items: end;
+  min-width: 0;
+  height: 100%;
+  text-align: center;
+}
+.trend-count {
+  color: var(--oslab-muted-strong);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.trend-track {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+}
+.trend-track span {
+  display: block;
+  width: min(24px, 70%);
+  min-height: 0;
+  border-radius: 3px 3px 0 0;
+  background: var(--oslab-primary);
+}
+.trend-label {
+  color: var(--oslab-muted-strong);
+  font-size: 11px;
+}
+.trend-footnote {
+  margin: 10px 0 0;
+}
+.history-heading {
+  margin-top: 22px;
+}
+@media (max-width: 760px) {
+  .learning-overview {
+    grid-template-columns: 1fr;
+  }
+  .overview-metrics {
+    grid-column: auto;
+    grid-template-columns: 1fr;
+  }
+  .mastery-row {
+    grid-template-columns:
+      minmax(90px, 1.5fr) minmax(58px, 1fr) minmax(58px, 1fr)
+      minmax(48px, auto);
+    gap: 5px;
+    font-size: 12px;
+  }
+  .overview-section {
+    padding: 14px;
+  }
 }
 .records-ai-panel {
   display: flex;

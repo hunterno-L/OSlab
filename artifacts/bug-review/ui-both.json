@@ -1,0 +1,60 @@
+{
+  "phase": "both",
+  "passed": 13,
+  "checks": [
+    "fresh home defaults to OS even when directory includes DB first",
+    "profile uses OS scope and shows human node name while links retain code",
+    "same-component course change displays DB profile without OS recommendation",
+    "browser back restores matching OS home and profile",
+    "delayed old DB profile cannot overwrite newer OS selection",
+    "fresh experiment loads actual C starter and visible concept-test boundary",
+    "old C++ draft in C slot is preserved with a language mismatch explanation",
+    "canceling starter restore keeps student draft untouched",
+    "confirmed restore loads starter and saves previous exact draft",
+    "previous draft can be restored exactly",
+    "leaving experiment disposes both Monaco editor and model once",
+    "local-build experiment visibly blocks online auto evaluation",
+    "desktop and mobile avoid horizontal overflow and uncaught errors; no AI turn sent"
+  ],
+  "overflow": [
+    {
+      "name": "home-desktop",
+      "width": 1440,
+      "scroll": 1440,
+      "client": 1440
+    },
+    {
+      "name": "home-mobile",
+      "width": 390,
+      "scroll": 390,
+      "client": 390
+    },
+    {
+      "name": "db-opt-in-profile",
+      "width": 1440,
+      "scroll": 1440,
+      "client": 1440
+    },
+    {
+      "name": "experiment-1-1-desktop",
+      "width": 1753,
+      "scroll": 1753,
+      "client": 1753
+    },
+    {
+      "name": "experiment-1-1-mobile",
+      "width": 390,
+      "scroll": 390,
+      "client": 390
+    },
+    {
+      "name": "experiment-draft-mobile",
+      "width": 390,
+      "scroll": 390,
+      "client": 390
+    }
+  ],
+  "pageErrors": [],
+  "aiTurnPosts": 0,
+  "data": "actual Edge browser and real verification backend; one intentionally delayed real profile response; synthetic draft in private browser only"
+}

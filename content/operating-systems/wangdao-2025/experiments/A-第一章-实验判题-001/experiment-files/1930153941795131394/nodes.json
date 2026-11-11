@@ -1,0 +1,26 @@
+{
+  "questionId": "1930153941795131394",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.loading_linking",
+      "nodeName": "程序的链接与装入",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "readelf() 遍历 Section Header Table 输出每个节的序号与 sh_addr，正是「链接器把多个 .o 的节合并成一个可执行文件」的结果视图；实验任务 4 要求与 readelf 工具输出逐条比对。"
+    },
+    {
+      "nodeCode": "os.memory.process_image",
+      "nodeName": "进程内存映像",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "各节的 sh_addr 决定装入后代码段/数据段/BSS 在内存映像中的位置，读节表就是读进程内存映像的布局蓝图。"
+    },
+    {
+      "nodeCode": "os.memory.logical_address",
+      "nodeName": "逻辑地址与物理地址",
+      "role": "RELATED",
+      "weight": 0.5,
+      "reason": "sh_addr 是段的虚拟（逻辑）地址而非文件偏移，子任务用 e_shoff + i*e_shentsize 定位记录、再取偏移 12 处的 sh_addr，正是区分文件偏移与逻辑地址的练习。"
+    }
+  ]
+}

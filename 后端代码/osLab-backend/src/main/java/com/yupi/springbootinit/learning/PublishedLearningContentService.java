@@ -71,9 +71,23 @@ public class PublishedLearningContentService {
 
     /** Retrieval fragments retain their parent block and exact publication/source metadata. */
     public List<TutorSourceVO> sources(Collection<String> codes, String question, int quota) {
+        return sourcesFromChunks(chunksForNodes(codes), question, quota);
+    }
+
+    public List<TutorSourceVO> sourcesForCourse(String courseCode, Collection<String> codes, String question, int quota) {
+        if (codes == null || codes.isEmpty()) return Collections.emptyList();
+        List<Map<String,Object>> selected = new ArrayList<>();
+        for (Map<String,Object> chunk : publishedChunks(courseCode)) {
+            JsonNode nodes = JSON.valueToTree(chunk).path("nodeCodes");
+            for (JsonNode node : nodes) if (codes.contains(node.asText())) { selected.add(chunk); break; }
+        }
+        return sourcesFromChunks(selected, question, quota);
+    }
+
+    private List<TutorSourceVO> sourcesFromChunks(List<Map<String,Object>> chunks, String question, int quota) {
         if(quota<=0)return Collections.emptyList();
         List<TutorSourceVO> out = new ArrayList<>();
-        for (Map<String,Object> chunk : chunksForNodes(codes)) {
+        for (Map<String,Object> chunk : chunks) {
             ObjectNode c = JSON.valueToTree(chunk);
             String markdown = c.path("contentMd").asText();
             String[] paragraphs = markdown.split("\\n\\s*\\n");

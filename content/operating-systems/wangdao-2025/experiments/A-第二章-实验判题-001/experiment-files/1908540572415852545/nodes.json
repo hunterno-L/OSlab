@@ -1,0 +1,26 @@
+{
+  "questionId": "1908540572415852545",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.page_table",
+      "nodeName": "页表",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "page_insert()/page_remove() 维护页表项与 pp_ref：插入前若该 va 已映射旧页必须先 page_remove，移除后 pp_ref--；判题输出返回码、物理地址与 pp_ref。"
+    },
+    {
+      "nodeCode": "os.memory.tlb",
+      "nodeName": "TLB 快表",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "content 明确要求在 page_insert 中调用 tlb_invalidate 更新 TLB，否则 CPU 仍用旧快表项访问已被换出的物理页。"
+    },
+    {
+      "nodeCode": "os.memory.sharing",
+      "nodeName": "内存共享",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "判题的 P 操作直接查询 pp_ref：同一物理页被多个 va 或多个页目录映射时 pp_ref>1，page_remove 只能减引用而不能直接回收。"
+    }
+  ]
+}

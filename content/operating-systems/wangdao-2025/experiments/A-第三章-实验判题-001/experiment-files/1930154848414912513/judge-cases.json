@@ -1,0 +1,22 @@
+[
+  {
+    "input": "256 8192\n6\nI\nA 0\nU 63\nE 0 0\nE 191 0\nE 63 0\n",
+    "output": "I 64\nA 0 63 191\nU 63\nE 0 63\nE 0 63\nE -2 -1"
+  },
+  {
+    "input": "256 8192\n7\nI\nA 0\nA 0\nE 191 0\nE 318 0\nE 4294967295 0\nE 62 0\n",
+    "output": "I 64\nA 0 63 191\nA 0 62 318\nE 0 63\nE 0 62\nE -2 -1\nE -2 -1"
+  },
+  {
+    "input": "256 8192\n7\nI\nA 0\nF 63\nA 0\nN 63\nE 191 0\nE 319 0\n",
+    "output": "I 64\nA 0 63 191\nF 63\nA 0 63 319\nN 63 319 1 0\nE -2 -1\nE 0 63"
+  },
+  {
+    "input": "256 8192\n9\nI\nA 0\nA 191\nA 0\nU 62\nE 318 1\nE 191 1\nE 445 1\nE 445 0\n",
+    "output": "I 64\nA 0 63 191\nA 0 62 318\nA 0 61 445\nU 62\nE 0 62\nE 0 63\nE -2 -1\nE 0 61"
+  },
+  {
+    "input": "256 8192\n6\nI\nA 0\nS 63 0\nE 191 0\nS 63 2\nE 191 0\n",
+    "output": "I 64\nA 0 63 191\nS 63 0\nE -2 -1\nS 63 2\nE 0 63"
+  }
+]

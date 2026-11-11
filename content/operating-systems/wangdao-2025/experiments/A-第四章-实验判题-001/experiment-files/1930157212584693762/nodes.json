@@ -1,0 +1,26 @@
+{
+  "questionId": "1930157212584693762",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.process.process_control",
+      "nodeName": "进程控制",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "sys_env_alloc 在内核里调 env_alloc 创建子进程环境、复制父进程 Trapframe，并把子进程置为不会立即被调度的状态（ENV_NOT_RUNNABLE）。"
+    },
+    {
+      "nodeCode": "os.runtime.system_call",
+      "nodeName": "系统调用",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "fork 的用户态实现必须经这个系统调用才能创建 PCB，用户态无权直接操作 envs 数组；返回值决定 fork 在父子两侧的不同返回。"
+    },
+    {
+      "nodeCode": "os.process.pcb",
+      "nodeName": "进程控制块",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "新进程的 env_id/env_parent_id/env_tf/env_pgdir 都在此初始化，env_parent_id 记录父进程 envid。"
+    }
+  ]
+}

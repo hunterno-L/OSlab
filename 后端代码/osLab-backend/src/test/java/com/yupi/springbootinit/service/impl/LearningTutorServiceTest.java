@@ -75,6 +75,18 @@ class LearningTutorServiceTest {
         TableInfoHelper.initTableInfo(assistant, LearningQuestion.class);
         TableInfoHelper.initTableInfo(assistant, LearningQuestionNode.class);
 
+        com.yupi.springbootinit.learning.NodeIdentityService identities = mock(com.yupi.springbootinit.learning.NodeIdentityService.class);
+        com.yupi.springbootinit.learning.PublishedCourseScopeService courseScope = mock(com.yupi.springbootinit.learning.PublishedCourseScopeService.class);
+        java.util.Map<String, com.yupi.springbootinit.learning.NodeIdentityService.Identity> allowed = new java.util.HashMap<>();
+        for (String name : NEIGHBORS) allowed.put(name, new com.yupi.springbootinit.learning.NodeIdentityService.Identity(name, name, name));
+        allowed.put(SEED, new com.yupi.springbootinit.learning.NodeIdentityService.Identity(SEED, SEED, SEED));
+        allowed.put("os.cpu.scheduler", new com.yupi.springbootinit.learning.NodeIdentityService.Identity("os.cpu.scheduler", SEED, SEED));
+        when(identities.resolve(any(String.class))).thenAnswer(i -> allowed.get(i.getArgument(0)));
+        when(identities.storageKey(any(String.class))).thenAnswer(i -> i.getArgument(0));
+        when(courseScope.nodes(any(String.class))).thenReturn(allowed);
+        ReflectionTestUtils.setField(service, "nodeIdentities", identities);
+        ReflectionTestUtils.setField(service, "courseScope", courseScope);
+        ReflectionTestUtils.setField(service, "enabledCourses", new com.yupi.springbootinit.course.EnabledCourses("course.operating-systems"));
         ReflectionTestUtils.setField(service, "knowledgeGraphService", knowledgeGraphService);
         ReflectionTestUtils.setField(service, "learningQuestionMapper", questionMapper);
         ReflectionTestUtils.setField(service, "learningQuestionNodeMapper", nodeMapper);
@@ -126,7 +138,7 @@ class LearningTutorServiceTest {
         experiment.setTags("[\"" + SEED + "\"]");
         when(questionService.list()).thenReturn(List.of(experiment));
         when(experiments.experiments(SEED)).thenReturn(List.of(experiment));
-        when(pathService.buildPath(eq(user), eq(SEED))).thenReturn(nextStepPath());
+        when(pathService.buildPath(eq(user), eq(SEED), eq("course.operating-systems"))).thenReturn(nextStepPath());
     }
 
     @Test
@@ -208,7 +220,7 @@ class LearningTutorServiceTest {
 
     @Test
     void pathUnavailableFallsBackWithoutFabricatedAction() {
-        when(pathService.buildPath(any(User.class), any(String.class)))
+        when(pathService.buildPath(any(User.class), any(String.class), any(String.class)))
                 .thenThrow(new RuntimeException("neo4j down"));
 
         TutorAnswerVO vo = service.ask(ask("下一步应该先学什么？"), user);
@@ -259,12 +271,13 @@ class LearningTutorServiceTest {
         com.yupi.springbootinit.learning.NodeIdentityService identities=mock(com.yupi.springbootinit.learning.NodeIdentityService.class);
         com.yupi.springbootinit.learning.PublishedLearningContentService published=mock(com.yupi.springbootinit.learning.PublishedLearningContentService.class);
         ReflectionTestUtils.setField(service,"nodeIdentities",identities);ReflectionTestUtils.setField(service,"publishedContent",published);
+        when(identities.resolve("os.cpu.scheduler")).thenReturn(new com.yupi.springbootinit.learning.NodeIdentityService.Identity("os.cpu.scheduler", SEED, SEED));
         when(identities.storageKey("os.cpu.scheduler")).thenReturn(SEED);
         when(identities.byStorageKey(SEED)).thenReturn(new com.yupi.springbootinit.learning.NodeIdentityService.Identity("os.cpu.scheduler","处理机调度",SEED));
         when(knowledgeGraphService.findByName("os.cpu.scheduler")).thenReturn(List.of(graphNode(SEED,"节点概要")));
         when(knowledgeGraphService.getAllRelatedNames("os.cpu.scheduler")).thenReturn(List.of(SEED));
         TutorSourceVO real=new TutorSourceVO();real.setSourceType("TEXTBOOK");real.setActionType("RESOURCE");real.setParentChunkCode("chunk.scheduler");real.setSourceId("chunk.scheduler");real.setTargetId("chunk.scheduler");real.setTitle("教材调度机制");real.setRevision(2);real.setSnippet("正文事实片段");real.setSourceRef(java.util.Map.of("pageStart",42,"locator","2.2.5"));
-        when(published.sources(eq(List.of("os.cpu.scheduler")),any(String.class),eq(2))).thenReturn(List.of(real));
+        when(published.sourcesForCourse(eq("course.operating-systems"),eq(List.of("os.cpu.scheduler")),any(String.class),eq(2))).thenReturn(List.of(real));
         TutorAskRequest request=ask("什么是调度？");request.setNodeCode("os.cpu.scheduler");TutorAnswerVO answer=service.ask(request,user);
         assertTrue(answer.getSources().contains(real));assertTrue(answer.getAnswer().contains("正文事实片段"));
         assertEquals(42,answer.getSources().stream().filter(s->s.getParentChunkCode()!=null).findFirst().get().getSourceRef().get("pageStart"));
@@ -373,6 +386,7 @@ class LearningTutorServiceTest {
         ReflectionTestUtils.setField(service, "publishedContent", published);
         ReflectionTestUtils.setField(service, "nodeIdentities", identities);
 
+        when(identities.resolve("os.cpu.scheduler")).thenReturn(new com.yupi.springbootinit.learning.NodeIdentityService.Identity("os.cpu.scheduler", SEED, SEED));
         when(identities.storageKey("os.cpu.scheduler")).thenReturn(SEED);
         when(identities.byStorageKey(SEED)).thenReturn(
                 new com.yupi.springbootinit.learning.NodeIdentityService.Identity(
@@ -406,7 +420,7 @@ class LearningTutorServiceTest {
         assertTrue(vo.getRetrievalTrace().stream()
                 .anyMatch(line -> line.contains("语义+关键词+图谱")));
         org.mockito.Mockito.verify(published, org.mockito.Mockito.never())
-                .sources(any(), any(), org.mockito.ArgumentMatchers.anyInt());
+                .sourcesForCourse(any(), any(), any(), org.mockito.ArgumentMatchers.anyInt());
     }
 
     /** 个人资料不得混进旧响应：旧契约只下发课程正文。 */
@@ -440,9 +454,9 @@ class LearningTutorServiceTest {
         assertFalse(captor.getValue().isIncludePersonal());
     }
 
-    /** 课程无法确定时不猜课程，退回既有发布内容检索。 */
+    /** 旧入口按已发布的节点范围确定课程。 */
     @Test
-    void oldEntryRefusesToGuessACourseAndFallsBackToPublishedContent() {
+    void oldEntryUsesPublishedCourseScope() {
         com.yupi.springbootinit.ai.retrieval.HybridRetrievalService retrieval =
                 mock(com.yupi.springbootinit.ai.retrieval.HybridRetrievalService.class);
         com.yupi.springbootinit.ai.plan.AiContentScopeService scope =
@@ -453,7 +467,10 @@ class LearningTutorServiceTest {
         when(scope.singleCourseCode()).thenReturn(null);
 
         assertDoesNotThrow(() -> service.ask(ask("什么是进程调度？"), user));
-        org.mockito.Mockito.verifyNoInteractions(retrieval);
+        ArgumentCaptor<com.yupi.springbootinit.ai.retrieval.HybridRetrievalService.Scope> selected =
+                ArgumentCaptor.forClass(com.yupi.springbootinit.ai.retrieval.HybridRetrievalService.Scope.class);
+        org.mockito.Mockito.verify(retrieval).retrieve(selected.capture(), any(String.class));
+        assertEquals("course.operating-systems", selected.getValue().getCourseCode());
     }
 
     // endregion
