@@ -1,0 +1,27 @@
+{
+  "questionId": "1918938841746878466",
+  "resourceCode": "exp.legacy.1918938841746878466",
+  "title": "实验4.8 进程创建系统调用 `sys_env_alloc`",
+  "content": " v持续上升",
+  "tags": [
+    "JavaScript",
+    "Vue"
+  ],
+  "referenceAnswer": "",
+  "originalCode": "",
+  "judgeCase": [
+    {
+      "input": "",
+      "output": ""
+    }
+  ],
+  "judgeConfig": {
+    "timeLimit": 1000,
+    "memoryLimit": 1000,
+    "stackLimit": 1000
+  },
+  "legacySetIds": [],
+  "legacySets": [],
+  "snapshotUpdatedTime": "2025-05-10 20:47:54",
+  "runtimeValidated": false
+}

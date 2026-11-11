@@ -1,0 +1,158 @@
+[
+  {
+    "url": "http://localhost:8081/api/learning/questions/catalog",
+    "method": "POST",
+    "status": 200,
+    "requestBody": "{\"courseCode\":\"course.operating-systems\"}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/questions/list/page",
+    "method": "POST",
+    "status": 200,
+    "requestBody": "{\"current\":1,\"pageSize\":10,\"courseCode\":\"course.operating-systems\"}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/questions/catalog",
+    "method": "POST",
+    "status": 200,
+    "requestBody": "{\"courseCode\":\"course.operating-systems\"}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/questions/list/page",
+    "method": "POST",
+    "status": 200,
+    "requestBody": "{\"current\":1,\"pageSize\":10,\"courseCode\":\"course.operating-systems\",\"nodeCode\":\"os.memory.page_fault\"}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/practice/attempts",
+    "method": "POST",
+    "status": 200,
+    "requestBody": "{\"questionId\":\"2115261127086305282\",\"courseCode\":\"course.operating-systems\",\"clientAttemptKey\":\"76a9a396-d44a-4b23-b3ee-8137e95b9307\"}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/questions/answer",
+    "method": "POST",
+    "status": 200,
+    "requestBody": "{\"questionId\":\"2115261127086305282\",\"answer\":\"C\",\"attemptContextId\":\"2120322114407604225\",\"submissionKey\":\"attempt:2120322114407604225\"}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/questions/catalog",
+    "method": "POST",
+    "status": 200,
+    "requestBody": "{\"courseCode\":\"course.operating-systems\"}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/practice/attempts",
+    "method": "POST",
+    "status": 200,
+    "requestBody": "{\"questionId\":\"2115261127186968578\",\"courseCode\":\"course.operating-systems\",\"clientAttemptKey\":\"fd6c05cb-fb35-43d5-bc18-c9d5d4bcf9a7\"}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/practice/attempts/2120322119314939905/help",
+    "method": "POST",
+    "status": 200,
+    "requestBody": "{\"helpLevel\":\"HINT\"}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/questions/catalog",
+    "method": "POST",
+    "status": 200,
+    "requestBody": "{\"courseCode\":\"course.operating-systems\"}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/questions/list/page",
+    "method": "POST",
+    "status": 200,
+    "requestBody": "{\"current\":1,\"pageSize\":10,\"courseCode\":\"course.operating-systems\"}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/start",
+    "method": "POST",
+    "status": 200,
+    "requestBody": "{\"courseCode\":\"course.operating-systems\",\"studyState\":\"ALL\",\"count\":5,\"mode\":\"SELF_TEST\"}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/run?runId=2120322139153997826",
+    "method": "GET",
+    "status": 200,
+    "requestBody": null
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/run?runId=2120322139153997826&t=1794359170089",
+    "method": "GET",
+    "status": 200,
+    "requestBody": null
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/run?runId=2120322139153997826&t=1794359170753",
+    "method": "GET",
+    "status": 200,
+    "requestBody": null
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/runs/2120322139153997826/drafts",
+    "method": "PUT",
+    "status": 200,
+    "requestBody": "{\"clientSaveId\":\"c4dba886-9123-4703-9e0d-d95307dd04f8\",\"rowVersion\":0,\"drafts\":[{\"questionId\":\"2112165588673150978\",\"answer\":\"B\",\"markedUnsure\":false},{\"questionId\":\"2115261063991390216\",\"answer\":\"\",\"markedUnsure\":false},{\"questionId\":\"2115261066579275779\",\"answer\":\"\",\"markedUnsure\":false},{\"questionId\":\"2115261126461353993\",\"answer\":\"\",\"markedUnsure\":false},{\"questionId\":\"2115261165598404616\",\"answer\":\"\",\"markedUnsure\":false}]}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/run?runId=2120322139153997826&t=1794359171379",
+    "method": "GET",
+    "status": 200,
+    "requestBody": null
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/run?runId=2120322139153997826&t=1794359174353",
+    "method": "GET",
+    "status": 200,
+    "requestBody": null
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/run?runId=2120322139153997826&t=1794359175007",
+    "method": "GET",
+    "status": 200,
+    "requestBody": null
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/runs/2120322139153997826/drafts",
+    "method": "PUT",
+    "status": 200,
+    "requestBody": "{\"clientSaveId\":\"51ac02e4-5060-4c02-bb90-18e8bdf4a4d7\",\"rowVersion\":1,\"drafts\":[{\"questionId\":\"2112165588673150978\",\"answer\":\"B\",\"markedUnsure\":false},{\"questionId\":\"2115261063991390216\",\"answer\":\"B\",\"markedUnsure\":true},{\"questionId\":\"2115261066579275779\",\"answer\":\"\",\"markedUnsure\":false},{\"questionId\":\"2115261126461353993\",\"answer\":\"\",\"markedUnsure\":false},{\"questionId\":\"2115261165598404616\",\"answer\":\"\",\"markedUnsure\":false}]}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/run?runId=2120322139153997826&t=1794359175630",
+    "method": "GET",
+    "status": 200,
+    "requestBody": null
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/run?runId=2120322139153997826&t=1794359176564",
+    "method": "GET",
+    "status": 200,
+    "requestBody": null
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/run?runId=2120322139153997826&t=1794359177202",
+    "method": "GET",
+    "status": 200,
+    "requestBody": null
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/runs/2120322139153997826/drafts",
+    "method": "PUT",
+    "status": 200,
+    "requestBody": "{\"clientSaveId\":\"e9d86165-f4ff-4895-83e7-2f618105d883\",\"rowVersion\":2,\"drafts\":[{\"questionId\":\"2112165588673150978\",\"answer\":\"B\",\"markedUnsure\":false},{\"questionId\":\"2115261063991390216\",\"answer\":\"B\",\"markedUnsure\":true},{\"questionId\":\"2115261066579275779\",\"answer\":\"B\",\"markedUnsure\":false},{\"questionId\":\"2115261126461353993\",\"answer\":\"\",\"markedUnsure\":false},{\"questionId\":\"2115261165598404616\",\"answer\":\"\",\"markedUnsure\":false}]}"
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/run?runId=2120322139153997826&t=1794359177826",
+    "method": "GET",
+    "status": 200,
+    "requestBody": null
+  },
+  {
+    "url": "http://localhost:8081/api/learning/assessment/run?runId=2120322139153997826",
+    "method": "GET",
+    "status": 200,
+    "requestBody": null
+  }
+]

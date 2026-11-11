@@ -1,0 +1,4654 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "QUESTIONS",
+  "batchCode": "batch.a.files.chapter.001",
+  "contributor": "A",
+  "courseCode": "course.operating-systems",
+  "note": "第四章题目包（4.2）。全部为教材原题（TEXTBOOK），题干与选项逐字取自《王道操作系统》2025 版「本节习题精选」，答案以书上答案为准。",
+  "questions": [
+    {
+      "questionCode": "q.wd25.s4_1.001",
+      "title": "UNIX 中输入输出设备的文件归类",
+      "content": "UNIX 操作系统中，输入/输出设备视为（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "普通文件"
+        },
+        {
+          "key": "B",
+          "value": "目录文件"
+        },
+        {
+          "key": "C",
+          "value": "索引文件"
+        },
+        {
+          "key": "D",
+          "value": "特殊文件"
+        }
+      ],
+      "answer": "D",
+      "analysis": "UNIX 操作系统中，所有设备都被视为特殊的文件，因为 UNIX 操作系统控制和访问外部设备的方式和访问一个文件的方式是相同的。",
+      "misconception": "把设备当成“普通文件”是按用途分类的直觉误判：普通文件是存放用户数据的有结构/无结构文件，而设备没有数据块意义上的文件体，因此被单列为特殊文件。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 263,
+        "pageEnd": 263,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第01题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "01"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.file_classification",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.file",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.002",
+      "title": "创建文件时建立的对象",
+      "content": "文件系统在创建一个文件时，为它建立一个（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "文件目录项"
+        },
+        {
+          "key": "B",
+          "value": "目录文件"
+        },
+        {
+          "key": "C",
+          "value": "逻辑结构"
+        },
+        {
+          "key": "D",
+          "value": "逻辑空间"
+        }
+      ],
+      "answer": "A",
+      "analysis": "一个文件对应一个 FCB，而一个文件目录项就是一个 FCB。",
+      "misconception": "误选“目录文件”：目录文件是存放一批目录项的容器，创建单个文件只是在所在目录中新增一个目录项，并不会新建一个目录文件。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 263,
+        "pageEnd": 263,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第02题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "02"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.operations",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.003",
+      "title": "打开文件操作的主要工作",
+      "content": "打开文件操作的主要工作是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "把指定文件的目录项复制到内存指定的区域"
+        },
+        {
+          "key": "B",
+          "value": "把指定文件复制到内存指定的区域"
+        },
+        {
+          "key": "C",
+          "value": "在指定文件所在的存储介质上找到指定文件的目录项"
+        },
+        {
+          "key": "D",
+          "value": "在内存寻找指定的文件"
+        }
+      ],
+      "answer": "A",
+      "analysis": "打开文件操作是将该文件的 FCB 存入内存的活跃文件目录表，而不是将文件内容复制到主存，找到指定文件目录是打开文件之前的操作。",
+      "misconception": "两个典型误选：把 open 当成“把文件读进内存”（B），或把“检索目录找到目录项”当成 open 本身（C）——后者是 open 的前置步骤，open 的实质是把目录项/FCB 调入内存的活动目录表。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 263,
+        "pageEnd": 263,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第03题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "03"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.open_close",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.004",
+      "title": "open() 系统调用的过程描述",
+      "content": "某用户程序发起 open() 系统调用，下列对该过程的描述中最准确的是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "open() 调用必然导致文件 I/O"
+        },
+        {
+          "key": "B",
+          "value": "open() 调用的参数含有需要打开的文件的文件名"
+        },
+        {
+          "key": "C",
+          "value": "open() 调用完成后，系统打开文件表将增加一个表目"
+        },
+        {
+          "key": "D",
+          "value": "open() 调用的参数的文件名不同时，必然会打开不同的文件实体"
+        }
+      ],
+      "answer": "B",
+      "analysis": "open() 调用的参数含有文件名（或者说文件的路径名），它会在进程的用户打开文件表中增加一个对应的表目，并返回该表目的索引号（文件描述符或句柄）。系统打开文件表只有在文件实体第一次被打开时才增加一个表目，也才会通过文件 I/O 将对应的索引节点从磁盘读入内存。当 open() 调用的不同文件互为硬链接时，所打开的文件实体是一样的。",
+      "misconception": "C 的陷阱在“系统打开文件表”：open 增加的是本进程的用户打开文件表表目，系统打开文件表只在文件实体首次被打开时增加表目；D 忽略了硬链接下不同文件名指向同一文件实体。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 263,
+        "pageEnd": 263,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第04题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "04"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.open_close",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.inode",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.005",
+      "title": "关闭文件操作的主要工作",
+      "content": "关闭文件操作的主要工作是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "将文件的最新信息从内存写回磁盘"
+        },
+        {
+          "key": "B",
+          "value": "将文件当前的控制信息从内存写回磁盘"
+        },
+        {
+          "key": "C",
+          "value": "将位示图从内存写回磁盘"
+        },
+        {
+          "key": "D",
+          "value": "将超级块当前的信息从内存写回磁盘"
+        }
+      ],
+      "answer": "B",
+      "analysis": "关闭文件是指将文件当前的控制信息从内存写回磁盘，需要注意的是关闭文件并不意味着将文件数据写回磁盘，写文件操作才会写回磁盘（不考虑延迟写）。",
+      "misconception": "误把 close 等同于“落盘数据”（A）：close 只回收内存中的控制信息（FCB/索引节点副本、打开计数），数据是否已写盘由 write 及缓冲区策略决定。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 263,
+        "pageEnd": 263,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第05题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "05"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.open_close",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.006",
+      "title": "读文件操作的先后次序",
+      "content": "读文件操作的正确次序应该是（ ）。\nI. 向设备驱动程序发出 I/O 请求，完成数据交换工作\nII. 按存取控制说明检查访问的合法性\nIII. 根据目录项中该文件的逻辑和物理组织形式，将逻辑记录号转换成物理块号\nIV. 按文件描述符在打开文件表中找到该文件的目录项",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "II、IV、III、I"
+        },
+        {
+          "key": "B",
+          "value": "IV、II、III、I"
+        },
+        {
+          "key": "C",
+          "value": "IV、III、II、I"
+        },
+        {
+          "key": "D",
+          "value": "II、IV、I、III"
+        }
+      ],
+      "answer": "B",
+      "analysis": "读文件操作的正确次序是：按文件描述符在打开文件表中找到该文件的目录项；按存取控制说明检查访问的合法性；根据目录项中该文件的逻辑和物理组织形式，将逻辑记录号转换成物理块号；向设备驱动程序发出 I/O 请求，完成数据交换工作。因此答案是 IV、II、III、I。",
+      "misconception": "A 把合法性检查提到定位目录项之前；C 把权限检查放到地址转换之后——权限校验必须在真正发起 I/O 之前完成，否则越权请求已经进入了设备驱动层。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 263,
+        "pageEnd": 263,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第06题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "06"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.operations",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.open_close",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.file.access_control",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.007",
+      "title": "目录文件存放的信息",
+      "content": "目录文件存放的信息是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "某一文件存放的数据信息"
+        },
+        {
+          "key": "B",
+          "value": "某一文件的文件目录"
+        },
+        {
+          "key": "C",
+          "value": "该目录中所有数据文件目录"
+        },
+        {
+          "key": "D",
+          "value": "该目录中所有子目录和数据文件的目录"
+        }
+      ],
+      "answer": "D",
+      "analysis": "目录文件是 FCB 的集合，一个目录中既可能有子目录，又可能有数据文件，因此目录文件中存放的是子目录和数据文件的信息。",
+      "misconception": "C 漏掉了子目录项：目录项既描述普通文件也描述下级目录，“所有数据文件目录”把子目录排除在外，属于典型的以偏概全。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第07题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "07"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.file_classification",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.008",
+      "title": "内存索引节点特有的内容",
+      "content": "当文件被打开时，需要将磁盘索引节点拷贝到内存的索引节点，下列属于内存索引节点中有而磁盘索引节点中没有的内容是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "访问计数值"
+        },
+        {
+          "key": "B",
+          "value": "文件物理地址"
+        },
+        {
+          "key": "C",
+          "value": "文件长度"
+        },
+        {
+          "key": "D",
+          "value": "文件类型"
+        }
+      ],
+      "answer": "A",
+      "analysis": "访问计数值表示的意义是，每当有一个进程要访问此索引节点，访问计数值加 1，访问结束时减 1，它属于内存索引节点中特有的内容。",
+      "misconception": "B、C、D 都是磁盘索引节点上本来就有的静态属性（物理地址、长度、类型），只有随进程访问动态变化的计数值、共享计数、是否被修改等标志才是内存副本增设的字段。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第08题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "08"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.inode",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.open_close",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.009",
+      "title": "FAT32 文件目录项的组成",
+      "content": "FAT32 的文件目录项不包括（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "文件名"
+        },
+        {
+          "key": "B",
+          "value": "文件访问权限说明"
+        },
+        {
+          "key": "C",
+          "value": "文件控制块的物理位置"
+        },
+        {
+          "key": "D",
+          "value": "文件所在的物理位置"
+        }
+      ],
+      "answer": "C",
+      "analysis": "文件目录项即 FCB，通常由文件基本信息、存取控制信息和使用信息组成。基本信息包括文件物理位置。文件目录项显然不包括 FCB 的物理位置信息。",
+      "misconception": "把“文件所在的物理位置”（D，目录项里要记的首簇号）与“FCB 自身存放在哪”（C）混为一谈；目录项记录数据在哪，不记录自己这个目录项存在哪个盘块。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第09题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "09"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fat",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.010",
+      "title": "描述信息与目录项分离的好处",
+      "content": "有些操作系统中将文件描述信息从目录项中分离出来，这样做的好处是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "减少读文件时的 I/O 信息量"
+        },
+        {
+          "key": "B",
+          "value": "减少写文件时的 I/O 信息量"
+        },
+        {
+          "key": "C",
+          "value": "减少查找文件时的 I/O 信息量"
+        },
+        {
+          "key": "D",
+          "value": "减少复制文件时的 I/O 信息量"
+        }
+      ],
+      "answer": "C",
+      "analysis": "将文件描述信息从目录项中分离，即应用了索引节点的方法，磁盘的盘块中可以存放更多的目录项，查找文件时可以大大减少其 I/O 信息量。",
+      "misconception": "误选 A：分离后读文件的数据量并没有减少，受益的是“按名检索目录”这一步——单个盘块能装更多目录项，检索同样多文件需要读的盘块更少。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第10题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "10"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.inode",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null,
+      "answerNote": "2026-10-27 全量逐字核对：补回书上的「中」字"
+    },
+    {
+      "questionCode": "q.wd25.s4_1.011",
+      "title": "未经授权不得使用文件的保障",
+      "content": "操作系统为保证未经文件拥有者授权，任何其他用户不能使用该文件，所提供的解决方法是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "文件保护"
+        },
+        {
+          "key": "B",
+          "value": "文件保密"
+        },
+        {
+          "key": "C",
+          "value": "文件转储"
+        },
+        {
+          "key": "D",
+          "value": "文件共享"
+        }
+      ],
+      "answer": "A",
+      "analysis": "文件保护是针对文件访问权限的保护。",
+      "misconception": "混淆“文件保护”与“文件保密”（B）：保密是防止文件内容被非授权者读懂（如加密），保护是防止非授权者访问（读写执行权限、存取控制），题干说的是“不能使用”。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第11题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "11"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.access_control",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.012",
+      "title": "不属于文件保护的方法",
+      "content": "在文件系统中，以下不属于文件保护的方法是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "口令"
+        },
+        {
+          "key": "B",
+          "value": "存取控制"
+        },
+        {
+          "key": "C",
+          "value": "用户权限表"
+        },
+        {
+          "key": "D",
+          "value": "读写之后使用关闭命令"
+        }
+      ],
+      "answer": "D",
+      "analysis": "在文件系统中，口令、存取控制和用户权限表都是常用的文件保护方法。",
+      "misconception": "把“关闭文件”当成一种保护手段：close 只是释放内存控制信息、把打开计数减一，不承担任何权限校验职责。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第12题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "12"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.access_control",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.013",
+      "title": "限制文件访问的两个因素",
+      "content": "对一个文件的访问，常由（ ）共同限制。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "用户访问权限和文件属性"
+        },
+        {
+          "key": "B",
+          "value": "用户访问权限和用户优先级"
+        },
+        {
+          "key": "C",
+          "value": "优先级和文件属性"
+        },
+        {
+          "key": "D",
+          "value": "文件属性和口令"
+        }
+      ],
+      "answer": "A",
+      "analysis": "只要能区分用户的访问权限和用户优先级，就能得到正确答案。用户访问权限是指用户有没有权限访问该文件，而用户优先级是指在多个用户同时请求该文件时应该先满足谁。比如，图书馆的用户排队借一本书，某用户可能有更高的优先级，即他排在队伍的前面，但有可能轮到他时被告知他没有借阅那本书的权限。文件的属性包括保存在 FCB 中对文件访问的控制信息。",
+      "misconception": "把“优先级”（调度/竞争顺序）当成访问控制条件：优先级决定谁先被服务，不决定谁被允许；文件属性中保存的读写执行、只读、隐藏等标志与用户访问权限共同构成判定。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第13题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "13"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.access_control",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.file_attributes",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.014",
+      "title": "进入系统须注册的安全级别",
+      "content": "为了对文件系统中的文件进行安全管理，任何一个用户在进入系统时都必须进行注册，这一级安全管理是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "系统级"
+        },
+        {
+          "key": "B",
+          "value": "目录级"
+        },
+        {
+          "key": "C",
+          "value": "用户级"
+        },
+        {
+          "key": "D",
+          "value": "文件级"
+        }
+      ],
+      "answer": "A",
+      "analysis": "系统级安全管理包括注册和登录。此外，通过“进入系统时”也可推测出正确答案。",
+      "misconception": "题干的时间点是“进入系统时”，发生在任何文件被打开之前，因此只能是系统级；用户级/目录级/文件级都发生在已登录之后的具体访问路径上。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第14题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "14"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.access_control",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.015",
+      "title": "非性能提升类的文件系统操作",
+      "content": "下列选项中，（ ）不是为了提升文件系统性能的操作。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "目录项分解"
+        },
+        {
+          "key": "B",
+          "value": "文件高速缓存"
+        },
+        {
+          "key": "C",
+          "value": "磁盘调度算法"
+        },
+        {
+          "key": "D",
+          "value": "异步 I/O"
+        }
+      ],
+      "answer": "D",
+      "analysis": "异步 I/O 是指发出 I/O 请求后，系统不必等待 I/O 完成，而继续执行其他任务，当 I/O 完成后再通知系统，异步 I/O 提高了 CPU 利用率，但对磁盘 I/O 次数没有影响。将目录项分解为符号目录项和基本目录项，符号目录项包括文件名和文件号，基本目录项包括文件号和文件其他描述信息，查找时只需查找符号目录，由于减少了磁盘占用空间，因此也减少了读盘次数。文件高速缓存可以减少磁盘 I/O 次数。磁盘调度算法可以减少寻道时间，提高磁盘 I/O 速度。",
+      "misconception": "把“提高并发度”当成“提高文件系统性能”：异步 I/O 优化的是 CPU 与 I/O 的重叠，减少的是进程等待时间，不减少访盘次数与寻道开销。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第15题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "15"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.operations",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.016",
+      "title": "属于逻辑结构范畴的文件",
+      "content": "下列说法中，（ ）属于文件的逻辑结构的范畴。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "连续文件"
+        },
+        {
+          "key": "B",
+          "value": "系统文件"
+        },
+        {
+          "key": "C",
+          "value": "链接文件"
+        },
+        {
+          "key": "D",
+          "value": "流式文件"
+        }
+      ],
+      "answer": "D",
+      "analysis": "逻辑文件有两种：无结构文件（流式文件）和有结构式文件。连续文件和链接文件都属于文件的物理结构，而系统文件是按文件用途分类的。",
+      "misconception": "A、C 是物理结构（数据块在磁盘上的组织方式）的名称，B 是按用途的分类项，只有“流式文件”是站在用户角度看的逻辑组织形式。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第16题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "16"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.logical_structure",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.file_classification",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.017",
+      "title": "文件逻辑结构的设计目的",
+      "content": "文件的逻辑结构是为了方便（ ）而设计的。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "存储介质特性"
+        },
+        {
+          "key": "B",
+          "value": "操作系统的管理方式"
+        },
+        {
+          "key": "C",
+          "value": "主存容量"
+        },
+        {
+          "key": "D",
+          "value": "用户"
+        }
+      ],
+      "answer": "D",
+      "analysis": "文件结构包括逻辑结构和物理结构。逻辑结构是用户组织数据的结构形式，数据组织形式来自需求，而物理结构是操作系统组织物理存储块的结构形式。因此说，逻辑文件的组织形式取决于用户，物理结构的选择取决于文件系统设计者针对硬件结构（如磁带介质很难实现链接结构和索引结构）所采取的策略（即 A 和 B 选项）。",
+      "misconception": "把逻辑结构的目的与物理结构的决定因素对调：介质特性、管理方式决定的是物理结构，逻辑结构服务的是用户对数据的组织与使用。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第17题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "17"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.logical_structure",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.018",
+      "title": "索引文件索引表的性质",
+      "content": "下列关于逻辑结构为索引文件的索引表的叙述中，（ ）是正确的。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "索引表中每条记录的索引项可以有多个"
+        },
+        {
+          "key": "B",
+          "value": "对索引文件存取时，必须先查找索引表"
+        },
+        {
+          "key": "C",
+          "value": "索引表中含有索引文件的数据及其物理地址"
+        },
+        {
+          "key": "D",
+          "value": "建立索引的目的之一是减少存储空间"
+        }
+      ],
+      "answer": "B",
+      "analysis": "索引文件由逻辑文件和索引表组成，对索引文件存取时，必须先查找索引表。索引项只包含每条记录的长度和在逻辑文件中的起始位置。每条记录都有一个索引项，因此提高了存储代价。",
+      "misconception": "三条错项各有一处硬伤：索引项是一记录一项（A 错）、索引表不含数据本身（C 错）、建索引是拿空间换速度而非省空间（D 错，反而增加存储代价）。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第18题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "18"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.index_file",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.logical_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.019",
+      "title": "索引顺序文件的平均查找次数",
+      "content": "有一个顺序文件含有 10000 条记录，平均查找的记录数为 5000 个，采用索引顺序文件结构，则最好情况下平均只需约查找（ ）次记录。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "1000"
+        },
+        {
+          "key": "B",
+          "value": "10000"
+        },
+        {
+          "key": "C",
+          "value": "100"
+        },
+        {
+          "key": "D",
+          "value": "500"
+        }
+      ],
+      "answer": "C",
+      "analysis": "采用索引顺序文件时，最好情况是有 √10000 = 100 组，每组有 100 条记录，则查找 100 组平均需要 100/2 = 50 次，组内查找平均需要 100/2 = 50 次，共需要 50 + 50 = 100 次。注意，严格来说，索引表查找和组内查找的准确平均次数都是 (1 + 100)/2 = 50.5，不过在教材中往往直接忽略前面的 1，因此本类题中也不时出现 100 和 101 两个选项。",
+      "misconception": "直接拿 N/2 = 5000（D）当答案，忘了分组后是“分组表 + 组内”两级均分查找；也有把 1000 当“减半一次”的粗略估计。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第19题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "19"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.index_sequential_file",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.logical_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.020",
+      "title": "磁带介质上的文件组织方式",
+      "content": "用磁带做文件存储介质时，文件只能组织成（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "顺序文件"
+        },
+        {
+          "key": "B",
+          "value": "链接文件"
+        },
+        {
+          "key": "C",
+          "value": "索引文件"
+        },
+        {
+          "key": "D",
+          "value": "目录文件"
+        }
+      ],
+      "answer": "A",
+      "analysis": "磁带是一种顺序存储设备，用它存储文件时只能采用顺序存储结构。注意，若允许磁带来回倒带，也可组织为其他文件形式，本题不做讨论。",
+      "misconception": "把“链接分配也支持顺序访问”当作理由是错的：链接结构依赖随机定位盘块读指针，磁带无法随机定位，因此只有物理上连续、可顺序读出的顺序文件成立。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 264,
+        "pageEnd": 264,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第20题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "20"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.sequential_file",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.physical_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.021",
+      "title": "不支持随机存取的外存分配",
+      "content": "以下不适合随机存取的外存分配方式是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "连续分配"
+        },
+        {
+          "key": "B",
+          "value": "链接分配"
+        },
+        {
+          "key": "C",
+          "value": "索引分配"
+        },
+        {
+          "key": "D",
+          "value": "以上都适合"
+        }
+      ],
+      "answer": "B",
+      "analysis": "采用连续分配和索引分配的文件都支持随机存取。采用链接分配的文件不支持随机存取。",
+      "misconception": "误以为“索引分配要先查索引表所以不能随机存取”：索引表本身可随机定位，查到表项后一次访盘即可取到目标块，属于支持随机存取。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第21题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "21"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.linked_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.physical_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.022",
+      "title": "不利于文件动态增长的物理结构",
+      "content": "在以下文件的物理结构中，不利于文件长度动态增长的是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "连续结构"
+        },
+        {
+          "key": "B",
+          "value": "链接结构"
+        },
+        {
+          "key": "C",
+          "value": "索引结构"
+        },
+        {
+          "key": "D",
+          "value": "散列结构"
+        }
+      ],
+      "answer": "A",
+      "analysis": "要求有连续的存储空间，所以必须事先知道文件的大小，然后根据其大小在存储空间中找出一块大小足够的存储区。如果文件动态地增长，那么会使文件所占的空间越来越大，即使事先知道文件的最终大小，在采用预分配的存储空间的方法时，也较低效，它会使大量的存储空间长期闲置。",
+      "misconception": "把“连续分配可以向后扩展（若后面恰好空闲）”当成一般结论：能扩展是偶然情况，一旦后继盘块被占用就必须整体搬迁，因此整体上最不利于动态增长。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第22题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "22"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.contiguous_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.023",
+      "title": "连续分配下 FCB 的定位信息",
+      "content": "若文件的物理结构采用连续分配，则 FCB 中有关文件的物理位置的信息应包括（ ）。\nI. 首块地址\nII. 文件长度\nIII. 索引表地址",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "仅 I"
+        },
+        {
+          "key": "B",
+          "value": "I、II"
+        },
+        {
+          "key": "C",
+          "value": "II、III"
+        },
+        {
+          "key": "D",
+          "value": "I、III"
+        }
+      ],
+      "answer": "B",
+      "analysis": "在连续分配方式中，为了使系统能找到文件存放的地址，应在目录项的“文件物理地址”字段中，记录该文件第一条记录所在的盘块号和文件长度（以盘块数进行计量）。",
+      "misconception": "漏掉文件长度：连续分配没有链接指针也没有索引表，只有“起点 + 长度”才能界定文件范围；III 属于索引分配才需要的字段。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第23题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "23"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.contiguous_allocation",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.024",
+      "title": "易产生存储碎片的物理结构",
+      "content": "在磁盘上，最容易导致存储碎片发生的物理文件结构是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "隐式链接"
+        },
+        {
+          "key": "B",
+          "value": "顺序存放"
+        },
+        {
+          "key": "C",
+          "value": "索引存放"
+        },
+        {
+          "key": "D",
+          "value": "显式链接"
+        }
+      ],
+      "answer": "B",
+      "analysis": "顺序文件占用连续的磁盘空间，容易导致存储碎片（外部碎片）的发生。",
+      "misconception": "把“碎片”理解成链接结构留下的零散盘块：链接分配恰恰是把离散盘块串起来使用，不产生外部碎片；碎片来自连续分配对大块连续空间的反复申请与释放。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第24题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "24"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.contiguous_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.physical_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.025",
+      "title": "两级索引下的单文件最大长度",
+      "content": "文件系统采用两级索引分配方式。若每个磁盘块的大小为 1KB，每个盘块号占 4B，则该系统中，单个文件的最大长度是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "64MB"
+        },
+        {
+          "key": "B",
+          "value": "128MB"
+        },
+        {
+          "key": "C",
+          "value": "32MB"
+        },
+        {
+          "key": "D",
+          "value": "以上都错误"
+        }
+      ],
+      "answer": "A",
+      "analysis": "每个磁盘块中最多有 1KB/4B = 256 个索引项，则两级索引分配方式下单个文件的最大长度为 256×256×1KB = 64MB。",
+      "misconception": "把“两级索引”当成“一次间接 + 一次直接”或漏乘一层：两级是索引块指向索引块再指向数据块，容量为 256×256 个数据块。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第25题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "25"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.indexed_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.mixed_index",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.026",
+      "title": "物理文件组织方式的决定者",
+      "content": "物理文件的组织方式是由（ ）确定的。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "应用程序"
+        },
+        {
+          "key": "B",
+          "value": "主存容量"
+        },
+        {
+          "key": "C",
+          "value": "外存容量"
+        },
+        {
+          "key": "D",
+          "value": "操作系统"
+        }
+      ],
+      "answer": "D",
+      "analysis": "通常用户可以根据需要来确定文件的逻辑结构，而文件的物理结构是由操作系统的设计者根据文件存储器的特性来确定的，一旦确定，就由操作系统管理。",
+      "misconception": "把“用户可以选逻辑结构”外推到物理结构：应用程序只能通过接口选择，物理组织方式由操作系统按存储设备特性统一决定。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第26题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "26"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.physical_structure",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.027",
+      "title": "记录数据块位置的索引表",
+      "content": "文件系统为每个文件创建一张（ ），存放文件数据块的磁盘存放位置。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "打开文件表"
+        },
+        {
+          "key": "B",
+          "value": "位图"
+        },
+        {
+          "key": "C",
+          "value": "索引表"
+        },
+        {
+          "key": "D",
+          "value": "空闲盘块链表"
+        }
+      ],
+      "answer": "C",
+      "analysis": "打开文件表仅存放已打开文件信息的表，将指明文件的属性从外存复制到内存，再使用该文件时直接返回索引，选项 A 错误。位图和空闲盘块链表是磁盘管理方法，选项 B、D 错误。只有索引表中记录每个文件所存放的盘块地址，选项 C 正确。",
+      "misconception": "误选“位图/空闲盘块链表”：这两者是磁盘空闲空间管理结构，记录的是“哪些块空闲”，不是“某个文件用了哪些块”。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第27题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "27"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.indexed_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.028",
+      "title": "文件组织管理描述的正误",
+      "content": "下列有关文件组织管理的描述中，错误的是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "记录是对文件进行存取操作的单位，一个文件中各记录的长度可以不等"
+        },
+        {
+          "key": "B",
+          "value": "采用链接分配的文件，它的物理块必须连续排列"
+        },
+        {
+          "key": "C",
+          "value": "创建一个文件时，可以分配连续的区域，也可以分配不连续的物理块"
+        },
+        {
+          "key": "D",
+          "value": "Hash 结构文件的优点是能够实现物理块的动态分配和回收"
+        }
+      ],
+      "answer": "B",
+      "analysis": "链接分配的文件通过在每个盘块上的链接指针，将同属于一个文件的多个离散的盘块链接成一个链表，它的物理块不需要连续排列。其他说法均正确。",
+      "misconception": "把“链接分配按逻辑顺序访问”误读成“物理上必须连续”：链接分配的全部意义就在于允许离散盘块，指针负责串接顺序。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第28题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "28"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.linked_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.hash_file",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.029",
+      "title": "决定文件组织形式的外因",
+      "content": "逻辑文件存放到存储介质上时，采用的组织形式与（ ）有关。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "逻辑文件结构"
+        },
+        {
+          "key": "B",
+          "value": "存储介质特性"
+        },
+        {
+          "key": "C",
+          "value": "主存储器管理方式"
+        },
+        {
+          "key": "D",
+          "value": "设备分配方式"
+        }
+      ],
+      "answer": "B",
+      "analysis": "不同的存储介质有不同的存储特性，如磁带只能顺序存取，磁盘可以随机存取，因此文件的组织形式与存储介质特性有关。文件的逻辑结构与文件的物理结构没有必然关系，主存储器的管理方式只涉及内存管理，文件的物理存储与设备的分配方式也没有必然关系。",
+      "misconception": "误选 A：逻辑结构是用户组织数据的视角，与落盘时采用连续/链接/索引没有必然联系，同一逻辑文件可在不同介质上采用不同物理组织。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第29题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "29"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.physical_structure",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.030",
+      "title": "增加盘块时 I/O 最多的分配",
+      "content": "某 500 个盘块的文件的目录项已调入内存（若为索引分配，其索引块也在内存中）。若需要在文件中增加一块，下列分配方式中磁盘 I/O 次数最多的是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "连续分配"
+        },
+        {
+          "key": "B",
+          "value": "隐式链接分配"
+        },
+        {
+          "key": "C",
+          "value": "显示链接分配"
+        },
+        {
+          "key": "D",
+          "value": "索引分配"
+        }
+      ],
+      "answer": "A",
+      "analysis": "若需要在文件中间增加一块，则连续分配就要将后面的所有盘块都向后移动一块，这样就会产生很多的磁盘 I/O 操作。而其他三种分配方式都不需要移动盘块，只需修改一些指针或者索引。因此，连续分配是操作磁盘 I/O 次数最多的。",
+      "misconception": "只看“要不要读盘找位置”而忽略“要不要搬移数据”：隐式链接插中间要顺序读盘定位，但只改指针；连续分配要成批搬移后续盘块，I/O 量级高得多。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第30题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "30"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.contiguous_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.physical_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.031",
+      "title": "隐式链接下修改第22条记录",
+      "content": "设有一个记录文件，采用隐式链接分配方式，逻辑记录的固定长度为 100B，在磁盘上存储时采用记录成组分解技术。盘块长度为 512B。若该文件的目录项已经读入内存，则对第 22 个逻辑记录完成修改后，共启动了磁盘（ ）次。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "3"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        },
+        {
+          "key": "C",
+          "value": "5"
+        },
+        {
+          "key": "D",
+          "value": "6"
+        }
+      ],
+      "answer": "D",
+      "analysis": "记录成组分解技术是指将若干逻辑记录存入一个块，一个逻辑记录不能跨越两个块。逻辑记录的固定长度为 100B，盘块长度为 512B，采用成组分解技术，因此每个盘块可以存放 5 个逻辑记录，剩下 12B 的空间可用于存放指向下一个盘块的指针。由于每个盘块存放 5 个逻辑记录，因此第 22 个逻辑记录在第 5 个物理块中（⌈22/5⌉ = 5）。由于采用链接分配方式，要找到第 5 个物理块，需要从第 1 个物理块开始依指针顺序查找，因此需要启动磁盘 5 次。修改完后还要写回磁盘，由于此前已获得该块的磁盘地址，因此只需启动磁盘 1 次，共需启动磁盘 6 次。",
+      "misconception": "两处易错：把每块记录数算成 512/100 = 5.12 取整出 6 条（忽略 12B 要留给链接指针，只能放 5 条）；以及忘记最后还要写回一次，只数了 5 次读盘。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第31题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "31"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.linked_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.032",
+      "title": "链接文件按字节定位盘块",
+      "content": "设某文件为链接文件，它由 5 个逻辑记录组成，每个逻辑记录的大小与磁盘块的大小相等，均为 512B，并依次存放在 50, 121, 75, 80, 63 号磁盘块上。若要存取文件的第 1569 逻辑字节处的信息，则应该访问（ ）号磁盘块。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "3"
+        },
+        {
+          "key": "B",
+          "value": "80"
+        },
+        {
+          "key": "C",
+          "value": "75"
+        },
+        {
+          "key": "D",
+          "value": "63"
+        }
+      ],
+      "answer": "B",
+      "analysis": "因为 1569 = 512×3 + 33，故要访问字节位于第 4 个磁盘块上，对应的物理磁盘块号为 80。",
+      "misconception": "忽略“字节从 0 起算或整块边界”的问题：512×3 = 1536 < 1569 ≤ 2048，落在第 4 个逻辑块；另一处易错是把偏移算成第 3 块而选 75，或直接把块号 3 当答案（A 是逻辑块序号，不是物理块号）。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第32题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "32"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.linked_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.033",
+      "title": "隐式链接链中插入记录的盘操作",
+      "content": "某文件共有 8 个记录 L1～L8，采用隐式链接分配，每个记录及链接指针占一个磁盘块，主存中的磁盘缓冲区的大小与磁盘块的大小相等。假设文件目录已读入内存。为了在 L5 和 L6 之间插入一个记录 Lx′（已在内存中），需要进行的磁盘操作有（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "4 次读盘和 2 次写盘"
+        },
+        {
+          "key": "B",
+          "value": "5 次读盘和 1 次写盘"
+        },
+        {
+          "key": "C",
+          "value": "5 次读盘和 2 次写盘"
+        },
+        {
+          "key": "D",
+          "value": "4 次读盘和 1 次写盘"
+        }
+      ],
+      "answer": "C",
+      "analysis": "采用隐式链接分配，首先需要依次读 L1～L5 磁盘块，根据 L5 磁盘块，获取 L6 磁盘块的地址；然后将 Lx′ 的数据写入一个空闲磁盘块，将该块的链接指针指向 L6 磁盘块；最后修改 L5 磁盘块，将链接指针指向 Lx′ 的磁盘块的地址并写回磁盘。因此共进行了 5 次读盘和 2 次写盘。",
+      "misconception": "只数“读 L1～L5”就以为读完了，忘了缓冲区只有一个块、L5 的指针要先读出才能改；也常漏掉“写入 Lx′”这次写盘，只算了改 L5 的那一次。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 265,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第33题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "33"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.linked_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.034",
+      "title": "只能顺序访问的物理结构",
+      "content": "某文件共有 3 个记录，每个记录占 1 个磁盘块，在 1 次读文件的操作中，为了读出最后 1 个记录，不得不读出其他 2 个记录。由此可知该文件所采用的物理结构是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "连续分配"
+        },
+        {
+          "key": "B",
+          "value": "索引分配"
+        },
+        {
+          "key": "C",
+          "value": "链接分配"
+        },
+        {
+          "key": "D",
+          "value": "连续分配或链接分配"
+        }
+      ],
+      "answer": "C",
+      "analysis": "连续分配和索引分配都支持随机访问，链接分配通常可默认为隐式链接，仅支持顺序访问，由题意可知该文件仅支持顺序访问，因此文件采用的结构为链接分配。",
+      "misconception": "误选 D：连续分配虽然顺序读很快，但要读最后一块并不“必须”读前两块（可直接定位第 3 块），所以“不得不”三个字排除了连续分配。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 265,
+        "pageEnd": 266,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第34题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "34"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.linked_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.035",
+      "title": "无需磁盘 I/O 的插入操作",
+      "content": "某文件存放在 100 个数据块中，假设管理文件所必需的文件控制块、索引块或索引信息都驻留在内存中。那么若（ ），则不需要做任何磁盘 I/O 操作。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "采用连续分配，将最后一个数据块搬到文件头部"
+        },
+        {
+          "key": "B",
+          "value": "采用单级索引分配，将最后一个数据块插入文件头部"
+        },
+        {
+          "key": "C",
+          "value": "采用隐式链接分配，将最后一个数据块插入文件头部"
+        },
+        {
+          "key": "D",
+          "value": "采用隐式链接分配，将第一个数据块插入文件尾部"
+        }
+      ],
+      "answer": "B",
+      "analysis": "采用连续分配时，将最后一个数据块搬到文件头部，要移动文件的物理块，需要磁盘 I/O。采用单级索引分配时，将最后一个数据块插入文件头部，由于索引块已驻留在内存中，因此只需修改索引块，不需要磁盘 I/O。采用隐式链接分配时，仅支持顺序访问，要修改文件数据块的顺序，就必须修改对应磁盘块末尾的指针，必须将文件块读入内存，需要磁盘 I/O。",
+      "misconception": "只看“插到头部就要搬数据”这一条连续分配的经验，忽略索引分配的在位优势：索引块已在内存，改表项即可完成逻辑顺序调整，数据块原地不动。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 266,
+        "pageEnd": 266,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第35题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "35"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.indexed_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.036",
+      "title": "中间插入数据开销最大的结构",
+      "content": "某文件有 100 个盘块（数据块），假设管理文件所必需的文件控制块、所有索引块都已调入内存。若需要在文件的第 45 个盘块后插入数据，则物理结构采用（ ）时开销最大。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "连续分配"
+        },
+        {
+          "key": "B",
+          "value": "链接分配"
+        },
+        {
+          "key": "C",
+          "value": "一级索引分配"
+        },
+        {
+          "key": "D",
+          "value": "多级索引分配"
+        }
+      ],
+      "answer": "A",
+      "analysis": "采用连续分配时，至少需进行 45 次读磁盘和 45 次写磁盘，将前 45 个盘块依次向前移动，之后还要进行 1 次写磁盘，将数据写入对应空出的盘块。采用链接分配时，需进行 45 次读磁盘，然后修改第 45 个磁盘块中的链接指针，并写新磁盘块，共进行 2 次写磁盘，开销比顺序文件小。采用一级索引分配或多级索引分配时，只需修改内存中的索引表，不需磁盘 I/O，开销较小。",
+      "misconception": "以为链接分配插入最贵（要顺序读到第 45 块）：那是 45 次读，但只写 2 次；连续分配要搬移 45 个盘块，是 45 读 + 45 写 + 1 写，量级明显更大。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 266,
+        "pageEnd": 266,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第36题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "36"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.contiguous_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.indexed_allocation",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.037",
+      "title": "inode 直接块与一级间接的容量",
+      "content": "某文件系统使用类似于 Linux 的 inode 存储结构，文件块和磁盘块的大小都是 4KB，磁盘地址是 32 位，现在一个文件包含 10 个直接指针和 1 个一级间接指针，则这个文件所占用的磁盘块数目最多是（ ）块（不考虑索引块）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "128"
+        },
+        {
+          "key": "B",
+          "value": "512"
+        },
+        {
+          "key": "C",
+          "value": "1024"
+        },
+        {
+          "key": "D",
+          "value": "1034"
+        }
+      ],
+      "answer": "D",
+      "analysis": "直接指针可指向 10 个磁盘块，一级间接指针可指向一个索引块，一个索引块中可存放 1024 个磁盘地址，每个地址指向一个磁盘块。因此该文件最多占用 10 + 1024 = 1034 个磁盘块。",
+      "misconception": "只算一级间接的 1024 而漏加 10 个直接块（选 C）；或把 4KB/32 位错算成 512（B，把地址当 8B）。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 266,
+        "pageEnd": 266,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第37题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "37"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.inode",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.mixed_index",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.038",
+      "title": "三级索引支持的最大文件尺寸",
+      "content": "某文件系统的物理结构采用三级索引分配方式，每个磁盘块的大小为 1024B，每个盘块索引号占用 4B，则该文件系统支持的最大文件的尺寸接近（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "8GB"
+        },
+        {
+          "key": "B",
+          "value": "16GB"
+        },
+        {
+          "key": "C",
+          "value": "32GB"
+        },
+        {
+          "key": "D",
+          "value": "2TB"
+        }
+      ],
+      "answer": "B",
+      "analysis": "最大文件的尺寸由三级索引块能够指向的磁盘块数决定。三级索引块可以指向 1024B/4B = 256 个二级索引块，每个二级索引块又可指向 256 个一级索引块，每个一级索引块又可指向 256 个磁盘块。因此，最大文件的尺寸为 256×256×256×1024B = 16GB。",
+      "misconception": "少乘一层变成 256×256×1024B = 64MB 再换算错，或把 1024B×1024³ 直接当答案（数量级跳到 TB）。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 266,
+        "pageEnd": 266,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第38题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "38"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.indexed_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.mixed_index",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.039",
+      "title": "可不用数组实现的内核结构",
+      "content": "下列各种操作系统内核相关的数据结构中，可以不用数组实现的是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "文件分配表"
+        },
+        {
+          "key": "B",
+          "value": "页表"
+        },
+        {
+          "key": "C",
+          "value": "调度器的就绪队列"
+        },
+        {
+          "key": "D",
+          "value": "中断向量表"
+        }
+      ],
+      "answer": "C",
+      "analysis": "根据文件分配表、页表和中断向量表的应用原理，它们都有一个要求，就是要能随机访问表中的任一元素，即随机访问，因此只能用数组实现。在进程调度的过程中，每次都调度就绪队列的队首进程，因此既可以用数组实现，又可以用链表实现。",
+      "misconception": "把“表”一律当成必须数组：FAT 要按块号随机取表项、页表要按页号随机定位、中断向量要按中断号直接跳转，都要求随机访问；就绪队列只取队首，链表即可。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 266,
+        "pageEnd": 266,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第39题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "39"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.fat",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.040",
+      "title": "文件访问控制信息的存放位置",
+      "content": "【2009 统考真题】文件系统中，文件访问控制信息存储的合理位置是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "文件控制块"
+        },
+        {
+          "key": "B",
+          "value": "文件分配表"
+        },
+        {
+          "key": "C",
+          "value": "用户口令表"
+        },
+        {
+          "key": "D",
+          "value": "系统注册表"
+        }
+      ],
+      "answer": "A",
+      "analysis": "为了实现“按名存取”，在文件系统中为每个文件设置用于描述和控制文件的数据结构，称为文件控制块。在文件控制块中，通常包含三类信息：基本信息、存取控制信息及使用信息。",
+      "misconception": "误选“用户口令表”（C）：口令表按用户组织，回答“你是谁”；访问控制信息按文件组织，回答“这个文件谁能怎么用”，必须随文件的 FCB/索引节点保存。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 266,
+        "pageEnd": 266,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第40题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "40"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.access_control",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.041",
+      "title": "随机访问且易扩展的物理结构",
+      "content": "【2009 统考真题】下列文件物理结构中，适合随机访问且易于文件扩展的是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "连续结构"
+        },
+        {
+          "key": "B",
+          "value": "索引结构"
+        },
+        {
+          "key": "C",
+          "value": "链式结构且磁盘块定长"
+        },
+        {
+          "key": "D",
+          "value": "链式结构且磁盘块变长"
+        }
+      ],
+      "answer": "B",
+      "analysis": "文件的物理结构包括连续、链式、索引三种，其中链式结构不能实现随机访问，连续结构的文件不易于扩展。因此随机访问且易于扩展是索引结构的特性。",
+      "misconception": "在“连续结构随机访问最快”上停住：题目是双条件（随机访问 且 易于扩展），连续结构满足前者不满足后者，只有索引结构两者兼具。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 266,
+        "pageEnd": 266,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第41题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "41"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.indexed_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.physical_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.042",
+      "title": "混合索引下文件最大长度",
+      "content": "【2010 统考真题】设文件索引节点中有 7 个地址项，其中 4 个地址项是直接地址索引，2 个地址项是一级间接地址索引，1 个地址项是二级间接地址索引，每个地址项大小为 4B，若磁盘索引块和磁盘数据块大小均为 256B，则可表示的单个文件最大长度是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "33KB"
+        },
+        {
+          "key": "B",
+          "value": "519KB"
+        },
+        {
+          "key": "C",
+          "value": "1057KB"
+        },
+        {
+          "key": "D",
+          "value": "16516KB"
+        }
+      ],
+      "answer": "C",
+      "analysis": "每个磁盘索引块和磁盘数据块大小均为 256B，每个磁盘索引块有 256/4 = 64 个地址项。因此，4 个直接地址索引指向的数据块大小为 4×256B；2 个一级间接索引包含的直接地址索引数为 2×(256/4)，即其指向的数据块大小为 2×(256/4)×256B。1 个二级间接索引所包含的直接地址索引数为 (256/4)×(256/4)，即其所指向的数据块大小为 (256/4)×(256/4)×256B。因此，7 个地址项所指向的数据块总大小为 4×256 + 2×(256/4)×256 + (256/4)×(256/4)×256 = 1082368B = 1057KB。",
+      "misconception": "常见的算术病：把每块地址项数算成 256/4 = 64 却漏乘一层块大小；或把二级间接当成 64 项（应为 64×64 = 4096 项），得到 519KB/33KB 一类错值。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 266,
+        "pageEnd": 266,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第42题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "42"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.mixed_index",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.inode",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.file.indexed_allocation",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.043",
+      "title": "read 系统调用过程的正误",
+      "content": "【2012 统考真题】若一个用户进程通过 read 系统调用读取一个磁盘文件中的数据，则下列关于此过程的叙述中，正确的是（ ）。\nI. 若该文件的数据不在内存，则该进程进入睡眠等待状态\nII. 请求 read 系统调用会导致 CPU 从用户态切换到核心态\nIII. read 系统调用的参数应包含文件的名称",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "仅 I、II"
+        },
+        {
+          "key": "B",
+          "value": "仅 I、III"
+        },
+        {
+          "key": "C",
+          "value": "仅 II、III"
+        },
+        {
+          "key": "D",
+          "value": "I、II 和 III"
+        }
+      ],
+      "answer": "A",
+      "analysis": "对于 I，当所读文件的数据不在内存时，产生中断（缺页中断），原进程进入阻塞态，直到所需数据从外存调入内存后，才将该进程唤醒。对于 II，read 系统调用通过陷入将 CPU 从用户态切换到核心态，从而获取操作系统提供的服务。对于 III，要读一个文件，首先要用 open 系统调用打开该文件。open 中的参数包含文件的路径名与文件名，而 read 只需使用 open 返回的文件描述符，并不使用文件名作为参数。read 要求用户提供三个输入参数：①文件描述符 fd；②buf 缓冲区首址；③传送的字节数 n。read 的功能是试图从 fd 所指示的文件中读入 n 个字节的数据，并将它们送至由指针 buf 所指示的缓冲区中。",
+      "misconception": "把 open 才需要的“文件名”塞进 read 的参数（III 错）：read 用的是 open 返回的 fd；另一处误判是以为调用系统调用不必陷入内核（II 错）。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 266,
+        "pageEnd": 266,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第43题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "43"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.operations",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.open_close",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.044",
+      "title": "删除文件时不会发生的操作",
+      "content": "【2013 统考真题】用户在删除某文件的过程中，操作系统不可能执行的操作是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "删除此文件所在的目录"
+        },
+        {
+          "key": "B",
+          "value": "删除与此文件关联的目录项"
+        },
+        {
+          "key": "C",
+          "value": "删除与此文件对应的文件控制块"
+        },
+        {
+          "key": "D",
+          "value": "释放与此文件关联的内存缓冲区"
+        }
+      ],
+      "answer": "A",
+      "analysis": "此文件所在目录下可能还存在其他文件，因此删除文件时不能（也不需要）删除文件所在的目录，而与此文件关联的目录项和文件控制块需要随着文件一同删除，同时释放文件关联的内存缓冲区。",
+      "misconception": "把“删文件”与“删目录”混为一谈：删除文件只摘除它自己的目录项（FCB），目录本身在还有其他条目时必须保留。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 266,
+        "pageEnd": 266,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第44题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "44"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.operations",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.045",
+      "title": "与文件长度无关的 inode 因素",
+      "content": "【2013 统考真题】若某文件系统索引节点（inode）中有直接地址项和间接地址项，则下列选项中，与单个文件长度无关的因素是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "索引节点的总数"
+        },
+        {
+          "key": "B",
+          "value": "间接地址索引的级数"
+        },
+        {
+          "key": "C",
+          "value": "地址项的个数"
+        },
+        {
+          "key": "D",
+          "value": "文件块大小"
+        }
+      ],
+      "answer": "A",
+      "analysis": "索引节点的总数即文件的总数，与单个文件的长度无关。间接地址级数越多、地址项数越多、文件块越大，单个文件的长度就会越大。",
+      "misconception": "把“索引节点的容量”与“索引节点的数量”混淆：决定单文件上限的是每个 inode 里能寻址多少块（级数 × 地址项数 × 块大小），而 inode 总数只决定整个系统能有多少文件。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 266,
+        "pageEnd": 267,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第45题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "45"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.inode",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.mixed_index",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.046",
+      "title": "CD-ROM 视频快速随机播放的结构",
+      "content": "【2013 统考真题】为支持 CD-ROM 中视频文件的快速随机播放，播放性能最好的文件数据块组织方式是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "连续结构"
+        },
+        {
+          "key": "B",
+          "value": "链式结构"
+        },
+        {
+          "key": "C",
+          "value": "直接索引结构"
+        },
+        {
+          "key": "D",
+          "value": "多级索引结构"
+        }
+      ],
+      "answer": "A",
+      "analysis": "为了实现快速随机播放，要保证最短的查询时间，即不能选取链表和索引结构，因此连续结构最优。",
+      "misconception": "以为“随机播放”就一定要索引结构：视频文件写在光盘上且整片顺序播放/定点跳转都可按块号直接换算，连续结构一次寻道即可连续读，反而最快。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 267,
+        "pageEnd": 267,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第46题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "46"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.contiguous_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.physical_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.047",
+      "title": "首次打开文件时系统的动作",
+      "content": "【2014 统考真题】在一个文件被用户进程首次打开的过程中，操作系统需做的是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "将文件内容读到内存中"
+        },
+        {
+          "key": "B",
+          "value": "将文件控制块读到内存中"
+        },
+        {
+          "key": "C",
+          "value": "修改文件控制块中的读写权限"
+        },
+        {
+          "key": "D",
+          "value": "将文件的数据缓冲区首指针返回给用户进程"
+        }
+      ],
+      "answer": "B",
+      "analysis": "一个文件被用户进程首次打开即被执行了 open 操作，会把文件的 FCB 调入内存，而不会把文件内容读到内存中，只有进程希望获取文件内容时才会读入文件内容。C、D 明显错误。",
+      "misconception": "误以为 open 就要把数据搬进内存（A）：open 只搬控制信息（FCB/索引节点）并建立打开文件表项，数据在 read 时才读入。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 267,
+        "pageEnd": 267,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第47题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "47"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.open_close",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.048",
+      "title": "混合索引下偏移量对应的访盘次数",
+      "content": "【2015 统考真题】在文件的索引节点中存放直接索引指针 10 个，一级和二级索引指针各 1 个。磁盘块大小为 1KB，每个索引指针占 4B。若某文件的索引节点已在内存中，则把该文件偏移量（按字节编址）为 1234 和 307400 处所在的磁盘块读入内存，需访问的磁盘块个数分别是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "1, 2"
+        },
+        {
+          "key": "B",
+          "value": "1, 3"
+        },
+        {
+          "key": "C",
+          "value": "2, 3"
+        },
+        {
+          "key": "D",
+          "value": "2, 4"
+        }
+      ],
+      "answer": "B",
+      "analysis": "10 个直接索引指针指向的数据块大小为 10×1KB = 10KB。每个索引指针占 4B，则每个磁盘块可存放 1KB/4B = 256 个索引指针，一级索引指针指向的数据块大小为 256×1KB = 256KB，二级索引指针指向的数据块大小为 256×256×1KB = 2^16KB = 64MB。按字节编址，偏移量为 1234 时，因 1234B < 10KB，由直接索引指针可得到其所在的磁盘块地址。文件的索引节点已在内存中，因此地址可直接得到，因此仅需 1 次访盘即可。偏移量为 307400 时，因 10KB + 256KB < 307400B < 64MB，可知该偏移量的内容在二级索引指针所指向的某个磁盘块中，索引节点已在内存中，因此先访盘 2 次得到文件所在的磁盘块地址，再访盘 1 次即可读出内容，共需 3 次访盘。",
+      "misconception": "把“索引节点已在内存”漏算成还要读 inode（多算 1 次）；或误判 307400B 落在一级间接区（10KB + 256KB = 266KB < 300KB），从而答成 2 次。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 267,
+        "pageEnd": 267,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第48题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "48"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.mixed_index",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.inode",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.049",
+      "title": "文件权限位串的最小位数",
+      "content": "【2017 统考真题】某文件系统中，针对每个文件，用户类别分为 4 类：安全管理员、文件主、文件主的伙伴、其他用户；访问权限分为 5 种：完全控制、执行、修改、读取、写入。若文件控制块中用二进制位串表示文件权限，为表示不同类别用户对一个文件的访问权限，则描述文件权限的位数至少应为（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "5"
+        },
+        {
+          "key": "B",
+          "value": "9"
+        },
+        {
+          "key": "C",
+          "value": "12"
+        },
+        {
+          "key": "D",
+          "value": "20"
+        }
+      ],
+      "answer": "D",
+      "analysis": "需要注意的是，二进制位串表示的访问权限是这个文件所持有的，而不是某个用户所持有的，这个二进制位串要表示所有类别的用户的访问权限，每个要访问该文件的用户在访问之前都要查这个二进制位串。对于每类用户来说，都需要用 5 位来表示 5 种访问权限中的哪几种访问权限，共有四类用户，因此可将用户访问权限抽象为一个矩阵，其行代表用户类别，列代表访问权限。这个矩阵有 4 行 5 列，1 代表 true，0 代表 false，所以需要 20 位。本题易误选 A，有读者认为用 2 位来表示用户类别，用 3 位来表示访问权限，这种情况在于没有理解文件访问权限的二进制位串是文件所持有的，所以当用户需要检查访问权限时，要在二进制位串中查询所属用户类别的访问权限。此外，每类用户的访问权限不是拥有 5 种访问权限中的哪一种，而是 5 种访问权限都可能拥有，因此不可能用 3 位来表示访问权限。",
+      "misconception": "两个典型错解：用 2 位编码用户类别 + 3 位编码权限（共 5 位，误选 A）；或以为 4 类 × 3 位 = 12 位（C）——权限是“有/无”的位向量而非单选枚举，必须每类 5 位。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 267,
+        "pageEnd": 267,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第49题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "49"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.access_control",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.050",
+      "title": "簇分配下的实际占用空间",
+      "content": "【2017 统考真题】某文件系统的簇和磁盘扇区大小分别为 1KB 和 512B。若一个文件的大小为 1026B，则系统分配给该文件的磁盘空间大小是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "1026B"
+        },
+        {
+          "key": "B",
+          "value": "1536B"
+        },
+        {
+          "key": "C",
+          "value": "1538B"
+        },
+        {
+          "key": "D",
+          "value": "2048B"
+        }
+      ],
+      "answer": "D",
+      "analysis": "为了改善磁盘的效率，操作系统将多个相邻的扇区组合成簇，对文件存储空间的分配以簇为单位，因此一个文件所占用的空间只能是簇的整数倍。文件的大小为 1026B，大于 1 簇、小于 2 簇，因此需要分配 2 簇磁盘空间，即 2048B。",
+      "misconception": "按扇区（512B）而不是簇（1KB）向上取整，得到 3 个扇区 1536B（B）；或把 1026B 向上取整到 1KB 再加零头凑 1538B（C）。分配单位是簇，必须取 2 簇。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 267,
+        "pageEnd": 267,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第50题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "50"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.physical_structure",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.051",
+      "title": "目录项结构决定的文件数上限",
+      "content": "【2020 统考真题】某文件系统的目录项由文件名和索引节点号构成。若每个目录项长度为 64 字节，其中 4 字节存放索引节点号，60 字节存放文件名。文件名由小写英文字母构成，则该文件系统能创建的文件数量的上限为（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "2²⁶"
+        },
+        {
+          "key": "B",
+          "value": "2³²"
+        },
+        {
+          "key": "C",
+          "value": "2⁶⁰"
+        },
+        {
+          "key": "D",
+          "value": "2⁶⁴"
+        }
+      ],
+      "answer": "B",
+      "analysis": "在总长为 64 字节的目录项中，索引节点占 4 字节，即 32 位。不同目录下的文件的文件名可以相同，所以在考虑系统创建最多文件数量时，只需考虑索引节点的个数，即创建文件数量上限 = 索引节点数量上限。整个系统中最多存储 2^32 个索引节点，因此整个系统最多可以表示 2^32 个文件。",
+      "misconception": "用文件名长度 60 字节/小写字母 26 种去算 26^60 量级（误选 C/D）：文件名可重复，不构成唯一性约束；文件数上限由索引节点号的位数 32 位决定。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 267,
+        "pageEnd": 267,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第51题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "51"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.inode",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.052",
+      "title": "多进程共享同一文件的性质",
+      "content": "【2020 统考真题】若多个进程共享同一个文件 F，则下列叙述中，正确的是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "各进程只能用“读”方式打开文件 F"
+        },
+        {
+          "key": "B",
+          "value": "在系统打开文件表中仅有一个表项包含 F 的属性"
+        },
+        {
+          "key": "C",
+          "value": "各进程的用户打开文件表中关于 F 的表项内容相同"
+        },
+        {
+          "key": "D",
+          "value": "进程关闭 F 时，系统删除 F 在系统打开文件表中的表项"
+        }
+      ],
+      "answer": "B",
+      "analysis": "多个进程可以同时以“读”或“写”的方式打开文件，操作系统并不保证写操作的互斥性，进程可通过系统调用对文件加锁，保证互斥写（读者-写者问题），A 错误。整个系统只有一个系统打开文件表，同一个文件打开多次只需改变引用计数，B 正确。用户进程的打开文件表关于同一个文件不一定相同，例如当前读写位置指针、访问权限不一定相同，C 错误。进程关闭文件时，文件的引用计数减 1，引用计数变为 0 时才删除系统打开文件表中的表项，D 错误。",
+      "misconception": "把“共享”理解成“内容都相同”（C）：每个进程的用户打开文件表项各自维护读写位置与权限，只有指向的系统表项一致；D 忽略引用计数，最后一个进程关闭时才摘除表项。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 267,
+        "pageEnd": 267,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第52题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "52"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.open_close",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.operations",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.053",
+      "title": "变长且可随机访问的分配方式",
+      "content": "【2020 统考真题】下列选项中，支持文件长度可变、随机访问的磁盘存储空间分配方式是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "索引分配"
+        },
+        {
+          "key": "B",
+          "value": "链接分配"
+        },
+        {
+          "key": "C",
+          "value": "连续分配"
+        },
+        {
+          "key": "D",
+          "value": "动态分区分配"
+        }
+      ],
+      "answer": "A",
+      "analysis": "索引分配支持变长的文件，同时可以随机访问文件的指定数据块，A 正确。链接分配不支持随机访问，需要依靠指针依次访问，B 错误。连续分配的文件长度固定，不支持可变文件长度（连续分配的文件长度虽然也可变，但是需要大量移动数据，代价较大，相比之下不太合适），C 错误。动态分区分配是内存管理方式，不是磁盘空间的管理方式，D 错误。",
+      "misconception": "用连续分配的“理论可变长”为 C 辩护：连续分配扩长要搬移后续数据、代价高，题目要求的“支持变长”是工程意义上的，索引分配才成立；D 属内存管理，直接被排除。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 267,
+        "pageEnd": 267,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第53题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "53"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.indexed_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.physical_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_1.054",
+      "title": "关闭文件时的资源释放",
+      "content": "【2023 统考真题】若文件 F 仅被进程 P 打开并访问，则当进程 P 关闭 F 时，下列操作中，文件系统需要完成的是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "删除目录中文件 F 的目录项"
+        },
+        {
+          "key": "B",
+          "value": "释放 F 的索引节点所占的内存空间"
+        },
+        {
+          "key": "C",
+          "value": "释放 F 的索引节点所占的外存空间"
+        },
+        {
+          "key": "D",
+          "value": "文件磁盘索引节点中的链接计数减 1"
+        }
+      ],
+      "answer": "B",
+      "analysis": "当文件 F 首次被进程 P 打开时，会将磁盘的索引节点复制到内存的索引节点，并新增链接计数（打开计数）等内容。当进程 P 关闭文件 F 时，会将内存索引节点的链接计数减 1，因为文件 F 仅被进程 P 打开，所以链接计数变为 0，文件系统释放 F 的内存索引节点，B 正确。关闭 F 不改变目录中文件 F 的目录项，A 错误。关闭 F 只对内存索引节点进行相关的操作，不改变磁盘索引节点的数据结构，C、D 错误。",
+      "misconception": "把“关闭文件”当成“删除文件”：close 只在内存中减计数并释放内存副本，目录项、外存索引节点与数据块都必须保留，否则等同于删除。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.basics",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.basics",
+        "pageStart": 267,
+        "pageEnd": 267,
+        "pageStatus": "VISIBLE",
+        "locator": "4.1.8 本节习题精选 一、单项选择题 第54题；解析见 4.1.9（印刷 270—284）",
+        "sourceQuestionNumber": "54"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.open_close",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.inode",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.001",
+      "title": "一级目录下查找文件的平均访盘次数",
+      "content": "一个文件系统中，其 FCB 占 64B，盘块大小为 1KB，采用一级目录。假定文件目录中有 3200 个目录项。则查找一个文件平均需要（　）次访问磁盘。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "50"
+        },
+        {
+          "key": "B",
+          "value": "54"
+        },
+        {
+          "key": "C",
+          "value": "100"
+        },
+        {
+          "key": "D",
+          "value": "200"
+        }
+      ],
+      "answer": "C",
+      "analysis": "FCB 占 64B，盘块大小为 1KB，一个盘块能存放 1024/64 = 16 个 FCB。文件目录有 3200 个目录项，即 3200 个 FCB（每个目录项为一个 FCB），文件目录需占用 3200/16 = 200 个盘块。查找一个文件需要在 200 个盘块中顺序查找目标 FCB，平均查找次数为 200/2 = 100，即平均访问磁盘的次数。注意，在操作系统教材中，平均查找长度通常描述为「总长度/2」；在数据结构教材中，平均查找长度通常描述为「(1+总长度)/2」，相对而言后者更为严谨。",
+      "misconception": "两步折算漏一步：把 3200 个目录项直接当成 3200 个盘块，或忘记一个盘块只装 16 个 FCB，从而算出 3200/2 = 1600 这类量级明显不符的数值。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 285,
+        "pageEnd": 285,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第01题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "01"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.directory_implementation",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.002",
+      "title": "目录检索方式的正确论述",
+      "content": "下列关于目录检索的论述中，正确的是（　）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "由于散列法具有较快的检索速度，因此现代操作系统中都用它来替代传统的顺序检索方法"
+        },
+        {
+          "key": "B",
+          "value": "在利用顺序检索法时，对树形目录应采用文件的路径名，且应从根目录开始逐级检索"
+        },
+        {
+          "key": "C",
+          "value": "在利用顺序检索法时，只要路径名的一个分量名未找到，就应停止查找"
+        },
+        {
+          "key": "D",
+          "value": "利用顺序检索法查找完成后，即可得到文件的物理地址"
+        }
+      ],
+      "answer": "C",
+      "analysis": "实现用户对文件的按名存取，系统先利用用户提供的文件名形成检索路径，对目录进行检索。在顺序检索中，路径名的一个分量未找到，说明路径名中的某个目录或文件不存在，不需要继续检索，C 正确。目录的查询方式有顺序检索法和散列法两种，散列法并不适用于所有的目录结构，而且有冲突和溢出的缺点，解决的开销也较大，因此通常更多采用的是顺序检索法，A 错误。在树形目录中，为了加快文件检索速度，可设置当前目录，于是文件路径可以从当前目录开始查找，B 错误。在顺序检索法查找完成后，得到的是文件的逻辑地址，D 错误。",
+      "misconception": "记住「散列更快」就选 A，忽略散列法的冲突、溢出与适用面；或把「顺序检索完成即得物理地址」当成结论，混淆逻辑地址与物理地址。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 285,
+        "pageEnd": 285,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第02题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "02"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.directory_operations",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.directory_implementation",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.003",
+      "title": "相对路径名的起始位置",
+      "content": "一个文件的相对路径名是从（　）开始，逐步沿着各级子目录追溯，最后到指定文件的整个通路上所有子目录名组成的一个字符串。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "当前目录"
+        },
+        {
+          "key": "B",
+          "value": "根目录"
+        },
+        {
+          "key": "C",
+          "value": "多级目录"
+        },
+        {
+          "key": "D",
+          "value": "二级目录"
+        }
+      ],
+      "answer": "A",
+      "analysis": "相对路径是从当前目录出发到所找文件通路上所有目录名和数据文件名用分隔符连接起来而形成的，注意与绝对路径的区别。",
+      "misconception": "把相对路径与绝对路径的起点混同——绝对路径从根目录出发，相对路径从当前目录出发。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 285,
+        "pageEnd": 285,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第03题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "03"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.directory_operations",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.directory",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.004",
+      "title": "多级目录结构的采用目的",
+      "content": "文件系统采用多级目录结构的目的是（　）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "减少系统开销"
+        },
+        {
+          "key": "B",
+          "value": "节省存储空间"
+        },
+        {
+          "key": "C",
+          "value": "解决命名冲突"
+        },
+        {
+          "key": "D",
+          "value": "缩短传送时间"
+        }
+      ],
+      "answer": "C",
+      "analysis": "在文件系统中采用多级目录结构后，符合了多层次管理的需要，提高了文件查找的速度，还允许用户建立同名文件。因此，多级目录结构的采用解决了命名冲突。",
+      "misconception": "按「结构越复杂越省资源」的直觉选「减少系统开销」或「节省存储空间」；多级目录恰恰要多占空间、多花检索开销，换来的是重名问题的解决。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 285,
+        "pageEnd": 285,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第04题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "04"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.directory_structure",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.directory",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.005",
+      "title": "两文件重名时不宜采用的目录结构",
+      "content": "若文件系统中有两个文件重名，则不应采用（　）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "单级目录结构"
+        },
+        {
+          "key": "B",
+          "value": "两级目录结构"
+        },
+        {
+          "key": "C",
+          "value": "树形目录结构"
+        },
+        {
+          "key": "D",
+          "value": "多级目录结构"
+        }
+      ],
+      "answer": "A",
+      "analysis": "在单级目录文件中，每当新建一个文件时，必须先检索所有的目录项，以保证新文件名在目录中是唯一的。所以单级目录结构无法解决文件重名问题。",
+      "misconception": "把题目问的「不应采用」读成「应当采用」，或以为只要是多级就一定允许任意重名——重名只在不同目录下才允许。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 285,
+        "pageEnd": 285,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第05题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "05"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.directory_structure",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.directory",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.006",
+      "title": "文件与目录相关说法的错误项",
+      "content": "下面的说法中，错误的是（　）。\nI. 一个文件在同一系统中、不同的存储介质上的复制文件，应采用同一种物理结构\nII. 对一个文件的访问，常由用户访问权限和用户优先级共同限制\nIII. 文件系统采用树形目录结构后，对于不同用户的文件，其文件名应该不同\nIV. 为防止系统故障造成系统内文件受损，常采用存取控制矩阵方法保护文件",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "II"
+        },
+        {
+          "key": "B",
+          "value": "I、III"
+        },
+        {
+          "key": "C",
+          "value": "I、III、IV"
+        },
+        {
+          "key": "D",
+          "value": "全选"
+        }
+      ],
+      "answer": "D",
+      "analysis": "文件在磁带上通常采用连续存放方法，在硬盘上通常不采用连续存放方法，在内存上采用随机存放方法，I 错误。对文件的访问控制，常由用户访问权限和文件属性共同限制，II 错误。在树形目录结构中，对于不同用户的文件，文件名可以不同也可以相同，III 错误。防止文件受损常采用备份的方法，而存取控制矩阵方法用于多用户之间的存取权限保护，IV 错误。",
+      "misconception": "逐条判时被「应该不同」「存取控制矩阵」这类看似合理的措辞带偏，只挑出两三条就选 B 或 C，没有意识到四条全错。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 285,
+        "pageEnd": 285,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第06题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "06"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.file",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.directory_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.file.directory",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.007",
+      "title": "删硬链接后各文件引用计数值",
+      "content": "设文件 F1 的当前引用计数为 1，先建立 F1 的硬链接文件 F2，再建立 F1 的符号链接文件 F3，然后删除 F2，则此时文件 F1、F3 的引用计数值分别是（　）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "1、1"
+        },
+        {
+          "key": "B",
+          "value": "1、2"
+        },
+        {
+          "key": "C",
+          "value": "1、0"
+        },
+        {
+          "key": "D",
+          "value": "2、2"
+        }
+      ],
+      "answer": "A",
+      "analysis": "建立 F2 时，F1 和 F2 的引用计数值都变为 2。建立 F3 时，符号链接文件的引用计数值不受被链接文件的影响，始终为 1，故 F1 和 F3 的引用计数值为 2 和 1。删除 F2 时，F1 的引用计数值变为 2−1 = 1，F3 的引用计数值仍保持不变，因此 F1、F3 的引用计数值分别是 1、1。",
+      "misconception": "以为符号链接也会抬高被链接文件的计数，或以为删除硬链接名不减计数，于是错选「2、2」或「1、2」。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 285,
+        "pageEnd": 285,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第07题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "07"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.hard_link",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.symbolic_link",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.008",
+      "title": "硬链接与软链接并存时的正确说法",
+      "content": "设文件 F1 的当前引用计数值为 1，先建立 F1 的硬链接文件 F2，再建立 F2 的符号链接文件 F3，现有两个进程 P1 和 P2 分别打开了 F1 和 F2，则下列说法中正确的是（　）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "两次打开操作只涉及一次文件索引节点的磁盘读取操作"
+        },
+        {
+          "key": "B",
+          "value": "进程 P1 和 P2 对 F1 具有相同的访问权限"
+        },
+        {
+          "key": "C",
+          "value": "若删除文件 F3，则 F2 的引用计数值减 1"
+        },
+        {
+          "key": "D",
+          "value": "进程 P1 读取 F1 时需要提供 F1 的绝对路径作为系统调用参数"
+        }
+      ],
+      "answer": "A",
+      "analysis": "文件 F2 是 F1 的硬链接文件，指向同一个索引节点，当进程 P1 第一次打开 F1 时，会将磁盘上的索引节点读入内存，之后进程 P1 打开 F2 及进程 P2 打开 F1 和 F2 都共享之前已读入内存的索引节点，A 正确。P1 和 P2 对同一个文件的访问权限可能有所不同，B 错误。F3 是 F1 的软链接文件，删除 F3 不影响 F1 的引用计数值，C 错误。读取 F1 只需传入 F1 在进程 P1 中的文件描述符（即 F1 在进程 P1 的进程打开文件表中的索引号），并不需要其路径名，D 错误。",
+      "misconception": "误以为每个进程打开一次硬链接就要再读一遍索引节点（选 A 以外的项），或以为同一文件的访问权限对所有进程都相同。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 285,
+        "pageEnd": 286,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第08题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "08"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.hard_link",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.symbolic_link",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.file.inode",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.009",
+      "title": "文件打开后的访问依据",
+      "content": "在树形目录结构中，文件已被打开后，对文件的访问采用（　）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "文件符号名"
+        },
+        {
+          "key": "B",
+          "value": "从根目录开始的路径名"
+        },
+        {
+          "key": "C",
+          "value": "从当前目录开始的路径名"
+        },
+        {
+          "key": "D",
+          "value": "文件描述符"
+        }
+      ],
+      "answer": "D",
+      "analysis": "文件被打开后，系统为每个打开的文件分配一个文件描述符（索引号），用来标识该文件。之后用户不再使用文件名，而使用文件描述符，来对该文件进行读、写、定位等操作。",
+      "misconception": "按「打开之后仍要按名访问」的直觉作答；打开操作的意义正是把按名访问换成按描述符访问。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 286,
+        "pageEnd": 286,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第09题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "09"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.inode",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.010",
+      "title": "目录检索性能的决定因素",
+      "content": "在访问文件时，需要根据文件名对目录文件进行检索，其检索性能主要由（　）决定。\nI. 文件大小　II. 目录项数量　III. 目录项的大小　IV. 目录项在目录中的位置",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "I、II 和 III"
+        },
+        {
+          "key": "B",
+          "value": "II、III 和 IV"
+        },
+        {
+          "key": "C",
+          "value": "I、III 和 IV"
+        },
+        {
+          "key": "D",
+          "value": "I、II 和 IV"
+        }
+      ],
+      "answer": "B",
+      "analysis": "文件大小与对目录进行检索无关。目录项数量越多，检索目录时的平均比较次数就越多，影响检索性能；目录项的大小越大，占用的盘块就越多，I/O 时间也就越长，影响检索性能；目录项在目录中的位置不同，可能导致不同的访问路径，影响检索性能。",
+      "misconception": "把「文件大小」也算成检索开销（文件多大与找它无关，只与读它有关），于是错选含 I 的组合。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 286,
+        "pageEnd": 286,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第10题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "10"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.directory_operations",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.directory_implementation",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.011",
+      "title": "文件名重名限制的适用范围",
+      "content": "在计算机中，不允许两个文件名重名主要指的是（　）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "不同磁盘的不同目录下"
+        },
+        {
+          "key": "B",
+          "value": "不同磁盘里的同名目录下"
+        },
+        {
+          "key": "C",
+          "value": "同一个磁盘的不同目录下"
+        },
+        {
+          "key": "D",
+          "value": "同一个磁盘的同一目录下"
+        }
+      ],
+      "answer": "D",
+      "analysis": "A、B 和 C 项的同名文件都有不同的路径名，因此不会造成文件名重名问题。在同一个磁盘的同一目录下，若两个文件名重名，则它们具有相同的路径名，因此无法区别。",
+      "misconception": "把「重名」理解成全局唯一，忽略了路径名才是文件的唯一标识；不同目录下同名完全合法。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 286,
+        "pageEnd": 286,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第11题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "11"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.directory",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.directory_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.012",
+      "title": "按名存取得以实现的关键",
+      "content": "文件系统实现按名存取主要是靠（　）实现的。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "查找位示图"
+        },
+        {
+          "key": "B",
+          "value": "查找文件目录"
+        },
+        {
+          "key": "C",
+          "value": "查找作业表"
+        },
+        {
+          "key": "D",
+          "value": "地址转换机构"
+        }
+      ],
+      "answer": "B",
+      "analysis": "文件目录是实现按名存取的关键，通过查找目录可以获得文件的物理地址和其他属性。",
+      "misconception": "把「按名」和「按地址」的机制混在一起，选了地址转换机构或位示图；位示图管的是盘块分配。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 286,
+        "pageEnd": 286,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第12题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "12"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.directory",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.013",
+      "title": "软链接与硬链接的引用计数变化",
+      "content": "【2009 统考真题】设文件 F1 的当前引用计数值为 1，先建立文件 F1 的符号链接（软链接）文件 F2，再建立文件 F1 的硬链接文件 F3，然后删除文件 F1。此时，文件 F2 和文件 F3 的引用计数值分别是（　）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "0, 1"
+        },
+        {
+          "key": "B",
+          "value": "1, 1"
+        },
+        {
+          "key": "C",
+          "value": "1, 2"
+        },
+        {
+          "key": "D",
+          "value": "2, 1"
+        }
+      ],
+      "answer": "B",
+      "analysis": "建立符号链接时，引用计数值直接设置为 1，不受被链接文件的影响；建立硬链接时，引用计数值加 1。删除文件时，删除操作对于符号链接是不可见的，这并不影响文件系统，当以后再通过符号链接访问时，发现文件不存在，直接删除符号链接；但对于硬链接则不可直接删除，引用计数值减 1，若值不为 0，则不能删除此文件，因为还有其他硬链接指向此文件。\n当建立 F2 时，F1 和 F2 的引用计数值都为 1。当再建立 F3 时，F1 和 F3 的引用计数值就都变成了 2。当后来删除 F1 时，F3 的引用计数值为 2−1 = 1，F2 的引用计数值不变。",
+      "misconception": "先建软链接这一步最容易漏算：软链接自身的计数恒为 1，且不随目标文件删减；把它的计数当成随 F1 一起衰减就会错选 0,1 或 2,1。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 286,
+        "pageEnd": 286,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第13题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "13"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.hard_link",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.symbolic_link",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.014",
+      "title": "设置当前工作目录的主要目的",
+      "content": "【2010 统考真题】设置当前工作目录的主要目的是（　）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "节省外存空间"
+        },
+        {
+          "key": "B",
+          "value": "节省内存空间"
+        },
+        {
+          "key": "C",
+          "value": "加快文件的检索速度"
+        },
+        {
+          "key": "D",
+          "value": "加快文件的读/写速度"
+        }
+      ],
+      "answer": "C",
+      "analysis": "当一个文件系统含有多级目录时，每访问一个文件，都要使用从树根开始到树叶为止、包括各中间节点名的全路径名。当前目录又称工作目录，进程对各个文件的访问都相对于当前目录进行，而不需要从根目录一层一层地检索，加快了文件的检索速度。选项 A、B 都与相对目录无关；选项 D，文件的读/写速度取决于磁盘的性能。",
+      "misconception": "把「少写几级路径」误解成省存储空间，或把检索速度与读写速度混为一谈——当前目录只缩短检索路径，不改磁盘性能。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 286,
+        "pageEnd": 286,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第14题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "14"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.directory_operations",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.directory",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.015",
+      "title": "硬链接两进程打开时的描述",
+      "content": "【2017 统考真题】若文件 f1 的硬链接为 f2，两个进程分别打开 f1 和 f2，获得对应的文件描述符为 fd1 和 fd2，则下列叙述中正确的是（　）。\nI. f1 和 f2 的读写指针位置保持相同\nII. f1 和 f2 共享同一个内存索引节点\nIII. fd1 和 fd2 分别指向各自的用户打开文件表中的一项",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "仅 III"
+        },
+        {
+          "key": "B",
+          "value": "仅 II、III"
+        },
+        {
+          "key": "C",
+          "value": "仅 I、II"
+        },
+        {
+          "key": "D",
+          "value": "I、II 和 III"
+        }
+      ],
+      "answer": "B",
+      "analysis": "多个进程打开一个文件时，读写指针的位置不同，它们保存在各自的用户打开文件表中，I 错误。硬链接是基于索引节点的共享方式，指向同一个内存索引节点，II 正确。不同进程获得的文件描述符是各自独立的，分别指向各自的用户打开文件表中的一项，III 正确。",
+      "misconception": "把「共享索引节点」顺推成「共享读写位置」——索引节点共享，但读写指针随各自的打开文件表项走。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 286,
+        "pageEnd": 286,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第15题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "15"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.hard_link",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.inode",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_2.016",
+      "title": "删除文件时内核不必做的工作",
+      "content": "【2021 统考真题】若目录 dir 下有文件 file1，则为删除该文件内核不必完成的工作是（　）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "删除 file1 的快捷方式"
+        },
+        {
+          "key": "B",
+          "value": "释放 file1 的文件控制块"
+        },
+        {
+          "key": "C",
+          "value": "释放 file1 占用的磁盘空间"
+        },
+        {
+          "key": "D",
+          "value": "删除目录 dir 中与 file1 对应的目录项"
+        }
+      ],
+      "answer": "A",
+      "analysis": "删除一个文件时，会根据文件控制块回收相应的磁盘空间，将文件控制块回收，并删除目录中对应的目录项。选项 B、C、D 正确。快捷方式属于文件共享中的软连接，本质上创建的是一个链接文件，其中存放的是访问该文件的路径，删除文件并不会导致文件的快捷方式被删除，正如在 Windows 中删除一个程序后，其快捷方式可能仍留在桌面上，但已无法打开。",
+      "misconception": "把快捷方式当成文件的附属物，以为删文件必然连带删除它；快捷方式只是一个存路径的链接文件，删掉目标后它仍在，只是打不开。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.directory",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.directory",
+        "pageStart": 286,
+        "pageEnd": 286,
+        "pageStatus": "VISIBLE",
+        "locator": "4.2.7 本节习题精选 一、单项选择题 第16题；解析见 4.2.8（印刷 289—300）",
+        "sourceQuestionNumber": "16"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.symbolic_link",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.file.directory_operations",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.001",
+      "title": "引入文件系统的首要目的",
+      "content": "从用户的观点看，操作系统中引入文件系统的目的是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "保护用户数据"
+        },
+        {
+          "key": "B",
+          "value": "实现对文件的按名存取"
+        },
+        {
+          "key": "C",
+          "value": "实现虚拟存储"
+        },
+        {
+          "key": "D",
+          "value": "保存用户和系统文档及数据"
+        }
+      ],
+      "answer": "B",
+      "analysis": "从系统角度看，文件系统负责对文件的存储空间进行组织、分配，负责文件的存储并对文件进行保护、检索。从用户角度看，文件系统根据一定的格式将文件存放到存储器中适当的地方，当用户需要使用文件时，系统根据用户所给的文件名能够从存储器中找到所需要的文件。",
+      "misconception": "把“保护用户数据”“保存用户和系统文档及数据”这类功能描述当成引入文件系统的目的，忽略了题干限定的是“从用户的观点看”，用户直接感受到的只是按名存取。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 299,
+        "pageEnd": 299,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第01题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "01"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.fs_structure",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.002",
+      "title": "逻辑文件系统的功能",
+      "content": "逻辑文件系统的功能有（ ）。\nI. 文件按名存取            II. 文件目录组织管理\nIII. 把文件名转换为文件描述符或文件句柄    IV. 存储保护",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "I、II 和 III"
+        },
+        {
+          "key": "B",
+          "value": "II、III 和 IV"
+        },
+        {
+          "key": "C",
+          "value": "I、II 和 IV"
+        },
+        {
+          "key": "D",
+          "value": "I、II、III 和 IV"
+        }
+      ],
+      "answer": "D",
+      "analysis": "逻辑文件系统的功能包括对文件按名存取，进行文件目录组织管理，将文件名转换为文件描述符或文件句柄，进行存储保护，因此 4 个说法均正确。",
+      "misconception": "漏选 III 或 IV，误以为“文件名到描述符的转换”“存储保护”属于物理文件系统或设备管理层的职责。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 299,
+        "pageEnd": 299,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第02题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "02"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.fs_structure",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.003",
+      "title": "文件系统说法辨正",
+      "content": "下列关于文件系统的说法中，正确的是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "一个文件系统可以存放的文件数量受限于文件控制块的数量"
+        },
+        {
+          "key": "B",
+          "value": "一个文件系统的容量一定等于承载该文件系统的磁盘容量"
+        },
+        {
+          "key": "C",
+          "value": "一个文件系统中单个文件的大小只受磁盘剩余空间大小的限制"
+        },
+        {
+          "key": "D",
+          "value": "一个文件系统不能将数据存放在多个磁盘上"
+        }
+      ],
+      "answer": "A",
+      "analysis": "一个文件系统的容量不一定等于承载该文件系统的磁盘容量。一个磁盘可分为多个分区，每个分区可以有不同的文件系统，单个文件的大小不仅受磁盘剩余空间大小的限制，而且受 FCB 和 FAT 表等结构的限制。利用磁盘阵列技术，一个文件系统可将数据存放到多个磁盘上。",
+      "misconception": "把“文件系统”和“磁盘”当成一一对应，以为一个文件系统只能落在一块盘上，或以为文件大小只受剩余空间约束而忽视 FCB、FAT 等结构的上限。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 299,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第03题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "03"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.fs_structure",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fcb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.004",
+      "title": "UNIX 中索引结构的存放位置",
+      "content": "UNIX 操作系统中，文件的索引结构放在（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "超级块"
+        },
+        {
+          "key": "B",
+          "value": "索引节点"
+        },
+        {
+          "key": "C",
+          "value": "目录项"
+        },
+        {
+          "key": "D",
+          "value": "空闲块"
+        }
+      ],
+      "answer": "B",
+      "analysis": "UNIX 采用树形目录结构，文件信息存放在索引节点中。超级块是用来描述文件系统的。",
+      "misconception": "把索引结构记成放在目录项里——目录项只保存文件名和指向索引节点的指针；超级块描述的是整个文件系统的全局信息。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第04题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "04"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.inode",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fs_layout",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.005",
+      "title": "文件存储空间管理的实质",
+      "content": "文件的存储空间管理实质上是对（ ）的组织和管理。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "文件目录"
+        },
+        {
+          "key": "B",
+          "value": "外存已占用区域"
+        },
+        {
+          "key": "C",
+          "value": "外存空闲区"
+        },
+        {
+          "key": "D",
+          "value": "文件控制块"
+        }
+      ],
+      "answer": "C",
+      "analysis": "文件存储空间管理即文件空闲空间管理。文件管理要解决的重要问题是，如何为创建文件分配存储空间，即如何找到空闲盘块，并对其管理。",
+      "misconception": "以为管理对象是“已占用区域”，其实已分配部分由文件自身的索引结构记录，需要专门组织的是空闲区。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第05题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "05"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.free_space",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.006",
+      "title": "外存文件区的管理目标",
+      "content": "对外存文件区的管理应以（ ）为主要目标。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "提高系统吞吐量"
+        },
+        {
+          "key": "B",
+          "value": "提高换入换出速度"
+        },
+        {
+          "key": "C",
+          "value": "降低存储费用"
+        },
+        {
+          "key": "D",
+          "value": "提高存储空间的利用率"
+        }
+      ],
+      "answer": "D",
+      "analysis": "文件区占磁盘空间的大部分，由于通常的文件都较长时间地驻留在外存上，对它们的访问频率是较低的，所以对文件区管理的主要目标是提高存储空间的利用率。",
+      "misconception": "把“提高换入换出速度”误当成文件区的目标——那是交换区（对换区）的管理目标，两者追求的方向不同。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第06题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "06"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.free_space",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fs_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.007",
+      "title": "位示图的应用范围",
+      "content": "位示图可用于（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "文件目录的查找"
+        },
+        {
+          "key": "B",
+          "value": "磁盘空间的管理"
+        },
+        {
+          "key": "C",
+          "value": "主存空间的管理"
+        },
+        {
+          "key": "D",
+          "value": "文件的保密"
+        }
+      ],
+      "answer": "B",
+      "analysis": "位示图方法是空闲块管理方法，用于管理磁盘空间。",
+      "misconception": "只记住位示图“能管空闲空间”，就把它套到主存管理或目录查找上；位示图在这里的定位是磁盘空闲块管理方法。",
+      "difficulty": 1,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第07题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "07"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.bitmap",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.free_space",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.008",
+      "title": "使用空闲盘块号栈的方法",
+      "content": "下列各种文件存储空间的管理方法中，（ ）需要使用空闲盘块号栈。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "空闲表法"
+        },
+        {
+          "key": "B",
+          "value": "空闲链表法"
+        },
+        {
+          "key": "C",
+          "value": "位示图法"
+        },
+        {
+          "key": "D",
+          "value": "成组链接法"
+        }
+      ],
+      "answer": "D",
+      "analysis": "成组链接法将所有空闲盘块分成若干组，每组的第一个盘块记录下一组的空闲盘块总数和空闲盘块号。第一组的空闲盘块总数和空闲盘块号存放在内存的专用栈中，称为空闲盘块号栈。",
+      "misconception": "把“空闲盘块号栈”当成空闲链表法的链头，实际上它是成组链接法在内存中缓存当前一组空闲块号的结构。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第08题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "08"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.group_linking",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.free_space",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.009",
+      "title": "主引导扇区的组成",
+      "content": "硬盘的主引导扇区（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "包含引导记录"
+        },
+        {
+          "key": "B",
+          "value": "包含分区表和主引导程序"
+        },
+        {
+          "key": "C",
+          "value": "只包含主引导程序"
+        },
+        {
+          "key": "D",
+          "value": "只包含分区表"
+        }
+      ],
+      "answer": "B",
+      "analysis": "硬盘的主引导扇区由三部分组成：主引导程序，也称主引导记录（MBR），用于系统启动时将控制转给用户指定的并在分区表中登记了的某个活动分区；分区表，给出每个分区的起始和结束地址；结束标志，其值通常为 AA55。",
+      "misconception": "把主引导扇区等同于“引导记录”或只记住分区表，漏掉它同时含主引导程序与分区表（还有 AA55 结束标志）。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第09题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "09"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.fs_layout",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.fs_structure",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.010",
+      "title": "位示图字号与位号的换算",
+      "content": "若用 8 个字（字长 32 位）组成的位示图管理内存，行号和列号均从 1 开始，假定用户归还一个块号为 100 的内存块时，则它对应位示图的位置为（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "字号为 3，位号为 5"
+        },
+        {
+          "key": "B",
+          "value": "字号为 4，位号为 4"
+        },
+        {
+          "key": "C",
+          "value": "字号为 3，位号为 4"
+        },
+        {
+          "key": "D",
+          "value": "字号为 4，位号为 5"
+        }
+      ],
+      "answer": "B",
+      "analysis": "首先求出块号 100 所在的行号，1～32 在行号 1 中，33～64 在行号 2 中，65～96 在行号 3 中，97～128 在行号 4 中，所以块号 100 在行号 4 中；然后求出块号 100 在行号 4 中的哪列，行号 4 的第 1 列是块号 97，以此类推，块号 100 在行号 4 中的第 4 列。另解，行号 row 和列号 col 分别为 row = (100 − 1) DIV 32 + 1 = 4，col = (100 − 1) MOD 32 + 1 = 4。即字号为 4，位号也为 4。注意，如果注明行号和列号从 0 开始，那么答案是不同的。",
+      "misconception": "直接把块号 100 除以 32（100÷32 = 3 余 4）得到“字号 3、位号 4”——错在起始编号：位示图行号列号从 1 开始，必须先减 1 再换算。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第10题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "10"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.bitmap",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.free_space",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.011",
+      "title": "难获得连续空间的管理方式",
+      "content": "比较难得到连续空间的空闲空间管理方式是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "空闲链表"
+        },
+        {
+          "key": "B",
+          "value": "空闲表"
+        },
+        {
+          "key": "C",
+          "value": "位示图"
+        },
+        {
+          "key": "D",
+          "value": "成组链接"
+        }
+      ],
+      "answer": "A",
+      "analysis": "空闲链表法适用于离散分配，比较难得到连续空间。空闲表法适用于连续分配，容易得到连续空间。位示图法适用于连续分配和离散分配，容易找到连续的空闲块。成组链接法是将连续分配和离散分配相结合的方法，也能方便找到连续的空闲块。",
+      "misconception": "以为“链表”最灵活因而最容易凑出连续块；实际上空闲链表只按块链接，缺乏连续段的整体视图，难以判断连续空闲区。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第11题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "11"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.free_space",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.bitmap",
+          "role": "SECONDARY",
+          "weight": 0.3
+        },
+        {
+          "nodeCode": "os.file.free_table_list",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.012",
+      "title": "VFS 定义的对象类型",
+      "content": "下列选项中，（ ）不是 Linux 实现虚拟文件系统 VFS 所定义的对象类型。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "超级块（superblock）对象"
+        },
+        {
+          "key": "B",
+          "value": "目录项（inode）对象"
+        },
+        {
+          "key": "C",
+          "value": "文件（file）对象"
+        },
+        {
+          "key": "D",
+          "value": "数据（data）对象"
+        }
+      ],
+      "answer": "D",
+      "analysis": "为了实现虚拟文件系统（VFS），Linux 主要抽象了四种对象类型：超级块对象、索引节点对象、目录项对象和文件对象。D 错误。注：本题选项 B 在书中印作“目录项（inode）对象”，按 VFS 的四种对象应为“索引节点（inode）对象”，此为书中印刷笔误，不影响答案 D。",
+      "misconception": "把“数据”当成 VFS 的一种抽象对象；VFS 抽象的是超级块、索引节点、目录项和文件四种对象，数据本身由 file 对象经读写操作访问。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第12题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "12"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.vfs",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.inode",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.013",
+      "title": "位图管理空闲簇所需簇数",
+      "content": "【2014 统考真题】现有一个容量为 10GB 的磁盘分区，磁盘空间以簇为单位进行分配，簇的大小为 4KB，若采用位图法管理该分区的空闲空间，即用一位来标识一个簇是否被分配，则存放该位图所需的簇数为（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "80"
+        },
+        {
+          "key": "B",
+          "value": "320"
+        },
+        {
+          "key": "C",
+          "value": "80K"
+        },
+        {
+          "key": "D",
+          "value": "320K"
+        }
+      ],
+      "answer": "A",
+      "analysis": "簇的总数为 10GB÷4KB = 2.5M，用一位标识一簇是否被分配，整个磁盘共需要 2.5Mbit，即需要 2.5M÷8 = 320KB，因此共需要 320KB÷4KB = 80 簇。",
+      "misconception": "算到 320KB 就停手选 B——320KB 是位图本身的字节数，题目问的是“存放该位图所需的簇数”，还要再除以簇大小 4KB。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第13题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "13"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.bitmap",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.free_space",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.014",
+      "title": "盘块号对应的盘块与块内字节",
+      "content": "【2015 统考真题】文件系统用位图法表示磁盘空间的分配情况，位图存于磁盘的 32～127 号块中，每个盘块占 1024B，盘块和块内字节均从 0 开始编号。假设要释放的盘块号为 409612，则位图中要修改的位所在的盘块号和块内字节序号分别是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "81，1"
+        },
+        {
+          "key": "B",
+          "value": "81，2"
+        },
+        {
+          "key": "C",
+          "value": "82，1"
+        },
+        {
+          "key": "D",
+          "value": "82，2"
+        }
+      ],
+      "answer": "C",
+      "analysis": "盘块号 = 起始块号 + ⌊盘块号/(1024×8)⌋ = 32 + ⌊409612/(1024×8)⌋ = 32 + 50 = 82，这里问的是块内字节号而不是位号，因此还需除以 8，块内字节号 = ⌊(盘块号 % (1024×8))/8⌋ = 1。",
+      "misconception": "①忘了把起始块号 32 加上，直接得 50 附近的块号；②算出块内位号 12 就直接当字节号，漏掉再除以 8。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第14题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "14"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.bitmap",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.free_space",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.015",
+      "title": "管理空闲磁盘块的数据结构",
+      "content": "【2019 统考真题】下列选项中，可用于文件系统管理空闲磁盘块的数据结构是（ ）。\nI. 位图    II. 索引节点    III. 空闲磁盘块链    IV. 文件分配表（FAT）",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "仅 I、II"
+        },
+        {
+          "key": "B",
+          "value": "仅 I、III、IV"
+        },
+        {
+          "key": "C",
+          "value": "仅 I、III"
+        },
+        {
+          "key": "D",
+          "value": "仅 II、III、IV"
+        }
+      ],
+      "answer": "B",
+      "analysis": "传统文件系统管理空闲磁盘的方法包括空闲表法、空闲链表法、位示图法和成组链接法，I、III 正确。FAT 的表项与物理磁盘块一一对应，并且可以用一个特殊的数字 -1 表示文件的最后一块，用 -2 表示这个磁盘块是空闲的（当然也可用 -3，-4 来表示），因此 FAT 不仅记录了文件中各个块的先后链接关系，同时还标记了空闲的磁盘块，操作系统可以通过 FAT 对文件存储空间进行管理，IV 正确。索引节点是操作系统为了实现文件名与文件信息分开而设计的数据结构，存储了文件描述信息，索引节点属于文件目录管理部分的内容，II 错误。",
+      "misconception": "只认“位图、空闲链”是空闲管理结构而漏掉 FAT；其实 FAT 表项用特殊值标记空闲块，同样承担空闲空间管理，而索引节点只管单个文件的描述信息。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第15题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "15"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.free_space",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.bitmap",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s4_3.016",
+      "title": "空闲页框位图的空间大小",
+      "content": "【2023 统考真题】某系统采用页式存储管理，用位图管理空闲页框。若页大小为 4KB，物理内存大小为 16GB，则位图所占空间的大小是（ ）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "128B"
+        },
+        {
+          "key": "B",
+          "value": "128KB"
+        },
+        {
+          "key": "C",
+          "value": "512KB"
+        },
+        {
+          "key": "D",
+          "value": "4MB"
+        }
+      ],
+      "answer": "C",
+      "analysis": "物理内存大小为 16GB，页大小为 4KB，则物理内存的总页框数为 16GB÷4KB = 2^34/2^12 = 2^22。位图用 1 位来表示一个页框是否空闲，所以占用的空间大小为 2^22 b = 2^19 B = 512KB。",
+      "misconception": "把 2^22 位直接当成 2^22 字节而选 4MB；位是 bit，换算成字节还要除以 8（2^22 b = 2^19 B）。",
+      "difficulty": 3,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "TEXTBOOK",
+        "sectionCode": "sec.files.system",
+        "pageStart": 300,
+        "pageEnd": 300,
+        "pageStatus": "VISIBLE",
+        "locator": "4.3.7 本节习题精选 一、单项选择题 第16题；解析见 4.3.8（印刷 301—302）",
+        "sourceQuestionNumber": "16"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.bitmap",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.free_space",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.ext.s4_3.901",
+      "title": "挂载点必须是什么",
+      "content": "在 Linux 系统中，关于文件挂载的说法正确的是（　）。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "挂载点可以是任意文件"
+        },
+        {
+          "key": "B",
+          "value": "挂载后原目录内容仍可访问"
+        },
+        {
+          "key": "C",
+          "value": "一个分区只能挂载到空目录"
+        },
+        {
+          "key": "D",
+          "value": "挂载点必须是一个目录"
+        }
+      ],
+      "answer": "D",
+      "analysis": "挂载点必须是一个已存在的目录，不能是普通文件，故 D 正确、A 错误。一个分区可以挂到非空目录上，但挂载后该目录原有内容被遮蔽、暂时不可访问，故 B、C 错误。这正是“挂载”与“把文件复制到目录”的区别。",
+      "misconception": "误以为挂载后原目录内容还能看到——挂载会遮住原内容，卸载后恢复。",
+      "difficulty": 2,
+      "sectionCode": "sec.files.system",
+      "sourceRef": {
+        "sourceCode": "web.hqwx.tiku",
+        "origin": "EXTERNAL_QUESTION",
+        "sectionCode": "sec.files.system",
+        "pageStart": null,
+        "pageEnd": null,
+        "pageStatus": "NOT_VISIBLE",
+        "locator": "环球网校软考网络工程师题库：https://hlbe.hqwx.com/tiku/24312/3919057.html 第 1 题，参考答案 D",
+        "sourceQuestionNumber": "1"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.file.mounting",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.file.vfs",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    }
+  ]
+}

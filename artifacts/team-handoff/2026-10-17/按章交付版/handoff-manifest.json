@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-17",
+  "preparedBy": "L",
+  "deliveryModel": "CHAPTER_PACKAGES_J_A_SUBMIT_FILES_L_IMPORTS",
+  "status": "ACTIVE_CHAPTER_DELIVERY",
+  "contentDeliveryGranularity": "CHAPTER",
+  "bundles": [
+    "J-开工包",
+    "A-开工包"
+  ],
+  "chapter": "第一章 计算机系统概述",
+  "overviewNodes": 29,
+  "overviewUnits": 10,
+  "experimentSnapshotCount": 48,
+  "experimentSource": "数据库文件/oslab_db.sql",
+  "experimentSourceSha256": "1e2edd866626634279b61cca553ec9760c667e507a59ff49f3ff591b785d3932",
+  "textbookAvailableToMembers": true,
+  "firstDelivery": "J交第一章整章知识包，A交第一章整章题目包；第一章含1.1重新依据教材整理，不采用旧1.1成果",
+  "packageNames": {
+    "J": "J-第一章-知识-001",
+    "A": "A-第一章-题目-001",
+    "experiments": "A-实验维护-001"
+  },
+  "batchCodes": {
+    "J": "batch.j.overview.chapter.001",
+    "A": "batch.a.overview.chapter.001",
+    "experiments": "batch.a.experiments.001"
+  },
+  "reviewProcedures": {
+    "J": "docs/教材驱动课程重构/15-J交付前审查流程.md",
+    "A": "docs/教材驱动课程重构/16-A交付前审查流程.md"
+  },
+  "reviewRecord": "实际自审记录可独立为自审记录.md，或写入对应交接说明；先修改资源再复查",
+  "priorSection11ContentPolicy": "NOT_ADOPTED_DO_NOT_REUSE_MERGE_OR_IMPORT",
+  "experimentDelivery": "SEPARATE_MAINTENANCE_PACKAGE_NOT_REPEATED_PER_CHAPTER",
+  "note": "未导入数据库，未执行原SQL，未运行实验。"
+}

@@ -1,0 +1,621 @@
+{
+  "runAt": "2026-10-20T12:26:13.296Z",
+  "course": {
+    "courseCode": "course.operating-systems",
+    "title": "操作系统",
+    "description": "教材驱动课程；第一章正文与测评待成员材料审核发布",
+    "status": "AVAILABLE",
+    "publishedUnitCount": 10,
+    "completedUnitCount": 10,
+    "progressPercent": "100"
+  },
+  "units": [
+    {
+      "unitCode": "unit.overview.basic-concepts",
+      "title": "操作系统是什么，有哪些基本特征",
+      "status": "COMPLETED",
+      "goalStatus": "REVIEW_RECOMMENDED",
+      "requiredCount": 10,
+      "completedCount": 10,
+      "activities": 10,
+      "questionMappings": 7
+    },
+    {
+      "unitCode": "unit.overview.services",
+      "title": "操作系统为谁服务、管理什么",
+      "status": "COMPLETED",
+      "goalStatus": "PASSED",
+      "requiredCount": 8,
+      "completedCount": 8,
+      "activities": 8,
+      "questionMappings": 8
+    },
+    {
+      "unitCode": "unit.overview.history",
+      "title": "从手工操作到现代操作系统",
+      "status": "COMPLETED",
+      "goalStatus": "PASSED",
+      "requiredCount": 12,
+      "completedCount": 12,
+      "activities": 12,
+      "questionMappings": 24
+    },
+    {
+      "unitCode": "unit.overview.runtime-modes",
+      "title": "程序如何在用户态与内核态运行",
+      "status": "COMPLETED",
+      "goalStatus": "PASSED",
+      "requiredCount": 9,
+      "completedCount": 9,
+      "activities": 9,
+      "questionMappings": 19
+    },
+    {
+      "unitCode": "unit.overview.interrupts",
+      "title": "中断与异常怎样改变执行过程",
+      "status": "COMPLETED",
+      "goalStatus": "PASSED",
+      "requiredCount": 9,
+      "completedCount": 9,
+      "activities": 9,
+      "questionMappings": 10
+    },
+    {
+      "unitCode": "unit.overview.system-calls",
+      "title": "应用如何请求操作系统服务",
+      "status": "COMPLETED",
+      "goalStatus": "PASSED",
+      "requiredCount": 6,
+      "completedCount": 6,
+      "activities": 8,
+      "questionMappings": 11
+    },
+    {
+      "unitCode": "unit.overview.structure",
+      "title": "操作系统如何组织内部结构",
+      "status": "COMPLETED",
+      "goalStatus": "PASSED",
+      "requiredCount": 13,
+      "completedCount": 13,
+      "activities": 13,
+      "questionMappings": 12
+    },
+    {
+      "unitCode": "unit.overview.boot",
+      "title": "计算机启动时发生什么",
+      "status": "COMPLETED",
+      "goalStatus": "PASSED",
+      "requiredCount": 5,
+      "completedCount": 5,
+      "activities": 5,
+      "questionMappings": 7
+    },
+    {
+      "unitCode": "unit.overview.virtual-machine",
+      "title": "虚拟机把什么抽象给用户",
+      "status": "COMPLETED",
+      "goalStatus": "PASSED",
+      "requiredCount": 8,
+      "completedCount": 8,
+      "activities": 8,
+      "questionMappings": 3
+    },
+    {
+      "unitCode": "unit.overview.review",
+      "title": "本章复习与综合测评",
+      "status": "COMPLETED",
+      "goalStatus": "PASSED",
+      "requiredCount": 10,
+      "completedCount": 10,
+      "activities": 10,
+      "questionMappings": 6
+    }
+  ],
+  "resume": {
+    "courseCode": "course.operating-systems",
+    "unitCode": "unit.overview.review",
+    "activityCode": "act.overview.review.q.wd25.s1_6.022",
+    "reason": "COURSE_COMPLETED"
+  },
+  "progressSummary": {
+    "rows": 92,
+    "completed": 92,
+    "failed": 1,
+    "passed": 32
+  },
+  "failedActivity": {
+    "unitCode": "unit.overview.basic-concepts",
+    "activityCode": "act.overview.basic-concepts.q.wd25.s1_1.001",
+    "attemptId": "2112516420933459969",
+    "questionId": "2112165588673150978",
+    "questionCode": "q.wd25.s1_1.001",
+    "sourceUnitCode": "unit.overview.basic-concepts",
+    "sourceActivityCode": "act.overview.basic-concepts.q.wd25.s1_1.001"
+  },
+  "wrongEvent": {
+    "nodeName": "os.overview.operating_system",
+    "nodeCode": "os.overview.operating_system",
+    "eventType": "ATTEMPT",
+    "result": "FAIL",
+    "isFirst": true,
+    "masteryBefore": 0.1,
+    "masteryAfter": 0.11232876712328767
+  },
+  "allQuestionCodesVisible": 200,
+  "checks": [
+    {
+      "name": "课程 AVAILABLE 且 10 个已发布单元",
+      "detail": {
+        "courseCode": "course.operating-systems",
+        "title": "操作系统",
+        "description": "教材驱动课程；第一章正文与测评待成员材料审核发布",
+        "status": "AVAILABLE",
+        "publishedUnitCount": 10,
+        "completedUnitCount": 10,
+        "progressPercent": "100"
+      }
+    },
+    {
+      "name": "课程进度 100%",
+      "detail": {
+        "courseCode": "course.operating-systems",
+        "title": "操作系统",
+        "description": "教材驱动课程；第一章正文与测评待成员材料审核发布",
+        "status": "AVAILABLE",
+        "publishedUnitCount": 10,
+        "completedUnitCount": 10,
+        "progressPercent": "100"
+      }
+    },
+    {
+      "name": "课程标题与描述编码正常",
+      "detail": {
+        "courseCode": "course.operating-systems",
+        "title": "操作系统",
+        "description": "教材驱动课程；第一章正文与测评待成员材料审核发布",
+        "status": "AVAILABLE",
+        "publishedUnitCount": 10,
+        "completedUnitCount": 10,
+        "progressPercent": "100"
+      }
+    },
+    {
+      "name": "目录返回 10 单元",
+      "detail": 10
+    },
+    {
+      "name": "单元 unit.overview.basic-concepts 有节点映射"
+    },
+    {
+      "name": "单元 unit.overview.services 有节点映射"
+    },
+    {
+      "name": "单元 unit.overview.history 有节点映射"
+    },
+    {
+      "name": "单元 unit.overview.runtime-modes 有节点映射"
+    },
+    {
+      "name": "单元 unit.overview.interrupts 有节点映射"
+    },
+    {
+      "name": "单元 unit.overview.system-calls 有节点映射"
+    },
+    {
+      "name": "单元 unit.overview.structure 有节点映射"
+    },
+    {
+      "name": "单元 unit.overview.boot 有节点映射"
+    },
+    {
+      "name": "单元 unit.overview.virtual-machine 有节点映射"
+    },
+    {
+      "name": "单元 unit.overview.review 有节点映射"
+    },
+    {
+      "name": "单元 unit.overview.basic-concepts COMPLETED",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "REVIEW_RECOMMENDED",
+        "requiredCount": 10,
+        "completedCount": 10,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.basic-concepts 必需活动完成",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "REVIEW_RECOMMENDED",
+        "requiredCount": 10,
+        "completedCount": 10,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.basic-concepts 题量与目录一致",
+      "detail": {
+        "list": 7,
+        "catalog": 7
+      }
+    },
+    {
+      "name": "单元 unit.overview.services COMPLETED",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 8,
+        "completedCount": 8,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.services 必需活动完成",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 8,
+        "completedCount": 8,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.services 题量与目录一致",
+      "detail": {
+        "list": 8,
+        "catalog": 8
+      }
+    },
+    {
+      "name": "单元 unit.overview.history COMPLETED",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 12,
+        "completedCount": 12,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.history 必需活动完成",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 12,
+        "completedCount": 12,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.history 题量与目录一致",
+      "detail": {
+        "list": 24,
+        "catalog": 24
+      }
+    },
+    {
+      "name": "单元 unit.overview.runtime-modes COMPLETED",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 9,
+        "completedCount": 9,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.runtime-modes 必需活动完成",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 9,
+        "completedCount": 9,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.runtime-modes 题量与目录一致",
+      "detail": {
+        "list": 19,
+        "catalog": 19
+      }
+    },
+    {
+      "name": "单元 unit.overview.interrupts COMPLETED",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 9,
+        "completedCount": 9,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.interrupts 必需活动完成",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 9,
+        "completedCount": 9,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.interrupts 题量与目录一致",
+      "detail": {
+        "list": 10,
+        "catalog": 10
+      }
+    },
+    {
+      "name": "单元 unit.overview.system-calls COMPLETED",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 6,
+        "completedCount": 6,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.system-calls 必需活动完成",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 6,
+        "completedCount": 6,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.system-calls 题量与目录一致",
+      "detail": {
+        "list": 11,
+        "catalog": 11
+      }
+    },
+    {
+      "name": "单元 unit.overview.structure COMPLETED",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 13,
+        "completedCount": 13,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.structure 必需活动完成",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 13,
+        "completedCount": 13,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.structure 题量与目录一致",
+      "detail": {
+        "list": 12,
+        "catalog": 12
+      }
+    },
+    {
+      "name": "单元 unit.overview.boot COMPLETED",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 5,
+        "completedCount": 5,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.boot 必需活动完成",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 5,
+        "completedCount": 5,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.boot 题量与目录一致",
+      "detail": {
+        "list": 7,
+        "catalog": 7
+      }
+    },
+    {
+      "name": "单元 unit.overview.virtual-machine COMPLETED",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 8,
+        "completedCount": 8,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.virtual-machine 必需活动完成",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 8,
+        "completedCount": 8,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.virtual-machine 题量与目录一致",
+      "detail": {
+        "list": 3,
+        "catalog": 3
+      }
+    },
+    {
+      "name": "单元 unit.overview.review COMPLETED",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 10,
+        "completedCount": 10,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.review 必需活动完成",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 10,
+        "completedCount": 10,
+        "percent": "100"
+      }
+    },
+    {
+      "name": "单元 unit.overview.review 题量与目录一致",
+      "detail": {
+        "list": 6,
+        "catalog": 6
+      }
+    },
+    {
+      "name": "首单元错题后提示复习",
+      "detail": {
+        "unitCode": "unit.overview.basic-concepts",
+        "title": "操作系统是什么，有哪些基本特征",
+        "status": "COMPLETED",
+        "goalStatus": "REVIEW_RECOMMENDED",
+        "requiredCount": 10,
+        "completedCount": 10,
+        "activities": 10,
+        "questionMappings": 7
+      }
+    },
+    {
+      "name": "续学状态 COURSE_COMPLETED",
+      "detail": {
+        "courseCode": "course.operating-systems",
+        "unitCode": "unit.overview.review",
+        "activityCode": "act.overview.review.q.wd25.s1_6.022",
+        "reason": "COURSE_COMPLETED"
+      }
+    },
+    {
+      "name": "92 个活动全部完成",
+      "detail": {
+        "rows": 92,
+        "completed": 92
+      }
+    },
+    {
+      "name": "仅 1 个活动未达标且其余达标",
+      "detail": {
+        "failed": 1,
+        "passed": 32
+      }
+    },
+    {
+      "name": "错题活动记录 completed=1 / passed=0",
+      "detail": [
+        "unit.overview.basic-concepts",
+        "act.overview.basic-concepts.q.wd25.s1_1.001",
+        "1",
+        "0",
+        "2112516420933459969",
+        "0",
+        "2112165588673150978",
+        "q.wd25.s1_1.001",
+        "unit.overview.basic-concepts",
+        "act.overview.basic-concepts.q.wd25.s1_1.001"
+      ]
+    },
+    {
+      "name": "错题 attempt 判错且来源活动一致",
+      "detail": [
+        "unit.overview.basic-concepts",
+        "act.overview.basic-concepts.q.wd25.s1_1.001",
+        "1",
+        "0",
+        "2112516420933459969",
+        "0",
+        "2112165588673150978",
+        "q.wd25.s1_1.001",
+        "unit.overview.basic-concepts",
+        "act.overview.basic-concepts.q.wd25.s1_1.001"
+      ]
+    },
+    {
+      "name": "错题目标为 q.wd25.s1_1.001",
+      "detail": "q.wd25.s1_1.001"
+    },
+    {
+      "name": "错题事件为 ATTEMPT/FAIL",
+      "detail": [
+        "os.overview.operating_system",
+        "os.overview.operating_system",
+        "ATTEMPT",
+        "FAIL",
+        "1",
+        "0.1",
+        "0.11232876712328767",
+        "unit.overview.basic-concepts",
+        "act.overview.basic-concepts.q.wd25.s1_1.001"
+      ]
+    },
+    {
+      "name": "错题只落在实际考查节点",
+      "detail": [
+        "os.overview.operating_system",
+        "os.overview.operating_system"
+      ]
+    },
+    {
+      "name": "首次答错掌握度按 BKT 更新",
+      "detail": [
+        "0.1",
+        "0.11232876712328767"
+      ]
+    },
+    {
+      "name": "独立题库可找到 q.wd25.s1_3.005"
+    },
+    {
+      "name": "独立题库可找到 q.wd25.s1_3.016"
+    },
+    {
+      "name": "独立题库可找到 q.ext.s1_2.001"
+    },
+    {
+      "name": "独立题库可找到 q.wd25.s1_2.009"
+    },
+    {
+      "name": "独立题库可找到 q.ext.s1_3.001"
+    },
+    {
+      "name": "独立题库可找到 q.ext.s1_3.003"
+    },
+    {
+      "name": "复习定位不改变主线",
+      "detail": {
+        "unitCode": "unit.overview.basic-concepts",
+        "activityCode": "act.overview.basic-concepts.read.s1_1.system-role",
+        "mode": "REVIEW",
+        "mainlineUpdated": false
+      }
+    },
+    {
+      "name": "复习后课程仍完成",
+      "detail": {
+        "courseCode": "course.operating-systems",
+        "unitCode": "unit.overview.review",
+        "activityCode": "act.overview.review.q.wd25.s1_6.022",
+        "reason": "COURSE_COMPLETED"
+      }
+    }
+  ]
+}

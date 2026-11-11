@@ -1,0 +1,1491 @@
+{
+  "schemaVersion": "oslab-experiment-snapshot/1.0",
+  "source": "数据库文件/oslab_db.sql",
+  "sourceSha256": "1e2edd866626634279b61cca553ec9760c667e507a59ff49f3ff591b785d3932",
+  "sourceStatus": "REPOSITORY_SQL_SNAPSHOT_NOT_LIVE_DATABASE",
+  "note": "仅导出实验教学字段，不包含用户、学生资料和提交记录。L在导入前与当前运行库核对。参考答案及代码是原快照材料，未运行验证。",
+  "total": 48,
+  "experiments": [
+    {
+      "questionId": "1908449571747745793",
+      "resourceCode": "exp.legacy.1908449571747745793",
+      "title": "实验2.1 内存控制块",
+      "tags": [
+        "内存管理"
+      ],
+      "legacySetIds": [
+        "2"
+      ],
+      "legacySets": [
+        {
+          "id": "2",
+          "title": "第二章 内存管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-04-08 13:16:37",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1908449571747745793",
+      "hasReferenceAnswer": true,
+      "hasOriginalCode": true,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "用例含123→123，需核对是否为占位用例"
+      ]
+    },
+    {
+      "questionId": "1908532874240593922",
+      "resourceCode": "exp.legacy.1908532874240593922",
+      "title": "实验2.2 初始化全局变量",
+      "tags": [
+        "内存管理"
+      ],
+      "legacySetIds": [
+        "2"
+      ],
+      "legacySets": [
+        {
+          "id": "2",
+          "title": "第二章 内存管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-04-05 22:51:10",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1908532874240593922",
+      "hasReferenceAnswer": true,
+      "hasOriginalCode": true,
+      "judgeCaseCount": 1,
+      "reviewHints": []
+    },
+    {
+      "questionId": "1908538371526131713",
+      "resourceCode": "exp.legacy.1908538371526131713",
+      "title": "实验2.3 空闲内存管理",
+      "tags": [
+        "内存管理",
+        "空闲链表"
+      ],
+      "legacySetIds": [
+        "2"
+      ],
+      "legacySets": [
+        {
+          "id": "2",
+          "title": "第二章 内存管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-04-05 23:13:01",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1908538371526131713",
+      "hasReferenceAnswer": true,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架"
+      ]
+    },
+    {
+      "questionId": "1908539177407119361",
+      "resourceCode": "exp.legacy.1908539177407119361",
+      "title": "实验2.4 内存分配与释放管理",
+      "tags": [
+        "内存管理",
+        "内存分配"
+      ],
+      "legacySetIds": [
+        "2"
+      ],
+      "legacySets": [
+        {
+          "id": "2",
+          "title": "第二章 内存管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-04-05 23:16:13",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1908539177407119361",
+      "hasReferenceAnswer": true,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架"
+      ]
+    },
+    {
+      "questionId": "1908539875976839170",
+      "resourceCode": "exp.legacy.1908539875976839170",
+      "title": "实验2.5 页表创建",
+      "tags": [
+        "内存管理",
+        "页表"
+      ],
+      "legacySetIds": [
+        "2"
+      ],
+      "legacySets": [
+        {
+          "id": "2",
+          "title": "第二章 内存管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-04-05 23:19:00",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1908539875976839170",
+      "hasReferenceAnswer": true,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架"
+      ]
+    },
+    {
+      "questionId": "1908540360305704962",
+      "resourceCode": "exp.legacy.1908540360305704962",
+      "title": "实验2.6 地址映射",
+      "tags": [
+        "地址映射"
+      ],
+      "legacySetIds": [
+        "2"
+      ],
+      "legacySets": [
+        {
+          "id": "2",
+          "title": "第二章 内存管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-04-05 23:20:55",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1908540360305704962",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1908540572415852545",
+      "resourceCode": "exp.legacy.1908540572415852545",
+      "title": "实验2.7 页表项插入与移除",
+      "tags": [
+        "页表",
+        "TLB"
+      ],
+      "legacySetIds": [
+        "2"
+      ],
+      "legacySets": [
+        {
+          "id": "2",
+          "title": "第二章 内存管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-04-05 23:21:46",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1908540572415852545",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1908540698916061185",
+      "resourceCode": "exp.legacy.1908540698916061185",
+      "title": "实验2.8  TLB 管理",
+      "tags": [
+        "TLB"
+      ],
+      "legacySetIds": [
+        "2"
+      ],
+      "legacySets": [
+        {
+          "id": "2",
+          "title": "第二章 内存管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-04-05 23:22:16",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1908540698916061185",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1908900051330306049",
+      "resourceCode": "exp.legacy.1908900051330306049",
+      "title": "实验3.1 初始化进程控制块数组",
+      "tags": [
+        "进程",
+        "进程控制块",
+        "进程创建"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-04-06 23:20:05",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1908900051330306049",
+      "hasReferenceAnswer": true,
+      "hasOriginalCode": true,
+      "judgeCaseCount": 1,
+      "reviewHints": []
+    },
+    {
+      "questionId": "1917131319528452098",
+      "resourceCode": "exp.legacy.1917131319528452098",
+      "title": "实验1.1 构建 Minix 内核",
+      "tags": [
+        "地址映射",
+        "页目录"
+      ],
+      "legacySetIds": [
+        "1"
+      ],
+      "legacySets": [
+        {
+          "id": "1",
+          "title": "第一章 硬件管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-04-29 16:19:17",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1917131319528452098",
+      "hasReferenceAnswer": true,
+      "hasOriginalCode": true,
+      "judgeCaseCount": 1,
+      "reviewHints": []
+    },
+    {
+      "questionId": "1918931948987031554",
+      "resourceCode": "exp.legacy.1918931948987031554",
+      "title": "实验4.3 基础系统调用函数 `sys_mem_alloc`",
+      "tags": [],
+      "legacySetIds": [],
+      "legacySets": [],
+      "snapshotUpdatedTime": "2025-05-10 20:47:54",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1918931948987031554",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1918932928252157953",
+      "resourceCode": "exp.legacy.1918932928252157953",
+      "title": "实验4.5 基础系统调用函数`sys_mem_unmap`",
+      "tags": [],
+      "legacySetIds": [],
+      "legacySets": [],
+      "snapshotUpdatedTime": "2025-05-10 20:47:54",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1918932928252157953",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1918933052214812674",
+      "resourceCode": "exp.legacy.1918933052214812674",
+      "title": "实验4.6 基础系统调用函数`sys_yield`",
+      "tags": [],
+      "legacySetIds": [],
+      "legacySets": [],
+      "snapshotUpdatedTime": "2025-05-10 20:47:54",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1918933052214812674",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1918934540198682625",
+      "resourceCode": "exp.legacy.1918934540198682625",
+      "title": "实验4.7 实现进程间通信（IPC）机制",
+      "tags": [
+        "JavaScript",
+        "Vue",
+        "React"
+      ],
+      "legacySetIds": [],
+      "legacySets": [],
+      "snapshotUpdatedTime": "2025-05-10 20:47:54",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1918934540198682625",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1918938841746878466",
+      "resourceCode": "exp.legacy.1918938841746878466",
+      "title": "实验4.8 进程创建系统调用 `sys_env_alloc`",
+      "tags": [
+        "JavaScript",
+        "Vue"
+      ],
+      "legacySetIds": [],
+      "legacySets": [],
+      "snapshotUpdatedTime": "2025-05-10 20:47:54",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1918938841746878466",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1925417914018824193",
+      "resourceCode": "exp.legacy.1925417914018824193",
+      "title": "Test",
+      "tags": [
+        "TLB 重填",
+        "MMU",
+        "内存访问"
+      ],
+      "legacySetIds": [
+        "1"
+      ],
+      "legacySets": [
+        {
+          "id": "1",
+          "title": "第一章 硬件管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-05-22 13:06:17",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1925417914018824193",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1925422266552942594",
+      "resourceCode": "exp.legacy.1925422266552942594",
+      "title": "1/1Test",
+      "tags": [
+        "kseg0 区域",
+        "内存分配函数",
+        "基础系统调用函数"
+      ],
+      "legacySetIds": [
+        "1"
+      ],
+      "legacySets": [
+        {
+          "id": "1",
+          "title": "第一章 硬件管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-05-22 13:23:35",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1925422266552942594",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930153941795131394",
+      "resourceCode": "exp.legacy.1930153941795131394",
+      "title": "实验1.2 深入理解 ELF 文件格式",
+      "tags": [
+        "文件"
+      ],
+      "legacySetIds": [
+        "1"
+      ],
+      "legacySets": [
+        {
+          "id": "1",
+          "title": "第一章 硬件管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:45:34",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930153941795131394",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930154079598989313",
+      "resourceCode": "exp.legacy.1930154079598989313",
+      "title": "实验1.3 使用 Linker Script 控制内核加载地址",
+      "tags": [
+        "内核",
+        "代码段",
+        "数据段",
+        "文件"
+      ],
+      "legacySetIds": [
+        "1"
+      ],
+      "legacySets": [
+        {
+          "id": "1",
+          "title": "第一章 硬件管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:46:07",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930154079598989313",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930154331844431873",
+      "resourceCode": "exp.legacy.1930154331844431873",
+      "title": "实验1.4 深入理解 MIPS 汇编与 C 语言的交互",
+      "tags": [
+        "文件"
+      ],
+      "legacySetIds": [
+        "1"
+      ],
+      "legacySets": [
+        {
+          "id": "1",
+          "title": "第一章 硬件管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:47:07",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930154331844431873",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930154460768948226",
+      "resourceCode": "exp.legacy.1930154460768948226",
+      "title": "实验1.5 实现内核中的 printf 函数",
+      "tags": [
+        "内核",
+        "用户空间",
+        "内核空间",
+        "文件"
+      ],
+      "legacySetIds": [
+        "1"
+      ],
+      "legacySets": [
+        {
+          "id": "1",
+          "title": "第一章 硬件管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:47:38",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930154460768948226",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930154686162456577",
+      "resourceCode": "exp.legacy.1930154686162456577",
+      "title": "实验3.2 管理进程控制块数组",
+      "tags": [
+        "内存管理",
+        "进程",
+        "寄存器",
+        "进程控制块",
+        "文件",
+        "操作系统"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:48:32",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930154686162456577",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930154848414912513",
+      "resourceCode": "exp.legacy.1930154848414912513",
+      "title": "实验3.3 进程标识",
+      "tags": [
+        "内存管理",
+        "进程",
+        "寄存器",
+        "进程控制块",
+        "进程标识",
+        "文件",
+        "操作系统"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:49:11",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930154848414912513",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930154980048949249",
+      "resourceCode": "exp.legacy.1930154980048949249",
+      "title": "实验3.4 初始化进程虚拟内存布局",
+      "tags": [
+        "内存管理",
+        "虚拟内存管理",
+        "页",
+        "进程",
+        "内核",
+        "寄存器",
+        "页表",
+        "页目录",
+        "虚拟地址",
+        "物理地址",
+        "地址空间",
+        "用户空间",
+        "内核空间",
+        "操作系统"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:49:42",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930154980048949249",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930155119123681282",
+      "resourceCode": "exp.legacy.1930155119123681282",
+      "title": "实验3.5 设置进程控制块",
+      "tags": [
+        "内存管理",
+        "页",
+        "进程",
+        "用户态",
+        "内核态",
+        "中断",
+        "内核",
+        "寄存器",
+        "页表",
+        "页目录",
+        "进程控制块",
+        "状态寄存器",
+        "操作系统"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:50:15",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930155119123681282",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930155245821022209",
+      "resourceCode": "exp.legacy.1930155245821022209",
+      "title": "实验3.6 加载镜像映射",
+      "tags": [
+        "内存管理",
+        "虚拟内存管理",
+        "页",
+        "进程",
+        "寄存器",
+        "页表",
+        "页目录",
+        "虚拟地址",
+        "物理地址",
+        "进程控制块",
+        "文件",
+        "操作系统"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:50:45",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930155245821022209",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930155360556208129",
+      "resourceCode": "exp.legacy.1930155360556208129",
+      "title": "实验3.7 完整加载镜像",
+      "tags": [
+        "内存管理",
+        "虚拟内存管理",
+        "页",
+        "进程",
+        "地址映射",
+        "寄存器",
+        "页表",
+        "页目录",
+        "进程控制块",
+        "用户进程",
+        "文件",
+        "操作系统"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:51:13",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930155360556208129",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930155484338507777",
+      "resourceCode": "exp.legacy.1930155484338507777",
+      "title": "实验3.8 创建进程",
+      "tags": [
+        "内存管理",
+        "页",
+        "进程",
+        "进程创建",
+        "寄存器",
+        "页表",
+        "页目录",
+        "进程控制块",
+        "地址空间",
+        "文件"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:51:42",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930155484338507777",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930155681017810946",
+      "resourceCode": "exp.legacy.1930155681017810946",
+      "title": "实验3.9 进程创建宏命令应用",
+      "tags": [
+        "进程",
+        "进程创建",
+        "用户进程",
+        "文件",
+        "操作系统"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:52:29",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930155681017810946",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930155792691154945",
+      "resourceCode": "exp.legacy.1930155792691154945",
+      "title": "实验3.10 进程运行与切换",
+      "tags": [
+        "进程",
+        "寄存器",
+        "地址空间",
+        "进程上下文"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:52:56",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930155792691154945",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930155905954140162",
+      "resourceCode": "exp.legacy.1930155905954140162",
+      "title": "实验3.12 异常处理",
+      "tags": [
+        "异常",
+        "异常分发",
+        "异常处理"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:53:23",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930155905954140162",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930156027966443521",
+      "resourceCode": "exp.legacy.1930156027966443521",
+      "title": "实验3.13 时钟中断",
+      "tags": [
+        "进程",
+        "异常",
+        "中断",
+        "异常分发",
+        "时钟中断",
+        "进程调度",
+        "定时器",
+        "时间片轮转算法",
+        "异常处理",
+        "操作系统"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:53:52",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930156027966443521",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930156143783759874",
+      "resourceCode": "exp.legacy.1930156143783759874",
+      "title": "实验3.14 进程调度实验",
+      "tags": [
+        "进程",
+        "中断",
+        "时钟中断",
+        "进程调度",
+        "时间片轮转算法",
+        "文件"
+      ],
+      "legacySetIds": [
+        "3"
+      ],
+      "legacySets": [
+        {
+          "id": "3",
+          "title": "第三章 进程管理"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:54:19",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930156143783759874",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930156360117571585",
+      "resourceCode": "exp.legacy.1930156360117571585",
+      "title": "实验4.1 实现用户空间到内核空间的系统调用机制",
+      "tags": [
+        "系统调用",
+        "内核态",
+        "内核",
+        "用户空间",
+        "内核空间",
+        "内核函数",
+        "系统调用函数",
+        "栈帧",
+        "特权指令",
+        "用户空间库函数"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:55:11",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930156360117571585",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930156493454495745",
+      "resourceCode": "exp.legacy.1930156493454495745",
+      "title": "实验4.2 实现内核的系统调用处理机制",
+      "tags": [
+        "系统调用",
+        "内核态",
+        "系统调用机制",
+        "内核",
+        "用户空间",
+        "内核空间",
+        "内核函数",
+        "系统调用函数",
+        "系统调用号",
+        "栈帧",
+        "特权指令"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:55:43",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930156493454495745",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930156605618573314",
+      "resourceCode": "exp.legacy.1930156605618573314",
+      "title": "实验4.3 基础系统调用函数 `sys_mem_alloc`",
+      "tags": [
+        "进程",
+        "系统调用",
+        "内核",
+        "用户空间",
+        "内核空间"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:56:10",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930156605618573314",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930156740377366529",
+      "resourceCode": "exp.legacy.1930156740377366529",
+      "title": "实验4.4 基础系统调用函数`sys_mem_map`",
+      "tags": [
+        "页",
+        "进程",
+        "系统调用",
+        "内核",
+        "地址空间",
+        "用户空间",
+        "内核空间"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:56:42",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930156740377366529",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930156844614209538",
+      "resourceCode": "exp.legacy.1930156844614209538",
+      "title": "实验4.5 基础系统调用函数`sys_mem_unmap`",
+      "tags": [
+        "页",
+        "进程",
+        "系统调用",
+        "内核",
+        "虚拟地址",
+        "物理地址",
+        "地址空间",
+        "用户空间",
+        "内核空间"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:57:06",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930156844614209538",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930156972624367618",
+      "resourceCode": "exp.legacy.1930156972624367618",
+      "title": "实验4.6 基础系统调用函数`sys_yield`",
+      "tags": [
+        "进程",
+        "系统调用",
+        "进程切换",
+        "进程调度",
+        "内核",
+        "用户进程",
+        "用户空间",
+        "内核空间",
+        "操作系统"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:57:37",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930156972624367618",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930157095085461505",
+      "resourceCode": "exp.legacy.1930157095085461505",
+      "title": "实验4.7 实现进程间通信（IPC）机制",
+      "tags": [
+        "进程",
+        "系统调用",
+        "内核",
+        "用户进程",
+        "用户空间",
+        "内核空间",
+        "系统调用函数"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:58:06",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930157095085461505",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930157212584693762",
+      "resourceCode": "exp.legacy.1930157212584693762",
+      "title": "实验4.8 进程创建系统调用 `sys_env_alloc`",
+      "tags": [
+        "进程",
+        "系统调用",
+        "进程创建",
+        "内核",
+        "寄存器",
+        "用户空间",
+        "内核空间",
+        "子进程",
+        "父进程"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:58:34",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930157212584693762",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930157404163723265",
+      "resourceCode": "exp.legacy.1930157404163723265",
+      "title": "实验4.9 实现 `fork` 系统调用中的 `sys_env_alloc` ",
+      "tags": [
+        "进程",
+        "系统调用",
+        "内核",
+        "进程控制块",
+        "用户空间",
+        "内核空间",
+        "子进程",
+        "父进程"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:59:20",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930157404163723265",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930157516164222977",
+      "resourceCode": "exp.legacy.1930157516164222977",
+      "title": "实验4.10 实现 `fork` 系统调用中的 `duppage` 函数",
+      "tags": [
+        "内存管理",
+        "页",
+        "进程",
+        "系统调用",
+        "写时复制机制",
+        "内核",
+        "页表",
+        "用户空间",
+        "内核空间",
+        "子进程"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 14:59:47",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930157516164222977",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930157629511094274",
+      "resourceCode": "exp.legacy.1930157629511094274",
+      "title": "实验4.11 实现缺页中断处理函数 `page_fault_handler`",
+      "tags": [
+        "内存管理",
+        "页",
+        "进程",
+        "异常",
+        "中断",
+        "缺页中断",
+        "内核",
+        "TLB",
+        "页表",
+        "虚拟地址",
+        "物理地址",
+        "用户空间",
+        "内核空间",
+        "异常处理",
+        "异常处理栈"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 15:00:14",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930157629511094274",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930157740261691394",
+      "resourceCode": "exp.legacy.1930157740261691394",
+      "title": "实验4.12 实现设置缺页处理函数的系统调用 `sys_set_pgfault_handler`",
+      "tags": [
+        "页",
+        "进程",
+        "系统调用",
+        "异常",
+        "中断",
+        "缺页中断",
+        "内核",
+        "进程控制块",
+        "用户进程",
+        "用户空间",
+        "内核空间",
+        "异常处理"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 15:00:40",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930157740261691394",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930157867273605121",
+      "resourceCode": "exp.legacy.1930157867273605121",
+      "title": "实验4.13 实现 `fork` 系统调用中的缺页处理函数 `pgfault`",
+      "tags": [
+        "页",
+        "进程",
+        "异常",
+        "中断",
+        "缺页中断",
+        "内核",
+        "页表",
+        "用户空间",
+        "内核空间",
+        "异常处理",
+        "子进程",
+        "父进程"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 15:01:10",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930157867273605121",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930157984642813953",
+      "resourceCode": "exp.legacy.1930157984642813953",
+      "title": "实验4.14 实现进程状态设置系统调用 `sys_set_env_status`",
+      "tags": [
+        "进程",
+        "系统调用",
+        "进程调度",
+        "内核",
+        "进程控制块",
+        "用户空间",
+        "内核空间"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 15:01:38",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930157984642813953",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    },
+    {
+      "questionId": "1930158086405017602",
+      "resourceCode": "exp.legacy.1930158086405017602",
+      "title": "实验4.15 实现 `fork` 系统调用",
+      "tags": [
+        "页",
+        "进程",
+        "系统调用",
+        "异常",
+        "内核",
+        "页表",
+        "地址空间",
+        "用户空间",
+        "内核空间",
+        "异常处理",
+        "子进程",
+        "父进程",
+        "异常处理栈"
+      ],
+      "legacySetIds": [
+        "4"
+      ],
+      "legacySets": [
+        {
+          "id": "4",
+          "title": "第四章 文件系统"
+        }
+      ],
+      "snapshotUpdatedTime": "2025-06-04 15:02:03",
+      "runtimeValidated": false,
+      "directory": "reference/experiments/1930158086405017602",
+      "hasReferenceAnswer": false,
+      "hasOriginalCode": false,
+      "judgeCaseCount": 1,
+      "reviewHints": [
+        "缺少原始代码／框架",
+        "缺少参考解"
+      ]
+    }
+  ]
+}

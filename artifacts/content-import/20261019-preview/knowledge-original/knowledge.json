@@ -1,0 +1,2617 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "KNOWLEDGE",
+  "batchCode": "batch.j.overview.chapter.001",
+  "contributor": "J",
+  "courseCode": "course.operating-systems",
+  "note": "按2026-10-17按章交付版开工要求，从教材重新整理第一章1.1—1.7；不以旧1.1成果为输入、不合并旧包。正文为教学改写，原图另标TEXTBOOK。正式发布和旧图谱身份绑定由L执行。",
+  "nodes": [
+    {
+      "nodeCode": "os.overview.operating_system",
+      "name": "操作系统",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.basic-concepts",
+      "aliases": [
+        "OS"
+      ],
+      "description": "最基本的系统软件，负责统筹硬件、软件资源和计算机工作，并向用户及其他软件提供接口与环境。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.basic-concepts",
+          "pageStart": 2,
+          "pageEnd": 2,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.1.1 操作系统定义；PDF页序14—14（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.concurrency",
+      "name": "并发",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.basic-concepts",
+      "aliases": [],
+      "description": "在一个共同的时间间隔中，两个或多个事件都在发生；多道程序可通过交替运行表现出并发。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.basic-concepts",
+          "pageStart": 2,
+          "pageEnd": 2,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.1.2 第1点 并发；PDF页序14—14（1基）",
+          "sourceQuestionNumber": null
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.review",
+          "pageStart": 36,
+          "pageEnd": 37,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.7 第1点；PDF页序48—49（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.parallelism",
+      "name": "并行",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.basic-concepts",
+      "aliases": [],
+      "description": "在同一时刻完成两项或更多工作；进程真正并行需要相应硬件支持。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.basic-concepts",
+          "pageStart": 2,
+          "pageEnd": 2,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.1.2 并行性的定义及分析；PDF页序14—14（1基）",
+          "sourceQuestionNumber": null
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.review",
+          "pageStart": 36,
+          "pageEnd": 37,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.7 第1点；PDF页序48—49（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.sharing",
+      "name": "共享",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.basic-concepts",
+      "aliases": [],
+      "description": "允许内存中的并发进程共同使用资源的特征，既包括互斥共享，也包括宏观上的同时访问。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.basic-concepts",
+          "pageStart": 2,
+          "pageEnd": 3,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.1.2 第2点 共享；PDF页序14—15（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.virtualization",
+      "name": "操作系统的虚拟性",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.basic-concepts",
+      "aliases": [
+        "虚拟性"
+      ],
+      "description": "将物理实体表现为逻辑对应物的特征，通过时分、空分等技术形成用户看到的逻辑资源。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.basic-concepts",
+          "pageStart": 3,
+          "pageEnd": 3,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.1.2 第3点 虚拟；PDF页序15—15（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.asynchrony",
+      "name": "异步性",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.basic-concepts",
+      "aliases": [],
+      "description": "并发进程受到有限资源等条件影响，不能始终连续执行，其推进速度难以预先确定。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.basic-concepts",
+          "pageStart": 3,
+          "pageEnd": 3,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.1.2 第4点 异步；PDF页序15—15（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.resource_management",
+      "name": "操作系统资源管理功能",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.basic-concepts",
+      "aliases": [
+        "资源管理"
+      ],
+      "description": "对处理机、存储器、文件和设备的分配、组织、保护与使用实施管理的功能集合。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.basic-concepts",
+          "pageStart": 3,
+          "pageEnd": 4,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.1.3 第1点 资源管理者；PDF页序15—16（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.user_interface",
+      "name": "操作系统与用户的接口",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.basic-concepts",
+      "aliases": [
+        "用户接口"
+      ],
+      "description": "为使用者控制作业以及程序请求系统服务提供的命令接口和程序接口。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.basic-concepts",
+          "pageStart": 4,
+          "pageEnd": 4,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.1.3 第2点 用户与硬件之间的接口；PDF页序16—16（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.manual_operation",
+      "name": "手工操作阶段",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.history",
+      "aliases": [],
+      "description": "尚无操作系统、主要由人控制程序装入运行和输出的阶段，用户独占主机且CPU等待人工操作。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.history",
+          "pageStart": 7,
+          "pageEnd": 7,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.2.1；PDF页序19—19（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.batch_system",
+      "name": "批处理系统",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.history",
+      "aliases": [],
+      "description": "把作业批量提交并自动处理的系统，单道依次运行，多道通过交替执行改善资源利用。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.history",
+          "pageStart": 7,
+          "pageEnd": 8,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.2.2；PDF页序19—20（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.time_sharing_system",
+      "name": "分时操作系统",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.history",
+      "aliases": [],
+      "description": "通过时间片轮换为多个终端用户提供交互服务的系统，突出同时性、交互性、独立性和及时性。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.history",
+          "pageStart": 8,
+          "pageEnd": 9,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.2.3；PDF页序20—21（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.real_time_system",
+      "name": "实时操作系统",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.history",
+      "aliases": [],
+      "description": "以在规定时限内处理事件为要求的系统，强调及时性和可靠性。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.history",
+          "pageStart": 9,
+          "pageEnd": 9,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.2.4；PDF页序21—21（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.network_os",
+      "name": "网络操作系统",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.history",
+      "aliases": [],
+      "description": "通过网络联系计算机并提供资源共享和通信支持的操作系统。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.history",
+          "pageStart": 9,
+          "pageEnd": 9,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.2.5 网络操作系统；PDF页序21—21（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.distributed_os",
+      "name": "分布式操作系统",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.history",
+      "aliases": [],
+      "description": "协调分布于多台计算机的资源和工作，使各机器协同完成任务的操作系统。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.history",
+          "pageStart": 9,
+          "pageEnd": 9,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.2.5 分布式计算机系统；PDF页序21—21（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.overview.personal_os",
+      "name": "个人计算机操作系统",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.history",
+      "aliases": [],
+      "description": "服务于个人计算机及其通用应用的操作系统类型。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.history",
+          "pageStart": 9,
+          "pageEnd": 10,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.2.6；PDF页序21—22（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.runtime.user_mode",
+      "name": "用户态",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.runtime",
+      "aliases": [
+        "目态"
+      ],
+      "description": "执行用户程序的受限状态，不能直接执行特权指令，也称目态。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.runtime",
+          "pageStart": 15,
+          "pageEnd": 15,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.3.1 用户态；PDF页序27—27（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.runtime.kernel_mode",
+      "name": "内核态",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.runtime",
+      "aliases": [
+        "管态"
+      ],
+      "description": "内核程序使用的CPU状态，具有执行特权指令的权限，也称管态或核心态。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.runtime",
+          "pageStart": 15,
+          "pageEnd": 15,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.3.1 内核态；PDF页序27—27（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.runtime.privileged_instruction",
+      "name": "特权指令",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.runtime",
+      "aliases": [],
+      "description": "为保护整个系统而限制用户直接执行、仅允许在内核态执行的一类指令。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.runtime",
+          "pageStart": 15,
+          "pageEnd": 15,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.3.1 特权指令；PDF页序27—27（1基）",
+          "sourceQuestionNumber": null
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.review",
+          "pageStart": 37,
+          "pageEnd": 37,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.7 第2点；PDF页序49—49（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.runtime.mode_switch",
+      "name": "处理器状态切换",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.runtime",
+      "aliases": [
+        "用户态与内核态切换"
+      ],
+      "description": "CPU在用户态与内核态之间受控转移的过程，进入内核通过中断或异常，返回时恢复相应状态。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.runtime",
+          "pageStart": 16,
+          "pageEnd": 19,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.3.2开头及1.3.3；PDF页序28—31（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.runtime.interrupt",
+      "name": "中断",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.runtime",
+      "aliases": [],
+      "description": "狭义上指当前指令执行之外的事件引发的外中断，典型为时钟和I/O完成请求。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.runtime",
+          "pageStart": 17,
+          "pageEnd": 17,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.3.2 第1点 外中断；PDF页序29—29（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.runtime.exception",
+      "name": "异常",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.runtime",
+      "aliases": [],
+      "description": "由当前指令执行内部事件引发的异常，含故障、自陷与终止，又称内中断。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.runtime",
+          "pageStart": 17,
+          "pageEnd": 17,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.3.2 第1—2点 异常；PDF页序29—29（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.runtime.interrupt_handling",
+      "name": "中断处理流程",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.runtime",
+      "aliases": [],
+      "description": "对中断或异常识别、进入处理、保护恢复现场并决定返回或终止的控制过程。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.runtime",
+          "pageStart": 17,
+          "pageEnd": 18,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.3.2 第3点 处理过程；PDF页序29—30（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.runtime.system_call",
+      "name": "系统调用",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.runtime",
+      "aliases": [
+        "System Call"
+      ],
+      "description": "用户程序请求系统管理资源或提供其他服务的接口，具体服务处理在内核中完成。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.runtime",
+          "pageStart": 18,
+          "pageEnd": 19,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.3.3 系统调用；PDF页序30—31（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.runtime.kernel",
+      "name": "操作系统内核",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "aliases": [],
+      "homeSectionCode": "sec.overview.runtime",
+      "description": "操作系统最底层的核心软件，集中承担紧密依赖硬件及高频的基本管理操作。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.runtime",
+          "pageStart": 15,
+          "pageEnd": 16,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.3.1 内核与四类内容；PDF页序27—28（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.runtime.primitive",
+      "name": "原语",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "aliases": [],
+      "homeSectionCode": "sec.overview.runtime",
+      "description": "完成规定操作且执行要求不可分割的底层程序，通常运行短、使用频繁。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.runtime",
+          "pageStart": 16,
+          "pageEnd": 16,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.3.1 第3点 原语；PDF页序28—28（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.runtime.trap_instruction",
+      "name": "访管指令",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "aliases": [
+        "陷入指令"
+      ],
+      "homeSectionCode": "sec.overview.runtime",
+      "description": "用户程序为请求内核服务而主动执行的非特权指令，执行后产生受控陷入事件。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.runtime",
+          "pageStart": 15,
+          "pageEnd": 15,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.3.1 访管指令的非特权性；PDF页序27—27（1基）",
+          "sourceQuestionNumber": null
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.review",
+          "pageStart": 37,
+          "pageEnd": 37,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.7 第3点 访管指令与访管中断；PDF页序49—49（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.structure.os_structure",
+      "name": "操作系统结构",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.structure",
+      "aliases": [],
+      "description": "组织操作系统模块、依赖和服务边界的设计方法，用于控制复杂度并权衡性能和可靠性。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.structure",
+          "pageStart": 27,
+          "pageEnd": 30,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.4 总述及第1—5点；PDF页序39—42（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.structure.monolithic_kernel",
+      "name": "宏内核",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.structure",
+      "aliases": [
+        "大内核"
+      ],
+      "description": "将主要系统功能紧密组合并置于内核态运行的内核结构，又称大内核、单内核。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.structure",
+          "pageStart": 28,
+          "pageEnd": 28,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.4 第3点 宏内核；PDF页序40—40（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.structure.microkernel",
+      "name": "微内核",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.structure",
+      "aliases": [],
+      "description": "把基本机制保留在小型内核，将其他服务放在用户空间并通过消息交互的组织方式。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.structure",
+          "pageStart": 28,
+          "pageEnd": 29,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.4 第4点 微内核；PDF页序40—41（1基）",
+          "sourceQuestionNumber": null
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.review",
+          "pageStart": 37,
+          "pageEnd": 37,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.7 第4点；PDF页序49—49（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.structure.layered",
+      "name": "分层结构",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "aliases": [],
+      "homeSectionCode": "sec.overview.structure",
+      "description": "以高层仅使用低层服务的单向依赖组织操作系统的结构。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.structure",
+          "pageStart": 27,
+          "pageEnd": 27,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.4 第1点 分层法；PDF页序39—39（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.structure.modular",
+      "name": "模块化结构",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "aliases": [],
+      "homeSectionCode": "sec.overview.structure",
+      "description": "按管理功能分为相对独立的模块、子模块，并用接口连接的系统组织方式。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.structure",
+          "pageStart": 27,
+          "pageEnd": 28,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.4 第2点 模块化；PDF页序39—40（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.structure.exokernel",
+      "name": "外核",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "aliases": [
+        "Exokernel"
+      ],
+      "homeSectionCode": "sec.overview.structure",
+      "description": "负责直接分配和保护底层资源，减少资源映射，并把更多管理留给用户层的内核设计思路。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.structure",
+          "pageStart": 29,
+          "pageEnd": 30,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.4 第5点 外核；PDF页序41—42（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.boot.boot_process",
+      "name": "操作系统引导过程",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.boot",
+      "aliases": [
+        "系统引导"
+      ],
+      "description": "CPU从固件开始，逐级寻找启动设备、引导信息和系统程序，最后载入初始化程序执行的过程。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.boot",
+          "pageStart": 30,
+          "pageEnd": 30,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.5 操作系统引导；PDF页序42—42（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.virtualization.virtual_machine",
+      "name": "虚拟机",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.virtual-machine",
+      "aliases": [
+        "VM"
+      ],
+      "description": "以虚拟化隐藏具体物理属性，为客户系统提供统一、模拟机器环境的资源抽象。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.virtual-machine",
+          "pageStart": 31,
+          "pageEnd": 32,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.6.1 虚拟机基本概念；PDF页序43—44（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.virtualization.vmm",
+      "name": "虚拟机监控程序",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.virtual-machine",
+      "aliases": [
+        "VMM",
+        "Hypervisor"
+      ],
+      "description": "提供和管理虚拟机器、协调资源及受控执行的管理程序，放置方式分第一类与第二类。",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.overview.virtual-machine",
+          "pageStart": 31,
+          "pageEnd": 32,
+          "pageStatus": "VISIBLE",
+          "locator": "第1章 1.6.1 两类虚拟机管理程序；PDF页序43—44（1基）",
+          "sourceQuestionNumber": null
+        }
+      ]
+    }
+  ],
+  "chunks": [
+    {
+      "chunkCode": "chunk.wd25.overview.s1_1.system-role.001",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "操作系统是什么、处在什么位置",
+      "chunkType": "DEFINITION",
+      "contentMd": "计算机硬件提供处理器、内存和输入输出设备等基本资源，应用程序利用资源解决用户问题。操作系统位于二者之间，统一控制资源的分配与使用，并给程序提供运行基础。教材按这一角度将系统分为硬件、操作系统、应用程序、用户四部分。\n\n操作系统不仅提供操作入口，还负责组织、调度计算机工作，管理硬件与软件资源，并向用户及其他软件提供方便的接口和环境，因此它是系统中最基本的系统软件。",
+      "nodeCodes": [
+        "os.overview.operating_system"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 1,
+        "pageEnd": 2,
+        "pageStatus": "INFERRED",
+        "locator": "第1章 1.1.1 操作系统的概念及四部分划分；PDF页序13—14（1基）；第1页据后页页码与连续正文推定",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_1.concurrent-parallel.001",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "并发和并行：先看时间尺度",
+      "chunkType": "EXPLANATION",
+      "contentMd": "并发所说的“同时”落在一个时间间隔内；并行要求在同一时刻确有多项活动进行。\n\n单处理机中的多道程序可以交替占用CPU：一个程序等待I/O时，让另一个程序继续执行。从较长时间段看，它们都在推进，但每个时刻CPU仍只运行一道程序。CPU与I/O设备、不同I/O设备之间则可有真正的并行活动。若要让多个程序同时执行，还需要多处理机等硬件支持。\n\n教材指出，引入进程是为了使程序能够并发执行。",
+      "nodeCodes": [
+        "os.overview.concurrency",
+        "os.overview.parallelism"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 2,
+        "pageEnd": 2,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.2 第1点及命题追踪；PDF页序14—14（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_1.bread-writing.001",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "教材情境：交替吃面包和写字",
+      "chunkType": "WORKED_EXAMPLE",
+      "contentMd": "以9:00—10:00为观察区间。若9:00—9:10仅吃面包，9:10—9:20仅写字，9:20—9:30再仅吃面包，9:30—10:00再仅写字，两种活动是在这个区间内交替完成的，体现并发。\n\n若在同一段时间内右手写字、左手同时拿面包吃，两种动作可以在同一时刻进行，体现并行。\n\n两种情境比较的不是活动数量，而是活动是否在同一时刻实际发生。",
+      "nodeCodes": [
+        "os.overview.concurrency",
+        "os.overview.parallelism"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 2,
+        "pageEnd": 2,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.2 注意段 吃面包与写字例子；PDF页序14—14（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_1.sharing-modes.001",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "共享的两种访问方式",
+      "chunkType": "EXPLANATION",
+      "contentMd": "共享意味着并发进程共同使用系统资源，但访问安排可以不同。\n\n互斥共享要求一段时间内只服务一个进程。例如打印机若交错打印不同用户的行，输出就会混乱。进程先申请资源，空闲时获准使用，被占用时等待，用完释放后才轮到其他进程。按此方式使用的资源叫临界资源。\n\n同时访问方式允许多个进程在一段时间内访问资源，例如教材所举磁盘和可重入代码文件。“同时”常指宏观效果，实际可能分时交替，一个请求分若干片段完成但结果等同于连续完成。",
+      "nodeCodes": [
+        "os.overview.sharing"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 2,
+        "pageEnd": 3,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.2 第2点 互斥共享、同时访问及第3页注意段；PDF页序14—15（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_1.concurrency-sharing-link.001",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "并发与共享为何是两个基本特征",
+      "chunkType": "EXPLANATION",
+      "contentMd": "教材把并发和共享列为最基本的两个特征，并强调它们互为存在条件。没有程序并发，就没有这一语境下多个进程共享资源的问题；共享资源若得不到有效管理，又会妨碍甚至阻止程序并发执行。\n\n因此，资源管理必须协调并发活动，而不能把“共享”理解为不受控制地争用资源。两者是相互支持的关系，不是简单的单向先后关系。",
+      "nodeCodes": [
+        "os.overview.concurrency",
+        "os.overview.sharing"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 3,
+        "pageEnd": 3,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.2 第2点末 并发与共享关系；PDF页序15—15（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_1.virtual-resources.001",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "时分、空分与用户看到的逻辑资源",
+      "chunkType": "EXPLANATION",
+      "contentMd": "虚拟技术把实际存在的物理实体转换为用户感觉到的逻辑对应物。本节按时分复用与空分复用说明这一特征。\n\n多道程序分时使用一个CPU，使多个用户都感到有处理器在为自己服务，形成虚拟处理器；虚拟存储器则从逻辑上扩充用户可使用的存储空间。物理I/O设备还可以表现为多台逻辑设备，使用户通过各自的逻辑入口使用原本需要互斥访问的设备。\n\n逻辑资源数量或容量的变化，并不表示物理设备凭空增多。",
+      "nodeCodes": [
+        "os.overview.virtualization"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 3,
+        "pageEnd": 3,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.2 第3点 虚拟处理器、存储器和设备；PDF页序15—15（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_1.asynchronous-progress.001",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "异步性：不可预知的是推进速度",
+      "chunkType": "DEFINITION",
+      "contentMd": "在多道程序环境中，进程可以并发运行，却受资源有限等因素限制，常常执行一段、等待一段，其前进速度不是预先固定的，这就是异步性。\n\n访问共享变量的次序可能影响结果，所以需要正确的协调。教材所说在相同运行环境下应获得相同结果，是对程序正确运行条件的要求；不能据此认定所有并发程序都天然具有确定结果。",
+      "nodeCodes": [
+        "os.overview.asynchrony"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 3,
+        "pageEnd": 3,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.2 第4点 异步；PDF页序15—15（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_1.resource-manager.001",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "作为资源管理者的四类工作",
+      "chunkType": "EXPLANATION",
+      "contentMd": "|对象|管理工作|\n|---|---|\n|处理机|以进程或线程为基本单位组织运行；包含控制、同步、通信、死锁处理和调度。|\n|存储器|分配与回收内存，进行地址映射、保护、共享和内存扩充。|\n|文件|管理文件存储空间、目录、读写和保护，由文件系统承担。|\n|设备|完成I/O请求，负责缓冲、分配、处理以及虚拟设备。|\n\n这些功能共同为程序创造运行条件，并提高资源利用率。用户无须自行安排每个硬件部件的细节。",
+      "nodeCodes": [
+        "os.overview.resource_management"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 3,
+        "pageEnd": 4,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.3 第1点（1）—（4）；PDF页序15—16（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_1.command-control.001",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "命令接口：交互控制和批量控制",
+      "chunkType": "EXPLANATION",
+      "contentMd": "用户通过命令接口组织作业的执行。联机命令接口也称交互式命令接口：用户输入一条命令，命令解释程序执行并反馈，然后再接收下一条命令，适合分时或实时系统。\n\n脱机命令接口也称批处理命令接口：先写好作业控制说明，随作业一起提交，系统调度到作业后按说明逐条执行，用户不能直接干预。\n\n两类方式的差别在作业控制过程是否逐次交互，不是名称里有“联机”就必然指网络连接。",
+      "nodeCodes": [
+        "os.overview.user_interface"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 4,
+        "pageEnd": 4,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.3 第2点（1）命令接口；PDF页序16—16（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_1.program-service.001",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "程序接口和图形界面",
+      "chunkType": "EXPLANATION",
+      "contentMd": "程序接口让编程人员在程序中请求操作系统的服务，由一组系统调用构成，教材也称之为广义指令。外设使用、内存分配回收等请求可经此交给系统处理。\n\n图形用户界面提供图标、鼠标和快捷键等交互形式，其功能最终要调用程序接口。按本教材的划分口径，图形接口本身与它所调用的系统调用应区分：后者属于操作系统的服务接口。",
+      "nodeCodes": [
+        "os.overview.user_interface",
+        "os.runtime.system_call"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 4,
+        "pageEnd": 4,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.3 第2点（2）程序接口及GUI段；PDF页序16—16（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_1.machine-extension.001",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "裸机如何成为更方便使用的机器",
+      "chunkType": "EXPLANATION",
+      "contentMd": "没有任何软件支持的计算机称为裸机，是计算机系统的物质基础。操作系统在其上提供资源管理和服务，其他软件再进一步扩充功能，使用户能更方便地使用机器。教材把覆盖了软件的机器称为扩充机器或虚拟机。\n\n此处重在说明软件扩充硬件能力；后文1.6还会用“虚拟机”讨论承载客户操作系统的具体机器环境，应按语境区分。",
+      "nodeCodes": [
+        "os.overview.operating_system"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 4,
+        "pageEnd": 5,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.3 第3点 计算机资源的扩充及第5页续段；PDF页序16—17（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_1.basic-summary.001",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "从特征、职责和服务入口复习操作系统",
+      "chunkType": "SUMMARY",
+      "contentMd": "本节可沿三条线复习：\n\n- 特征：并发、共享、虚拟、异步，其中并发与共享最基本。\n- 职责：管理处理机、存储器、文件和设备，组织程序运行。\n- 对外作用：通过命令和程序接口提供服务，并在裸机上扩充使用能力。\n\n判断概念时抓住限定条件：并发不要求同一时刻；共享可能互斥；虚拟描述逻辑资源；异步描述推进速度。",
+      "nodeCodes": [
+        "os.overview.operating_system",
+        "os.overview.concurrency",
+        "os.overview.sharing",
+        "os.overview.virtualization",
+        "os.overview.asynchrony",
+        "os.overview.resource_management",
+        "os.overview.user_interface"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 2,
+        "pageEnd": 5,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.2—1.1.3 教学归纳；PDF页序14—17（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_2.manual-bottleneck.001",
+      "sectionCode": "sec.overview.history",
+      "title": "从人工控制转向自动控制",
+      "chunkType": "EXPLANATION",
+      "contentMd": "手工阶段没有操作系统，用户独占主机并人工安排装入、运行和输出。虽然不必等待其他用户释放资源，机器整体利用率却很低，CPU也要等待人的慢速操作。\n\n硬件越快，人机速度差距越突出。批处理以机器自动控制作业，试图同时缓解人机矛盾和CPU与I/O速度不匹配的问题。",
+      "nodeCodes": [
+        "os.overview.manual_operation",
+        "os.overview.batch_system"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.history",
+        "pageStart": 7,
+        "pageEnd": 7,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.2.1及1.2.2引言，不含本页上方答案；PDF页序19—19（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_2.single-batch.001",
+      "sectionCode": "sec.overview.history",
+      "title": "单道批处理的特征与等待问题",
+      "chunkType": "EXPLANATION",
+      "contentMd": "先把一批作业脱机输入磁带，由监督程序逐个调入内存、连续控制运行。其特点是自动性、顺序性和单道性：可以自动处理，按先后顺序完成，内存始终只有一道作业。\n\n自动化没有消除所有空闲。当当前作业在运行中请求I/O时，CPU仍可能只能等待设备完成，不能换用另一道内存中的作业，因为内存中没有第二道作业可运行。",
+      "nodeCodes": [
+        "os.overview.batch_system"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.history",
+        "pageStart": 8,
+        "pageEnd": 8,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.2.2 第1点 单道批处理系统；PDF页序20—20（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_2.multi-batch.001",
+      "sectionCode": "sec.overview.history",
+      "title": "多道程序设计怎样利用等待时间",
+      "chunkType": "EXPLANATION",
+      "contentMd": "作业先在外存排队，调度程序选择若干作业调入内存。在管理程序控制下，它们共享资源并穿插运行；一道程序因I/O暂停时，CPU就可转去执行另一道程序。\n\n教材概括为多道、宏观上并行、微观上串行。在单处理机语境下，“宏观上并行”表示多个程序在一段时间内都处于执行过程；微观上仍轮流占用CPU，不等于同一时刻运行多个程序。不同硬件部件之间则可能真正并行工作。",
+      "nodeCodes": [
+        "os.overview.batch_system",
+        "os.overview.concurrency",
+        "os.overview.parallelism"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.history",
+        "pageStart": 8,
+        "pageEnd": 8,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.2.2 第2点 多道批处理与多道程序特点；PDF页序20—20（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_2.batch-benefit-cost.001",
+      "sectionCode": "sec.overview.history",
+      "title": "多道批处理的管理问题与取舍",
+      "chunkType": "EXPLANATION",
+      "contentMd": "多道技术要求解决CPU分配、内存分配、I/O设备分配，以及大量程序数据的组织、安全和一致性。\n\n多道批处理的优点是资源利用率提高、吞吐量增大；传统模式的不足是响应时间长，作业执行时缺少人机交互。教材关于多任务系统的注意框还说明，可以有带交互能力的多道运行系统，因此不能把“多道”本身等同于“绝无交互”。",
+      "nodeCodes": [
+        "os.overview.batch_system",
+        "os.overview.resource_management"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.history",
+        "pageStart": 8,
+        "pageEnd": 8,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.2.2 第2点 管理问题、优缺点及注意框；PDF页序20—20（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_2.timeslice-terminals.001",
+      "sectionCode": "sec.overview.history",
+      "title": "分时系统为何能提供交互感受",
+      "chunkType": "EXPLANATION",
+      "contentMd": "处理器时间被分成短时间片，联机作业轮流得到服务。未在本片内完成的作业暂停，等下一轮继续；轮换足够快，多个终端用户都可感觉自己在独立操作主机。\n\n它的主要特征为同时性或多路性、交互性、独立性、及时性。重点是能够及时接收命令、处理请求并反馈，而不仅是把作业自动执行完。",
+      "nodeCodes": [
+        "os.overview.time_sharing_system"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.history",
+        "pageStart": 8,
+        "pageEnd": 9,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.2.3 分时操作系统；PDF页序20—21（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_2.deadline-systems.001",
+      "sectionCode": "sec.overview.history",
+      "title": "实时系统的时限及软硬区别",
+      "chunkType": "EXPLANATION",
+      "contentMd": "实时系统不仅要求较快响应，还要在被处理任务规定的时限内完成操作，主要特点为及时性和可靠性。\n\n硬实时必须保证动作在规定时间完成，教材以飞行自动控制为例；软实时可容忍偶尔违反时间限制而不造成永久性损害，书中以订票和银行管理说明。分时的“响应较快”和实时的“满足指定时限”不能互相替代。",
+      "nodeCodes": [
+        "os.overview.real_time_system",
+        "os.overview.time_sharing_system"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.history",
+        "pageStart": 9,
+        "pageEnd": 9,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.2.4 实时操作系统；PDF页序21—21（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_2.network-distribution.001",
+      "sectionCode": "sec.overview.history",
+      "title": "网络共享与分布式协作",
+      "chunkType": "EXPLANATION",
+      "contentMd": "网络操作系统着重让联网计算机共享资源、交换数据。分布式计算机系统还强调各机器地位平等、没有主从，共享资源，各自可组成子系统，任务能分布到不同机器协作完成。\n\n教材将分布性和并行性作为其特点。多台机器能通信是基础，但仅有网络连接并不等于它们已经作为一个分布式系统共同完成任务。",
+      "nodeCodes": [
+        "os.overview.network_os",
+        "os.overview.distributed_os"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.history",
+        "pageStart": 9,
+        "pageEnd": 9,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.2.5 网络操作系统和分布式计算机系统；PDF页序21—21（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_2.personal-and-special.001",
+      "sectionCode": "sec.overview.history",
+      "title": "个人系统及其他应用类型",
+      "chunkType": "EXPLANATION",
+      "contentMd": "个人计算机操作系统广泛服务于文字处理、电子表格、游戏等应用，教材举Windows、Linux和MacOS作说明。除这些外，还存在嵌入式、服务器、智能手机等应用类型。\n\n这些名称有的描述运行目标，有的描述服务对象，不应理解为完全互斥的一组类别。",
+      "nodeCodes": [
+        "os.overview.personal_os"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.history",
+        "pageStart": 9,
+        "pageEnd": 10,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.2.6及图1.1后的补充，止于1.2.7前；PDF页序21—22（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_2.figure-1-1.001",
+      "sectionCode": "sec.overview.history",
+      "title": "图1.1：操作系统的发展历程",
+      "chunkType": "FIGURE",
+      "contentMd": "![图1.1 操作系统的发展历程](assets/wd25-p0010-fig1-1.png)\n\n图中按资源利用、交互、时限及协作等目标串联系统发展。箭头是教材概览，不表示所有类型只能依次取代或彼此排斥。",
+      "nodeCodes": [
+        "os.overview.manual_operation",
+        "os.overview.batch_system",
+        "os.overview.time_sharing_system",
+        "os.overview.real_time_system",
+        "os.overview.network_os",
+        "os.overview.distributed_os",
+        "os.overview.personal_os"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.history",
+        "pageStart": 10,
+        "pageEnd": 10,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 图1.1；PDF页序22—22（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": [
+        {
+          "path": "assets/wd25-p0010-fig1-1.png",
+          "caption": "图1.1 操作系统的发展历程",
+          "sourceRef": {
+            "sourceCode": "book.wangdao.os.2025",
+            "origin": "TEXTBOOK",
+            "sectionCode": "sec.overview.history",
+            "pageStart": 10,
+            "pageEnd": 10,
+            "pageStatus": "VISIBLE",
+            "locator": "第1章 图1.1 操作系统的发展历程；PDF页序22—22（1基）",
+            "sourceQuestionNumber": null
+          }
+        }
+      ]
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.privilege-model.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "内核程序与用户程序为何权限不同",
+      "chunkType": "EXPLANATION",
+      "contentMd": "内核程序是系统资源的管理者，用户程序是被管理者。管理程序需要执行I/O控制、关闭中断、内存保护等影响全局的操作；出于安全考虑，不能把这些能力直接交给任意用户代码。\n\nCPU用运行模式区分权限：用户态只能执行非特权指令，内核态能执行包括特权指令在内的指令。用户态又称目态，内核态又称管态或核心态。应用程序请求服务时可执行非特权的访管指令，再由内核完成具体操作。",
+      "nodeCodes": [
+        "os.runtime.user_mode",
+        "os.runtime.kernel_mode",
+        "os.runtime.privileged_instruction",
+        "os.runtime.trap_instruction"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 15,
+        "pageEnd": 15,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1 程序类型、指令权限与运行模式；PDF页序27—27（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.kernel-scope.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "内核由哪些基本内容构成",
+      "chunkType": "EXPLANATION",
+      "contentMd": "与硬件相关的时钟、中断处理、设备驱动等位于系统低层，进程、存储器和设备管理中的高频基本操作也构成内核内容。\n\n教材分四方面说明：时钟管理；中断机制；原语；系统控制的数据结构及处理。结构设计不同，哪些较高层服务留在内核会不同，但这些底层职能为系统其他活动提供基础。",
+      "nodeCodes": [
+        "os.runtime.kernel"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 15,
+        "pageEnd": 16,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1 内核概述和四类内容；PDF页序27—28（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.clock-interrupt.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "时钟和中断怎样支持系统运行",
+      "chunkType": "EXPLANATION",
+      "contentMd": "时钟除了提供系统时间，还可用于进程切换、时间片轮转、定时控制和作业运行衡量。中断则使CPU能在I/O进行时执行其他工作，并在事件到来时转入相应处理。\n\n教材所述内核中的中断底层部分，主要保护和恢复现场、向具体处理程序交接控制。这样可缩短底层响应时间，并为并发执行提供支持。",
+      "nodeCodes": [
+        "os.runtime.kernel",
+        "os.runtime.interrupt"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 15,
+        "pageEnd": 16,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1 第1点 时钟管理、第2点 中断机制；PDF页序27—28（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.atomic-primitives.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "原语的不可分割性",
+      "chunkType": "DEFINITION",
+      "contentMd": "原语接近硬件，完成一个确定操作，运行时间短而调用频繁，执行要求作为一个整体不可分割。设备驱动、CPU切换、进程通信中的部分操作可定义成原语。\n\n教材以关闭中断、完成操作、重新打开中断说明一种直接实现思路；此处要抓住的是原子执行要求，不据此把单个CPU的关中断推成所有处理器之间的完整同步机制。",
+      "nodeCodes": [
+        "os.runtime.primitive",
+        "os.runtime.kernel"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 16,
+        "pageEnd": 16,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1 第3点 原语；PDF页序28—28（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.kernel-state-data.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "内核怎样记录状态和管理资源",
+      "chunkType": "EXPLANATION",
+      "contentMd": "系统使用作业控制块、PCB、设备控制块、链表、消息队列、缓冲区和内存分配表等结构记录管理状态。\n\n围绕这些数据，系统执行进程状态维护、调度分派、控制块创建撤销，存储空间分配回收与保护，以及缓冲和设备分配回收。数据结构保存当前情况，基本操作根据系统规则更新它们，二者配合实现资源管理。",
+      "nodeCodes": [
+        "os.runtime.kernel",
+        "os.overview.resource_management"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 16,
+        "pageEnd": 16,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1 第4点 系统控制的数据结构及处理；PDF页序28—28（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.entry-and-mode.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "进入内核的受控入口",
+      "chunkType": "EXPLANATION",
+      "contentMd": "内核要向用户程序提供服务，却不能让用户随意执行其特权代码。因此，CPU通过中断或异常提供受控入口，在事件发生时由硬件转换运行状态。\n\n教材示意模式位0代表内核态、1代表用户态。此编码是图示约定，重点是用户程序不能任意自行提高权限。主动的服务请求和被动发生的错误都可能进入内核；处理完成后，借助适当返回指令恢复用户程序状态。",
+      "nodeCodes": [
+        "os.runtime.mode_switch",
+        "os.runtime.user_mode",
+        "os.runtime.kernel_mode"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 15,
+        "pageEnd": 16,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1模式位及1.3.2开头；PDF页序27—28（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.event-origins.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "外中断与内部异常的来源和分类",
+      "chunkType": "EXPLANATION",
+      "contentMd": "|类别|与当前指令的关系|本节例子与子类|\n|---|---|---|\n|外中断|事件来自当前执行指令之外。|I/O完成、时钟；分可屏蔽INTR和不可屏蔽NMI。|\n|内部异常|事件来自当前指令执行内部。|非法操作码、越界、缺页、除零、陷入；分故障Fault、自陷Trap和终止Abort。|\n\n可屏蔽外中断能用相应屏蔽机制调整响应；NMI常用于紧急硬件情况。异常不能按普通可屏蔽外中断的方式忽略。教材也使用广义“中断”包含内外两类，判断时必须先明确口径。",
+      "nodeCodes": [
+        "os.runtime.interrupt",
+        "os.runtime.exception"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 17,
+        "pageEnd": 17,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.2 第1—2点 定义与分类；PDF页序29—29（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.exception-kinds.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "Fault、Trap和Abort的含义",
+      "chunkType": "EXPLANATION",
+      "contentMd": "故障是执行指令导致的异常，如缺页或除零；能否处理并恢复要看具体原因。自陷是事先安排的事件，可由陷入指令引起，用于用户程序请求内核服务。终止表示严重故障使执行无法继续，教材以控制器、存储器校验等错误说明。\n\n教材图示把故障、自陷归入软件中断，把终止和外中断归入硬件中断。这一分法不能替代“来自指令内部还是外部”的来源分类，也不能认为软件中断一概由用户主动安排。",
+      "nodeCodes": [
+        "os.runtime.exception",
+        "os.runtime.trap_instruction"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 17,
+        "pageEnd": 17,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.2 第2点 故障、自陷、终止；PDF页序29—29（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.service-return.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "处理中断或异常后回到哪里",
+      "chunkType": "EXPLANATION",
+      "contentMd": "CPU在执行第i条指令时发现异常，或者执行后识别到中断请求，会暂停当前程序并进入相应处理。入口过程和处理程序需要保存必要状态，随后依据事件性质完成服务。\n\n能解决的问题可返回第i条或第i+1条继续，不能一律按“下一条指令”处理；遇到不可恢复的致命错误，则终止程序。具体处理通常由操作系统和驱动程序完成，识别事件和受控进入还需要硬件支持。",
+      "nodeCodes": [
+        "os.runtime.interrupt_handling",
+        "os.runtime.interrupt",
+        "os.runtime.exception"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 17,
+        "pageEnd": 17,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.2 第3点 中断和异常处理过程；PDF页序29—29（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.call-comparison.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "中断入口与普通CALL的不同",
+      "chunkType": "EXPLANATION",
+      "contentMd": "两者都要保存返回位置，但进入原因和程序关系不同。一般子程序调用由程序设计者用CALL安排，入口由调用指令给定，主程序和子程序属于程序的组成部分；中断处理程序通常独立于被中断程序，由硬件结合中断向量确定入口，并可能对多个请求作裁决。\n\n教材将现场入口中的保存动作与CALL保存PC的动作分开说明。普通CALL本身不授予特权，也不等于系统调用；有意安排的陷入则属于异常机制，需要单独识别。",
+      "nodeCodes": [
+        "os.runtime.interrupt_handling",
+        "os.runtime.system_call"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 17,
+        "pageEnd": 18,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.2末 中断处理与子程序调用对比；PDF页序29—30（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.system-services.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "系统调用提供哪些服务",
+      "chunkType": "EXPLANATION",
+      "contentMd": "用户程序通过调用号区分不同系统服务。教材按功能列出设备管理、文件管理、进程控制、进程通信和内存管理，例如设备请求释放、文件读写创建删除、进程创建阻塞唤醒、消息传递，以及内存分配回收。\n\n涉及共享资源的操作由系统统一管理，所以用户提出请求后，由内核态的服务程序完成。系统调用既是接口，也是受保护资源操作的组织方式。",
+      "nodeCodes": [
+        "os.runtime.system_call",
+        "os.overview.resource_management"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 18,
+        "pageEnd": 18,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.3 定义和系统调用功能分类；PDF页序30—30（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.system-call-sequence.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "一次系统调用的逻辑过程",
+      "chunkType": "EXPLANATION",
+      "contentMd": "1. 用户程序准备调用号与参数，教材用压栈描述传递过程。\n2. 执行陷入指令，经异常入口由用户态进入内核态，保存PC、PSW、通用寄存器等必要现场。\n3. 按调用号查找入口表，转入对应系统服务处理。\n4. 处理完成后恢复或安排进程现场；返回用户程序时恢复用户态，继续执行。\n\n发起请求的陷入指令可在用户态执行；受保护的服务代码在内核态运行。两者权限不能混为一谈。参数压栈是本教材采用的具体说明，逻辑上应掌握请求、陷入、分派、返回。",
+      "nodeCodes": [
+        "os.runtime.system_call",
+        "os.runtime.mode_switch",
+        "os.runtime.trap_instruction"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 18,
+        "pageEnd": 19,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.3 处理过程及第19页续段；PDF页序30—31（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.mode-events.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "典型的用户态到内核态转换事件",
+      "chunkType": "SUMMARY",
+      "contentMd": "教材列举：程序请求系统服务、发生中断、程序出现错误状态、程序试图执行特权指令。它们分别通过系统调用陷入、外中断或内部异常进入内核。\n\n最后一种情况表示非法尝试受到异常处理，不是用户获得了特权操作许可。由内核返回用户态也需相应的受控返回机制。",
+      "nodeCodes": [
+        "os.runtime.mode_switch",
+        "os.runtime.privileged_instruction"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 19,
+        "pageEnd": 19,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.3末 四种事件及返回说明；PDF页序31—31（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.figure-1-2.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "图1.2：内中断和外中断的联系与区别",
+      "chunkType": "FIGURE",
+      "contentMd": "![图1.2 内中断和外中断的联系与区别](assets/wd25-p0017-fig1-2.png)\n\n树根的中断采用广义说法，内部异常与外中断是来源分类；软件/硬件中断的括注按本图口径读取。",
+      "nodeCodes": [
+        "os.runtime.interrupt",
+        "os.runtime.exception"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 17,
+        "pageEnd": 17,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 图1.2；PDF页序29—29（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": [
+        {
+          "path": "assets/wd25-p0017-fig1-2.png",
+          "caption": "图1.2 内中断和外中断的联系与区别",
+          "sourceRef": {
+            "sourceCode": "book.wangdao.os.2025",
+            "origin": "TEXTBOOK",
+            "sectionCode": "sec.overview.runtime",
+            "pageStart": 17,
+            "pageEnd": 17,
+            "pageStatus": "VISIBLE",
+            "locator": "第1章 图1.2 内中断和外中断的联系与区别；PDF页序29—29（1基）",
+            "sourceQuestionNumber": null
+          }
+        }
+      ]
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_3.figure-1-3.001",
+      "sectionCode": "sec.overview.runtime",
+      "title": "图1.3：系统调用执行过程",
+      "chunkType": "FIGURE",
+      "contentMd": "![图1.3 系统调用执行过程](assets/wd25-p0019-fig1-3.png)\n\n沿箭头依次读出用户执行、调用请求、陷入内核、执行服务和返回。模式位0/1是教材的示意编码。",
+      "nodeCodes": [
+        "os.runtime.system_call",
+        "os.runtime.mode_switch"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 19,
+        "pageEnd": 19,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 图1.3；PDF页序31—31（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": [
+        {
+          "path": "assets/wd25-p0019-fig1-3.png",
+          "caption": "图1.3 系统调用执行过程",
+          "sourceRef": {
+            "sourceCode": "book.wangdao.os.2025",
+            "origin": "TEXTBOOK",
+            "sectionCode": "sec.overview.runtime",
+            "pageStart": 19,
+            "pageEnd": 19,
+            "pageStatus": "VISIBLE",
+            "locator": "第1章 图1.3 系统调用执行过程；PDF页序31—31（1基）",
+            "sourceQuestionNumber": null
+          }
+        }
+      ]
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_4.layer-organization.001",
+      "sectionCode": "sec.overview.structure",
+      "title": "分层法：按依赖逐层建立系统",
+      "chunkType": "EXPLANATION",
+      "contentMd": "分层结构底层为硬件，顶层为用户接口，每层仅使用更低层提供的功能和服务。可先验证下层，再基于可信下层调试上层；保持接口稳定时，替换某层也较少影响其他层。\n\n困难是层次边界不易合理安排，固定依赖限制灵活性；多次跨层通信还会带来额外开销。因此便于验证和维护，与执行效率之间存在权衡。",
+      "nodeCodes": [
+        "os.structure.os_structure",
+        "os.structure.layered"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 27,
+        "pageEnd": 27,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第1点 分层法；PDF页序39—39（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_4.module-boundaries.001",
+      "sectionCode": "sec.overview.structure",
+      "title": "模块化：粒度、内聚和耦合",
+      "chunkType": "EXPLANATION",
+      "contentMd": "将进程、存储器、文件等管理功能划成模块，再细分子模块，借约定接口通信。模块过细会增加联系，过粗又使内部复杂。\n\n内聚性衡量模块内部各部分联系的紧密程度，耦合度衡量模块之间的影响程度；较高内聚、较低耦合有助于独立性。模块化可以改善理解、维护和适应性，也能加快开发，但接口设计困难，多个模块平行设计时不易像分层法那样逐步验证。",
+      "nodeCodes": [
+        "os.structure.modular"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 27,
+        "pageEnd": 28,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第2点及第28页续段；PDF页序39—40（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_4.large-small-kernel.001",
+      "sectionCode": "sec.overview.structure",
+      "title": "宏内核和微内核关注的边界",
+      "chunkType": "EXPLANATION",
+      "contentMd": "宏内核把主要管理功能作为紧密联系的整体放在内核态，模块可共享信息、直接利用相互关系，具有性能优势。随着功能增长，规模和扩展维护压力也随之增大。\n\n微内核则保留最低限度的基本功能，把不必在内核态执行的服务移到用户空间。新增或修改这些服务时，通常不必同幅度改动内核。两者的核心差别是服务放置和通信边界，不只是代码文件的大小。",
+      "nodeCodes": [
+        "os.structure.monolithic_kernel",
+        "os.structure.microkernel"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 28,
+        "pageEnd": 28,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第3点及第4点（1）；PDF页序40—40（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_4.server-isolation.001",
+      "sectionCode": "sec.overview.structure",
+      "title": "微内核中的服务进程和故障隔离",
+      "chunkType": "EXPLANATION",
+      "contentMd": "微内核把系统分成小型内核与多个服务器，客户和服务器通过消息通信。进程、文件或虚拟存储器等服务可在用户态进程中提供，内核承担必要的底层和通信支持。\n\n在这一设计模型下，一个服务器出错主要影响该服务，可以通过停止、重启处理，而不必让整个系统崩溃。这是微内核可靠性与安全性的主要来源之一。",
+      "nodeCodes": [
+        "os.structure.microkernel"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 28,
+        "pageEnd": 29,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第4点（1） 客户/服务器与文件服务例子；PDF页序40—41（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_4.mechanisms-policies.001",
+      "sectionCode": "sec.overview.structure",
+      "title": "机制留在内核，策略交给服务器",
+      "chunkType": "EXPLANATION",
+      "contentMd": "机制解决“基本操作怎样执行”，策略解决“选什么目标、算法或参数”。微内核将必要的机制和紧密依赖硬件的部分保留在核心。\n\n教材以进程管理说明：通信、切换、低级调度等机制进入内核，优先级分类和确定方法可留在外部；以存储管理说明：页表和地址变换等硬件相关机制进入内核，置换、分配回收策略可由服务器负责。中断与陷入的低层响应同样不能移除。",
+      "nodeCodes": [
+        "os.structure.microkernel",
+        "os.runtime.kernel"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 29,
+        "pageEnd": 29,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第4点（2） 微内核的基本功能；PDF页序41—41（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_4.microkernel-cost.001",
+      "sectionCode": "sec.overview.structure",
+      "title": "微内核的收益为何伴随开销",
+      "chunkType": "EXPLANATION",
+      "contentMd": "服务分离带来扩展灵活、隔离故障、便于移植的好处，消息传递还利于支持网络和分布式系统。硬件相关部分集中，也使平台迁移时需要修改的范围较小。\n\n代价在于消息和模式切换频繁，用户态与内核态往返会增加执行开销。把高频服务搬回内核虽能改善速度，却也扩大内核。因此不能只根据某个优点断定一种结构总是更好。",
+      "nodeCodes": [
+        "os.structure.microkernel"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 29,
+        "pageEnd": 29,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第4点（3） 优点与性能问题；PDF页序41—41（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_4.exokernel-resource.001",
+      "sectionCode": "sec.overview.structure",
+      "title": "外核以分配、保护取代多余映射",
+      "chunkType": "EXPLANATION",
+      "contentMd": "外核思路给各用户环境分配真实资源的子集。例如把磁盘块0—1023和1024—2047分别交给不同环境，内核中的外核记录分配并检查使用，禁止越界访问他人资源。\n\n这样不必让每台虚拟机都先拥有完整虚拟磁盘、再维护到真实磁盘的映射表，能减少映射层。底层负责多道运行和保护，用户层操作系统在分配范围内自行管理，职责由此分离。",
+      "nodeCodes": [
+        "os.structure.exokernel"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 29,
+        "pageEnd": 30,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第5点 外核及第30页续段；PDF页序41—42（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_4.figure-1-4.001",
+      "sectionCode": "sec.overview.structure",
+      "title": "图1.4：分层的操作系统",
+      "chunkType": "FIGURE",
+      "contentMd": "![图1.4 分层的操作系统](assets/wd25-p0027-fig1-4.png)\n\n由硬件向用户接口扩展，高层只能使用低层服务。圈层表达依赖组织，不代表模块大小或处理速度。",
+      "nodeCodes": [
+        "os.structure.layered"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 27,
+        "pageEnd": 27,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 图1.4；PDF页序39—39（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": [
+        {
+          "path": "assets/wd25-p0027-fig1-4.png",
+          "caption": "图1.4 分层的操作系统",
+          "sourceRef": {
+            "sourceCode": "book.wangdao.os.2025",
+            "origin": "TEXTBOOK",
+            "sectionCode": "sec.overview.structure",
+            "pageStart": 27,
+            "pageEnd": 27,
+            "pageStatus": "VISIBLE",
+            "locator": "第1章 图1.4 分层的操作系统；PDF页序39—39（1基）",
+            "sourceQuestionNumber": null
+          }
+        }
+      ]
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_4.figure-1-5.001",
+      "sectionCode": "sec.overview.structure",
+      "title": "图1.5：由模块、子模块等组成的模块化操作系统结构",
+      "chunkType": "FIGURE",
+      "contentMd": "![图1.5 由模块、子模块等组成的模块化操作系统结构](assets/wd25-p0027-fig1-5.png)\n\n从进程、存储器和文件管理细分到控制、调度、分配、保护与目录等功能。连线体现功能拆分，不能自动当作学习前置。",
+      "nodeCodes": [
+        "os.structure.modular"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 27,
+        "pageEnd": 27,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 图1.5；PDF页序39—39（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": [
+        {
+          "path": "assets/wd25-p0027-fig1-5.png",
+          "caption": "图1.5 由模块、子模块等组成的模块化操作系统结构",
+          "sourceRef": {
+            "sourceCode": "book.wangdao.os.2025",
+            "origin": "TEXTBOOK",
+            "sectionCode": "sec.overview.structure",
+            "pageStart": 27,
+            "pageEnd": 27,
+            "pageStatus": "VISIBLE",
+            "locator": "第1章 图1.5 由模块、子模块等组成的模块化操作系统结构；PDF页序39—39（1基）",
+            "sourceQuestionNumber": null
+          }
+        }
+      ]
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_4.figure-1-6.001",
+      "sectionCode": "sec.overview.structure",
+      "title": "图1.6：单机环境下的客户/服务器模式",
+      "chunkType": "FIGURE",
+      "contentMd": "![图1.6 单机环境下的客户/服务器模式](assets/wd25-p0028-fig1-6.png)\n\n图中客户和各服务进程在用户态，底部内核提供请求与应答等支持，体现服务分离和消息通信。",
+      "nodeCodes": [
+        "os.structure.microkernel"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 28,
+        "pageEnd": 28,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 图1.6；PDF页序40—40（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": [
+        {
+          "path": "assets/wd25-p0028-fig1-6.png",
+          "caption": "图1.6 单机环境下的客户/服务器模式",
+          "sourceRef": {
+            "sourceCode": "book.wangdao.os.2025",
+            "origin": "TEXTBOOK",
+            "sectionCode": "sec.overview.structure",
+            "pageStart": 28,
+            "pageEnd": 28,
+            "pageStatus": "VISIBLE",
+            "locator": "第1章 图1.6 单机环境下的客户/服务器模式；PDF页序40—40（1基）",
+            "sourceQuestionNumber": null
+          }
+        }
+      ]
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_5.firmware-to-os.001",
+      "sectionCode": "sec.overview.boot",
+      "title": "教材中的BIOS/MBR引导链",
+      "chunkType": "EXPLANATION",
+      "contentMd": "操作系统通常以程序文件存储在外存，需要引导程序将其逐步装入并启动。本节采用传统BIOS与MBR路径讲解：\n\n1. 激活CPU，读取ROM中的引导程序，开始执行BIOS。\n2. 构建教材所述中断向量表并进行POST硬件自检；故障可使启动停止。\n3. 按保存的启动顺序或用户选择尝试存储设备，读取引导扇区。\n4. 加载主引导记录MBR，检查设备是否可引导，不可用则尝试下一设备。\n5. 根据分区表找到活动分区并转入其引导过程。\n6. 读取分区引导记录PBR，寻找启动管理器。\n7. 加载启动管理器。\n8. 把操作系统初始化程序载入内存并执行。\n\n这是本书给出的传统启动模型；要掌握逐级移交控制，不把具体固件与分区假设外推成所有机器都相同。",
+      "nodeCodes": [
+        "os.boot.boot_process"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.boot",
+        "pageStart": 30,
+        "pageEnd": 30,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.5 定义及八步过程；PDF页序42—42（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_5.boot-records.001",
+      "sectionCode": "sec.overview.boot",
+      "title": "区分存放位置、引导记录和启动管理器",
+      "chunkType": "SUMMARY",
+      "contentMd": "BIOS负责开机初期的检查和设备选择；MBR结合磁盘分区表决定继续从哪个分区启动；PBR属于被选分区的引导信息；启动管理器再继续装入系统。\n\n操作系统平时存放在外存，与运行时把初始化程序加载到内存，是两个阶段。主引导记录和分区引导记录也不在同一层级，不能仅因二者都叫“引导记录”而合并。",
+      "nodeCodes": [
+        "os.boot.boot_process"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.boot",
+        "pageStart": 30,
+        "pageEnd": 30,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.5 步骤③—⑧归纳；PDF页序42—42（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_6.vm-environment.001",
+      "sectionCode": "sec.overview.virtual-machine",
+      "title": "虚拟机器与客户操作系统",
+      "chunkType": "DEFINITION",
+      "contentMd": "虚拟化把一台物理机器表现为若干虚拟机器，向用户提供抽象、统一的模拟计算环境，隐藏底层机器的具体特性。运行在该环境中的操作系统叫客户操作系统。\n\n第一类管理程序直接在硬件上运行，向上提供类似裸机的虚拟环境；第二类依托已有操作系统获得资源，底层这个系统叫宿主操作系统。二者都让客户看到机器，但资源获得途径不同。",
+      "nodeCodes": [
+        "os.virtualization.virtual_machine",
+        "os.virtualization.vmm"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.virtual-machine",
+        "pageStart": 31,
+        "pageEnd": 31,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.6.1 定义及第1—2点；PDF页序43—43（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_6.virtual-privileges.001",
+      "sectionCode": "sec.overview.virtual-machine",
+      "title": "客户系统的内核权限仍受控制",
+      "chunkType": "EXPLANATION",
+      "contentMd": "客户操作系统以为自己管理一台完整机器，其看到的内核状态是虚拟环境的一部分。敏感操作仍需由虚拟机管理程序检查、处理或模拟，不能破坏宿主与其他客户的隔离。\n\n教材分别讨论CPU支持和不支持虚拟化时的处理思路，包括陷入管理程序和模拟指令。理解时区分客户感受到的权限与物理硬件真正赋予的权限，不把书中的虚拟内核态示意当作所有CPU的同一实现。",
+      "nodeCodes": [
+        "os.virtualization.vmm",
+        "os.virtualization.virtual_machine"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.virtual-machine",
+        "pageStart": 31,
+        "pageEnd": 31,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.6.1 第1点 敏感操作与虚拟内核态；PDF页序43—43（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_6.hosted-machine.001",
+      "sectionCode": "sec.overview.virtual-machine",
+      "title": "寄居架构中的安装与虚拟磁盘",
+      "chunkType": "EXPLANATION",
+      "contentMd": "第二类管理程序由宿主操作系统分配、调度资源，像普通进程一样存在，但对客户模拟CPU和各种设备。教材以VMware Workstation为例。安装客户系统时，它发现的是虚拟设备，虚拟磁盘可只是宿主文件系统里的一个文件；安装后再按客户系统的方式启动。\n\n教材也用服务器托管说明用途：一台物理服务器可承载多个客户环境，各自安装操作系统和软件，共享物理资源而保持环境边界。",
+      "nodeCodes": [
+        "os.virtualization.vmm",
+        "os.virtualization.virtual_machine"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.virtual-machine",
+        "pageStart": 31,
+        "pageEnd": 32,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.6.1 第2点及第32页托管例子；PDF页序43—44（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_6.vmm-summary.001",
+      "sectionCode": "sec.overview.virtual-machine",
+      "title": "裸金属与寄居架构的比较",
+      "chunkType": "SUMMARY",
+      "contentMd": "|方式|管理程序下面是什么|资源管理来源|\n|---|---|---|\n|第一类，裸金属|物理硬件|管理程序直接承担底层控制。|\n|第二类，寄居|宿主操作系统|先由宿主分配和调度，再提供虚拟环境。|\n\n客户操作系统在两类中都可存在。多个虚拟机同时运行描述的是资源复用，是否真的并行执行仍要看硬件；1.1的一般虚拟性也不能直接等同于这里的具体虚拟机环境。",
+      "nodeCodes": [
+        "os.virtualization.vmm",
+        "os.virtualization.virtual_machine",
+        "os.overview.virtualization"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.virtual-machine",
+        "pageStart": 31,
+        "pageEnd": 32,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.6.1 两类位置及裸金属/寄居称呼归纳；PDF页序43—44（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_6.figure-1-7.001",
+      "sectionCode": "sec.overview.virtual-machine",
+      "title": "图1.7：两类虚拟机管理程序在系统中的位置",
+      "chunkType": "FIGURE",
+      "contentMd": "![图1.7 两类虚拟机管理程序在系统中的位置](assets/wd25-p0031-fig1-7.png)\n\n左图管理程序直接接触硬件，右图先有宿主系统再运行管理程序。注意客户系统与宿主系统所在层次。",
+      "nodeCodes": [
+        "os.virtualization.vmm",
+        "os.virtualization.virtual_machine"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.virtual-machine",
+        "pageStart": 31,
+        "pageEnd": 31,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 图1.7；PDF页序43—43（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": [
+        {
+          "path": "assets/wd25-p0031-fig1-7.png",
+          "caption": "图1.7 两类虚拟机管理程序在系统中的位置",
+          "sourceRef": {
+            "sourceCode": "book.wangdao.os.2025",
+            "origin": "TEXTBOOK",
+            "sectionCode": "sec.overview.virtual-machine",
+            "pageStart": 31,
+            "pageEnd": 31,
+            "pageStatus": "VISIBLE",
+            "locator": "第1章 图1.7 两类虚拟机管理程序在系统中的位置；PDF页序43—43（1基）",
+            "sourceQuestionNumber": null
+          }
+        }
+      ]
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_7.time-scale-review.001",
+      "sectionCode": "sec.overview.review",
+      "title": "疑难点一：并发程序怎样形成并行执行",
+      "chunkType": "SUMMARY",
+      "contentMd": "同一时间间隔内都有进展是并发，同一时刻真正同时发生是并行。单处理机中的并发程序依靠分时交替推进；多处理器环境可把程序分配到不同处理器，从而实现实际并行。\n\n“宏观上同时运行”和“每时刻都在执行”不是同一命题，必须结合时间尺度与处理器条件作判断。",
+      "nodeCodes": [
+        "os.overview.concurrency",
+        "os.overview.parallelism"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.review",
+        "pageStart": 36,
+        "pageEnd": 37,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.7 第1点，起于第36页1.7标题之后；PDF页序48—49（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_7.instruction-review.001",
+      "sectionCode": "sec.overview.review",
+      "title": "疑难点二：特权能力由CPU状态限制",
+      "chunkType": "SUMMARY",
+      "contentMd": "特权指令涉及内存、时钟、资源分配、页表和访问权限等系统级操作，使用不当会破坏整个系统，因此不能让用户态直接执行。内核态能执行指令全集，用户态只允许非特权部分。\n\n用户试图执行受限指令会引起异常，由系统处理；只有经受控入口进入内核后，内核程序才能使用相应能力。",
+      "nodeCodes": [
+        "os.runtime.privileged_instruction",
+        "os.runtime.user_mode",
+        "os.runtime.kernel_mode"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.review",
+        "pageStart": 37,
+        "pageEnd": 37,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.7 第2点 特权与非特权指令；PDF页序49—49（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_7.trap-review.001",
+      "sectionCode": "sec.overview.review",
+      "title": "疑难点三：访管指令不等于访管事件",
+      "chunkType": "EXPLANATION",
+      "contentMd": "访管指令可以在用户态执行，目的是让用户程序主动请求内核服务。执行它引发的受控转移事件，教材称访管中断或自愿中断；按本章来源分类，它属于有意安排的陷入。\n\n应分别说清请求指令、所产生的异常事件以及随后内核执行的服务。请求入口不是特权指令，否则用户程序就无法合法发出请求。",
+      "nodeCodes": [
+        "os.runtime.trap_instruction",
+        "os.runtime.exception",
+        "os.runtime.system_call"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.review",
+        "pageStart": 37,
+        "pageEnd": 37,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.7 第3点 访管指令与访管中断；PDF页序49—49（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    },
+    {
+      "chunkCode": "chunk.wd25.overview.s1_7.microkernel-review.001",
+      "sectionCode": "sec.overview.review",
+      "title": "疑难点四：微内核的四条组织思路",
+      "chunkType": "SUMMARY",
+      "contentMd": "本章从四方面概括微内核：核心足够小、采用客户/服务器模式、分离机制与策略，以及利用面向对象的设计技术。\n\n具体操作机制留在核心，目标、参数和算法等策略可以在外部服务中安排。抽象和信息隐藏帮助控制复杂度，封装和继承等组织方式有助于正确性、可靠性与扩展维护。\n\n这一归纳用于理解教材的设计思想，重点仍是基本机制与外部服务的边界。",
+      "nodeCodes": [
+        "os.structure.microkernel"
+      ],
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.review",
+        "pageStart": 37,
+        "pageEnd": 37,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.7 第4点 微内核四方面；PDF页序49—49（1基）",
+        "sourceQuestionNumber": null
+      },
+      "assets": []
+    }
+  ],
+  "relations": [
+    {
+      "fromNodeCode": "os.overview.concurrency",
+      "toNodeCode": "os.overview.parallelism",
+      "relationType": "CONTRASTS_WITH",
+      "reason": "正文以同一时间间隔与同一时刻明确对照两者，单CPU交替不构成进程真正并行。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 2,
+        "pageEnd": 2,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.2 第1点；PDF页序14—14（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.overview.concurrency",
+      "toNodeCode": "os.overview.sharing",
+      "relationType": "RELATED_TO",
+      "reason": "正文明确两者互为存在条件，不用双向REQUIRES表达。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 3,
+        "pageEnd": 3,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.2 第2点末；PDF页序15—15（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.overview.asynchrony",
+      "toNodeCode": "os.overview.concurrency",
+      "relationType": "REQUIRES",
+      "reason": "候选教学前置：先理解并发环境，再理解资源有限下进程时走时停的异步推进。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.basic-concepts",
+        "pageStart": 3,
+        "pageEnd": 3,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.1.2 第4点；PDF页序15—15（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.overview.batch_system",
+      "toNodeCode": "os.overview.time_sharing_system",
+      "relationType": "CONTRASTS_WITH",
+      "reason": "传统批处理强调自动连续处理与吞吐，分时以人机交互和及时反馈为重点。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.history",
+        "pageStart": 8,
+        "pageEnd": 9,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.2.2—1.2.3；PDF页序20—21（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.overview.real_time_system",
+      "toNodeCode": "os.overview.time_sharing_system",
+      "relationType": "CONTRASTS_WITH",
+      "reason": "分时的较短响应与实时的规定时限是不同约束。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.history",
+        "pageStart": 9,
+        "pageEnd": 9,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.2.3—1.2.4；PDF页序21—21（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.overview.distributed_os",
+      "toNodeCode": "os.overview.network_os",
+      "relationType": "CONTRASTS_WITH",
+      "reason": "联网共享通信与各机器协作完成任务的重点不同。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.history",
+        "pageStart": 9,
+        "pageEnd": 9,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.2.5；PDF页序21—21（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.runtime.kernel_mode",
+      "toNodeCode": "os.runtime.user_mode",
+      "relationType": "CONTRASTS_WITH",
+      "reason": "用户态与内核态的可执行指令范围不同。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 15,
+        "pageEnd": 15,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1；PDF页序27—27（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.runtime.privileged_instruction",
+      "toNodeCode": "os.runtime.kernel_mode",
+      "relationType": "REQUIRES",
+      "reason": "候选教学前置：先有内核态权限概念，再判断特权指令的执行条件。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 15,
+        "pageEnd": 15,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1；PDF页序27—27（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.runtime.mode_switch",
+      "toNodeCode": "os.runtime.user_mode",
+      "relationType": "REQUIRES",
+      "reason": "候选教学前置：先识别两种端点状态，再理解受控状态转换。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 15,
+        "pageEnd": 16,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1—1.3.2；PDF页序27—28（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.runtime.mode_switch",
+      "toNodeCode": "os.runtime.kernel_mode",
+      "relationType": "REQUIRES",
+      "reason": "候选教学前置：先识别两种端点状态，再理解受控状态转换。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 15,
+        "pageEnd": 16,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1—1.3.2；PDF页序27—28（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.runtime.privileged_instruction",
+      "toNodeCode": "os.runtime.trap_instruction",
+      "relationType": "CONTRASTS_WITH",
+      "reason": "访管请求可由用户态发起，受保护的特权操作只能在内核态执行。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 15,
+        "pageEnd": 15,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1；PDF页序27—27（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.runtime.exception",
+      "toNodeCode": "os.runtime.interrupt",
+      "relationType": "CONTRASTS_WITH",
+      "reason": "外中断源于当前指令外部，异常源于当前指令内部。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 17,
+        "pageEnd": 17,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.2 第1点；PDF页序29—29（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.runtime.interrupt_handling",
+      "toNodeCode": "os.runtime.interrupt",
+      "relationType": "REQUIRES",
+      "reason": "候选教学前置：先明确所响应的事件类型，再学习其处理与返回。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 17,
+        "pageEnd": 18,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.2 第1—3点；PDF页序29—30（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.runtime.interrupt_handling",
+      "toNodeCode": "os.runtime.exception",
+      "relationType": "REQUIRES",
+      "reason": "候选教学前置：先明确所响应的事件类型，再学习其处理与返回。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 17,
+        "pageEnd": 18,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.2 第1—3点；PDF页序29—30（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.runtime.system_call",
+      "toNodeCode": "os.runtime.mode_switch",
+      "relationType": "REQUIRES",
+      "reason": "候选教学前置：系统调用处理需要理解陷入内核与恢复用户态。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 18,
+        "pageEnd": 19,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.3及图1.3；PDF页序30—31（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.runtime.system_call",
+      "toNodeCode": "os.runtime.trap_instruction",
+      "relationType": "RELATED_TO",
+      "reason": "陷入指令提供用户请求服务的入口，与内核服务过程相联系但不等同。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 15,
+        "pageEnd": 19,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1及1.3.3；PDF页序27—31（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.runtime.kernel",
+      "toNodeCode": "os.runtime.primitive",
+      "relationType": "CONTAINS",
+      "reason": "原语被列为内核基本内容之一。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.runtime",
+        "pageStart": 16,
+        "pageEnd": 16,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.3.1 第3点；PDF页序28—28（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.structure.os_structure",
+      "toNodeCode": "os.structure.layered",
+      "relationType": "CONTAINS",
+      "reason": "教材1.4把该项列为操作系统组织方法或内核结构类型。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 27,
+        "pageEnd": 30,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第1—5点；PDF页序39—42（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.structure.os_structure",
+      "toNodeCode": "os.structure.modular",
+      "relationType": "CONTAINS",
+      "reason": "教材1.4把该项列为操作系统组织方法或内核结构类型。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 27,
+        "pageEnd": 30,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第1—5点；PDF页序39—42（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.structure.os_structure",
+      "toNodeCode": "os.structure.monolithic_kernel",
+      "relationType": "CONTAINS",
+      "reason": "教材1.4把该项列为操作系统组织方法或内核结构类型。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 27,
+        "pageEnd": 30,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第1—5点；PDF页序39—42（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.structure.os_structure",
+      "toNodeCode": "os.structure.microkernel",
+      "relationType": "CONTAINS",
+      "reason": "教材1.4把该项列为操作系统组织方法或内核结构类型。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 27,
+        "pageEnd": 30,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第1—5点；PDF页序39—42（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.structure.os_structure",
+      "toNodeCode": "os.structure.exokernel",
+      "relationType": "CONTAINS",
+      "reason": "教材1.4把该项列为操作系统组织方法或内核结构类型。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 27,
+        "pageEnd": 30,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第1—5点；PDF页序39—42（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.structure.microkernel",
+      "toNodeCode": "os.structure.monolithic_kernel",
+      "relationType": "CONTRASTS_WITH",
+      "reason": "主要服务运行位置、模块通信和隔离方式形成明确对比。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 28,
+        "pageEnd": 29,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第3—4点；PDF页序40—41（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.structure.layered",
+      "toNodeCode": "os.structure.modular",
+      "relationType": "CONTRASTS_WITH",
+      "reason": "分层以低层依赖、逐层验证组织，模块化以功能分解和接口组织。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 27,
+        "pageEnd": 28,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第1—2点；PDF页序39—40（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.structure.microkernel",
+      "toNodeCode": "os.runtime.kernel",
+      "relationType": "REQUIRES",
+      "reason": "候选教学前置：先理解内核基本职责，再理解精简机制和外部服务的分离。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.structure",
+        "pageStart": 28,
+        "pageEnd": 29,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.4 第4点；PDF页序40—41（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.virtualization.virtual_machine",
+      "toNodeCode": "os.virtualization.vmm",
+      "relationType": "RELATED_TO",
+      "reason": "机器环境与提供和管理该环境的程序是相关的两个概念。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.virtual-machine",
+        "pageStart": 31,
+        "pageEnd": 32,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.6.1；PDF页序43—44（1基）",
+        "sourceQuestionNumber": null
+      }
+    },
+    {
+      "fromNodeCode": "os.overview.virtualization",
+      "toNodeCode": "os.virtualization.virtual_machine",
+      "relationType": "RELATED_TO",
+      "reason": "一般资源虚拟性是背景，机器虚拟化是具体环境，本章分节说明且不合并节点。",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.overview.virtual-machine",
+        "pageStart": 31,
+        "pageEnd": 31,
+        "pageStatus": "VISIBLE",
+        "locator": "第1章 1.6.1 定义，参照1.1.2虚拟性；PDF页序43—43（1基）",
+        "sourceQuestionNumber": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "runAt": "2026-10-20T12:03:27.659Z",
+  "results": [
+    {
+      "sourceCode": "external.shititong.os-mcq",
+      "sourceType": "EXTERNAL_QUESTION",
+      "authorized": true
+    },
+    {
+      "sourceCode": "external.offcn.2019.nx-electric.os13",
+      "sourceType": "EXTERNAL_QUESTION",
+      "authorized": true
+    },
+    {
+      "sourceCode": "external.huatu.gongji.kernel-subsystems",
+      "sourceType": "EXTERNAL_QUESTION",
+      "authorized": true
+    }
+  ]
+}

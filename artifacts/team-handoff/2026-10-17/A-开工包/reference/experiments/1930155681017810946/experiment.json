@@ -1,0 +1,37 @@
+{
+  "questionId": "1930155681017810946",
+  "resourceCode": "exp.legacy.1930155681017810946",
+  "title": "实验3.9 进程创建宏命令应用",
+  "content": "### 任务描述\n\n本实验的目标是将已经定义的 `ENV_CREATE` 和 `ENV_CREATE_PRIORITY` 宏命令应用到操作系统的初始化过程中。具体任务是将这两条进程创建命令加入到 `init/init.c` 文件中，以初始化创建两个进程。\n\n### 知识要点\n\n1. **宏命令应用**：\n   - 理解宏命令的定义和用法，以及如何在代码中正确地应用宏命令。\n2. **进程初始化**：\n   - 理解操作系统启动过程中进程初始化的步骤和重要性。\n3. **C 语言编程**：\n   - 理解 C 语言的基本语法和编程技巧，特别是如何在文件中添加和使用宏命令。\n\n### 实验任务\n\n1. **定位合适的代码位置**：\n   - 在 `init/init.c` 文件中找到合适的位置，通常是在操作系统启动过程中初始化用户进程的部分。\n2. **添加宏命令**：\n   - 将 `ENV_CREATE_PRIORITY(user_A, 2);` 和 `ENV_CREATE_PRIORITY(user_B, 1);` 这两条语句添加到 `init.c` 文件中，以初始化创建两个具有不同优先级的进程。",
+  "tags": [
+    "进程",
+    "进程创建",
+    "用户进程",
+    "文件",
+    "操作系统"
+  ],
+  "referenceAnswer": "",
+  "originalCode": "",
+  "judgeCase": [
+    {
+      "input": "",
+      "output": ""
+    }
+  ],
+  "judgeConfig": {
+    "timeLimit": 1000,
+    "memoryLimit": 1000,
+    "stackLimit": 1000
+  },
+  "legacySetIds": [
+    "3"
+  ],
+  "legacySets": [
+    {
+      "id": "3",
+      "title": "第三章 进程管理"
+    }
+  ],
+  "snapshotUpdatedTime": "2025-06-04 14:52:29",
+  "runtimeValidated": false
+}

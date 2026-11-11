@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "oslab-application-authoring/1.0",
+  "packageType": "APPLICATION_QUESTIONS",
+  "batchCode": "batch.sample.application",
+  "contributor": "A",
+  "courseCode": "course.operating-systems",
+  "note": "自编格式样例，不是教材原题；当前主观评阅待系统接入。",
+  "questions": [
+    {
+      "questionCode": "q.sample.process.fcfs.app.001",
+      "title": "FCFS 的执行区间与等待时间",
+      "type": "COMPREHENSIVE",
+      "contentMd": "单核 CPU 从时刻 0 开始按非抢占 FCFS 调度。P1 到达 0，运行 3；P2 到达 1，运行 2。无 I/O、无切换开销。",
+      "difficulty": 2,
+      "sectionCode": "sec.process.cpu-algorithms",
+      "maxScore": 4,
+      "sourceRef": {"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.process.cpu-algorithms","pageStart":null,"pageEnd":null,"locator":"自编协议示例，非教材原题","sourceQuestionNumber":null},
+      "answerSourceRef": {"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.process.cpu-algorithms","pageStart":null,"pageEnd":null,"locator":"按FCFS规则独立推导的样例答案","sourceQuestionNumber":null},
+      "nodeMappings": [{"nodeCode":"os.cpu.fcfs","role":"PRIMARY","weight":1}],
+      "usageSuggestions": [],
+      "assets": [],
+      "parts": [
+        {
+          "partCode": "q.sample.process.fcfs.app.001.p1",
+          "promptMd": "给出两个进程的运行区间，并求平均等待时间。",
+          "responseType": "CALCULATION",
+          "answerMd": "P1 运行于 [0,3)，P2 运行于 [3,5)。等待时间分别为 0−0=0 与 3−1=2，平均等待时间为 (0+2)/2=1。",
+          "maxScore": 4,
+          "nodeMappings": [{"nodeCode":"os.cpu.fcfs","role":"PRIMARY","weight":1}],
+          "rubric": [
+            {"rubricCode":"q.sample.process.fcfs.app.001.p1.r1","description":"依到达顺序正确给出P1、P2执行区间","points":2,"nodeCodes":["os.cpu.fcfs"]},
+            {"rubricCode":"q.sample.process.fcfs.app.001.p1.r2","description":"用开始时间减到达时间求出等待时间及平均值1","points":2,"nodeCodes":["os.cpu.fcfs"]}
+          ],
+          "commonErrors": ["把完成时间直接当作等待时间，未扣除执行时间和到达时间。"],
+          "acceptableAlternatives": ["甘特图或文字列区间均可；等待时间使用完成−到达−运行时间的等价公式。"]
+        }
+      ]
+    }
+  ]
+}

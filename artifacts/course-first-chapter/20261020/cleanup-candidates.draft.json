@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "oslab-cleanup-review/1.0",
+  "capturedAt": "2026-10-20",
+  "execution": "NOT_EXECUTED",
+  "note": "只读候选表，未连接或修改数据库。任何停用/下线需 L 复核完整引用后在隔离验证库演练，再对开发库逐条执行。",
+  "groups": [
+    {
+      "group": "incomplete-legacy-experiments",
+      "rule": "五道题面无有效内容的旧实验题不按重复删除；可停用题库入口，保留 questionId、内容、代码提交和学习历史。",
+      "candidates": [
+        {
+          "questionId": "1918931948987031554",
+          "title": "实验4.3 基础系统调用函数 sys_mem_alloc",
+          "evidence": "题面 10 字节（正文「分丰富」）；原始代码/参考解 0 字节；用例 1 条；题面无有效任务；每题已知 3 条有效代码提交。",
+          "pairedCompleteQuestionId": "1930156605618573314",
+          "recommendedAction": "停用题库入口；保留全部历史；不删除",
+          "status": "PENDING_L_REVIEW"
+        },
+        {
+          "questionId": "1918932928252157953",
+          "title": "实验4.5 基础系统调用函数 sys_mem_unmap",
+          "evidence": "题面 10 字节（正文「啊啊啊」）；原始代码/参考解 0 字节；用例 1 条；每题已知 3 条有效代码提交。",
+          "pairedCompleteQuestionId": "1930156844614209538",
+          "recommendedAction": "停用题库入口；保留全部历史；不删除",
+          "status": "PENDING_L_REVIEW"
+        },
+        {
+          "questionId": "1918933052214812674",
+          "title": "实验4.6 基础系统调用函数 sys_yield",
+          "evidence": "题面 6 字节（正文「11111」）；原始代码/参考解 0 字节；用例 1 条；每题已知 3 条有效代码提交。",
+          "pairedCompleteQuestionId": "1930156972624367618",
+          "recommendedAction": "停用题库入口；保留全部历史；不删除",
+          "status": "PENDING_L_REVIEW"
+        },
+        {
+          "questionId": "1918934540198682625",
+          "title": "实验4.7 实现进程间通信（IPC）机制",
+          "evidence": "题面 7 字节（正文「333333」）；原始代码/参考解 0 字节；用例 1 条；每题已知 3 条有效代码提交。",
+          "pairedCompleteQuestionId": "1930157095085461505",
+          "recommendedAction": "停用题库入口；保留全部历史；不删除",
+          "status": "PENDING_L_REVIEW"
+        },
+        {
+          "questionId": "1918938841746878466",
+          "title": "实验4.8 进程创建系统调用 sys_env_alloc",
+          "evidence": "题面 15 字节（正文「v持续上升」）；原始代码/参考解 0 字节；用例 1 条；每题已知 3 条有效代码提交。",
+          "pairedCompleteQuestionId": "1930157212584693762",
+          "recommendedAction": "停用题库入口；保留全部历史；不删除",
+          "status": "PENDING_L_REVIEW"
+        }
+      ]
+    },
+    {
+      "group": "test-residue-questions",
+      "rule": "补查完整引用；确认无教学用途且引用为零后才可逻辑删除；不得硬删历史。",
+      "candidates": [
+        {
+          "questionId": "1925417914018824193",
+          "title": "Test",
+          "evidence": "题面 7 字节（正文「内容」）；旧章节归属第一章硬件管理；已知无 question_submit 与 course_resource 引用；题目集/revision/节点/实验映射/attempt/event/活动引用尚未完整复核。",
+          "pairedCompleteQuestionId": null,
+          "recommendedAction": "保留，待完整引用审查；不得仅因 Test 标题删除",
+          "status": "PENDING_FULL_REFERENCE_AUDIT"
+        },
+        {
+          "questionId": "1925422266552942594",
+          "title": "1/1Test",
+          "evidence": "题面 7 字节（正文「内容」）；旧章节归属第一章硬件管理；已知无 question_submit 与 course_resource 引用；题目集/revision/节点/实验映射/attempt/event/活动引用尚未完整复核。",
+          "pairedCompleteQuestionId": null,
+          "recommendedAction": "保留，待完整引用审查；不得仅因 Test 标题删除",
+          "status": "PENDING_FULL_REFERENCE_AUDIT"
+        }
+      ]
+    },
+    {
+      "group": "legacy-graph-entities",
+      "rule": "旧图谱 150 个节点不按名称自动合并；身份绑定与退役均需 L 对照节点定义后决定；保留 legacy identity、关系与历史事件。",
+      "candidateSource": "artifacts/course-system/2026-10-17/overview-legacy-identity-candidates.json",
+      "known": "150 个旧实体；29 个拟绑定节点；候选文件只列出精确同名候选，不是授权自动绑定清单。",
+      "recommendedAction": "逐项由 L 复核身份；本次不退役、不合并、不删除",
+      "status": "PENDING_L_REVIEW"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "start": {
+    "code": 0,
+    "data": {
+      "runId": "2120326744910831618",
+      "questionIds": [
+        "2117582691588841473",
+        "2117582691655950342"
+      ],
+      "mode": "SELF_TEST",
+      "rowVersion": 0
+    },
+    "message": "ok"
+  },
+  "offline": {
+    "saveErrorSeen": true,
+    "checked": 1,
+    "text": "跳到主要内容\nZhiCore\nOPERATING SYSTEMS\n首页\n课程学习\n题目练习\n编程实验\n算法演示\n学习任务\n学习资源\n用\n用户\n学生 · 操作系统\n整组自测\n第 1 / 2 题 · 交卷后统一判分\n保存失败\n暂存退出\n交卷\n草稿保存失败\nNetwork Error 当前输入仍在本页，请重试保存。 重试保存\n1\n2\n求属性 A 的闭包\n单选题\n关系数据库设计\n\n关系模式 R(A,B,C,D)，函数依赖集 F = {A→B, B→C}。属性 A 的闭包 A+ 是？（单选）\n\nA\n\n{A,B}\n\nB\n\n{A,B,C}\n\nC\n\n{A,B,C,D}\n\nD\n\n{A,B,D}\n\n标记为不确定\n自测期间不显示对错与解析，交卷后统一查看\n上一题\n下一题\n\n自测期间不提供提示、答案与解析；标记不确定不扣分。需要辅导时请先交卷。\n\n网络异常，请稍后重试"
+  },
+  "recovered": {
+    "recovered": true,
+    "draft": "A",
+    "saveState": "已保存"
+  },
+  "mobile": {
+    "width": 390,
+    "scrollWidth": 390,
+    "noHorizontalOverflow": true,
+    "buttons": [
+      "用用户学生 · 操作系统",
+      "暂存退出",
+      "交卷",
+      "1",
+      "2",
+      "上一题",
+      "下一题"
+    ],
+    "cardVisible": true,
+    "noteVisible": true
+  }
+}

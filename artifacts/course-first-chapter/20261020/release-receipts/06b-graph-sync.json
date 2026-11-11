@@ -1,0 +1,14 @@
+{
+  "status": "SYNCED",
+  "pendingCount": 0,
+  "graphAvailable": true,
+  "constraintReady": true,
+  "runs": [
+    {
+      "importRunCode": "import.2112165568641155091",
+      "status": "SYNCED",
+      "errorMessage": null,
+      "updateTime": "2026-10-19T20:54:50"
+    }
+  ]
+}

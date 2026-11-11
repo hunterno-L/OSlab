@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "KNOWLEDGE",
+  "batchCode": "batch.sample.knowledge.001",
+  "contributor": "J",
+  "courseCode": "course.operating-systems",
+  "note": "自编协议样例。正式整理时替换正文与出处，不当作教材转录。",
+  "nodes": [
+    {
+      "nodeCode":"os.memory.page_table","name":"页表","nodeType":"CONCEPT","layer":"CORE",
+      "description":"记录虚拟页与物理页框映射及相应状态的数据结构。","aliases":["Page Table"],"homeSectionCode":"sec.memory.paging",
+      "sourceRefs":[{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.paging","pageStart":null,"pageEnd":null,"locator":"节点定义样例","sourceQuestionNumber":null}]
+    },
+    {
+      "nodeCode":"os.memory.page_fault","name":"缺页中断","nodeType":"MECHANISM","layer":"CORE",
+      "description":"访问的虚拟页未驻留内存时触发的缺页异常与相应处理过程。","aliases":["Page Fault"],"homeSectionCode":"sec.memory.demand-paging",
+      "sourceRefs":[{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.demand-paging","pageStart":null,"pageEnd":null,"locator":"节点定义样例","sourceQuestionNumber":null}]
+    },
+    {
+      "nodeCode":"os.memory.page_replacement","name":"页面置换","nodeType":"MECHANISM","layer":"CORE",
+      "description":"需要调入页面且可用页框不足时，选择驻留页面换出的过程。","aliases":["页面替换","Page Replacement"],"homeSectionCode":"sec.memory.page-replacement",
+      "sourceRefs":[{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"节点定义样例","sourceQuestionNumber":null}]
+    },
+    {
+      "nodeCode":"os.memory.locality","name":"局部性原理","nodeType":"CONCEPT","layer":"CORE",
+      "description":"程序的访问常在时间和空间上集中；最近访问过的内容可能在近期再次被访问。","aliases":["Locality"],"homeSectionCode":"sec.memory.virtual-concepts",
+      "sourceRefs":[{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.virtual-concepts","pageStart":null,"pageEnd":null,"locator":"节点定义样例","sourceQuestionNumber":null}]
+    },
+    {
+      "nodeCode":"os.memory.fifo","name":"FIFO 页面置换算法","nodeType":"ALGORITHM","layer":"CORE",
+      "description":"需要换出页面时选择最早调入的驻留页，命中不改变调入先后顺序。","aliases":["FIFO","先进先出页面置换"],"homeSectionCode":"sec.memory.page-replacement",
+      "sourceRefs":[{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"节点定义样例","sourceQuestionNumber":null}]
+    },
+    {
+      "nodeCode":"os.memory.lru","name":"LRU 页面置换算法","nodeType":"ALGORITHM","layer":"CORE",
+      "description":"需要换出页面时选择过去最长时间未被访问的驻留页；命中也要更新最近访问状态。","aliases":["LRU","最近最久未使用"],"homeSectionCode":"sec.memory.page-replacement",
+      "sourceRefs":[{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"节点定义样例","sourceQuestionNumber":null}]
+    },
+    {
+      "nodeCode":"os.memory.opt","name":"OPT 页面置换算法","nodeType":"ALGORITHM","layer":"CORE",
+      "description":"选择未来最长时间不会被访问的驻留页换出，依赖未来访问序列，常作为比较基准。","aliases":["OPT","最佳页面置换"],"homeSectionCode":"sec.memory.page-replacement",
+      "sourceRefs":[{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"节点定义样例","sourceQuestionNumber":null}]
+    }
+  ],
+  "chunks": [
+    {
+      "chunkCode":"chunk.sample.memory.lru.rule","sectionCode":"sec.memory.page-replacement","title":"LRU 的规则与命中更新","chunkType":"ALGORITHM",
+      "contentMd":"LRU 在需要换出页面时，选择过去最长时间没有被访问的驻留页。\n\n1. 页面命中：更新该页的最近访问状态。\n2. 页面未命中且仍有空页框：装入页面并记录最近访问。\n3. 页面未命中且页框已满：换出最近最久未访问的页，再装入新页。\n\n比较的是最近访问时间，不是首次调入时间。可以用时间戳或维护最近访问顺序的结构实现。",
+      "nodeCodes":["os.memory.lru"],"assets":[],
+      "sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"自编算法规则示例","sourceQuestionNumber":null}
+    },
+    {
+      "chunkCode":"chunk.sample.memory.lru.example","sectionCode":"sec.memory.page-replacement","title":"3 页框下的 LRU 推演","chunkType":"WORKED_EXAMPLE",
+      "contentMd":"条件：3 个页框，初始为空，访问序列为 `1,2,3,1,4`。表内顺序为最近访问到最久未访问，并非物理页框位置。\n\n|访问|最近访问顺序|结果|换出|\n|---|---|---|---|\n|1|1|缺页|无|\n|2|2,1|缺页|无|\n|3|3,2,1|缺页|无|\n|1|1,3,2|命中|无|\n|4|4,1,3|缺页|2|\n\n第 4 步对页面 1 的命中更新了访问顺序，因此最后换出页面 2，而不是页面 1。总缺页次数为 4。",
+      "nodeCodes":["os.memory.lru"],"assets":[],
+      "sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"自编五步访问例子","sourceQuestionNumber":null}
+    },
+    {
+      "chunkCode":"chunk.sample.memory.lru.summary","sectionCode":"sec.memory.page-replacement","title":"LRU 学习小结","chunkType":"SUMMARY",
+      "contentMd":"你应能够根据访问历史选出 LRU 换出页，并解释为什么命中也要更新访问顺序。\n\n若把 LRU 与 FIFO 混淆，可回看同一序列：FIFO 依据调入先后，LRU 依据最近访问。接下来可比较 OPT，或进入代码实现实验。",
+      "nodeCodes":["os.memory.lru"],"assets":[],
+      "sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"自编学习小结","sourceQuestionNumber":null}
+    },
+    {
+      "chunkCode":"chunk.sample.memory.page-comparison","sectionCode":"sec.memory.page-replacement","title":"三种页面置换算法的比较","chunkType":"EXPLANATION",
+      "contentMd":"FIFO 看调入先后；LRU 看过去的最近访问；OPT 看未来的下一次访问。\n\nOPT 需要未来访问序列，通常不能直接用于实际运行时的在线决策。比较算法时，必须使用相同页框数、相同初始状态与相同访问序列。",
+      "nodeCodes":["os.memory.fifo","os.memory.lru","os.memory.opt"],"assets":[],
+      "sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"自编算法比较","sourceQuestionNumber":null}
+    }
+  ],
+  "relations": [
+    {"fromNodeCode":"os.memory.page_replacement","toNodeCode":"os.memory.page_fault","relationType":"REQUIRES","reason":"先理解页面未驻留导致的缺页，再理解可用页框不足时为何需要换出。","sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"候选教学前置关系","sourceQuestionNumber":null}},
+    {"fromNodeCode":"os.memory.fifo","toNodeCode":"os.memory.page_replacement","relationType":"REQUIRES","reason":"学习具体算法前先理解置换任务。","sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"候选教学前置关系","sourceQuestionNumber":null}},
+    {"fromNodeCode":"os.memory.lru","toNodeCode":"os.memory.page_replacement","relationType":"REQUIRES","reason":"学习具体算法前先理解置换任务。","sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"候选教学前置关系","sourceQuestionNumber":null}},
+    {"fromNodeCode":"os.memory.opt","toNodeCode":"os.memory.page_replacement","relationType":"REQUIRES","reason":"学习具体算法前先理解置换任务。","sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"候选教学前置关系","sourceQuestionNumber":null}},
+    {"fromNodeCode":"os.memory.page_replacement","toNodeCode":"os.memory.fifo","relationType":"CONTAINS","reason":"FIFO 是页面置换算法之一。","sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"候选分类关系","sourceQuestionNumber":null}},
+    {"fromNodeCode":"os.memory.page_replacement","toNodeCode":"os.memory.lru","relationType":"CONTAINS","reason":"LRU 是页面置换算法之一。","sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"候选分类关系","sourceQuestionNumber":null}},
+    {"fromNodeCode":"os.memory.page_replacement","toNodeCode":"os.memory.opt","relationType":"CONTAINS","reason":"OPT 是页面置换算法之一。","sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"候选分类关系","sourceQuestionNumber":null}},
+    {"fromNodeCode":"os.memory.lru","toNodeCode":"os.memory.locality","relationType":"BASED_ON","reason":"LRU 利用历史访问近似预测近期再次访问，设计依据与局部性相关。","sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"候选设计依据关系","sourceQuestionNumber":null}},
+    {"fromNodeCode":"os.memory.fifo","toNodeCode":"os.memory.lru","relationType":"CONTRASTS_WITH","reason":"调入先后与最近访问顺序不同，可使用相同序列对比。","sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"候选算法对比关系","sourceQuestionNumber":null}},
+    {"fromNodeCode":"os.memory.lru","toNodeCode":"os.memory.opt","relationType":"CONTRASTS_WITH","reason":"LRU 使用过去信息，OPT 使用未来信息。","sourceRef":{"sourceCode":"sample.oslab","origin":"SELF_AUTHORED_SAMPLE","sectionCode":"sec.memory.page-replacement","pageStart":null,"pageEnd":null,"locator":"候选算法对比关系","sourceQuestionNumber":null}}
+  ]
+}

@@ -1,0 +1,2087 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "UNITS",
+  "batchCode": "batch.overview.units.first-chapter.001",
+  "contributor": "OSLab agent（第一章十单元编排草案）",
+  "courseCode": "course.operating-systems",
+  "note": "第一章十单元编排草案，供 L 审核后走 preview → commit → 审核 → 发布；本文件不执行数据库导入或发布。J v3 知识包沿用既有 35 节点/57 块/27 关系/7 图，不再重审或重导。questionMappings 采用 A 的 usageSuggestions；六道争议题（q.wd25.s1_3.005/.016、q.wd25.s1_2.009、q.ext.s1_2.001、q.ext.s1_3.001/.003）在结论确认前保持 DRAFT 且不进入正式映射。必做活动只选 2–4 道（复习单元 6 道），其余仅作配套练习。第一章未加入模拟或编程实验；所有活动引用真实 chunkCode/questionCode。本包未执行导入或发布：需先发布教学块与题目，再对单元执行 preview → commit → 审核 → 发布并确认图谱同步。",
+  "units": [
+    {
+      "unitCode": "unit.overview.basic-concepts",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "操作系统是什么，有哪些基本特征",
+      "sortOrder": 1,
+      "estimatedMinutes": 18,
+      "status": "DRAFT",
+      "objectives": [
+        "能说明操作系统在硬件、应用程序和用户之间的位置与基本职责",
+        "能在具体情境中区分并发与并行、共享的两种访问方式",
+        "能用时分与空分解释虚拟资源，并说明异步性的来源"
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.overview.operating_system",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.concurrency",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.parallelism",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.sharing",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.virtualization",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.asynchrony",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s1_1.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.006",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.013",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.014",
+          "usage": "REVIEW"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.overview.basic-concepts.read.s1_1.system-role",
+          "title": "阅读：操作系统是什么、处在什么位置",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.system-role.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.basic-concepts.read.s1_1.concurrent-parallel",
+          "title": "阅读：并发和并行：先看时间尺度",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.concurrent-parallel.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.basic-concepts.read.s1_1.bread-writing",
+          "title": "示例/图示：教材情境：交替吃面包和写字",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.bread-writing.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.basic-concepts.read.s1_1.sharing-modes",
+          "title": "阅读：共享的两种访问方式",
+          "activityType": "READING",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.sharing-modes.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.basic-concepts.read.s1_1.concurrency-sharing-link",
+          "title": "阅读：并发与共享为何是两个基本特征",
+          "activityType": "READING",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.concurrency-sharing-link.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.basic-concepts.read.s1_1.virtual-resources",
+          "title": "阅读：时分、空分与用户看到的逻辑资源",
+          "activityType": "READING",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.virtual-resources.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.basic-concepts.read.s1_1.asynchronous-progress",
+          "title": "阅读：异步性：不可预知的是推进速度",
+          "activityType": "READING",
+          "sortOrder": 7,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.asynchronous-progress.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.basic-concepts.q.wd25.s1_1.001",
+          "title": "练习：操作系统管理对象的界定",
+          "activityType": "PRACTICE",
+          "sortOrder": 8,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_1.001"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.overview.basic-concepts.q.wd25.s1_1.005",
+          "title": "练习：现代操作系统最基本的两个特征",
+          "activityType": "PRACTICE",
+          "sortOrder": 9,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_1.005"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.overview.basic-concepts.q.wd25.s1_1.006",
+          "title": "测评：并发性的准确定义",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 10,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_1.006"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        }
+      ]
+    },
+    {
+      "unitCode": "unit.overview.services",
+      "sectionCode": "sec.overview.basic-concepts",
+      "title": "操作系统为谁服务、管理什么",
+      "sortOrder": 2,
+      "estimatedMinutes": 16,
+      "status": "DRAFT",
+      "objectives": [
+        "能按处理机、存储器、文件和设备说明资源管理职责",
+        "能区分命令接口、程序接口和图形用户界面",
+        "能说明操作系统作为扩展机器的作用"
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.overview.resource_management",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.user_interface",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.system_call",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.operating_system",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.concurrency",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.sharing",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.virtualization",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.asynchrony",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s1_1.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.004",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.009",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.014",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.overview.services.read.s1_1.resource-manager",
+          "title": "阅读：作为资源管理者的四类工作",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.resource-manager.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.services.read.s1_1.command-control",
+          "title": "阅读：命令接口：交互控制和批量控制",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.command-control.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.services.read.s1_1.program-service",
+          "title": "阅读：程序接口和图形界面",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.program-service.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.services.read.s1_1.machine-extension",
+          "title": "阅读：裸机如何成为更方便使用的机器",
+          "activityType": "READING",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.machine-extension.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.services.read.s1_1.basic-summary",
+          "title": "小结：从特征、职责和服务入口复习操作系统",
+          "activityType": "SUMMARY",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.basic-summary.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.services.q.wd25.s1_1.004",
+          "title": "测评：操作系统最基本的功能",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_1.004"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.services.q.wd25.s1_1.009",
+          "title": "测评：面向编程人员的接口",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 7,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_1.009"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.services.q.wd25.s1_1.014",
+          "title": "测评：操作系统提供给应用程序的接口（2010 统考真题）",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 8,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_1.014"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        }
+      ]
+    },
+    {
+      "unitCode": "unit.overview.history",
+      "sectionCode": "sec.overview.history",
+      "title": "从手工操作到现代操作系统",
+      "sortOrder": 3,
+      "estimatedMinutes": 28,
+      "status": "DRAFT",
+      "objectives": [
+        "能沿时间线比较手工、单道批处理、多道批处理、分时和实时系统",
+        "能说明多道程序设计利用等待时间的前提与代价",
+        "能区分网络系统与分布式系统的共享和透明性"
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.overview.manual_operation",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.batch_system",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.concurrency",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.parallelism",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.resource_management",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.time_sharing_system",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.real_time_system",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.network_os",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.distributed_os",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.personal_os",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.ext.s1_2.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.ext.s1_2.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.002",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.005",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.006",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.007",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.008",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.011",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.012",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.013.1",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.013.2",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.013.3",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.013.4",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.014",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.015",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.016",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.017",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.018",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.019",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.020",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.overview.history.read.s1_2.manual-bottleneck",
+          "title": "阅读：从人工控制转向自动控制",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_2.manual-bottleneck.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.history.read.s1_2.single-batch",
+          "title": "阅读：单道批处理的特征与等待问题",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_2.single-batch.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.history.read.s1_2.multi-batch",
+          "title": "阅读：多道程序设计怎样利用等待时间",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_2.multi-batch.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.history.read.s1_2.batch-benefit-cost",
+          "title": "阅读：多道批处理的管理问题与取舍",
+          "activityType": "READING",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_2.batch-benefit-cost.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.history.read.s1_2.timeslice-terminals",
+          "title": "阅读：分时系统为何能提供交互感受",
+          "activityType": "READING",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_2.timeslice-terminals.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.history.read.s1_2.deadline-systems",
+          "title": "阅读：实时系统的时限及软硬区别",
+          "activityType": "READING",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_2.deadline-systems.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.history.read.s1_2.network-distribution",
+          "title": "阅读：网络共享与分布式协作",
+          "activityType": "READING",
+          "sortOrder": 7,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_2.network-distribution.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.history.read.s1_2.personal-and-special",
+          "title": "阅读：个人系统及其他应用类型",
+          "activityType": "READING",
+          "sortOrder": 8,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_2.personal-and-special.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.history.read.s1_2.figure-1-1",
+          "title": "示例/图示：图1.1：操作系统的发展历程",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 9,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_2.figure-1-1.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.history.q.wd25.s1_2.001",
+          "title": "练习：提高单机资源利用率的关键技术",
+          "activityType": "PRACTICE",
+          "sortOrder": 10,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_2.001"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.overview.history.q.wd25.s1_2.008",
+          "title": "练习：关于分时系统的错误叙述",
+          "activityType": "PRACTICE",
+          "sortOrder": 11,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_2.008"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.overview.history.q.wd25.s1_2.017",
+          "title": "测评：2016 统考真题：关于批处理系统的正确叙述",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 12,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_2.017"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        }
+      ]
+    },
+    {
+      "unitCode": "unit.overview.runtime-modes",
+      "sectionCode": "sec.overview.runtime",
+      "title": "程序如何在用户态与内核态运行",
+      "sortOrder": 4,
+      "estimatedMinutes": 22,
+      "status": "DRAFT",
+      "objectives": [
+        "能区分用户态与内核态、普通指令与特权指令",
+        "能说明内核、原语和内核态数据结构的作用",
+        "能判断受控状态切换与事件类型"
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.runtime.user_mode",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.kernel_mode",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.privileged_instruction",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.trap_instruction",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.kernel",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.primitive",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.resource_management",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.mode_switch",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.ext.s1_3.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.002",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.008",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.009",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.010",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.011",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.012",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.015",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.017",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.022",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.023",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.025",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.026",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.028",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.034",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.036",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.overview.runtime-modes.read.s1_3.privilege-model",
+          "title": "阅读：内核程序与用户程序为何权限不同",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.privilege-model.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.runtime-modes.read.s1_3.kernel-scope",
+          "title": "阅读：内核由哪些基本内容构成",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.kernel-scope.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.runtime-modes.read.s1_3.atomic-primitives",
+          "title": "阅读：原语的不可分割性",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.atomic-primitives.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.runtime-modes.read.s1_3.kernel-state-data",
+          "title": "阅读：内核怎样记录状态和管理资源",
+          "activityType": "READING",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.kernel-state-data.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.runtime-modes.read.s1_3.entry-and-mode",
+          "title": "阅读：进入内核的受控入口",
+          "activityType": "READING",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.entry-and-mode.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.runtime-modes.read.s1_3.mode-events",
+          "title": "小结：典型的用户态到内核态转换事件",
+          "activityType": "SUMMARY",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.mode-events.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.runtime-modes.q.wd25.s1_3.006",
+          "title": "练习：特权指令的使用者",
+          "activityType": "PRACTICE",
+          "sortOrder": 7,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_3.006"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.overview.runtime-modes.q.wd25.s1_3.008",
+          "title": "测评：用户态到核心态转换由谁完成",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 8,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_3.008"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.runtime-modes.q.wd25.s1_3.036",
+          "title": "测评：2022 统考真题：关于 CPU 模式的正确叙述",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 9,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_3.036"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        }
+      ]
+    },
+    {
+      "unitCode": "unit.overview.interrupts",
+      "sectionCode": "sec.overview.runtime",
+      "title": "中断与异常怎样改变执行过程",
+      "sortOrder": 5,
+      "estimatedMinutes": 22,
+      "status": "DRAFT",
+      "objectives": [
+        "能按事件来源区分外部中断与内部异常",
+        "能说明中断处理、恢复和返回的基本过程",
+        "能区分中断入口与普通 CALL"
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.runtime.kernel",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.interrupt",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.exception",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.trap_instruction",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.interrupt_handling",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.system_call",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s1_2.016",
+          "usage": "REVIEW"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.004",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.007",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.018",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.024",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.027",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.029",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.031",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.033",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.038",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.overview.interrupts.read.s1_3.clock-interrupt",
+          "title": "阅读：时钟和中断怎样支持系统运行",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.clock-interrupt.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.interrupts.read.s1_3.event-origins",
+          "title": "阅读：外中断与内部异常的来源和分类",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.event-origins.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.interrupts.read.s1_3.exception-kinds",
+          "title": "阅读：Fault、Trap和Abort的含义",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.exception-kinds.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.interrupts.read.s1_3.service-return",
+          "title": "阅读：处理中断或异常后回到哪里",
+          "activityType": "READING",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.service-return.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.interrupts.read.s1_3.call-comparison",
+          "title": "阅读：中断入口与普通CALL的不同",
+          "activityType": "READING",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.call-comparison.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.interrupts.read.s1_3.figure-1-2",
+          "title": "示例/图示：图1.2：内中断和外中断的联系与区别",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.figure-1-2.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.interrupts.q.wd25.s1_3.004",
+          "title": "练习：操作系统必须提供的功能",
+          "activityType": "PRACTICE",
+          "sortOrder": 7,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_3.004"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.overview.interrupts.q.wd25.s1_3.018",
+          "title": "测评：能引起外部中断的事件",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 8,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_3.018"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.interrupts.q.wd25.s1_3.029",
+          "title": "测评：2016 统考真题：关于中断或异常的错误叙述",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 9,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_3.029"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        }
+      ]
+    },
+    {
+      "unitCode": "unit.overview.system-calls",
+      "sectionCode": "sec.overview.runtime",
+      "title": "应用如何请求操作系统服务",
+      "sortOrder": 6,
+      "estimatedMinutes": 22,
+      "status": "DRAFT",
+      "objectives": [
+        "能描述一次系统调用从用户态进入内核再返回的顺序",
+        "能区分系统调用、普通过程调用和库函数",
+        "能说明系统调用的服务入口与参数传递"
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.runtime.system_call",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.resource_management",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.mode_switch",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.trap_instruction",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.user_interface",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.user_mode",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.kernel_mode",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s1_1.008",
+          "usage": "REVIEW"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.010",
+          "usage": "REVIEW"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.003",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.014",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.019",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.020",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.021",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.030",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.032",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.035",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_3.037",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.overview.system-calls.read.s1_3.system-services",
+          "title": "阅读：系统调用提供哪些服务",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.system-services.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.system-calls.read.s1_3.system-call-sequence",
+          "title": "阅读：一次系统调用的逻辑过程",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.system-call-sequence.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.system-calls.read.s1_3.figure-1-3",
+          "title": "示例/图示：图1.3：系统调用执行过程",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.figure-1-3.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.system-calls.read.s1_1.program-service",
+          "title": "阅读：程序接口和图形界面",
+          "activityType": "READING",
+          "sortOrder": 4,
+          "required": false,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_1.program-service.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.system-calls.read.s1_3.entry-and-mode",
+          "title": "阅读：进入内核的受控入口",
+          "activityType": "READING",
+          "sortOrder": 5,
+          "required": false,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_3.entry-and-mode.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.system-calls.q.wd25.s1_3.003",
+          "title": "练习：关于系统调用的正确说法",
+          "activityType": "PRACTICE",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_3.003"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.overview.system-calls.q.wd25.s1_3.020",
+          "title": "测评：系统调用与一般过程调用的区别",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 7,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_3.020"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.system-calls.q.wd25.s1_3.030",
+          "title": "测评：2017 统考真题：执行系统调用的正确顺序",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 8,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_3.030"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        }
+      ]
+    },
+    {
+      "unitCode": "unit.overview.structure",
+      "sectionCode": "sec.overview.structure",
+      "title": "操作系统如何组织内部结构",
+      "sortOrder": 7,
+      "estimatedMinutes": 28,
+      "status": "DRAFT",
+      "objectives": [
+        "能比较分层与模块化的组织边界和取舍",
+        "能说明宏内核、微内核和外核的职责划分",
+        "能结合图示判断结构类型的收益与开销"
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.structure.os_structure",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.structure.layered",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.structure.modular",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.structure.monolithic_kernel",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.structure.microkernel",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.kernel",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.structure.exokernel",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s1_6.001",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.002",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.003",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.004",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.005",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.006",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.007",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.008",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.009",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.010",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.011",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.022",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.overview.structure.read.s1_4.layer-organization",
+          "title": "阅读：分层法：按依赖逐层建立系统",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_4.layer-organization.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.structure.read.s1_4.module-boundaries",
+          "title": "阅读：模块化：粒度、内聚和耦合",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_4.module-boundaries.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.structure.read.s1_4.large-small-kernel",
+          "title": "阅读：宏内核和微内核关注的边界",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_4.large-small-kernel.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.structure.read.s1_4.server-isolation",
+          "title": "阅读：微内核中的服务进程和故障隔离",
+          "activityType": "READING",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_4.server-isolation.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.structure.read.s1_4.mechanisms-policies",
+          "title": "阅读：机制留在内核，策略交给服务器",
+          "activityType": "READING",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_4.mechanisms-policies.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.structure.read.s1_4.microkernel-cost",
+          "title": "阅读：微内核的收益为何伴随开销",
+          "activityType": "READING",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_4.microkernel-cost.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.structure.read.s1_4.exokernel-resource",
+          "title": "阅读：外核以分配、保护取代多余映射",
+          "activityType": "READING",
+          "sortOrder": 7,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_4.exokernel-resource.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.structure.read.s1_4.figure-1-4",
+          "title": "示例/图示：图1.4：分层的操作系统",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 8,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_4.figure-1-4.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.structure.read.s1_4.figure-1-5",
+          "title": "示例/图示：图1.5：由模块、子模块等组成的模块化操作系统结构",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 9,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_4.figure-1-5.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.structure.read.s1_4.figure-1-6",
+          "title": "示例/图示：图1.6：单机环境下的客户/服务器模式",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 10,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_4.figure-1-6.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.structure.q.wd25.s1_6.002",
+          "title": "测评：关于分层式结构的错误说法",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 11,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_6.002"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.structure.q.wd25.s1_6.006",
+          "title": "练习：不适合描述微内核操作系统的一项",
+          "activityType": "PRACTICE",
+          "sortOrder": 12,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_6.006"
+          },
+          "config": {},
+          "completionRule": "SUBMIT"
+        },
+        {
+          "activityCode": "act.overview.structure.q.wd25.s1_6.022",
+          "title": "测评：2023 统考真题：微内核操作系统具有的特征",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 13,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_6.022"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        }
+      ]
+    },
+    {
+      "unitCode": "unit.overview.boot",
+      "sectionCode": "sec.overview.boot",
+      "title": "计算机启动时发生什么",
+      "sortOrder": 8,
+      "estimatedMinutes": 12,
+      "status": "DRAFT",
+      "objectives": [
+        "能按教材模型说明 BIOS/MBR 与引导记录的作用",
+        "能区分引导程序、引导记录和启动管理器的位置与职责"
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.boot.boot_process",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s1_6.012",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.013",
+          "usage": "PRACTICE"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.014",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.015",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.016",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.020",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.021",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.overview.boot.read.s1_5.firmware-to-os",
+          "title": "阅读：教材中的BIOS/MBR引导链",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_5.firmware-to-os.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.boot.read.s1_5.boot-records",
+          "title": "小结：区分存放位置、引导记录和启动管理器",
+          "activityType": "SUMMARY",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_5.boot-records.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.boot.q.wd25.s1_6.012",
+          "title": "测评：关于操作系统引导的错误描述",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_6.012"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.boot.q.wd25.s1_6.015",
+          "title": "测评：计算机启动过程的正确顺序",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_6.015"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.boot.q.wd25.s1_6.020",
+          "title": "测评：2013 统考真题：开机后操作系统最终被加载到",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_6.020"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        }
+      ]
+    },
+    {
+      "unitCode": "unit.overview.virtual-machine",
+      "sectionCode": "sec.overview.virtual-machine",
+      "title": "虚拟机把什么抽象给用户",
+      "sortOrder": 9,
+      "estimatedMinutes": 16,
+      "status": "DRAFT",
+      "objectives": [
+        "能说明客户机、宿主与 VMM 的关系",
+        "能比较裸金属与寄居两类虚拟机管理程序的差异",
+        "能判断虚拟资源与权限边界"
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.virtualization.virtual_machine",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.virtualization.vmm",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.virtualization",
+          "role": "TEACHES"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s1_6.017",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.018",
+          "usage": "ASSESSMENT"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.019",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.overview.virtual-machine.read.s1_6.vm-environment",
+          "title": "阅读：虚拟机器与客户操作系统",
+          "activityType": "READING",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_6.vm-environment.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.virtual-machine.read.s1_6.virtual-privileges",
+          "title": "阅读：客户系统的内核权限仍受控制",
+          "activityType": "READING",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_6.virtual-privileges.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.virtual-machine.read.s1_6.hosted-machine",
+          "title": "阅读：寄居架构中的安装与虚拟磁盘",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_6.hosted-machine.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.virtual-machine.read.s1_6.vmm-summary",
+          "title": "小结：裸金属与寄居架构的比较",
+          "activityType": "SUMMARY",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_6.vmm-summary.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.virtual-machine.read.s1_6.figure-1-7",
+          "title": "示例/图示：图1.7：两类虚拟机管理程序在系统中的位置",
+          "activityType": "WORKED_EXAMPLE",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_6.figure-1-7.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.virtual-machine.q.wd25.s1_6.017",
+          "title": "测评：关于虚拟机的正确说法",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_6.017"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.virtual-machine.q.wd25.s1_6.018",
+          "title": "测评：关于 VMware 虚拟机的错误说法",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 7,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_6.018"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.virtual-machine.q.wd25.s1_6.019",
+          "title": "测评：关于 VMM 的正确说法",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 8,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_6.019"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        }
+      ]
+    },
+    {
+      "unitCode": "unit.overview.review",
+      "sectionCode": "sec.overview.review",
+      "title": "本章复习与综合测评",
+      "sortOrder": 10,
+      "estimatedMinutes": 24,
+      "status": "DRAFT",
+      "objectives": [
+        "能把并发/并行、特权指令与访管、内核结构三条主线联系起来",
+        "能根据个人错题与待复习节点选择下一步复习内容",
+        "能在跨节综合题中说明教材概念的适用边界"
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.overview.concurrency",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.overview.parallelism",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.privileged_instruction",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.user_mode",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.kernel_mode",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.trap_instruction",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.exception",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.runtime.system_call",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.structure.microkernel",
+          "role": "TEACHES"
+        },
+        {
+          "nodeCode": "os.boot.boot_process",
+          "role": "PREREQUISITE"
+        }
+      ],
+      "questionMappings": [
+        {
+          "questionCode": "q.wd25.s1_1.013",
+          "usage": "REVIEW"
+        },
+        {
+          "questionCode": "q.wd25.s1_1.014",
+          "usage": "REVIEW"
+        },
+        {
+          "questionCode": "q.wd25.s1_2.019",
+          "usage": "REVIEW"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.020",
+          "usage": "REVIEW"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.021",
+          "usage": "REVIEW"
+        },
+        {
+          "questionCode": "q.wd25.s1_6.022",
+          "usage": "REVIEW"
+        }
+      ],
+      "activities": [
+        {
+          "activityCode": "act.overview.review.read.s1_7.time-scale-review",
+          "title": "小结：疑难点一：并发程序怎样形成并行执行",
+          "activityType": "SUMMARY",
+          "sortOrder": 1,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_7.time-scale-review.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.review.read.s1_7.instruction-review",
+          "title": "小结：疑难点二：特权能力由CPU状态限制",
+          "activityType": "SUMMARY",
+          "sortOrder": 2,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_7.instruction-review.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.review.read.s1_7.trap-review",
+          "title": "阅读：疑难点三：访管指令不等于访管事件",
+          "activityType": "READING",
+          "sortOrder": 3,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_7.trap-review.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.review.read.s1_7.microkernel-review",
+          "title": "小结：疑难点四：微内核的四条组织思路",
+          "activityType": "SUMMARY",
+          "sortOrder": 4,
+          "required": true,
+          "reference": {
+            "kind": "CHUNK",
+            "code": "chunk.wd25.overview.s1_7.microkernel-review.001"
+          },
+          "config": {},
+          "completionRule": "CONFIRM"
+        },
+        {
+          "activityCode": "act.overview.review.q.wd25.s1_1.013",
+          "title": "测评：单处理机系统中的并行关系（2009 统考真题）",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 5,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_1.013"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.review.q.wd25.s1_1.014",
+          "title": "测评：操作系统提供给应用程序的接口（2010 统考真题）",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 6,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_1.014"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.review.q.wd25.s1_2.019",
+          "title": "测评：2018 统考真题：关于多任务操作系统的正确叙述",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 7,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_2.019"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.review.q.wd25.s1_6.020",
+          "title": "测评：2013 统考真题：开机后操作系统最终被加载到",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 8,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_6.020"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.review.q.wd25.s1_6.021",
+          "title": "测评：2022 统考真题：操作系统初始化过程中创建的对象",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 9,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_6.021"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        },
+        {
+          "activityCode": "act.overview.review.q.wd25.s1_6.022",
+          "title": "测评：2023 统考真题：微内核操作系统具有的特征",
+          "activityType": "ASSESSMENT",
+          "sortOrder": 10,
+          "required": true,
+          "reference": {
+            "kind": "QUESTION",
+            "code": "q.wd25.s1_6.022"
+          },
+          "config": {},
+          "completionRule": "PASS"
+        }
+      ]
+    }
+  ]
+}

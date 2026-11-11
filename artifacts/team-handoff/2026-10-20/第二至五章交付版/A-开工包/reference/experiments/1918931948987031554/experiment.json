@@ -1,0 +1,24 @@
+{
+  "questionId": "1918931948987031554",
+  "resourceCode": "exp.legacy.1918931948987031554",
+  "title": "实验4.3 基础系统调用函数 `sys_mem_alloc`",
+  "content": "分丰富",
+  "tags": [],
+  "referenceAnswer": "",
+  "originalCode": "",
+  "judgeCase": [
+    {
+      "input": "",
+      "output": ""
+    }
+  ],
+  "judgeConfig": {
+    "timeLimit": 1000,
+    "memoryLimit": 1000,
+    "stackLimit": 1000
+  },
+  "legacySetIds": [],
+  "legacySets": [],
+  "snapshotUpdatedTime": "2025-05-10 20:47:54",
+  "runtimeValidated": false
+}

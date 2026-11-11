@@ -1,0 +1,906 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "KNOWLEDGE",
+  "batchCode": "batch.chapters.reused-nodes.20261027",
+  "contributor": "L",
+  "courseCode": "course.operating-systems",
+  "nodes": [
+    {
+      "nodeCode": "os.cpu.scheduling",
+      "name": "CPU 调度",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "多道程序系统中进程数量往往多于 CPU 个数，进程争用 CPU 不可避免",
+      "aliases": [
+        "处理机调度"
+      ],
+      "homeSectionCode": "sec.process.cpu-scheduling",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.process.scheduling-concept",
+          "pageStart": 66,
+          "pageEnd": 67,
+          "pageStatus": "VISIBLE",
+          "locator": "2.2.1 调度的概念与三级调度，图 2.7",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-p066-fig2-7-three-level-scheduling.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.cpu.fcfs",
+      "name": "先来先服务（CPU）",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "FCFS 每次从就绪队列选择最先进入的进程，让它运行到完成或阻塞才释放 CPU",
+      "aliases": [
+        "FCFS"
+      ],
+      "homeSectionCode": "sec.process.cpu-algorithms",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.process.cpu-algorithms",
+          "pageStart": 70,
+          "pageEnd": 71,
+          "pageStatus": "VISIBLE",
+          "locator": "2.2.5 FCFS 调度算法与表 2.2",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.cpu.sjf",
+      "name": "短作业优先",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "短作业优先（SJF）从后备队列选择估计运行时间最短的作业；用于进程调度时又称短进程优先（SPF），从就绪队列选择估计运行时间最短的进程",
+      "aliases": [
+        "SJF"
+      ],
+      "homeSectionCode": "sec.process.cpu-algorithms",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.process.cpu-algorithms",
+          "pageStart": 71,
+          "pageEnd": 72,
+          "pageStatus": "VISIBLE",
+          "locator": "2.2.5 SJF/SPF、SRTN 与表 2.3",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.cpu.hrrn",
+      "name": "高响应比优先",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "高响应比优先（HRRN）主要用于作业调度，综合了 FCFS 与 SJF：每次计算后备队列中每个作业的响应比，选择响应比最高者",
+      "aliases": [
+        "HRRN"
+      ],
+      "homeSectionCode": "sec.process.cpu-algorithms",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.process.cpu-algorithms",
+          "pageStart": 72,
+          "pageEnd": 72,
+          "pageStatus": "VISIBLE",
+          "locator": "2.2.5 高响应比优先调度算法",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.cpu.priority_nonpreemptive",
+      "name": "非抢占优先级调度",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "优先级调度既可用于作业调度，也可用于进程调度：每次选择优先级最高的作业或进程",
+      "aliases": [],
+      "homeSectionCode": "sec.process.cpu-algorithms",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.process.cpu-algorithms",
+          "pageStart": 72,
+          "pageEnd": 73,
+          "pageStatus": "VISIBLE",
+          "locator": "2.2.5 优先级调度算法",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.cpu.priority_preemptive",
+      "name": "抢占优先级调度",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "优先级调度既可用于作业调度，也可用于进程调度：每次选择优先级最高的作业或进程",
+      "aliases": [],
+      "homeSectionCode": "sec.process.cpu-algorithms",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.process.cpu-algorithms",
+          "pageStart": 72,
+          "pageEnd": 73,
+          "pageStatus": "VISIBLE",
+          "locator": "2.2.5 优先级调度算法",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.cpu.rr",
+      "name": "时间片轮转",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "时间片轮转（RR）主要适用于分时系统",
+      "aliases": [
+        "RR"
+      ],
+      "homeSectionCode": "sec.process.cpu-algorithms",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.process.cpu-algorithms",
+          "pageStart": 73,
+          "pageEnd": 73,
+          "pageStatus": "VISIBLE",
+          "locator": "2.2.5 时间片轮转调度算法",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.cpu.mlfq",
+      "name": "多级反馈队列",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "前述算法通常只有一个就绪队列，调度策略固定单一，难以满足不同用户的需求",
+      "aliases": [
+        "MLFQ"
+      ],
+      "homeSectionCode": "sec.process.cpu-algorithms",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.process.cpu-algorithms",
+          "pageStart": 73,
+          "pageEnd": 73,
+          "pageStatus": "VISIBLE",
+          "locator": "2.2.5 多级队列调度算法",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.contiguous_allocation",
+      "name": "连续分配管理",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "连续分配是为一个用户程序分配一块连续的内存空间",
+      "aliases": [
+        "连续内存分配"
+      ],
+      "homeSectionCode": "sec.memory.contiguous",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.contiguous",
+          "pageStart": 181,
+          "pageEnd": 181,
+          "pageStatus": "VISIBLE",
+          "locator": "3.1.2 单一连续分配与固定分区分配，图 3.5",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-p181-fig3-5-fixed-partition.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.first_fit",
+      "name": "首次适应算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "顺序分配算法依次搜索空闲分区链，寻找满足要求的分区",
+      "aliases": [
+        "FF"
+      ],
+      "homeSectionCode": "sec.memory.contiguous",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.contiguous",
+          "pageStart": 182,
+          "pageEnd": 183,
+          "pageStatus": "VISIBLE",
+          "locator": "3.1.2 基于顺序搜索的分配算法",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.next_fit",
+      "name": "邻近适应算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "顺序分配算法依次搜索空闲分区链，寻找满足要求的分区",
+      "aliases": [
+        "NF",
+        "循环首次适应"
+      ],
+      "homeSectionCode": "sec.memory.contiguous",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.contiguous",
+          "pageStart": 182,
+          "pageEnd": 183,
+          "pageStatus": "VISIBLE",
+          "locator": "3.1.2 基于顺序搜索的分配算法",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.best_fit",
+      "name": "最佳适应算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "顺序分配算法依次搜索空闲分区链，寻找满足要求的分区",
+      "aliases": [
+        "BF"
+      ],
+      "homeSectionCode": "sec.memory.contiguous",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.contiguous",
+          "pageStart": 182,
+          "pageEnd": 183,
+          "pageStatus": "VISIBLE",
+          "locator": "3.1.2 基于顺序搜索的分配算法",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.worst_fit",
+      "name": "最坏适应算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "顺序分配算法依次搜索空闲分区链，寻找满足要求的分区",
+      "aliases": [
+        "WF"
+      ],
+      "homeSectionCode": "sec.memory.contiguous",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.contiguous",
+          "pageStart": 182,
+          "pageEnd": 183,
+          "pageStatus": "VISIBLE",
+          "locator": "3.1.2 基于顺序搜索的分配算法",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.page_table",
+      "name": "页表",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "固定分区有内部碎片，动态分区有外部碎片，利用率都不高",
+      "aliases": [
+        "Page Table"
+      ],
+      "homeSectionCode": "sec.memory.paging",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.paging",
+          "pageStart": 183,
+          "pageEnd": 184,
+          "pageStatus": "VISIBLE",
+          "locator": "3.1.3 分页的基本概念、地址结构与页表，图 3.7、图 3.8",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-p184-fig3-7-paging-address.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.address_translation",
+      "name": "地址翻译",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "将逻辑地址转换为物理地址；在题给选项中TLB容量与驻留内存页表有助于翻译，swap容量无直接作用。",
+      "aliases": [
+        "地址转换"
+      ],
+      "homeSectionCode": "sec.memory.address-translation",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.address-translation",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "47",
+          "locator": "3.2 习题精选第47题及对应解析；提高地址转换速度的措施；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.tlb",
+      "name": "TLB 快表",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "缓存部分页表项以加速地址翻译；增大快表容量可能提高命中率，但不等于改变页面置换范围。",
+      "aliases": [
+        "TLB",
+        "快表"
+      ],
+      "homeSectionCode": "sec.memory.paging",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.paging",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "47",
+          "locator": "3.2 习题精选第47题及对应解析；增大快表容量与地址转换；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.locality",
+      "name": "局部性原理",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "![图 3.10　具有快表的地址变换机构](assets/wd25-p186-fig3-10-tlb.png)",
+      "aliases": [
+        "Locality"
+      ],
+      "homeSectionCode": "sec.memory.virtual-concepts",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.paging",
+          "pageStart": 186,
+          "pageEnd": 186,
+          "pageStatus": "VISIBLE",
+          "locator": "3.1.3 具有快表的地址变换机构，图 3.10",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-p186-fig3-10-tlb.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.virtual_memory",
+      "name": "虚拟内存",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "利用按需调入与换出扩大可用的逻辑地址空间；容量不再单纯受实际内存大小约束。",
+      "aliases": [
+        "虚拟存储器"
+      ],
+      "homeSectionCode": "sec.memory.virtual-concepts",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.virtual-concepts",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "45",
+          "locator": "3.2 习题精选第45题及对应解析；虚拟存储容量与连续分配限制；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.access_bit",
+      "name": "访问位",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "本节用 A 表示页面近期是否被访问；访问置1，扫描时按算法规则清零。",
+      "aliases": [
+        "A 位",
+        "引用位"
+      ],
+      "homeSectionCode": "sec.memory.demand-paging",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 219,
+          "pageEnd": 219,
+          "pageStatus": "VISIBLE",
+          "locator": "简单CLOCK的访问位置1与清零规则",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 220,
+          "pageEnd": 220,
+          "pageStatus": "VISIBLE",
+          "locator": "改进型CLOCK中的A位",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.dirty_bit",
+      "name": "修改位",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "本节用 M 表示页面调入后是否被修改；被修改页换出前需要写回，未修改页通常无需写回。",
+      "aliases": [
+        "M 位",
+        "脏位"
+      ],
+      "homeSectionCode": "sec.memory.demand-paging",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 220,
+          "pageEnd": 220,
+          "pageStatus": "VISIBLE",
+          "locator": "改进型CLOCK中修改位与写回代价",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.page_fault",
+      "name": "缺页中断",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "访问页面不在内存时进入缺页处理；可能涉及分配页框、页面置换、磁盘读取及页表更新。",
+      "aliases": [
+        "Page Fault"
+      ],
+      "homeSectionCode": "sec.memory.demand-paging",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.demand-paging",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "43",
+          "locator": "3.2 习题精选第43题及对应解析；缺页处理可能执行的操作；两张截图均未包含印刷页码"
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.demand-paging",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "46",
+          "locator": "3.2 习题精选第46题及对应解析；缺页时先阻塞等待页面调入；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.frame_allocation",
+      "name": "页框分配与置换范围",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "页框分配策略与局部或全局置换范围需要一致；本题中固定分配不能采用全局置换。",
+      "aliases": [
+        "局部置换",
+        "全局置换"
+      ],
+      "homeSectionCode": "sec.memory.frame-allocation",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.frame-allocation",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "49",
+          "locator": "3.2 习题精选第49题及对应解析；固定分配与全局置换的组合限制；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.opt",
+      "name": "OPT 页面置换算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "依据未来访问序列，换出下次访问最晚或以后不再使用的驻留页，作为缺页性能的理想比较基准。",
+      "aliases": [
+        "OPT",
+        "最佳页面置换"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 217,
+          "pageEnd": 217,
+          "pageStatus": "INFERRED",
+          "locator": "1. 最佳（OPT）置换算法与图3.22",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.page_replacement",
+      "name": "页面置换",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "请求页面不在内存且没有可用页框时，从驻留页中选出一页换出以容纳请求页。",
+      "aliases": [
+        "页面替换",
+        "Page Replacement"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 217,
+          "pageEnd": 217,
+          "pageStatus": "INFERRED",
+          "locator": "3.2.4 开头：页面换入与换出",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-01-opt.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.fifo",
+      "name": "FIFO 页面置换算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "换出最早调入的驻留页，命中不改变调入顺序；在某些访问序列中会出现 Belady 异常。",
+      "aliases": [
+        "FIFO",
+        "先进先出页面置换"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 218,
+          "pageEnd": 218,
+          "pageStatus": "INFERRED",
+          "locator": "2. 先进先出（FIFO）页面置换算法与图3.23",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.belady",
+      "name": "Belady 异常",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "对同一访问序列，增加分配页框数反而造成更多缺页；FIFO可能出现，LRU与OPT不出现。",
+      "aliases": [
+        "Belady anomaly"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 218,
+          "pageEnd": 218,
+          "pageStatus": "INFERRED",
+          "locator": "图3.24：3页框9次缺页、4页框10次缺页",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "48",
+          "locator": "3.2 习题精选第48题及对应解析；FIFO与LRU、OPT的异常性质比较；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.lru",
+      "name": "LRU 页面置换算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "依据过去访问历史换出最近最久未访问的驻留页；命中同样更新最近访问状态。",
+      "aliases": [
+        "LRU",
+        "最近最久未使用"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 218,
+          "pageEnd": 218,
+          "pageStatus": "INFERRED",
+          "locator": "3. 最近最久未使用（LRU）置换算法开头",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-02-fifo-lru.png"
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 219,
+          "pageEnd": 219,
+          "pageStatus": "VISIBLE",
+          "locator": "图3.25及 LRU 的历史信息、实现代价说明",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.clock",
+      "name": "CLOCK 页面置换算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "使用环形页框队列、替换指针与访问位；扫描到访问位为1时清零并跳过，遇0时换出。",
+      "aliases": [
+        "简单 CLOCK",
+        "时钟置换",
+        "NRU（本教材简单 CLOCK 别名）"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 219,
+          "pageEnd": 219,
+          "pageStatus": "VISIBLE",
+          "locator": "4. 时钟（CLOCK）置换算法：（1）简单CLOCK",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-03-lru-clock-p0219.png"
+        },
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 220,
+          "pageEnd": 220,
+          "pageStatus": "VISIBLE",
+          "locator": "图3.27及简单CLOCK推演续文",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.clock_enhanced",
+      "name": "改进型 CLOCK 页面置换算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "结合访问位A和修改位M分轮扫描，优先选择近期未访问且无需写回的页，兼顾命中历史与换出代价。",
+      "aliases": [
+        "Enhanced CLOCK"
+      ],
+      "homeSectionCode": "sec.memory.page-replacement",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.page-replacement",
+          "pageStart": 220,
+          "pageEnd": 220,
+          "pageStatus": "VISIBLE",
+          "locator": "（2）改进型CLOCK及四类页面、扫描步骤",
+          "sourceQuestionNumber": null,
+          "sourceAsset": "assets/wd25-memory-batch-001/body-04-clock-p0220.png"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.memory.thrashing",
+      "name": "抖动",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "description": "进程频繁缺页使系统大量时间用于页面调入调出；降低并发进程数量是题目给定的有效缓解措施。",
+      "aliases": [
+        "颠簸",
+        "Thrashing"
+      ],
+      "homeSectionCode": "sec.memory.thrashing-workingset",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.memory.thrashing-workingset",
+          "pageStart": null,
+          "pageEnd": null,
+          "pageStatus": "NOT_VISIBLE",
+          "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+          "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+          "sourceQuestionNumber": "44",
+          "locator": "3.2 习题精选第44题及对应解析；撤销部分进程与其他措施的比较；两张截图均未包含印刷页码"
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.disk.scheduling",
+      "name": "磁盘调度",
+      "nodeType": "MECHANISM",
+      "layer": "CORE",
+      "description": "磁盘按不同的方式可分为若干类型：磁头相对于盘片的径向方向固定的称为固定头磁盘，这种磁盘中的每个磁道有一个磁头；磁头可移动的称为活动头磁盘，磁头臂可来回伸缩定位磁道",
+      "aliases": [],
+      "homeSectionCode": "sec.io.disk-algorithms",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.io.disk-basics",
+          "pageStart": 337,
+          "pageEnd": 337,
+          "pageStatus": "VISIBLE",
+          "locator": "5.3.1 磁盘的类型；磁盘调度问题的提出",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.disk.fcfs",
+      "name": "先来先服务（磁盘）",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "![图 5.18 FCFS磁盘调度算法](assets/wd25-p340-fig5-18-fcfs.png)",
+      "aliases": [
+        "FCFS"
+      ],
+      "homeSectionCode": "sec.io.disk-algorithms",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.io.disk-algorithms",
+          "pageStart": 339,
+          "pageEnd": 340,
+          "pageStatus": "VISIBLE",
+          "locator": "5.3.3 FCFS 算法，498 个磁道，图 5.18",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.disk.sstf",
+      "name": "最短寻道时间优先",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "![图 5.19 SSTF磁盘调度算法](assets/wd25-p340-fig5-19-sstf.png)",
+      "aliases": [
+        "SSTF"
+      ],
+      "homeSectionCode": "sec.io.disk-algorithms",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.io.disk-algorithms",
+          "pageStart": 340,
+          "pageEnd": 340,
+          "pageStatus": "VISIBLE",
+          "locator": "5.3.3 SSTF 算法与饥饿现象，248 个磁道，图 5.19",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.disk.scan",
+      "name": "扫描算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "![图 5.20 SCAN磁盘调度算法](assets/wd25-p340-fig5-20-scan.png)",
+      "aliases": [
+        "SCAN",
+        "电梯算法"
+      ],
+      "homeSectionCode": "sec.io.disk-algorithms",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.io.disk-algorithms",
+          "pageStart": 340,
+          "pageEnd": 341,
+          "pageStatus": "VISIBLE",
+          "locator": "5.3.3 SCAN（电梯）算法，282 个磁道，图 5.20",
+          "sourceQuestionNumber": null
+        }
+      ]
+    },
+    {
+      "nodeCode": "os.disk.cscan",
+      "name": "循环扫描算法",
+      "nodeType": "ALGORITHM",
+      "layer": "CORE",
+      "description": "![图 5.21 C-SCAN磁盘调度算法](assets/wd25-p341-fig5-21-cscan.png)",
+      "aliases": [
+        "C-SCAN",
+        "CSCAN"
+      ],
+      "homeSectionCode": "sec.io.disk-algorithms",
+      "sourceRefs": [
+        {
+          "sourceCode": "book.wangdao.os.2025",
+          "origin": "ADAPTED",
+          "sectionCode": "sec.io.disk-algorithms",
+          "pageStart": 341,
+          "pageEnd": 341,
+          "pageStatus": "VISIBLE",
+          "locator": "5.3.3 C-SCAN 算法，390 个磁道，图 5.21",
+          "sourceQuestionNumber": null
+        }
+      ]
+    }
+  ],
+  "chunks": [],
+  "relations": []
+}

@@ -1,0 +1,39 @@
+{
+  "questionId": "1930157095085461505",
+  "resourceCode": "exp.legacy.1930157095085461505",
+  "title": "实验4.7 实现进程间通信（IPC）机制",
+  "content": "### 任务描述\n\n在 `lib/syscall_all.c` 中实现进程间通信（IPC）相关的系统调用函数，包括 `sys_ipc_recv` 和 `sys_ipc_can_send`，以支持用户进程之间的消息传递和同步。\n\n### 知识要点\n\n1. 进程间通信（IPC）的基本概念和重要性。\n2. 消息传递和同步机制的实现方法。\n3. 用户空间和内核空间的交互。\n4. 系统调用的实现和调用规范。\n5. 进程状态管理和调度。\n6. 内存映射和解除映射的系统调用 `sys_mem_map` 和 `sys_mem_unmap`。\n\n### 实验任务\n\n1. 理解进程间通信（IPC）的基本原理和需求。\n2. 在 `lib/syscall_all.c` 中编写 `sys_ipc_recv` 函数，实现进程接收消息的功能。\n   - 设置 `env_ipc_receiving` 标志，表示进程准备接收消息。\n   - 阻塞当前进程，直到有消息到达。\n   - 处理接收到的消息并返回。\n3. 在 `lib/syscall_all.c` 中编写 `sys_ipc_can_send` 函数，实现进程发送消息的功能。\n   - 检查目标进程是否处于可接收状态。\n   - 发送消息并更新目标进程的状态。\n   - 返回发送结果。\n4. 实现进程状态的管理和调度，确保进程在接收和发送消息时能够正确地被调度。",
+  "tags": [
+    "进程",
+    "系统调用",
+    "内核",
+    "用户进程",
+    "用户空间",
+    "内核空间",
+    "系统调用函数"
+  ],
+  "referenceAnswer": "",
+  "originalCode": "",
+  "judgeCase": [
+    {
+      "input": "",
+      "output": ""
+    }
+  ],
+  "judgeConfig": {
+    "timeLimit": 1000,
+    "memoryLimit": 1000,
+    "stackLimit": 1000
+  },
+  "legacySetIds": [
+    "4"
+  ],
+  "legacySets": [
+    {
+      "id": "4",
+      "title": "第四章 文件系统"
+    }
+  ],
+  "snapshotUpdatedTime": "2025-06-04 14:58:06",
+  "runtimeValidated": false
+}

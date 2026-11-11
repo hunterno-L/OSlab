@@ -1,0 +1,1465 @@
+{
+  "runKey": "eval-20261103",
+  "generatedAt": "2026-11-03T22:49:33+08:00",
+  "baseUrl": "http://localhost:8121/api",
+  "frozen": true,
+  "questionCount": 20,
+  "hits": 20,
+  "hitRate": 1.0,
+  "mainlineCount": 8,
+  "mainlineHits": 8,
+  "courseIsolationViolations": 0,
+  "citationLocatorViolations": 0,
+  "executionErrors": 0,
+  "categorySummary": [
+    {
+      "category": "ALGORITHM",
+      "total": 4,
+      "hits": 4
+    },
+    {
+      "category": "DATABASE_CANDIDATE_KEY",
+      "total": 4,
+      "hits": 4
+    },
+    {
+      "category": "DATABASE_CLOSURE",
+      "total": 4,
+      "hits": 4
+    },
+    {
+      "category": "SYNONYM",
+      "total": 4,
+      "hits": 4
+    },
+    {
+      "category": "WRONG_ANSWER",
+      "total": 4,
+      "hits": 4
+    }
+  ],
+  "mainlineDetail": [
+    {
+      "id": "os-alg-fifo",
+      "query": "FIFO 按什么顺序换出？命中时会不会改变队列？",
+      "targetKind": "NODE",
+      "targetCode": "os.memory.fifo",
+      "hit": true,
+      "hitRank": 3,
+      "mode": "AI",
+      "topSource": "chunk.wd25.memory.opt.001"
+    },
+    {
+      "id": "os-alg-lru",
+      "query": "LRU 命中后为什么要更新该页的位置？换出时看的是哪一端？",
+      "targetKind": "NODE",
+      "targetCode": "os.memory.lru",
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "topSource": "chunk.wd25.memory.lru.001"
+    },
+    {
+      "id": "os-alg-clock",
+      "query": "简单 CLOCK 算法怎样用访问位决定换出页？扫描时访问位怎么变化？",
+      "targetKind": "NODE",
+      "targetCode": "os.memory.clock",
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "topSource": "chunk.wd25.memory.clock.001"
+    },
+    {
+      "id": "os-alg-eclock",
+      "query": "改进型 CLOCK 为什么还要看修改位？访问位和修改位四类页的处理顺序是什么？",
+      "targetKind": "NODE",
+      "targetCode": "os.memory.clock_enhanced",
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "topSource": "chunk.wd25.memory.clock-enhanced.001"
+    },
+    {
+      "id": "db-closure-01",
+      "query": "给定函数依赖集，如何求属性 A 的闭包？步骤是什么？",
+      "targetKind": "QUESTION",
+      "targetCode": "q.db.fd.closure-basic",
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "topSource": "chunk.db.fd.closure"
+    },
+    {
+      "id": "db-closure-02",
+      "query": "复合决定因素的闭包怎么算？比如 AB→C、C→D，求 AB 的闭包。",
+      "targetKind": "QUESTION",
+      "targetCode": "q.db.fd.closure-composite",
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "topSource": "chunk.db.fd.closure"
+    },
+    {
+      "id": "db-key-01",
+      "query": "候选键和超键的区别是什么？候选键为什么要求最小性？",
+      "targetKind": "QUESTION",
+      "targetCode": "q.db.fd.superkey-not-candidate",
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "topSource": "chunk.db.fd.superkey"
+    },
+    {
+      "id": "db-key-02",
+      "query": "怎样统计一个关系模式的候选键个数？请结合属性闭包说明。",
+      "targetKind": "QUESTION",
+      "targetCode": "q.db.fd.candidate-count",
+      "hit": true,
+      "hitRank": 2,
+      "mode": "AI",
+      "topSource": "chunk.db.fd.closure"
+    }
+  ],
+  "results": [
+    {
+      "id": "os-syn-01",
+      "category": "SYNONYM",
+      "mainline": false,
+      "courseCode": "course.operating-systems",
+      "query": "LRU 里常说的换页，到底换出哪一页？",
+      "targetKind": "NODE",
+      "targetCode": "os.memory.lru",
+      "targetChunks": [
+        "chunk.wd25.memory.lru.001"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 8,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p0",
+          "excerpt": "**LRU 算法**淘汰最近最长时间未被使用的页面。它的依据是：过去一段时间未访问过的页面，在最近的将来可能也不会被访问。实现上为每个页面设置访问字段，记录自上次访问以来经历的时间，淘汰时选值最大的页面。\n\n仍用引用串 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`，3 个物理块："
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p2",
+          "excerpt": "理解 LRU 与 OPT 的区别：LRU 根据各页**以前**的使用情况判断，是“向前看”；OPT 根据各页**以后**的使用情况判断，是“向后看”。页面过去与未来的走向之间并无必然联系，所以 LRU 只是 OPT 的近似。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p1",
+          "excerpt": "| 序号 | 访问页 | 块1 | 块2 | 块3 | 缺页 |\n| --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | F |\n| 2 | 0 | 7 | 0 | — | F |\n| 3 | 1 | 7 | 0 | 1 | F |\n| 4 | 2 | 0 | 1 | 2 | F |\n| 5 | 0 | 1 | 2 | 0 |  |\n| 6 | 3 | 2 | 0 | 3 | F |\n| 7 | 0 | 2 | 3 | 0 |  |\n| 8 | 4 | 3 | 0 | 4 | F |\n| 9 | 2 | 0 | 4 | 2 | F |\n| 10 | 3 | 4 | 2 | 3 | F |\n| 11 | 0 | 2 | 3 | 0 | F |\n| 12 | 3 | 2 | 0 | 3 |  |\n| 13 | 2 | 0 | 3 | 2 |  |\n| 14 | 1 | 3 | 2 | 1 | F |\n| 15 | 2 | 3 | 1 | 2 |  |\n| 16 | 0 | 1 | 2 | 0 | F |\n| 17 | 1..."
+        },
+        {
+          "rank": 4,
+          "sourceId": "chunk.wd25.memory.opt.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.opt.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.opt.001-p0",
+          "excerpt": "页面换入换出需要磁盘 I/O，开销较大，好的页面置换算法应追求更低的缺页率。**最佳（OPT）置换算法**选择淘汰“以后永不使用”或“在最长时间内不再被访问”的页面，可保证最低的缺页率。但未来无法预测，因此 OPT 无法真正实现，只能用来评价其他算法。\n\n设系统为进程分配 3 个物理块，页面引用串为：\n\n`7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1`\n\n按 OPT 置换的过程如下（“缺页”列标 F 表示缺页）："
+        },
+        {
+          "rank": 5,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p2",
+          "excerpt": "共 **8 次缺页**。第 6 次访问（页 3）时，四个访问位全为 1，指针完整扫描一周，把全部访问位清 0，再回到起点淘汰页 7；第 14 次访问（页 1）时同样全扫描一周后淘汰页 2。\n\nCLOCK 只用一个访问位近似“最近是否使用”，比 LRU 容易实现，但精度较低：它不区分页面的具体访问先后，只区分“这一轮是否被访问过”。"
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 8 条来源（语义可用）",
+      "elapsedMs": 24570,
+      "executionError": ""
+    },
+    {
+      "id": "os-syn-02",
+      "category": "SYNONYM",
+      "mainline": false,
+      "courseCode": "course.operating-systems",
+      "query": "淘汰页的选择依据是什么？为什么不是随便挑一页？",
+      "targetKind": "UNIT",
+      "targetCode": "unit.memory.replacement-lru-clock",
+      "targetChunks": [
+        "chunk.wd25.memory.clock-enhanced.001",
+        "chunk.wd25.memory.clock.001",
+        "chunk.wd25.memory.demand-pte.001",
+        "chunk.wd25.memory.difficulties.002",
+        "chunk.wd25.memory.lru.001",
+        "chunk.wd25.memory.page-fault.001",
+        "chunk.wd25.memory.page-in-timing.001",
+        "chunk.wd25.memory.performance.001"
+      ],
+      "hit": true,
+      "hitRank": 3,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 8,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.wd25.memory.opt.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.opt.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.opt.001-p0",
+          "excerpt": "页面换入换出需要磁盘 I/O，开销较大，好的页面置换算法应追求更低的缺页率。**最佳（OPT）置换算法**选择淘汰“以后永不使用”或“在最长时间内不再被访问”的页面，可保证最低的缺页率。但未来无法预测，因此 OPT 无法真正实现，只能用来评价其他算法。\n\n设系统为进程分配 3 个物理块，页面引用串为：\n\n`7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1`\n\n按 OPT 置换的过程如下（“缺页”列标 F 表示缺页）："
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.wd25.memory.opt.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.opt.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.opt.001-p1",
+          "excerpt": "| 序号 | 访问页 | 块1 | 块2 | 块3 | 缺页 |\n| --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | F |\n| 2 | 0 | 7 | 0 | — | F |\n| 3 | 1 | 7 | 0 | 1 | F |\n| 4 | 2 | 2 | 0 | 1 | F |\n| 5 | 0 | 2 | 0 | 1 |  |\n| 6 | 3 | 2 | 0 | 3 | F |\n| 7 | 0 | 2 | 0 | 3 |  |\n| 8 | 4 | 2 | 4 | 3 | F |\n| 9 | 2 | 2 | 4 | 3 |  |\n| 10 | 3 | 2 | 4 | 3 |  |\n| 11 | 0 | 2 | 0 | 3 | F |\n| 12 | 3 | 2 | 0 | 3 |  |\n| 13 | 2 | 2 | 0 | 3 |  |\n| 14 | 1 | 2 | 0 | 1 | F |\n| 15 | 2 | 2 | 0 | 1 |  |\n| 16 | 0 | 2 | 0 | 1 |  |\n| 17 | 1 | ..."
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p0",
+          "excerpt": "**LRU 算法**淘汰最近最长时间未被使用的页面。它的依据是：过去一段时间未访问过的页面，在最近的将来可能也不会被访问。实现上为每个页面设置访问字段，记录自上次访问以来经历的时间，淘汰时选值最大的页面。\n\n仍用引用串 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`，3 个物理块："
+        },
+        {
+          "rank": 4,
+          "sourceId": "chunk.wd25.memory.clock-enhanced.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock-enhanced.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock-enhanced.001-p1",
+          "excerpt": "两类 CLOCK 的共同原则是“尽量保留访问过的页面，淘汰未访问过的页面”。简单 CLOCK 只区分是否访问过；改进型 CLOCK 在此基础上再区分是否修改过，因此优先淘汰未使用且未修改的页面。"
+        },
+        {
+          "rank": 5,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p2",
+          "excerpt": "共 **8 次缺页**。第 6 次访问（页 3）时，四个访问位全为 1，指针完整扫描一周，把全部访问位清 0，再回到起点淘汰页 7；第 14 次访问（页 1）时同样全扫描一周后淘汰页 2。\n\nCLOCK 只用一个访问位近似“最近是否使用”，比 LRU 容易实现，但精度较低：它不区分页面的具体访问先后，只区分“这一轮是否被访问过”。"
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 8 条来源（语义可用）",
+      "elapsedMs": 28037,
+      "executionError": ""
+    },
+    {
+      "id": "os-syn-03",
+      "category": "SYNONYM",
+      "mainline": false,
+      "courseCode": "course.operating-systems",
+      "query": "页面淘汰和页面置换是一回事吗？LRU 如何决定被淘汰的页？",
+      "targetKind": "NODE",
+      "targetCode": "os.memory.lru",
+      "targetChunks": [
+        "chunk.wd25.memory.lru.001"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 8,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p0",
+          "excerpt": "**LRU 算法**淘汰最近最长时间未被使用的页面。它的依据是：过去一段时间未访问过的页面，在最近的将来可能也不会被访问。实现上为每个页面设置访问字段，记录自上次访问以来经历的时间，淘汰时选值最大的页面。\n\n仍用引用串 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`，3 个物理块："
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p2",
+          "excerpt": "理解 LRU 与 OPT 的区别：LRU 根据各页**以前**的使用情况判断，是“向前看”；OPT 根据各页**以后**的使用情况判断，是“向后看”。页面过去与未来的走向之间并无必然联系，所以 LRU 只是 OPT 的近似。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p1",
+          "excerpt": "| 序号 | 访问页 | 块1 | 块2 | 块3 | 缺页 |\n| --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | F |\n| 2 | 0 | 7 | 0 | — | F |\n| 3 | 1 | 7 | 0 | 1 | F |\n| 4 | 2 | 0 | 1 | 2 | F |\n| 5 | 0 | 1 | 2 | 0 |  |\n| 6 | 3 | 2 | 0 | 3 | F |\n| 7 | 0 | 2 | 3 | 0 |  |\n| 8 | 4 | 3 | 0 | 4 | F |\n| 9 | 2 | 0 | 4 | 2 | F |\n| 10 | 3 | 4 | 2 | 3 | F |\n| 11 | 0 | 2 | 3 | 0 | F |\n| 12 | 3 | 2 | 0 | 3 |  |\n| 13 | 2 | 0 | 3 | 2 |  |\n| 14 | 1 | 3 | 2 | 1 | F |\n| 15 | 2 | 3 | 1 | 2 |  |\n| 16 | 0 | 1 | 2 | 0 | F |\n| 17 | 1..."
+        },
+        {
+          "rank": 4,
+          "sourceId": "chunk.wd25.memory.allocation-strategy.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.allocation-strategy.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.frame-allocation#chunk-chunk.wd25.memory.allocation-strategy.001-p0",
+          "excerpt": "请求分页中有两种分配策略（固定、可变）和两种置换范围（全局、局部），组合出三种适用策略：\n\n| 策略 | 页框数 | 缺页时的淘汰范围 | 优点 | 缺点 |\n| --- | --- | --- | --- | --- |\n| 固定分配局部置换 | 进程运行期间固定不变 | 只从本进程内存页面中选一页换出 | 实现简单，进程内存空间稳定 | 难以确定每个进程该分多少页框：太少频繁缺页，太多浪费 |\n| 可变分配全局置换 | 运行期间可适当增减 | 可从系统空闲页框队列取一块，也可淘汰其他进程的页 | 灵活，能动态增加进程页框 | 可能盲目给进程增加页框，导致多道程序并发能力下降 |\n| 可变分配局部置换 | 运行期间可增减 | 只从本进程页面中选一页换出 | 不影响其他进程；缺页率高时增加页框，低时适当减少 | 实现复杂、开销较大 |\n\n记忆要点：**“固定/可变”说的是分给进程的页框数变不变，“全局/局部”说的是缺页时能不能动别人的页**。\n\n可变分配局部置换在“保证进程不频繁调页”和“保持系统并发能力”之间取得较好的平衡：它根据进程的实际缺页率动态调整页框数，代价是需要更复杂..."
+        },
+        {
+          "rank": 5,
+          "sourceId": "chunk.wd25.memory.opt.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.opt.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.opt.001-p0",
+          "excerpt": "页面换入换出需要磁盘 I/O，开销较大，好的页面置换算法应追求更低的缺页率。**最佳（OPT）置换算法**选择淘汰“以后永不使用”或“在最长时间内不再被访问”的页面，可保证最低的缺页率。但未来无法预测，因此 OPT 无法真正实现，只能用来评价其他算法。\n\n设系统为进程分配 3 个物理块，页面引用串为：\n\n`7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1`\n\n按 OPT 置换的过程如下（“缺页”列标 F 表示缺页）："
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 8 条来源（语义可用）",
+      "elapsedMs": 27980,
+      "executionError": ""
+    },
+    {
+      "id": "os-syn-04",
+      "category": "SYNONYM",
+      "mainline": false,
+      "courseCode": "course.operating-systems",
+      "query": "缺页时如果内存已满，按什么规则挑一个牺牲页？",
+      "targetKind": "UNIT",
+      "targetCode": "unit.memory.replacement-opt-fifo",
+      "targetChunks": [
+        "chunk.wd25.memory.clock.001",
+        "chunk.wd25.memory.difficulties.002",
+        "chunk.wd25.memory.fifo-belady.001",
+        "chunk.wd25.memory.lru.001",
+        "chunk.wd25.memory.opt.001",
+        "chunk.wd25.memory.performance.001",
+        "chunk.wd25.memory.summary-3-2.001",
+        "chunk.wd25.memory.thrashing.001"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 8,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.wd25.memory.opt.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.opt.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.opt.001-p1",
+          "excerpt": "| 序号 | 访问页 | 块1 | 块2 | 块3 | 缺页 |\n| --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | F |\n| 2 | 0 | 7 | 0 | — | F |\n| 3 | 1 | 7 | 0 | 1 | F |\n| 4 | 2 | 2 | 0 | 1 | F |\n| 5 | 0 | 2 | 0 | 1 |  |\n| 6 | 3 | 2 | 0 | 3 | F |\n| 7 | 0 | 2 | 0 | 3 |  |\n| 8 | 4 | 2 | 4 | 3 | F |\n| 9 | 2 | 2 | 4 | 3 |  |\n| 10 | 3 | 2 | 4 | 3 |  |\n| 11 | 0 | 2 | 0 | 3 | F |\n| 12 | 3 | 2 | 0 | 3 |  |\n| 13 | 2 | 2 | 0 | 3 |  |\n| 14 | 1 | 2 | 0 | 1 | F |\n| 15 | 2 | 2 | 0 | 1 |  |\n| 16 | 0 | 2 | 0 | 1 |  |\n| 17 | 1 | ..."
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.wd25.memory.fifo-belady.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.fifo-belady.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.fifo-belady.001-p2",
+          "excerpt": "3 个块缺页 **9 次**，4 个块缺页 **10 次**。在常见算法中，**只有 FIFO 可能出现 Belady 异常**；LRU 和 OPT 永远不会。原因是 LRU、OPT 属于堆栈类算法，而 FIFO 基于队列，不满足堆栈性质。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p1",
+          "excerpt": "| 序号 | 访问页 | 块1 | 块2 | 块3 | 缺页 |\n| --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | F |\n| 2 | 0 | 7 | 0 | — | F |\n| 3 | 1 | 7 | 0 | 1 | F |\n| 4 | 2 | 0 | 1 | 2 | F |\n| 5 | 0 | 1 | 2 | 0 |  |\n| 6 | 3 | 2 | 0 | 3 | F |\n| 7 | 0 | 2 | 3 | 0 |  |\n| 8 | 4 | 3 | 0 | 4 | F |\n| 9 | 2 | 0 | 4 | 2 | F |\n| 10 | 3 | 4 | 2 | 3 | F |\n| 11 | 0 | 2 | 3 | 0 | F |\n| 12 | 3 | 2 | 0 | 3 |  |\n| 13 | 2 | 0 | 3 | 2 |  |\n| 14 | 1 | 3 | 2 | 1 | F |\n| 15 | 2 | 3 | 1 | 2 |  |\n| 16 | 0 | 1 | 2 | 0 | F |\n| 17 | 1..."
+        },
+        {
+          "rank": 4,
+          "sourceId": "chunk.wd25.memory.opt.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.opt.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.opt.001-p0",
+          "excerpt": "页面换入换出需要磁盘 I/O，开销较大，好的页面置换算法应追求更低的缺页率。**最佳（OPT）置换算法**选择淘汰“以后永不使用”或“在最长时间内不再被访问”的页面，可保证最低的缺页率。但未来无法预测，因此 OPT 无法真正实现，只能用来评价其他算法。\n\n设系统为进程分配 3 个物理块，页面引用串为：\n\n`7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1`\n\n按 OPT 置换的过程如下（“缺页”列标 F 表示缺页）："
+        },
+        {
+          "rank": 5,
+          "sourceId": "chunk.wd25.memory.fifo-belady.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.fifo-belady.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.fifo-belady.001-p1",
+          "excerpt": "FIFO 共发生 **15 次缺页、12 次置换**，正好是 OPT 置换次数的两倍。\n\nFIFO 还可能产生**Belady 异常**：为进程分配的物理块增多，缺页次数不但不减少，反而增加。例如引用串 `3, 2, 1, 0, 3, 2, 4, 3, 2, 1, 0, 4`：\n\n| 访问页 | 3 | 2 | 1 | 0 | 3 | 2 | 4 | 3 | 2 | 1 | 0 | 4 |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 3 个块 | 3 | 3,2 | 3,2,1 | 2,1,0 | 1,0,3 | 0,3,2 | 3,2,4 | 3,2,4 | 3,2,4 | 2,4,1 | 4,1,0 | 4,1,0 |\n| 缺页 | F | F | F | F | F | F | F |  |  | F | F |  |\n| 4 个块 | 3 | 3,2 | 3,2,1 | 3,2,1,0 | 3,2,1,0 | 3,2,1,0 | 2,1,0,4 | 1,..."
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 8 条来源（语义可用）",
+      "elapsedMs": 22367,
+      "executionError": ""
+    },
+    {
+      "id": "os-alg-fifo",
+      "category": "ALGORITHM",
+      "mainline": true,
+      "courseCode": "course.operating-systems",
+      "query": "FIFO 按什么顺序换出？命中时会不会改变队列？",
+      "targetKind": "NODE",
+      "targetCode": "os.memory.fifo",
+      "targetChunks": [
+        "chunk.wd25.memory.fifo-belady.001"
+      ],
+      "hit": true,
+      "hitRank": 3,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 8,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.wd25.memory.opt.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.opt.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.opt.001-p0",
+          "excerpt": "页面换入换出需要磁盘 I/O，开销较大，好的页面置换算法应追求更低的缺页率。**最佳（OPT）置换算法**选择淘汰“以后永不使用”或“在最长时间内不再被访问”的页面，可保证最低的缺页率。但未来无法预测，因此 OPT 无法真正实现，只能用来评价其他算法。\n\n设系统为进程分配 3 个物理块，页面引用串为：\n\n`7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1`\n\n按 OPT 置换的过程如下（“缺页”列标 F 表示缺页）："
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.wd25.memory.opt.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.opt.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.opt.001-p1",
+          "excerpt": "| 序号 | 访问页 | 块1 | 块2 | 块3 | 缺页 |\n| --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | F |\n| 2 | 0 | 7 | 0 | — | F |\n| 3 | 1 | 7 | 0 | 1 | F |\n| 4 | 2 | 2 | 0 | 1 | F |\n| 5 | 0 | 2 | 0 | 1 |  |\n| 6 | 3 | 2 | 0 | 3 | F |\n| 7 | 0 | 2 | 0 | 3 |  |\n| 8 | 4 | 2 | 4 | 3 | F |\n| 9 | 2 | 2 | 4 | 3 |  |\n| 10 | 3 | 2 | 4 | 3 |  |\n| 11 | 0 | 2 | 0 | 3 | F |\n| 12 | 3 | 2 | 0 | 3 |  |\n| 13 | 2 | 2 | 0 | 3 |  |\n| 14 | 1 | 2 | 0 | 1 | F |\n| 15 | 2 | 2 | 0 | 1 |  |\n| 16 | 0 | 2 | 0 | 1 |  |\n| 17 | 1 | ..."
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.wd25.memory.fifo-belady.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.fifo-belady.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.fifo-belady.001-p0",
+          "excerpt": "**FIFO 算法**淘汰最早进入内存的页面。实现简单：把页面按调入先后排成队列，换出时取队头即可。但它没有利用局部性原理，与进程实际运行规律不相适应，性能较差。\n\n仍用前面的引用串和 3 个物理块：\n\n| 序号 | 访问页 | 块1 | 块2 | 块3 | 缺页 |\n| --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | F |\n| 2 | 0 | 7 | 0 | — | F |\n| 3 | 1 | 7 | 0 | 1 | F |\n| 4 | 2 | 0 | 1 | 2 | F |\n| 5 | 0 | 0 | 1 | 2 |  |\n| 6 | 3 | 1 | 2 | 3 | F |\n| 7 | 0 | 2 | 3 | 0 | F |\n| 8 | 4 | 3 | 0 | 4 | F |\n| 9 | 2 | 0 | 4 | 2 | F |\n| 10 | 3 | 4 | 2 | 3 | F |\n| 11 | 0 | 2 | 3 | 0 | F |\n| 12 | 3 | 2 | 3 | 0 |  |\n| 13 | 2 | ..."
+        },
+        {
+          "rank": 4,
+          "sourceId": "chunk.wd25.memory.fifo-belady.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.fifo-belady.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.fifo-belady.001-p1",
+          "excerpt": "FIFO 共发生 **15 次缺页、12 次置换**，正好是 OPT 置换次数的两倍。\n\nFIFO 还可能产生**Belady 异常**：为进程分配的物理块增多，缺页次数不但不减少，反而增加。例如引用串 `3, 2, 1, 0, 3, 2, 4, 3, 2, 1, 0, 4`：\n\n| 访问页 | 3 | 2 | 1 | 0 | 3 | 2 | 4 | 3 | 2 | 1 | 0 | 4 |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 3 个块 | 3 | 3,2 | 3,2,1 | 2,1,0 | 1,0,3 | 0,3,2 | 3,2,4 | 3,2,4 | 3,2,4 | 2,4,1 | 4,1,0 | 4,1,0 |\n| 缺页 | F | F | F | F | F | F | F |  |  | F | F |  |\n| 4 个块 | 3 | 3,2 | 3,2,1 | 3,2,1,0 | 3,2,1,0 | 3,2,1,0 | 2,1,0,4 | 1,..."
+        },
+        {
+          "rank": 5,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p0",
+          "excerpt": "**LRU 算法**淘汰最近最长时间未被使用的页面。它的依据是：过去一段时间未访问过的页面，在最近的将来可能也不会被访问。实现上为每个页面设置访问字段，记录自上次访问以来经历的时间，淘汰时选值最大的页面。\n\n仍用引用串 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`，3 个物理块："
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 8 条来源（语义可用）",
+      "elapsedMs": 27373,
+      "executionError": ""
+    },
+    {
+      "id": "os-alg-lru",
+      "category": "ALGORITHM",
+      "mainline": true,
+      "courseCode": "course.operating-systems",
+      "query": "LRU 命中后为什么要更新该页的位置？换出时看的是哪一端？",
+      "targetKind": "NODE",
+      "targetCode": "os.memory.lru",
+      "targetChunks": [
+        "chunk.wd25.memory.lru.001"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 8,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p0",
+          "excerpt": "**LRU 算法**淘汰最近最长时间未被使用的页面。它的依据是：过去一段时间未访问过的页面，在最近的将来可能也不会被访问。实现上为每个页面设置访问字段，记录自上次访问以来经历的时间，淘汰时选值最大的页面。\n\n仍用引用串 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`，3 个物理块："
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p2",
+          "excerpt": "理解 LRU 与 OPT 的区别：LRU 根据各页**以前**的使用情况判断，是“向前看”；OPT 根据各页**以后**的使用情况判断，是“向后看”。页面过去与未来的走向之间并无必然联系，所以 LRU 只是 OPT 的近似。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p1",
+          "excerpt": "| 序号 | 访问页 | 块1 | 块2 | 块3 | 缺页 |\n| --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | F |\n| 2 | 0 | 7 | 0 | — | F |\n| 3 | 1 | 7 | 0 | 1 | F |\n| 4 | 2 | 0 | 1 | 2 | F |\n| 5 | 0 | 1 | 2 | 0 |  |\n| 6 | 3 | 2 | 0 | 3 | F |\n| 7 | 0 | 2 | 3 | 0 |  |\n| 8 | 4 | 3 | 0 | 4 | F |\n| 9 | 2 | 0 | 4 | 2 | F |\n| 10 | 3 | 4 | 2 | 3 | F |\n| 11 | 0 | 2 | 3 | 0 | F |\n| 12 | 3 | 2 | 0 | 3 |  |\n| 13 | 2 | 0 | 3 | 2 |  |\n| 14 | 1 | 3 | 2 | 1 | F |\n| 15 | 2 | 3 | 1 | 2 |  |\n| 16 | 0 | 1 | 2 | 0 | F |\n| 17 | 1..."
+        },
+        {
+          "rank": 4,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p0",
+          "excerpt": "LRU 性能好但开销大。操作系统设计者希望用较小开销接近 LRU，**CLOCK 算法**及其变体就是这类尝试。\n\n简单 CLOCK 为每个页面设置一位**访问位**：页面首次装入或被访问时置 1。所有页面链接成循环队列，并有一个替换指针。淘汰时检查指针所指页面的访问位：\n\n- 若为 0，选它换出；\n- 若为 1，把它置 0，暂不换出，给予该页“第二次机会”，指针后移继续检查；\n- 检查到队尾仍为 1，就回到队首循环检查。\n\n因为循环扫描，所以称为 CLOCK 算法；又因为只根据一位访问位淘汰“最近未用过”的页，也称**最近未用（NRU）算法**。\n\n设页面访问顺序为 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,3,2`，分配 4 个页框，初始按序装入 7、0、1、2，访问位均为 1，替换指针从帧 1 开始："
+        },
+        {
+          "rank": 5,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p2",
+          "excerpt": "共 **8 次缺页**。第 6 次访问（页 3）时，四个访问位全为 1，指针完整扫描一周，把全部访问位清 0，再回到起点淘汰页 7；第 14 次访问（页 1）时同样全扫描一周后淘汰页 2。\n\nCLOCK 只用一个访问位近似“最近是否使用”，比 LRU 容易实现，但精度较低：它不区分页面的具体访问先后，只区分“这一轮是否被访问过”。"
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 8 条来源（语义可用）",
+      "elapsedMs": 22340,
+      "executionError": ""
+    },
+    {
+      "id": "os-alg-clock",
+      "category": "ALGORITHM",
+      "mainline": true,
+      "courseCode": "course.operating-systems",
+      "query": "简单 CLOCK 算法怎样用访问位决定换出页？扫描时访问位怎么变化？",
+      "targetKind": "NODE",
+      "targetCode": "os.memory.clock",
+      "targetChunks": [
+        "chunk.wd25.memory.clock.001"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 8,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p2",
+          "excerpt": "共 **8 次缺页**。第 6 次访问（页 3）时，四个访问位全为 1，指针完整扫描一周，把全部访问位清 0，再回到起点淘汰页 7；第 14 次访问（页 1）时同样全扫描一周后淘汰页 2。\n\nCLOCK 只用一个访问位近似“最近是否使用”，比 LRU 容易实现，但精度较低：它不区分页面的具体访问先后，只区分“这一轮是否被访问过”。"
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p0",
+          "excerpt": "LRU 性能好但开销大。操作系统设计者希望用较小开销接近 LRU，**CLOCK 算法**及其变体就是这类尝试。\n\n简单 CLOCK 为每个页面设置一位**访问位**：页面首次装入或被访问时置 1。所有页面链接成循环队列，并有一个替换指针。淘汰时检查指针所指页面的访问位：\n\n- 若为 0，选它换出；\n- 若为 1，把它置 0，暂不换出，给予该页“第二次机会”，指针后移继续检查；\n- 检查到队尾仍为 1，就回到队首循环检查。\n\n因为循环扫描，所以称为 CLOCK 算法；又因为只根据一位访问位淘汰“最近未用过”的页，也称**最近未用（NRU）算法**。\n\n设页面访问顺序为 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,3,2`，分配 4 个页框，初始按序装入 7、0、1、2，访问位均为 1，替换指针从帧 1 开始："
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.wd25.memory.clock-enhanced.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock-enhanced.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock-enhanced.001-p1",
+          "excerpt": "两类 CLOCK 的共同原则是“尽量保留访问过的页面，淘汰未访问过的页面”。简单 CLOCK 只区分是否访问过；改进型 CLOCK 在此基础上再区分是否修改过，因此优先淘汰未使用且未修改的页面。"
+        },
+        {
+          "rank": 4,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p1",
+          "excerpt": "| 序号 | 访问页 | 帧1 | 帧2 | 帧3 | 帧4 | 访问位 | 缺页 |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | — | 1000 | F |\n| 2 | 0 | 7 | 0 | — | — | 1100 | F |\n| 3 | 1 | 7 | 0 | 1 | — | 1110 | F |\n| 4 | 2 | 7 | 0 | 1 | 2 | 1111 | F |\n| 5 | 0 | 7 | 0 | 1 | 2 | 1111 |  |\n| 6 | 3 | 3 | 0 | 1 | 2 | 1000 | F |\n| 7 | 0 | 3 | 0 | 1 | 2 | 1100 |  |\n| 8 | 4 | 3 | 0 | 4 | 2 | 1010 | F |\n| 9 | 2 | 3 | 0 | 4 | 2 | 1011 |  |\n| 10 | 3 | 3 | 0 | 4 | 2 | 1111 |  |\n| 11 | 0 | 3 | 0 | 4 | 2 | 1111 |  |..."
+        },
+        {
+          "rank": 5,
+          "sourceId": "chunk.wd25.memory.clock-enhanced.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock-enhanced.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock-enhanced.001-p0",
+          "excerpt": "换出页面时，若该页被修改过，要写回磁盘；未修改过则不必写回。显然，淘汰修改过的页面代价更大。**改进型 CLOCK** 在访问位 A 之外再考虑修改位 M，优先淘汰“既未使用又未修改”的页面。\n\n按 A、M 组合，内存中的页面必属以下四类：\n\n| 类别 | A | M | 含义 | 淘汰优先级 |\n| --- | --- | --- | --- | --- |\n| 1 类 | 0 | 0 | 最近未被访问，且未被修改 | 最佳淘汰页 |\n| 2 类 | 0 | 1 | 最近未被访问，但已被修改 | 次佳淘汰页 |\n| 3 类 | 1 | 0 | 最近已被访问，但未被修改 | 可能再被访问 |\n| 4 类 | 1 | 1 | 最近已被访问，且已被修改 | 最不应淘汰 |\n\n算法分三轮：\n\n1. 从指针当前位置扫描，寻找 A=0 且 M=0 的 1 类页，遇到第一个就选中。**第一轮不改变访问位 A。**\n2. 若第一轮失败，进行第二轮，寻找 A=0 且 M=1 的 2 类页，遇到第一个就选中。**第二轮把扫描过的页面的访问位都置 0。**\n3. 若第二轮也失败，把指针回到开始位置，..."
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 8 条来源（语义可用）",
+      "elapsedMs": 30095,
+      "executionError": ""
+    },
+    {
+      "id": "os-alg-eclock",
+      "category": "ALGORITHM",
+      "mainline": true,
+      "courseCode": "course.operating-systems",
+      "query": "改进型 CLOCK 为什么还要看修改位？访问位和修改位四类页的处理顺序是什么？",
+      "targetKind": "NODE",
+      "targetCode": "os.memory.clock_enhanced",
+      "targetChunks": [
+        "chunk.wd25.memory.clock-enhanced.001",
+        "chunk.wd25.memory.difficulties.002"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 8,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.wd25.memory.clock-enhanced.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock-enhanced.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock-enhanced.001-p0",
+          "excerpt": "换出页面时，若该页被修改过，要写回磁盘；未修改过则不必写回。显然，淘汰修改过的页面代价更大。**改进型 CLOCK** 在访问位 A 之外再考虑修改位 M，优先淘汰“既未使用又未修改”的页面。\n\n按 A、M 组合，内存中的页面必属以下四类：\n\n| 类别 | A | M | 含义 | 淘汰优先级 |\n| --- | --- | --- | --- | --- |\n| 1 类 | 0 | 0 | 最近未被访问，且未被修改 | 最佳淘汰页 |\n| 2 类 | 0 | 1 | 最近未被访问，但已被修改 | 次佳淘汰页 |\n| 3 类 | 1 | 0 | 最近已被访问，但未被修改 | 可能再被访问 |\n| 4 类 | 1 | 1 | 最近已被访问，且已被修改 | 最不应淘汰 |\n\n算法分三轮：\n\n1. 从指针当前位置扫描，寻找 A=0 且 M=0 的 1 类页，遇到第一个就选中。**第一轮不改变访问位 A。**\n2. 若第一轮失败，进行第二轮，寻找 A=0 且 M=1 的 2 类页，遇到第一个就选中。**第二轮把扫描过的页面的访问位都置 0。**\n3. 若第二轮也失败，把指针回到开始位置，..."
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.wd25.memory.clock-enhanced.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock-enhanced.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock-enhanced.001-p1",
+          "excerpt": "两类 CLOCK 的共同原则是“尽量保留访问过的页面，淘汰未访问过的页面”。简单 CLOCK 只区分是否访问过；改进型 CLOCK 在此基础上再区分是否修改过，因此优先淘汰未使用且未修改的页面。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p0",
+          "excerpt": "LRU 性能好但开销大。操作系统设计者希望用较小开销接近 LRU，**CLOCK 算法**及其变体就是这类尝试。\n\n简单 CLOCK 为每个页面设置一位**访问位**：页面首次装入或被访问时置 1。所有页面链接成循环队列，并有一个替换指针。淘汰时检查指针所指页面的访问位：\n\n- 若为 0，选它换出；\n- 若为 1，把它置 0，暂不换出，给予该页“第二次机会”，指针后移继续检查；\n- 检查到队尾仍为 1，就回到队首循环检查。\n\n因为循环扫描，所以称为 CLOCK 算法；又因为只根据一位访问位淘汰“最近未用过”的页，也称**最近未用（NRU）算法**。\n\n设页面访问顺序为 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,3,2`，分配 4 个页框，初始按序装入 7、0、1、2，访问位均为 1，替换指针从帧 1 开始："
+        },
+        {
+          "rank": 4,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p2",
+          "excerpt": "共 **8 次缺页**。第 6 次访问（页 3）时，四个访问位全为 1，指针完整扫描一周，把全部访问位清 0，再回到起点淘汰页 7；第 14 次访问（页 1）时同样全扫描一周后淘汰页 2。\n\nCLOCK 只用一个访问位近似“最近是否使用”，比 LRU 容易实现，但精度较低：它不区分页面的具体访问先后，只区分“这一轮是否被访问过”。"
+        },
+        {
+          "rank": 5,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p1",
+          "excerpt": "| 序号 | 访问页 | 帧1 | 帧2 | 帧3 | 帧4 | 访问位 | 缺页 |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | — | 1000 | F |\n| 2 | 0 | 7 | 0 | — | — | 1100 | F |\n| 3 | 1 | 7 | 0 | 1 | — | 1110 | F |\n| 4 | 2 | 7 | 0 | 1 | 2 | 1111 | F |\n| 5 | 0 | 7 | 0 | 1 | 2 | 1111 |  |\n| 6 | 3 | 3 | 0 | 1 | 2 | 1000 | F |\n| 7 | 0 | 3 | 0 | 1 | 2 | 1100 |  |\n| 8 | 4 | 3 | 0 | 4 | 2 | 1010 | F |\n| 9 | 2 | 3 | 0 | 4 | 2 | 1011 |  |\n| 10 | 3 | 3 | 0 | 4 | 2 | 1111 |  |\n| 11 | 0 | 3 | 0 | 4 | 2 | 1111 |  |..."
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 8 条来源（语义可用）",
+      "elapsedMs": 28784,
+      "executionError": ""
+    },
+    {
+      "id": "os-err-01",
+      "category": "WRONG_ANSWER",
+      "mainline": false,
+      "courseCode": "course.operating-systems",
+      "query": "我答错了：三个物理块，访问序列 1,2,3,1,4，按 LRU 访问 4 时到底换出哪一页？我选了 2。",
+      "targetKind": "QUESTION",
+      "targetCode": "q.self.diag.lru.hit-update",
+      "targetChunks": [
+        "chunk.wd25.memory.lru.001"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 8,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p0",
+          "excerpt": "**LRU 算法**淘汰最近最长时间未被使用的页面。它的依据是：过去一段时间未访问过的页面，在最近的将来可能也不会被访问。实现上为每个页面设置访问字段，记录自上次访问以来经历的时间，淘汰时选值最大的页面。\n\n仍用引用串 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`，3 个物理块："
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p1",
+          "excerpt": "| 序号 | 访问页 | 块1 | 块2 | 块3 | 缺页 |\n| --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | F |\n| 2 | 0 | 7 | 0 | — | F |\n| 3 | 1 | 7 | 0 | 1 | F |\n| 4 | 2 | 0 | 1 | 2 | F |\n| 5 | 0 | 1 | 2 | 0 |  |\n| 6 | 3 | 2 | 0 | 3 | F |\n| 7 | 0 | 2 | 3 | 0 |  |\n| 8 | 4 | 3 | 0 | 4 | F |\n| 9 | 2 | 0 | 4 | 2 | F |\n| 10 | 3 | 4 | 2 | 3 | F |\n| 11 | 0 | 2 | 3 | 0 | F |\n| 12 | 3 | 2 | 0 | 3 |  |\n| 13 | 2 | 0 | 3 | 2 |  |\n| 14 | 1 | 3 | 2 | 1 | F |\n| 15 | 2 | 3 | 1 | 2 |  |\n| 16 | 0 | 1 | 2 | 0 | F |\n| 17 | 1..."
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p2",
+          "excerpt": "理解 LRU 与 OPT 的区别：LRU 根据各页**以前**的使用情况判断，是“向前看”；OPT 根据各页**以后**的使用情况判断，是“向后看”。页面过去与未来的走向之间并无必然联系，所以 LRU 只是 OPT 的近似。"
+        },
+        {
+          "rank": 4,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p0",
+          "excerpt": "LRU 性能好但开销大。操作系统设计者希望用较小开销接近 LRU，**CLOCK 算法**及其变体就是这类尝试。\n\n简单 CLOCK 为每个页面设置一位**访问位**：页面首次装入或被访问时置 1。所有页面链接成循环队列，并有一个替换指针。淘汰时检查指针所指页面的访问位：\n\n- 若为 0，选它换出；\n- 若为 1，把它置 0，暂不换出，给予该页“第二次机会”，指针后移继续检查；\n- 检查到队尾仍为 1，就回到队首循环检查。\n\n因为循环扫描，所以称为 CLOCK 算法；又因为只根据一位访问位淘汰“最近未用过”的页，也称**最近未用（NRU）算法**。\n\n设页面访问顺序为 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,3,2`，分配 4 个页框，初始按序装入 7、0、1、2，访问位均为 1，替换指针从帧 1 开始："
+        },
+        {
+          "rank": 5,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p2",
+          "excerpt": "共 **8 次缺页**。第 6 次访问（页 3）时，四个访问位全为 1，指针完整扫描一周，把全部访问位清 0，再回到起点淘汰页 7；第 14 次访问（页 1）时同样全扫描一周后淘汰页 2。\n\nCLOCK 只用一个访问位近似“最近是否使用”，比 LRU 容易实现，但精度较低：它不区分页面的具体访问先后，只区分“这一轮是否被访问过”。"
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 8 条来源（语义可用）",
+      "elapsedMs": 23839,
+      "executionError": ""
+    },
+    {
+      "id": "os-err-02",
+      "category": "WRONG_ANSWER",
+      "mainline": false,
+      "courseCode": "course.operating-systems",
+      "query": "刚才那道 FIFO 题我把命中页也当成换出页了，FIFO 命中时应该怎么处理？",
+      "targetKind": "QUESTION",
+      "targetCode": "q.self.diag.fifo.hit-order",
+      "targetChunks": [
+        "chunk.wd25.memory.fifo-belady.001"
+      ],
+      "hit": true,
+      "hitRank": 3,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 8,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.wd25.memory.opt.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.opt.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.opt.001-p0",
+          "excerpt": "页面换入换出需要磁盘 I/O，开销较大，好的页面置换算法应追求更低的缺页率。**最佳（OPT）置换算法**选择淘汰“以后永不使用”或“在最长时间内不再被访问”的页面，可保证最低的缺页率。但未来无法预测，因此 OPT 无法真正实现，只能用来评价其他算法。\n\n设系统为进程分配 3 个物理块，页面引用串为：\n\n`7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1`\n\n按 OPT 置换的过程如下（“缺页”列标 F 表示缺页）："
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.wd25.memory.opt.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.opt.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.opt.001-p1",
+          "excerpt": "| 序号 | 访问页 | 块1 | 块2 | 块3 | 缺页 |\n| --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | F |\n| 2 | 0 | 7 | 0 | — | F |\n| 3 | 1 | 7 | 0 | 1 | F |\n| 4 | 2 | 2 | 0 | 1 | F |\n| 5 | 0 | 2 | 0 | 1 |  |\n| 6 | 3 | 2 | 0 | 3 | F |\n| 7 | 0 | 2 | 0 | 3 |  |\n| 8 | 4 | 2 | 4 | 3 | F |\n| 9 | 2 | 2 | 4 | 3 |  |\n| 10 | 3 | 2 | 4 | 3 |  |\n| 11 | 0 | 2 | 0 | 3 | F |\n| 12 | 3 | 2 | 0 | 3 |  |\n| 13 | 2 | 2 | 0 | 3 |  |\n| 14 | 1 | 2 | 0 | 1 | F |\n| 15 | 2 | 2 | 0 | 1 |  |\n| 16 | 0 | 2 | 0 | 1 |  |\n| 17 | 1 | ..."
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.wd25.memory.fifo-belady.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.fifo-belady.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.fifo-belady.001-p0",
+          "excerpt": "**FIFO 算法**淘汰最早进入内存的页面。实现简单：把页面按调入先后排成队列，换出时取队头即可。但它没有利用局部性原理，与进程实际运行规律不相适应，性能较差。\n\n仍用前面的引用串和 3 个物理块：\n\n| 序号 | 访问页 | 块1 | 块2 | 块3 | 缺页 |\n| --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | F |\n| 2 | 0 | 7 | 0 | — | F |\n| 3 | 1 | 7 | 0 | 1 | F |\n| 4 | 2 | 0 | 1 | 2 | F |\n| 5 | 0 | 0 | 1 | 2 |  |\n| 6 | 3 | 1 | 2 | 3 | F |\n| 7 | 0 | 2 | 3 | 0 | F |\n| 8 | 4 | 3 | 0 | 4 | F |\n| 9 | 2 | 0 | 4 | 2 | F |\n| 10 | 3 | 4 | 2 | 3 | F |\n| 11 | 0 | 2 | 3 | 0 | F |\n| 12 | 3 | 2 | 3 | 0 |  |\n| 13 | 2 | ..."
+        },
+        {
+          "rank": 4,
+          "sourceId": "chunk.wd25.memory.fifo-belady.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.fifo-belady.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.fifo-belady.001-p1",
+          "excerpt": "FIFO 共发生 **15 次缺页、12 次置换**，正好是 OPT 置换次数的两倍。\n\nFIFO 还可能产生**Belady 异常**：为进程分配的物理块增多，缺页次数不但不减少，反而增加。例如引用串 `3, 2, 1, 0, 3, 2, 4, 3, 2, 1, 0, 4`：\n\n| 访问页 | 3 | 2 | 1 | 0 | 3 | 2 | 4 | 3 | 2 | 1 | 0 | 4 |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 3 个块 | 3 | 3,2 | 3,2,1 | 2,1,0 | 1,0,3 | 0,3,2 | 3,2,4 | 3,2,4 | 3,2,4 | 2,4,1 | 4,1,0 | 4,1,0 |\n| 缺页 | F | F | F | F | F | F | F |  |  | F | F |  |\n| 4 个块 | 3 | 3,2 | 3,2,1 | 3,2,1,0 | 3,2,1,0 | 3,2,1,0 | 2,1,0,4 | 1,..."
+        },
+        {
+          "rank": 5,
+          "sourceId": "chunk.wd25.memory.lru.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.lru.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.lru.001-p0",
+          "excerpt": "**LRU 算法**淘汰最近最长时间未被使用的页面。它的依据是：过去一段时间未访问过的页面，在最近的将来可能也不会被访问。实现上为每个页面设置访问字段，记录自上次访问以来经历的时间，淘汰时选值最大的页面。\n\n仍用引用串 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1`，3 个物理块："
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 8 条来源（语义可用）",
+      "elapsedMs": 23724,
+      "executionError": ""
+    },
+    {
+      "id": "os-err-03",
+      "category": "WRONG_ANSWER",
+      "mainline": false,
+      "courseCode": "course.operating-systems",
+      "query": "我做 CLOCK 题时忘了访问位会变化，能说说扫描过程吗？",
+      "targetKind": "NODE",
+      "targetCode": "os.memory.clock",
+      "targetChunks": [
+        "chunk.wd25.memory.clock.001"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 8,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p2",
+          "excerpt": "共 **8 次缺页**。第 6 次访问（页 3）时，四个访问位全为 1，指针完整扫描一周，把全部访问位清 0，再回到起点淘汰页 7；第 14 次访问（页 1）时同样全扫描一周后淘汰页 2。\n\nCLOCK 只用一个访问位近似“最近是否使用”，比 LRU 容易实现，但精度较低：它不区分页面的具体访问先后，只区分“这一轮是否被访问过”。"
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p0",
+          "excerpt": "LRU 性能好但开销大。操作系统设计者希望用较小开销接近 LRU，**CLOCK 算法**及其变体就是这类尝试。\n\n简单 CLOCK 为每个页面设置一位**访问位**：页面首次装入或被访问时置 1。所有页面链接成循环队列，并有一个替换指针。淘汰时检查指针所指页面的访问位：\n\n- 若为 0，选它换出；\n- 若为 1，把它置 0，暂不换出，给予该页“第二次机会”，指针后移继续检查；\n- 检查到队尾仍为 1，就回到队首循环检查。\n\n因为循环扫描，所以称为 CLOCK 算法；又因为只根据一位访问位淘汰“最近未用过”的页，也称**最近未用（NRU）算法**。\n\n设页面访问顺序为 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,3,2`，分配 4 个页框，初始按序装入 7、0、1、2，访问位均为 1，替换指针从帧 1 开始："
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.wd25.memory.clock-enhanced.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock-enhanced.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock-enhanced.001-p1",
+          "excerpt": "两类 CLOCK 的共同原则是“尽量保留访问过的页面，淘汰未访问过的页面”。简单 CLOCK 只区分是否访问过；改进型 CLOCK 在此基础上再区分是否修改过，因此优先淘汰未使用且未修改的页面。"
+        },
+        {
+          "rank": 4,
+          "sourceId": "chunk.wd25.memory.clock-enhanced.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock-enhanced.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock-enhanced.001-p0",
+          "excerpt": "换出页面时，若该页被修改过，要写回磁盘；未修改过则不必写回。显然，淘汰修改过的页面代价更大。**改进型 CLOCK** 在访问位 A 之外再考虑修改位 M，优先淘汰“既未使用又未修改”的页面。\n\n按 A、M 组合，内存中的页面必属以下四类：\n\n| 类别 | A | M | 含义 | 淘汰优先级 |\n| --- | --- | --- | --- | --- |\n| 1 类 | 0 | 0 | 最近未被访问，且未被修改 | 最佳淘汰页 |\n| 2 类 | 0 | 1 | 最近未被访问，但已被修改 | 次佳淘汰页 |\n| 3 类 | 1 | 0 | 最近已被访问，但未被修改 | 可能再被访问 |\n| 4 类 | 1 | 1 | 最近已被访问，且已被修改 | 最不应淘汰 |\n\n算法分三轮：\n\n1. 从指针当前位置扫描，寻找 A=0 且 M=0 的 1 类页，遇到第一个就选中。**第一轮不改变访问位 A。**\n2. 若第一轮失败，进行第二轮，寻找 A=0 且 M=1 的 2 类页，遇到第一个就选中。**第二轮把扫描过的页面的访问位都置 0。**\n3. 若第二轮也失败，把指针回到开始位置，..."
+        },
+        {
+          "rank": 5,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p1",
+          "excerpt": "| 序号 | 访问页 | 帧1 | 帧2 | 帧3 | 帧4 | 访问位 | 缺页 |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | — | 1000 | F |\n| 2 | 0 | 7 | 0 | — | — | 1100 | F |\n| 3 | 1 | 7 | 0 | 1 | — | 1110 | F |\n| 4 | 2 | 7 | 0 | 1 | 2 | 1111 | F |\n| 5 | 0 | 7 | 0 | 1 | 2 | 1111 |  |\n| 6 | 3 | 3 | 0 | 1 | 2 | 1000 | F |\n| 7 | 0 | 3 | 0 | 1 | 2 | 1100 |  |\n| 8 | 4 | 3 | 0 | 4 | 2 | 1010 | F |\n| 9 | 2 | 3 | 0 | 4 | 2 | 1011 |  |\n| 10 | 3 | 3 | 0 | 4 | 2 | 1111 |  |\n| 11 | 0 | 3 | 0 | 4 | 2 | 1111 |  |..."
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 8 条来源（语义可用）",
+      "elapsedMs": 30246,
+      "executionError": ""
+    },
+    {
+      "id": "os-err-04",
+      "category": "WRONG_ANSWER",
+      "mainline": false,
+      "courseCode": "course.operating-systems",
+      "query": "改进型 CLOCK 题我把修改位优先级弄反了，正确顺序是什么？",
+      "targetKind": "NODE",
+      "targetCode": "os.memory.clock_enhanced",
+      "targetChunks": [
+        "chunk.wd25.memory.clock-enhanced.001",
+        "chunk.wd25.memory.difficulties.002"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 8,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.wd25.memory.clock-enhanced.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock-enhanced.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock-enhanced.001-p0",
+          "excerpt": "换出页面时，若该页被修改过，要写回磁盘；未修改过则不必写回。显然，淘汰修改过的页面代价更大。**改进型 CLOCK** 在访问位 A 之外再考虑修改位 M，优先淘汰“既未使用又未修改”的页面。\n\n按 A、M 组合，内存中的页面必属以下四类：\n\n| 类别 | A | M | 含义 | 淘汰优先级 |\n| --- | --- | --- | --- | --- |\n| 1 类 | 0 | 0 | 最近未被访问，且未被修改 | 最佳淘汰页 |\n| 2 类 | 0 | 1 | 最近未被访问，但已被修改 | 次佳淘汰页 |\n| 3 类 | 1 | 0 | 最近已被访问，但未被修改 | 可能再被访问 |\n| 4 类 | 1 | 1 | 最近已被访问，且已被修改 | 最不应淘汰 |\n\n算法分三轮：\n\n1. 从指针当前位置扫描，寻找 A=0 且 M=0 的 1 类页，遇到第一个就选中。**第一轮不改变访问位 A。**\n2. 若第一轮失败，进行第二轮，寻找 A=0 且 M=1 的 2 类页，遇到第一个就选中。**第二轮把扫描过的页面的访问位都置 0。**\n3. 若第二轮也失败，把指针回到开始位置，..."
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.wd25.memory.clock-enhanced.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock-enhanced.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock-enhanced.001-p1",
+          "excerpt": "两类 CLOCK 的共同原则是“尽量保留访问过的页面，淘汰未访问过的页面”。简单 CLOCK 只区分是否访问过；改进型 CLOCK 在此基础上再区分是否修改过，因此优先淘汰未使用且未修改的页面。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p0",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p0",
+          "excerpt": "LRU 性能好但开销大。操作系统设计者希望用较小开销接近 LRU，**CLOCK 算法**及其变体就是这类尝试。\n\n简单 CLOCK 为每个页面设置一位**访问位**：页面首次装入或被访问时置 1。所有页面链接成循环队列，并有一个替换指针。淘汰时检查指针所指页面的访问位：\n\n- 若为 0，选它换出；\n- 若为 1，把它置 0，暂不换出，给予该页“第二次机会”，指针后移继续检查；\n- 检查到队尾仍为 1，就回到队首循环检查。\n\n因为循环扫描，所以称为 CLOCK 算法；又因为只根据一位访问位淘汰“最近未用过”的页，也称**最近未用（NRU）算法**。\n\n设页面访问顺序为 `7,0,1,2,0,3,0,4,2,3,0,3,2,1,3,2`，分配 4 个页框，初始按序装入 7、0、1、2，访问位均为 1，替换指针从帧 1 开始："
+        },
+        {
+          "rank": 4,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p2",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p2",
+          "excerpt": "共 **8 次缺页**。第 6 次访问（页 3）时，四个访问位全为 1，指针完整扫描一周，把全部访问位清 0，再回到起点淘汰页 7；第 14 次访问（页 1）时同样全扫描一周后淘汰页 2。\n\nCLOCK 只用一个访问位近似“最近是否使用”，比 LRU 容易实现，但精度较低：它不区分页面的具体访问先后，只区分“这一轮是否被访问过”。"
+        },
+        {
+          "rank": 5,
+          "sourceId": "chunk.wd25.memory.clock.001",
+          "blockId": "course.operating-systems::chunk.wd25.memory.clock.001::p1",
+          "courseCode": "course.operating-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.memory.page-replacement#chunk-chunk.wd25.memory.clock.001-p1",
+          "excerpt": "| 序号 | 访问页 | 帧1 | 帧2 | 帧3 | 帧4 | 访问位 | 缺页 |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | 7 | 7 | — | — | — | 1000 | F |\n| 2 | 0 | 7 | 0 | — | — | 1100 | F |\n| 3 | 1 | 7 | 0 | 1 | — | 1110 | F |\n| 4 | 2 | 7 | 0 | 1 | 2 | 1111 | F |\n| 5 | 0 | 7 | 0 | 1 | 2 | 1111 |  |\n| 6 | 3 | 3 | 0 | 1 | 2 | 1000 | F |\n| 7 | 0 | 3 | 0 | 1 | 2 | 1100 |  |\n| 8 | 4 | 3 | 0 | 4 | 2 | 1010 | F |\n| 9 | 2 | 3 | 0 | 4 | 2 | 1011 |  |\n| 10 | 3 | 3 | 0 | 4 | 2 | 1111 |  |\n| 11 | 0 | 3 | 0 | 4 | 2 | 1111 |  |..."
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 8 条来源（语义可用）",
+      "elapsedMs": 16489,
+      "executionError": ""
+    },
+    {
+      "id": "db-closure-01",
+      "category": "DATABASE_CLOSURE",
+      "mainline": true,
+      "courseCode": "course.database-systems",
+      "query": "给定函数依赖集，如何求属性 A 的闭包？步骤是什么？",
+      "targetKind": "QUESTION",
+      "targetCode": "q.db.fd.closure-basic",
+      "targetChunks": [
+        "chunk.db.fd.closure"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 3,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.db.fd.closure",
+          "blockId": "course.database-systems::chunk.db.fd.closure::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.closure-p0",
+          "excerpt": "设关系模式 R 上的函数依赖集为 F，属性集 X 的闭包 X+ 是：在 F 下由 X 能函数推导出的全部属性集合。\n\n计算步骤：\n\n1. 令结果集 `result = X`。\n2. 反复扫描 F 中的每个函数依赖 `A → B`：若 `A ⊆ result`，则把 `B` 并入 `result`。\n3. 当一轮扫描没有任何属性新增时停止；此时 `result` 就是 `X+`。\n\n例：R(A,B,C,D)，F = {A→B, B→C}。\n\n- 初值 `{A}`；由 A→B 得 `{A,B}`；由 B→C 得 `{A,B,C}`；没有新属性，停止。\n- 因此 `A+ = {A,B,C}`，A 不能决定 D。\n\n要点：闭包要一直扩展到不能再扩展，不能只应用一步；复合决定因素（如 AB→C）只有在 A 与 B 都在结果集中时才可用。"
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.db.fd.superkey",
+          "blockId": "course.database-systems::chunk.db.fd.superkey::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.superkey-p0",
+          "excerpt": "若属性集 K 的闭包 `K+` 包含关系模式 R 的全部属性，则 K 是超键。\n\n候选键是**最小超键**：K 本身是超键，并且从 K 中去掉任何一个属性后都不再是超键。\n\n判定方法：\n\n1. 先求 K+，确认 K 是超键。\n2. 再检查 K 的每个真子集，若存在真子集也能决定全部属性，则 K 不是候选键。\n3. 一个关系模式可能有多个候选键，它们都满足最小性。\n\n例：R(A,B,C)，F = {A→B, B→A, A→C}。\n\n- `A+ = {A,B,C}`，A 是超键；A 没有非空真子集，因此 A 是候选键。\n- `B+ = {B,A,C}`，B 也是候选键。\n- `{A,B}` 虽是超键，但包含候选键 A，不是最小超键，因此不是候选键。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.db.fd.minimality",
+          "blockId": "course.database-systems::chunk.db.fd.minimality::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.minimality-p0",
+          "excerpt": "题：R(A,B,C)，F = {A→B, B→C}。求候选键。\n\n闭包计算：\n\n| 属性集 | 闭包 | 是否超键 | 是否最小 |\n| --- | --- | --- | --- |\n| A | {A,B,C} | 是 | 是（无非空真子集） |\n| B | {B,C} | 否 | — |\n| C | {C} | 否 | — |\n| AB | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n| AC | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n\n结论：唯一候选键是 A。判断最小性时，不能只看“能不能决定全部属性”，还要看是否存在更小的子集也能决定全部属性。"
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 3 条来源（语义可用）",
+      "elapsedMs": 18614,
+      "executionError": ""
+    },
+    {
+      "id": "db-closure-02",
+      "category": "DATABASE_CLOSURE",
+      "mainline": true,
+      "courseCode": "course.database-systems",
+      "query": "复合决定因素的闭包怎么算？比如 AB→C、C→D，求 AB 的闭包。",
+      "targetKind": "QUESTION",
+      "targetCode": "q.db.fd.closure-composite",
+      "targetChunks": [
+        "chunk.db.fd.closure"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 3,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.db.fd.closure",
+          "blockId": "course.database-systems::chunk.db.fd.closure::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.closure-p0",
+          "excerpt": "设关系模式 R 上的函数依赖集为 F，属性集 X 的闭包 X+ 是：在 F 下由 X 能函数推导出的全部属性集合。\n\n计算步骤：\n\n1. 令结果集 `result = X`。\n2. 反复扫描 F 中的每个函数依赖 `A → B`：若 `A ⊆ result`，则把 `B` 并入 `result`。\n3. 当一轮扫描没有任何属性新增时停止；此时 `result` 就是 `X+`。\n\n例：R(A,B,C,D)，F = {A→B, B→C}。\n\n- 初值 `{A}`；由 A→B 得 `{A,B}`；由 B→C 得 `{A,B,C}`；没有新属性，停止。\n- 因此 `A+ = {A,B,C}`，A 不能决定 D。\n\n要点：闭包要一直扩展到不能再扩展，不能只应用一步；复合决定因素（如 AB→C）只有在 A 与 B 都在结果集中时才可用。"
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.db.fd.minimality",
+          "blockId": "course.database-systems::chunk.db.fd.minimality::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.minimality-p0",
+          "excerpt": "题：R(A,B,C)，F = {A→B, B→C}。求候选键。\n\n闭包计算：\n\n| 属性集 | 闭包 | 是否超键 | 是否最小 |\n| --- | --- | --- | --- |\n| A | {A,B,C} | 是 | 是（无非空真子集） |\n| B | {B,C} | 否 | — |\n| C | {C} | 否 | — |\n| AB | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n| AC | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n\n结论：唯一候选键是 A。判断最小性时，不能只看“能不能决定全部属性”，还要看是否存在更小的子集也能决定全部属性。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.db.fd.superkey",
+          "blockId": "course.database-systems::chunk.db.fd.superkey::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.superkey-p0",
+          "excerpt": "若属性集 K 的闭包 `K+` 包含关系模式 R 的全部属性，则 K 是超键。\n\n候选键是**最小超键**：K 本身是超键，并且从 K 中去掉任何一个属性后都不再是超键。\n\n判定方法：\n\n1. 先求 K+，确认 K 是超键。\n2. 再检查 K 的每个真子集，若存在真子集也能决定全部属性，则 K 不是候选键。\n3. 一个关系模式可能有多个候选键，它们都满足最小性。\n\n例：R(A,B,C)，F = {A→B, B→A, A→C}。\n\n- `A+ = {A,B,C}`，A 是超键；A 没有非空真子集，因此 A 是候选键。\n- `B+ = {B,A,C}`，B 也是候选键。\n- `{A,B}` 虽是超键，但包含候选键 A，不是最小超键，因此不是候选键。"
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 3 条来源（语义可用）",
+      "elapsedMs": 16513,
+      "executionError": ""
+    },
+    {
+      "id": "db-closure-03",
+      "category": "DATABASE_CLOSURE",
+      "mainline": false,
+      "courseCode": "course.database-systems",
+      "query": "属性闭包的结果包含哪些属性？闭包和超键有什么关系？",
+      "targetKind": "NODE",
+      "targetCode": "db.fd.attribute-closure",
+      "targetChunks": [
+        "chunk.db.fd.closure"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 3,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.db.fd.closure",
+          "blockId": "course.database-systems::chunk.db.fd.closure::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.closure-p0",
+          "excerpt": "设关系模式 R 上的函数依赖集为 F，属性集 X 的闭包 X+ 是：在 F 下由 X 能函数推导出的全部属性集合。\n\n计算步骤：\n\n1. 令结果集 `result = X`。\n2. 反复扫描 F 中的每个函数依赖 `A → B`：若 `A ⊆ result`，则把 `B` 并入 `result`。\n3. 当一轮扫描没有任何属性新增时停止；此时 `result` 就是 `X+`。\n\n例：R(A,B,C,D)，F = {A→B, B→C}。\n\n- 初值 `{A}`；由 A→B 得 `{A,B}`；由 B→C 得 `{A,B,C}`；没有新属性，停止。\n- 因此 `A+ = {A,B,C}`，A 不能决定 D。\n\n要点：闭包要一直扩展到不能再扩展，不能只应用一步；复合决定因素（如 AB→C）只有在 A 与 B 都在结果集中时才可用。"
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.db.fd.superkey",
+          "blockId": "course.database-systems::chunk.db.fd.superkey::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.superkey-p0",
+          "excerpt": "若属性集 K 的闭包 `K+` 包含关系模式 R 的全部属性，则 K 是超键。\n\n候选键是**最小超键**：K 本身是超键，并且从 K 中去掉任何一个属性后都不再是超键。\n\n判定方法：\n\n1. 先求 K+，确认 K 是超键。\n2. 再检查 K 的每个真子集，若存在真子集也能决定全部属性，则 K 不是候选键。\n3. 一个关系模式可能有多个候选键，它们都满足最小性。\n\n例：R(A,B,C)，F = {A→B, B→A, A→C}。\n\n- `A+ = {A,B,C}`，A 是超键；A 没有非空真子集，因此 A 是候选键。\n- `B+ = {B,A,C}`，B 也是候选键。\n- `{A,B}` 虽是超键，但包含候选键 A，不是最小超键，因此不是候选键。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.db.fd.minimality",
+          "blockId": "course.database-systems::chunk.db.fd.minimality::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.minimality-p0",
+          "excerpt": "题：R(A,B,C)，F = {A→B, B→C}。求候选键。\n\n闭包计算：\n\n| 属性集 | 闭包 | 是否超键 | 是否最小 |\n| --- | --- | --- | --- |\n| A | {A,B,C} | 是 | 是（无非空真子集） |\n| B | {B,C} | 否 | — |\n| C | {C} | 否 | — |\n| AB | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n| AC | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n\n结论：唯一候选键是 A。判断最小性时，不能只看“能不能决定全部属性”，还要看是否存在更小的子集也能决定全部属性。"
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 3 条来源（语义可用）",
+      "elapsedMs": 17892,
+      "executionError": ""
+    },
+    {
+      "id": "db-closure-04",
+      "category": "DATABASE_CLOSURE",
+      "mainline": false,
+      "courseCode": "course.database-systems",
+      "query": "为什么求候选键要先求属性闭包？闭包能判断函数依赖是否成立吗？",
+      "targetKind": "NODE",
+      "targetCode": "db.fd.attribute-closure",
+      "targetChunks": [
+        "chunk.db.fd.closure"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 3,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.db.fd.closure",
+          "blockId": "course.database-systems::chunk.db.fd.closure::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.closure-p0",
+          "excerpt": "设关系模式 R 上的函数依赖集为 F，属性集 X 的闭包 X+ 是：在 F 下由 X 能函数推导出的全部属性集合。\n\n计算步骤：\n\n1. 令结果集 `result = X`。\n2. 反复扫描 F 中的每个函数依赖 `A → B`：若 `A ⊆ result`，则把 `B` 并入 `result`。\n3. 当一轮扫描没有任何属性新增时停止；此时 `result` 就是 `X+`。\n\n例：R(A,B,C,D)，F = {A→B, B→C}。\n\n- 初值 `{A}`；由 A→B 得 `{A,B}`；由 B→C 得 `{A,B,C}`；没有新属性，停止。\n- 因此 `A+ = {A,B,C}`，A 不能决定 D。\n\n要点：闭包要一直扩展到不能再扩展，不能只应用一步；复合决定因素（如 AB→C）只有在 A 与 B 都在结果集中时才可用。"
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.db.fd.superkey",
+          "blockId": "course.database-systems::chunk.db.fd.superkey::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.superkey-p0",
+          "excerpt": "若属性集 K 的闭包 `K+` 包含关系模式 R 的全部属性，则 K 是超键。\n\n候选键是**最小超键**：K 本身是超键，并且从 K 中去掉任何一个属性后都不再是超键。\n\n判定方法：\n\n1. 先求 K+，确认 K 是超键。\n2. 再检查 K 的每个真子集，若存在真子集也能决定全部属性，则 K 不是候选键。\n3. 一个关系模式可能有多个候选键，它们都满足最小性。\n\n例：R(A,B,C)，F = {A→B, B→A, A→C}。\n\n- `A+ = {A,B,C}`，A 是超键；A 没有非空真子集，因此 A 是候选键。\n- `B+ = {B,A,C}`，B 也是候选键。\n- `{A,B}` 虽是超键，但包含候选键 A，不是最小超键，因此不是候选键。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.db.fd.minimality",
+          "blockId": "course.database-systems::chunk.db.fd.minimality::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.minimality-p0",
+          "excerpt": "题：R(A,B,C)，F = {A→B, B→C}。求候选键。\n\n闭包计算：\n\n| 属性集 | 闭包 | 是否超键 | 是否最小 |\n| --- | --- | --- | --- |\n| A | {A,B,C} | 是 | 是（无非空真子集） |\n| B | {B,C} | 否 | — |\n| C | {C} | 否 | — |\n| AB | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n| AC | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n\n结论：唯一候选键是 A。判断最小性时，不能只看“能不能决定全部属性”，还要看是否存在更小的子集也能决定全部属性。"
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 3 条来源（语义可用）",
+      "elapsedMs": 18693,
+      "executionError": ""
+    },
+    {
+      "id": "db-key-01",
+      "category": "DATABASE_CANDIDATE_KEY",
+      "mainline": true,
+      "courseCode": "course.database-systems",
+      "query": "候选键和超键的区别是什么？候选键为什么要求最小性？",
+      "targetKind": "QUESTION",
+      "targetCode": "q.db.fd.superkey-not-candidate",
+      "targetChunks": [
+        "chunk.db.fd.minimality",
+        "chunk.db.fd.superkey"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 3,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.db.fd.superkey",
+          "blockId": "course.database-systems::chunk.db.fd.superkey::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.superkey-p0",
+          "excerpt": "若属性集 K 的闭包 `K+` 包含关系模式 R 的全部属性，则 K 是超键。\n\n候选键是**最小超键**：K 本身是超键，并且从 K 中去掉任何一个属性后都不再是超键。\n\n判定方法：\n\n1. 先求 K+，确认 K 是超键。\n2. 再检查 K 的每个真子集，若存在真子集也能决定全部属性，则 K 不是候选键。\n3. 一个关系模式可能有多个候选键，它们都满足最小性。\n\n例：R(A,B,C)，F = {A→B, B→A, A→C}。\n\n- `A+ = {A,B,C}`，A 是超键；A 没有非空真子集，因此 A 是候选键。\n- `B+ = {B,A,C}`，B 也是候选键。\n- `{A,B}` 虽是超键，但包含候选键 A，不是最小超键，因此不是候选键。"
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.db.fd.minimality",
+          "blockId": "course.database-systems::chunk.db.fd.minimality::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.minimality-p0",
+          "excerpt": "题：R(A,B,C)，F = {A→B, B→C}。求候选键。\n\n闭包计算：\n\n| 属性集 | 闭包 | 是否超键 | 是否最小 |\n| --- | --- | --- | --- |\n| A | {A,B,C} | 是 | 是（无非空真子集） |\n| B | {B,C} | 否 | — |\n| C | {C} | 否 | — |\n| AB | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n| AC | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n\n结论：唯一候选键是 A。判断最小性时，不能只看“能不能决定全部属性”，还要看是否存在更小的子集也能决定全部属性。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.db.fd.closure",
+          "blockId": "course.database-systems::chunk.db.fd.closure::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.closure-p0",
+          "excerpt": "设关系模式 R 上的函数依赖集为 F，属性集 X 的闭包 X+ 是：在 F 下由 X 能函数推导出的全部属性集合。\n\n计算步骤：\n\n1. 令结果集 `result = X`。\n2. 反复扫描 F 中的每个函数依赖 `A → B`：若 `A ⊆ result`，则把 `B` 并入 `result`。\n3. 当一轮扫描没有任何属性新增时停止；此时 `result` 就是 `X+`。\n\n例：R(A,B,C,D)，F = {A→B, B→C}。\n\n- 初值 `{A}`；由 A→B 得 `{A,B}`；由 B→C 得 `{A,B,C}`；没有新属性，停止。\n- 因此 `A+ = {A,B,C}`，A 不能决定 D。\n\n要点：闭包要一直扩展到不能再扩展，不能只应用一步；复合决定因素（如 AB→C）只有在 A 与 B 都在结果集中时才可用。"
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 3 条来源（语义可用）",
+      "elapsedMs": 23813,
+      "executionError": ""
+    },
+    {
+      "id": "db-key-02",
+      "category": "DATABASE_CANDIDATE_KEY",
+      "mainline": true,
+      "courseCode": "course.database-systems",
+      "query": "怎样统计一个关系模式的候选键个数？请结合属性闭包说明。",
+      "targetKind": "QUESTION",
+      "targetCode": "q.db.fd.candidate-count",
+      "targetChunks": [
+        "chunk.db.fd.minimality",
+        "chunk.db.fd.superkey"
+      ],
+      "hit": true,
+      "hitRank": 2,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 3,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.db.fd.closure",
+          "blockId": "course.database-systems::chunk.db.fd.closure::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.closure-p0",
+          "excerpt": "设关系模式 R 上的函数依赖集为 F，属性集 X 的闭包 X+ 是：在 F 下由 X 能函数推导出的全部属性集合。\n\n计算步骤：\n\n1. 令结果集 `result = X`。\n2. 反复扫描 F 中的每个函数依赖 `A → B`：若 `A ⊆ result`，则把 `B` 并入 `result`。\n3. 当一轮扫描没有任何属性新增时停止；此时 `result` 就是 `X+`。\n\n例：R(A,B,C,D)，F = {A→B, B→C}。\n\n- 初值 `{A}`；由 A→B 得 `{A,B}`；由 B→C 得 `{A,B,C}`；没有新属性，停止。\n- 因此 `A+ = {A,B,C}`，A 不能决定 D。\n\n要点：闭包要一直扩展到不能再扩展，不能只应用一步；复合决定因素（如 AB→C）只有在 A 与 B 都在结果集中时才可用。"
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.db.fd.minimality",
+          "blockId": "course.database-systems::chunk.db.fd.minimality::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.minimality-p0",
+          "excerpt": "题：R(A,B,C)，F = {A→B, B→C}。求候选键。\n\n闭包计算：\n\n| 属性集 | 闭包 | 是否超键 | 是否最小 |\n| --- | --- | --- | --- |\n| A | {A,B,C} | 是 | 是（无非空真子集） |\n| B | {B,C} | 否 | — |\n| C | {C} | 否 | — |\n| AB | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n| AC | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n\n结论：唯一候选键是 A。判断最小性时，不能只看“能不能决定全部属性”，还要看是否存在更小的子集也能决定全部属性。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.db.fd.superkey",
+          "blockId": "course.database-systems::chunk.db.fd.superkey::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.superkey-p0",
+          "excerpt": "若属性集 K 的闭包 `K+` 包含关系模式 R 的全部属性，则 K 是超键。\n\n候选键是**最小超键**：K 本身是超键，并且从 K 中去掉任何一个属性后都不再是超键。\n\n判定方法：\n\n1. 先求 K+，确认 K 是超键。\n2. 再检查 K 的每个真子集，若存在真子集也能决定全部属性，则 K 不是候选键。\n3. 一个关系模式可能有多个候选键，它们都满足最小性。\n\n例：R(A,B,C)，F = {A→B, B→A, A→C}。\n\n- `A+ = {A,B,C}`，A 是超键；A 没有非空真子集，因此 A 是候选键。\n- `B+ = {B,A,C}`，B 也是候选键。\n- `{A,B}` 虽是超键，但包含候选键 A，不是最小超键，因此不是候选键。"
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 3 条来源（语义可用）",
+      "elapsedMs": 31854,
+      "executionError": ""
+    },
+    {
+      "id": "db-key-03",
+      "category": "DATABASE_CANDIDATE_KEY",
+      "mainline": false,
+      "courseCode": "course.database-systems",
+      "query": "选择最小候选键时，如何判断某个属性能不能从候选键里去掉？",
+      "targetKind": "QUESTION",
+      "targetCode": "q.db.fd.candidate-minimal",
+      "targetChunks": [
+        "chunk.db.fd.minimality"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 3,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.db.fd.minimality",
+          "blockId": "course.database-systems::chunk.db.fd.minimality::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.minimality-p0",
+          "excerpt": "题：R(A,B,C)，F = {A→B, B→C}。求候选键。\n\n闭包计算：\n\n| 属性集 | 闭包 | 是否超键 | 是否最小 |\n| --- | --- | --- | --- |\n| A | {A,B,C} | 是 | 是（无非空真子集） |\n| B | {B,C} | 否 | — |\n| C | {C} | 否 | — |\n| AB | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n| AC | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n\n结论：唯一候选键是 A。判断最小性时，不能只看“能不能决定全部属性”，还要看是否存在更小的子集也能决定全部属性。"
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.db.fd.superkey",
+          "blockId": "course.database-systems::chunk.db.fd.superkey::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.superkey-p0",
+          "excerpt": "若属性集 K 的闭包 `K+` 包含关系模式 R 的全部属性，则 K 是超键。\n\n候选键是**最小超键**：K 本身是超键，并且从 K 中去掉任何一个属性后都不再是超键。\n\n判定方法：\n\n1. 先求 K+，确认 K 是超键。\n2. 再检查 K 的每个真子集，若存在真子集也能决定全部属性，则 K 不是候选键。\n3. 一个关系模式可能有多个候选键，它们都满足最小性。\n\n例：R(A,B,C)，F = {A→B, B→A, A→C}。\n\n- `A+ = {A,B,C}`，A 是超键；A 没有非空真子集，因此 A 是候选键。\n- `B+ = {B,A,C}`，B 也是候选键。\n- `{A,B}` 虽是超键，但包含候选键 A，不是最小超键，因此不是候选键。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.db.fd.closure",
+          "blockId": "course.database-systems::chunk.db.fd.closure::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.closure-p0",
+          "excerpt": "设关系模式 R 上的函数依赖集为 F，属性集 X 的闭包 X+ 是：在 F 下由 X 能函数推导出的全部属性集合。\n\n计算步骤：\n\n1. 令结果集 `result = X`。\n2. 反复扫描 F 中的每个函数依赖 `A → B`：若 `A ⊆ result`，则把 `B` 并入 `result`。\n3. 当一轮扫描没有任何属性新增时停止；此时 `result` 就是 `X+`。\n\n例：R(A,B,C,D)，F = {A→B, B→C}。\n\n- 初值 `{A}`；由 A→B 得 `{A,B}`；由 B→C 得 `{A,B,C}`；没有新属性，停止。\n- 因此 `A+ = {A,B,C}`，A 不能决定 D。\n\n要点：闭包要一直扩展到不能再扩展，不能只应用一步；复合决定因素（如 AB→C）只有在 A 与 B 都在结果集中时才可用。"
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 3 条来源（语义可用）",
+      "elapsedMs": 23738,
+      "executionError": ""
+    },
+    {
+      "id": "db-key-04",
+      "category": "DATABASE_CANDIDATE_KEY",
+      "mainline": false,
+      "courseCode": "course.database-systems",
+      "query": "超键的判定条件是什么？一个超键在什么情况下不是候选键？",
+      "targetKind": "UNIT",
+      "targetCode": "unit.db.fd-keys",
+      "targetChunks": [
+        "chunk.db.fd.closure",
+        "chunk.db.fd.minimality",
+        "chunk.db.fd.superkey"
+      ],
+      "hit": true,
+      "hitRank": 1,
+      "mode": "AI",
+      "turnStatus": "SUCCEEDED",
+      "sourcesCount": 3,
+      "topSources": [
+        {
+          "rank": 1,
+          "sourceId": "chunk.db.fd.superkey",
+          "blockId": "course.database-systems::chunk.db.fd.superkey::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.superkey-p0",
+          "excerpt": "若属性集 K 的闭包 `K+` 包含关系模式 R 的全部属性，则 K 是超键。\n\n候选键是**最小超键**：K 本身是超键，并且从 K 中去掉任何一个属性后都不再是超键。\n\n判定方法：\n\n1. 先求 K+，确认 K 是超键。\n2. 再检查 K 的每个真子集，若存在真子集也能决定全部属性，则 K 不是候选键。\n3. 一个关系模式可能有多个候选键，它们都满足最小性。\n\n例：R(A,B,C)，F = {A→B, B→A, A→C}。\n\n- `A+ = {A,B,C}`，A 是超键；A 没有非空真子集，因此 A 是候选键。\n- `B+ = {B,A,C}`，B 也是候选键。\n- `{A,B}` 虽是超键，但包含候选键 A，不是最小超键，因此不是候选键。"
+        },
+        {
+          "rank": 2,
+          "sourceId": "chunk.db.fd.minimality",
+          "blockId": "course.database-systems::chunk.db.fd.minimality::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.minimality-p0",
+          "excerpt": "题：R(A,B,C)，F = {A→B, B→C}。求候选键。\n\n闭包计算：\n\n| 属性集 | 闭包 | 是否超键 | 是否最小 |\n| --- | --- | --- | --- |\n| A | {A,B,C} | 是 | 是（无非空真子集） |\n| B | {B,C} | 否 | — |\n| C | {C} | 否 | — |\n| AB | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n| AC | {A,B,C} | 是 | 否（A 已能决定全部属性） |\n\n结论：唯一候选键是 A。判断最小性时，不能只看“能不能决定全部属性”，还要看是否存在更小的子集也能决定全部属性。"
+        },
+        {
+          "rank": 3,
+          "sourceId": "chunk.db.fd.closure",
+          "blockId": "course.database-systems::chunk.db.fd.closure::p0",
+          "courseCode": "course.database-systems",
+          "ownerScope": "COURSE",
+          "revision": 1,
+          "locator": "sec.db.fd#chunk-chunk.db.fd.closure-p0",
+          "excerpt": "设关系模式 R 上的函数依赖集为 F，属性集 X 的闭包 X+ 是：在 F 下由 X 能函数推导出的全部属性集合。\n\n计算步骤：\n\n1. 令结果集 `result = X`。\n2. 反复扫描 F 中的每个函数依赖 `A → B`：若 `A ⊆ result`，则把 `B` 并入 `result`。\n3. 当一轮扫描没有任何属性新增时停止；此时 `result` 就是 `X+`。\n\n例：R(A,B,C,D)，F = {A→B, B→C}。\n\n- 初值 `{A}`；由 A→B 得 `{A,B}`；由 B→C 得 `{A,B,C}`；没有新属性，停止。\n- 因此 `A+ = {A,B,C}`，A 不能决定 D。\n\n要点：闭包要一直扩展到不能再扩展，不能只应用一步；复合决定因素（如 AB→C）只有在 A 与 B 都在结果集中时才可用。"
+        }
+      ],
+      "courseIsolationOk": true,
+      "citationLocatorOk": true,
+      "retrievalSummary": "检索到 3 条来源（语义可用）",
+      "elapsedMs": 11443,
+      "executionError": ""
+    }
+  ]
+}

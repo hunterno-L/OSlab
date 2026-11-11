@@ -39,3 +39,7 @@ pnpm-debug.log*
 
 # Superpowers SDD working scratch (ledgers/briefs/review packages)
 .superpowers/
+
+# 旧设计文档仅本地留存，不入库
+旧设（useless）/
+docs/useless/

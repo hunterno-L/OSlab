@@ -1,0 +1,13 @@
+{
+  "url": "http://localhost:8081/assessments/run/2120322139153997826?returnTo=/assessments?courseCode=course.operating-systems&courseCode=course.operating-systems",
+  "saveState": "已保存",
+  "nav": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+  ],
+  "cardText": "【2023 统考真题】共享数据所在页号与页框号的关系\n单选题\n内存管理\n\n【2023 统考真题】进程 R 和 S 共享数据 data，若 data 在 R 和 S 中所占的页号分别为 p1 和 p2，两个页所对应的页框号分别为 f1 和 f2，则下列叙述中，正确的是（　）。\n\nA\n\np1 和 p2 一定相等，f1 和 f2 一定相等\n\nB\n\np1 和 p2 一定相等，f1 和 f2 不一定相等\n\nC\n\np1 和 p2 不一定相等，f1 和 f2 一定相等\n\nD\n\np1 和 p2 不一定相等，f1 和 f2 不一定相等\n\n标记为不确定\n自测期间不显示对错与解析，交卷后统一查看",
+  "bodyHasAnalysis": false
+}

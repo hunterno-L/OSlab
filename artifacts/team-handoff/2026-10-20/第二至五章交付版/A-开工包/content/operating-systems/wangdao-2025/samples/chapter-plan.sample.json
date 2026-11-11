@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "oslab-chapter-plan/1.0",
+  "chapterCode": "sec.process",
+  "status": "PROPOSED",
+  "sections": [],
+  "units": [
+    {
+      "unitCode": "unit.process.fcfs-example",
+      "sectionCode": "sec.process.cpu-algorithms",
+      "title": "FCFS 调度与等待时间（自编格式样例）",
+      "objectives": ["按到达顺序确定执行区间", "由执行区间计算等待时间"],
+      "sortOrder": 1,
+      "estimatedMinutes": 20,
+      "prerequisiteUnitCodes": [],
+      "nodeCodes": ["os.cpu.fcfs"],
+      "readingChunkCodes": ["chunk.sample.process.fcfs-rule"],
+      "demoResourceCodes": ["demo.cpu.fcfs"],
+      "practiceGuidance": "阅读规则后先手算，再观察演示；按教材整理时替换本示例，不把它计作教材内容。"
+    }
+  ]
+}

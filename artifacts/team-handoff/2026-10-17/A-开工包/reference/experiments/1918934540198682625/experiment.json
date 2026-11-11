@@ -1,0 +1,28 @@
+{
+  "questionId": "1918934540198682625",
+  "resourceCode": "exp.legacy.1918934540198682625",
+  "title": "实验4.7 实现进程间通信（IPC）机制",
+  "content": "333333",
+  "tags": [
+    "JavaScript",
+    "Vue",
+    "React"
+  ],
+  "referenceAnswer": "",
+  "originalCode": "",
+  "judgeCase": [
+    {
+      "input": "",
+      "output": ""
+    }
+  ],
+  "judgeConfig": {
+    "timeLimit": 1000,
+    "memoryLimit": 1000,
+    "stackLimit": 1000
+  },
+  "legacySetIds": [],
+  "legacySets": [],
+  "snapshotUpdatedTime": "2025-05-10 20:47:54",
+  "runtimeValidated": false
+}

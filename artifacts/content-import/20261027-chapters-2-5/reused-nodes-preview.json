@@ -1,0 +1,148 @@
+{
+  "valid" : true,
+  "items" : [ {
+    "type" : "nodes",
+    "code" : "os.cpu.scheduling",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.cpu.fcfs",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.cpu.sjf",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.cpu.hrrn",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.cpu.priority_nonpreemptive",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.cpu.priority_preemptive",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.cpu.rr",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.cpu.mlfq",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.contiguous_allocation",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.first_fit",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.next_fit",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.best_fit",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.worst_fit",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.page_table",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.address_translation",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.tlb",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.locality",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.virtual_memory",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.access_bit",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.dirty_bit",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.page_fault",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.frame_allocation",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.opt",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.page_replacement",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.fifo",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.belady",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.lru",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.clock",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.clock_enhanced",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.memory.thrashing",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.disk.scheduling",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.disk.fcfs",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.disk.sstf",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.disk.scan",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.disk.cscan",
+    "action" : "CREATE"
+  } ],
+  "errors" : [ ],
+  "created" : 35,
+  "updated" : 0,
+  "unchanged" : 0
+}

@@ -1,0 +1,541 @@
+{
+  "valid" : true,
+  "items" : [ {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_1.system-role.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_1.concurrent-parallel.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_1.bread-writing.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_1.sharing-modes.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_1.concurrency-sharing-link.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_1.virtual-resources.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_1.asynchronous-progress.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_1.resource-manager.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_1.command-control.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_1.program-service.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_1.machine-extension.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_1.basic-summary.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_2.manual-bottleneck.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_2.single-batch.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_2.multi-batch.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_2.batch-benefit-cost.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_2.timeslice-terminals.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_2.deadline-systems.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_2.network-distribution.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_2.personal-and-special.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_2.figure-1-1.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.privilege-model.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.kernel-scope.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.clock-interrupt.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.atomic-primitives.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.kernel-state-data.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.entry-and-mode.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.event-origins.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.exception-kinds.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.service-return.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.call-comparison.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.system-services.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.system-call-sequence.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.mode-events.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.figure-1-2.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_3.figure-1-3.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_4.layer-organization.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_4.module-boundaries.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_4.large-small-kernel.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_4.server-isolation.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_4.mechanisms-policies.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_4.microkernel-cost.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_4.exokernel-resource.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_4.figure-1-4.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_4.figure-1-5.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_4.figure-1-6.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_5.firmware-to-os.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_5.boot-records.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_6.vm-environment.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_6.virtual-privileges.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_6.hosted-machine.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_6.vmm-summary.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_6.figure-1-7.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_7.time-scale-review.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_7.instruction-review.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_7.trap-review.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "chunks",
+    "code" : "chunk.wd25.overview.s1_7.microkernel-review.001",
+    "action" : "CREATE",
+    "id" : null
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.operating_system",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.concurrency",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.parallelism",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.sharing",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.virtualization",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.asynchrony",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.resource_management",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.user_interface",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.manual_operation",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.batch_system",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.time_sharing_system",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.real_time_system",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.network_os",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.distributed_os",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.overview.personal_os",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.runtime.user_mode",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.runtime.kernel_mode",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.runtime.privileged_instruction",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.runtime.mode_switch",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.runtime.interrupt",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.runtime.exception",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.runtime.interrupt_handling",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.runtime.system_call",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.runtime.kernel",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.runtime.primitive",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.runtime.trap_instruction",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.structure.os_structure",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.structure.monolithic_kernel",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.structure.microkernel",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.structure.layered",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.structure.modular",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.structure.exokernel",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.boot.boot_process",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.virtualization.virtual_machine",
+    "action" : "CREATE"
+  }, {
+    "type" : "nodes",
+    "code" : "os.virtualization.vmm",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.overview.concurrency→os.overview.parallelism:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.overview.concurrency→os.overview.sharing:RELATED_TO",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.overview.asynchrony→os.overview.concurrency:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.overview.batch_system→os.overview.time_sharing_system:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.overview.real_time_system→os.overview.time_sharing_system:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.overview.distributed_os→os.overview.network_os:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.runtime.kernel_mode→os.runtime.user_mode:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.runtime.privileged_instruction→os.runtime.kernel_mode:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.runtime.mode_switch→os.runtime.user_mode:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.runtime.mode_switch→os.runtime.kernel_mode:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.runtime.privileged_instruction→os.runtime.trap_instruction:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.runtime.exception→os.runtime.interrupt:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.runtime.interrupt_handling→os.runtime.interrupt:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.runtime.interrupt_handling→os.runtime.exception:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.runtime.system_call→os.runtime.mode_switch:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.runtime.system_call→os.runtime.trap_instruction:RELATED_TO",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.runtime.kernel→os.runtime.primitive:CONTAINS",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.structure.os_structure→os.structure.layered:CONTAINS",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.structure.os_structure→os.structure.modular:CONTAINS",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.structure.os_structure→os.structure.monolithic_kernel:CONTAINS",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.structure.os_structure→os.structure.microkernel:CONTAINS",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.structure.os_structure→os.structure.exokernel:CONTAINS",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.structure.microkernel→os.structure.monolithic_kernel:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.structure.layered→os.structure.modular:CONTRASTS_WITH",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.structure.microkernel→os.runtime.kernel:REQUIRES",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.virtualization.virtual_machine→os.virtualization.vmm:RELATED_TO",
+    "action" : "CREATE"
+  }, {
+    "type" : "relations",
+    "code" : "os.overview.virtualization→os.virtualization.virtual_machine:RELATED_TO",
+    "action" : "CREATE"
+  } ],
+  "errors" : [ ],
+  "created" : 119,
+  "updated" : 0,
+  "unchanged" : 0
+}

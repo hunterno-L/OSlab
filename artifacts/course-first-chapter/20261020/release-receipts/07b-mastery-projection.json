@@ -1,0 +1,433 @@
+{
+  "runAt": "2026-10-20T12:24:04.108Z",
+  "checks": [
+    {
+      "name": "第一章有掌握证据节点",
+      "detail": 24
+    },
+    {
+      "name": "概念证据节点返回概念分",
+      "detail": []
+    },
+    {
+      "name": "无实践证据节点实践分为 null",
+      "detail": []
+    },
+    {
+      "name": "节点工作台保留概念证据",
+      "detail": {
+        "events": 1
+      }
+    },
+    {
+      "name": "节点工作台实践维度未评估",
+      "detail": {
+        "id": "5",
+        "nodeCode": "os.overview.operating_system",
+        "displayName": "操作系统",
+        "nodeType": "CONCEPT",
+        "layer": "CORE",
+        "homeSectionCode": "sec.overview.basic-concepts",
+        "name": "os.overview.operating_system",
+        "category": "基础",
+        "chapter": "计算机系统概述",
+        "description": "最基本的系统软件，负责统筹硬件、软件资源和计算机工作，并向用户及其他软件提供接口与环境。",
+        "confidence": 0.25,
+        "conceptScore": 0.11232876712328767,
+        "practiceScore": null,
+        "conceptEvidenceCount": 1,
+        "practiceEvidenceCount": 0,
+        "status": "RED",
+        "recentReason": "操作系统管理对象的界定：答错（首次作答（独立观测））",
+        "lastEventId": "2112516421243838466",
+        "lastEventType": "ATTEMPT",
+        "lastResult": "FAIL",
+        "snapshotAvailable": null,
+        "pKnown": 0.11232876712328767
+      }
+    },
+    {
+      "name": "节点工作台概念分存在",
+      "detail": {
+        "id": "5",
+        "nodeCode": "os.overview.operating_system",
+        "displayName": "操作系统",
+        "nodeType": "CONCEPT",
+        "layer": "CORE",
+        "homeSectionCode": "sec.overview.basic-concepts",
+        "name": "os.overview.operating_system",
+        "category": "基础",
+        "chapter": "计算机系统概述",
+        "description": "最基本的系统软件，负责统筹硬件、软件资源和计算机工作，并向用户及其他软件提供接口与环境。",
+        "confidence": 0.25,
+        "conceptScore": 0.11232876712328767,
+        "practiceScore": null,
+        "conceptEvidenceCount": 1,
+        "practiceEvidenceCount": 0,
+        "status": "RED",
+        "recentReason": "操作系统管理对象的界定：答错（首次作答（独立观测））",
+        "lastEventId": "2112516421243838466",
+        "lastEventType": "ATTEMPT",
+        "lastResult": "FAIL",
+        "snapshotAvailable": null,
+        "pKnown": 0.11232876712328767
+      }
+    },
+    {
+      "name": "节点工作台展示所属课程单元",
+      "detail": [
+        {
+          "unitCode": "unit.overview.basic-concepts",
+          "courseCode": "course.operating-systems",
+          "sectionCode": "sec.overview.basic-concepts",
+          "title": "操作系统是什么，有哪些基本特征",
+          "sortOrder": 1,
+          "estimatedMinutes": 18,
+          "status": "",
+          "nodeMappings": [
+            {
+              "nodeCode": "os.overview.operating_system",
+              "role": "TEACHES",
+              "name": "操作系统"
+            },
+            {
+              "nodeCode": "os.overview.concurrency",
+              "role": "TEACHES",
+              "name": "并发"
+            },
+            {
+              "nodeCode": "os.overview.parallelism",
+              "role": "TEACHES",
+              "name": "并行"
+            },
+            {
+              "nodeCode": "os.overview.sharing",
+              "role": "TEACHES",
+              "name": "共享"
+            },
+            {
+              "nodeCode": "os.overview.virtualization",
+              "role": "TEACHES",
+              "name": "操作系统的虚拟性"
+            },
+            {
+              "nodeCode": "os.overview.asynchrony",
+              "role": "TEACHES",
+              "name": "异步性"
+            }
+          ],
+          "progress": {
+            "status": "COMPLETED",
+            "goalStatus": "REVIEW_RECOMMENDED",
+            "requiredCount": 10,
+            "completedCount": 10,
+            "percent": "100"
+          },
+          "role": "TEACHES"
+        },
+        {
+          "unitCode": "unit.overview.services",
+          "courseCode": "course.operating-systems",
+          "sectionCode": "sec.overview.basic-concepts",
+          "title": "操作系统为谁服务、管理什么",
+          "sortOrder": 2,
+          "estimatedMinutes": 16,
+          "status": "",
+          "nodeMappings": [
+            {
+              "nodeCode": "os.overview.resource_management",
+              "role": "TEACHES",
+              "name": "操作系统资源管理功能"
+            },
+            {
+              "nodeCode": "os.overview.user_interface",
+              "role": "TEACHES",
+              "name": "操作系统与用户的接口"
+            },
+            {
+              "nodeCode": "os.runtime.system_call",
+              "role": "TEACHES",
+              "name": "系统调用"
+            },
+            {
+              "nodeCode": "os.overview.operating_system",
+              "role": "TEACHES",
+              "name": "操作系统"
+            },
+            {
+              "nodeCode": "os.overview.concurrency",
+              "role": "TEACHES",
+              "name": "并发"
+            },
+            {
+              "nodeCode": "os.overview.sharing",
+              "role": "TEACHES",
+              "name": "共享"
+            },
+            {
+              "nodeCode": "os.overview.virtualization",
+              "role": "TEACHES",
+              "name": "操作系统的虚拟性"
+            },
+            {
+              "nodeCode": "os.overview.asynchrony",
+              "role": "TEACHES",
+              "name": "异步性"
+            }
+          ],
+          "progress": {
+            "status": "COMPLETED",
+            "goalStatus": "PASSED",
+            "requiredCount": 8,
+            "completedCount": 8,
+            "percent": "100"
+          },
+          "role": "TEACHES"
+        }
+      ]
+    },
+    {
+      "name": "待巩固列表包含第一章薄弱节点",
+      "detail": 10
+    },
+    {
+      "name": "待巩固列表实践维度未评估",
+      "detail": []
+    },
+    {
+      "name": "课程完成状态保持",
+      "detail": {
+        "courseCode": "course.operating-systems",
+        "unitCode": "unit.overview.review",
+        "activityCode": "act.overview.review.q.wd25.s1_6.022",
+        "reason": "COURSE_COMPLETED"
+      }
+    },
+    {
+      "name": "章末复习单元保持完成",
+      "detail": {
+        "status": "COMPLETED",
+        "goalStatus": "PASSED",
+        "requiredCount": 10,
+        "completedCount": 10,
+        "percent": "100"
+      }
+    }
+  ],
+  "graphSummary": {
+    "totalNodes": 185,
+    "evidenceCount": 26,
+    "statusCounts": {
+      "RED": 10,
+      "GRAY": 159,
+      "YELLOW": 16,
+      "GREEN": 0
+    }
+  },
+  "workbench": {
+    "mastery": {
+      "id": "5",
+      "nodeCode": "os.overview.operating_system",
+      "displayName": "操作系统",
+      "nodeType": "CONCEPT",
+      "layer": "CORE",
+      "homeSectionCode": "sec.overview.basic-concepts",
+      "name": "os.overview.operating_system",
+      "category": "基础",
+      "chapter": "计算机系统概述",
+      "description": "最基本的系统软件，负责统筹硬件、软件资源和计算机工作，并向用户及其他软件提供接口与环境。",
+      "confidence": 0.25,
+      "conceptScore": 0.11232876712328767,
+      "practiceScore": null,
+      "conceptEvidenceCount": 1,
+      "practiceEvidenceCount": 0,
+      "status": "RED",
+      "recentReason": "操作系统管理对象的界定：答错（首次作答（独立观测））",
+      "lastEventId": "2112516421243838466",
+      "lastEventType": "ATTEMPT",
+      "lastResult": "FAIL",
+      "snapshotAvailable": null,
+      "pKnown": 0.11232876712328767
+    },
+    "events": 1,
+    "learningUnits": [
+      {
+        "unitCode": "unit.overview.basic-concepts",
+        "title": "操作系统是什么，有哪些基本特征"
+      },
+      {
+        "unitCode": "unit.overview.services",
+        "title": "操作系统为谁服务、管理什么"
+      }
+    ]
+  },
+  "weakness": [
+    {
+      "nodeName": "os.overview.operating_system",
+      "nodeCode": "os.overview.operating_system",
+      "displayName": "操作系统",
+      "chapter": "计算机系统概述",
+      "status": "RED",
+      "conceptScore": 0.11232876712328767,
+      "practiceScore": null,
+      "conceptEvidenceCount": 1,
+      "practiceEvidenceCount": 0,
+      "lastActivityTime": "2026-10-20T12:08:58.000+00:00",
+      "failureState": "CURRENT",
+      "lastFailure": {
+        "resourceType": "LEARNING_QUESTION",
+        "resourceId": "2112165588673150978",
+        "result": "FAIL",
+        "evidence": "{\"note\": \"首次作答（独立观测）\", \"title\": \"操作系统管理对象的界定\", \"source\": \"普通题作答\", \"resultText\": \"答错\", \"modelVersion\": \"bkt-weighted-legacy/1\", \"mappingWeight\": 1}",
+        "createTime": "2026-10-20T12:08:58.000+00:00",
+        "errorType": "WRONG_ANSWER",
+        "confidence": 0.9,
+        "recommendedAction": "先完成「os.overview.operating_system」的基础题练习，再进入实验验证",
+        "knowledgeImpact": true,
+        "failureState": "CURRENT",
+        "certaintyLabel": "关联明确",
+        "attributionBasis": [
+          "普通题作答映射到知识节点「os.overview.operating_system」",
+          "本次结果消息：首次作答（独立观测）",
+          "归因类型：WRONG_ANSWER"
+        ]
+      },
+      "pknown": 0.11232876712328767
+    },
+    {
+      "nodeName": "os.overview.asynchrony",
+      "nodeCode": "os.overview.asynchrony",
+      "displayName": "异步性",
+      "chapter": "计算机系统概述",
+      "status": "RED",
+      "conceptScore": 0.4,
+      "practiceScore": null,
+      "conceptEvidenceCount": 1,
+      "practiceEvidenceCount": 0,
+      "lastActivityTime": "2026-10-20T12:08:58.000+00:00",
+      "failureState": "NONE",
+      "lastFailure": null,
+      "pknown": 0.19
+    },
+    {
+      "nodeName": "os.overview.virtualization",
+      "nodeCode": "os.overview.virtualization",
+      "displayName": "操作系统的虚拟性",
+      "chapter": "计算机系统概述",
+      "status": "RED",
+      "conceptScore": 0.4,
+      "practiceScore": null,
+      "conceptEvidenceCount": 1,
+      "practiceEvidenceCount": 0,
+      "lastActivityTime": "2026-10-20T12:08:58.000+00:00",
+      "failureState": "NONE",
+      "lastFailure": null,
+      "pknown": 0.19
+    },
+    {
+      "nodeName": "os.overview.sharing",
+      "nodeCode": "os.overview.sharing",
+      "displayName": "共享",
+      "chapter": "计算机系统概述",
+      "status": "RED",
+      "conceptScore": 0.775,
+      "practiceScore": null,
+      "conceptEvidenceCount": 2,
+      "practiceEvidenceCount": 0,
+      "lastActivityTime": "2026-10-20T12:09:08.000+00:00",
+      "failureState": "NONE",
+      "lastFailure": null,
+      "pknown": 0.30164864864864865
+    },
+    {
+      "nodeName": "os.overview.parallelism",
+      "nodeCode": "os.overview.parallelism",
+      "displayName": "并行",
+      "chapter": "计算机系统概述",
+      "status": "YELLOW",
+      "conceptScore": 0.4,
+      "practiceScore": null,
+      "conceptEvidenceCount": 1,
+      "practiceEvidenceCount": 0,
+      "lastActivityTime": "2026-10-20T12:09:07.000+00:00",
+      "failureState": "NONE",
+      "lastFailure": null,
+      "pknown": 0.4
+    },
+    {
+      "nodeName": "os.overview.resource_management",
+      "nodeCode": "os.overview.resource_management",
+      "displayName": "操作系统资源管理功能",
+      "chapter": "计算机系统概述",
+      "status": "YELLOW",
+      "conceptScore": 0.4,
+      "practiceScore": null,
+      "conceptEvidenceCount": 1,
+      "practiceEvidenceCount": 0,
+      "lastActivityTime": "2026-10-20T12:08:59.000+00:00",
+      "failureState": "NONE",
+      "lastFailure": null,
+      "pknown": 0.4
+    },
+    {
+      "nodeName": "os.overview.time_sharing_system",
+      "nodeCode": "os.overview.time_sharing_system",
+      "displayName": "分时操作系统",
+      "chapter": "计算机系统概述",
+      "status": "YELLOW",
+      "conceptScore": 0.4,
+      "practiceScore": null,
+      "conceptEvidenceCount": 1,
+      "practiceEvidenceCount": 0,
+      "lastActivityTime": "2026-10-20T12:09:00.000+00:00",
+      "failureState": "NONE",
+      "lastFailure": null,
+      "pknown": 0.4
+    },
+    {
+      "nodeName": "os.overview.user_interface",
+      "nodeCode": "os.overview.user_interface",
+      "displayName": "操作系统与用户的接口",
+      "chapter": "计算机系统概述",
+      "status": "YELLOW",
+      "conceptScore": 0.9454545454545454,
+      "practiceScore": null,
+      "conceptEvidenceCount": 3,
+      "practiceEvidenceCount": 0,
+      "lastActivityTime": "2026-10-20T12:09:08.000+00:00",
+      "failureState": "NONE",
+      "lastFailure": null,
+      "pknown": 0.653677447939743
+    },
+    {
+      "nodeName": "os.overview.batch_system",
+      "nodeCode": "os.overview.batch_system",
+      "displayName": "批处理系统",
+      "chapter": "计算机系统概述",
+      "status": "YELLOW",
+      "conceptScore": 0.775,
+      "practiceScore": null,
+      "conceptEvidenceCount": 2,
+      "practiceEvidenceCount": 0,
+      "lastActivityTime": "2026-10-20T12:09:01.000+00:00",
+      "failureState": "NONE",
+      "lastFailure": null,
+      "pknown": 0.775
+    },
+    {
+      "nodeName": "os.overview.concurrency",
+      "nodeCode": "os.overview.concurrency",
+      "displayName": "并发",
+      "chapter": "计算机系统概述",
+      "status": "YELLOW",
+      "conceptScore": 0.9454545454545454,
+      "practiceScore": null,
+      "conceptEvidenceCount": 3,
+      "practiceEvidenceCount": 0,
+      "lastActivityTime": "2026-10-20T12:09:08.000+00:00",
+      "failureState": "NONE",
+      "lastFailure": null,
+      "pknown": 0.9454545454545454
+    }
+  ]
+}

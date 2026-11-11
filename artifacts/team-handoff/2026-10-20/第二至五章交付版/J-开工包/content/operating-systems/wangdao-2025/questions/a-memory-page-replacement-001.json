@@ -1,0 +1,1081 @@
+{
+  "schemaVersion": "oslab-authoring/1.0",
+  "packageType": "QUESTIONS",
+  "batchCode": "batch.a.memory.page-replacement.001",
+  "contributor": "A（系统整理初稿，待成员复核）",
+  "courseCode": "course.operating-systems",
+  "note": "8道教材题43—50按平台排版与语义整理，题号加adapt1；14道课程自编练习另用q.self编号。教材答案43D/44A/45B/46B/47C/48A/49C/50A已对照截图。41、42无答案；51无题面，均未导入。",
+  "questions": [
+    {
+      "questionCode": "q.wd25.s3_2.043.adapt1",
+      "title": "缺页处理可能执行哪些操作",
+      "content": "【教材第43题，2011统考】在缺页处理过程中，操作系统可能执行哪些操作？\n\nⅠ. 修改页表\nⅡ. 磁盘 I/O\nⅢ. 分配页框\n\n请选择一个正确选项。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "仅Ⅰ、Ⅱ"
+        },
+        {
+          "key": "B",
+          "value": "仅Ⅰ、Ⅲ"
+        },
+        {
+          "key": "C",
+          "value": "仅Ⅱ、Ⅲ"
+        },
+        {
+          "key": "D",
+          "value": "Ⅰ、Ⅱ和Ⅲ"
+        }
+      ],
+      "answer": "D",
+      "analysis": "可能先分配或选出页框，通过磁盘I/O将所需页调入，再修改页表中的有效位、页框号等信息。三项都可能发生，并非每次都要执行同样数量的I/O。",
+      "misconception": "误以为缺页处理只是重新读取页表。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.demand-paging",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.demand-paging",
+        "pageStart": null,
+        "pageEnd": null,
+        "pageStatus": "NOT_VISIBLE",
+        "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+        "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+        "sourceQuestionNumber": "43",
+        "locator": "3.2 习题精选第43题及对应解析；题干按平台排版整理，保留条件与选项语义；印刷页码未进入截图"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page_fault",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s3_2.044.adapt1",
+      "title": "抖动时有效的缓解措施",
+      "content": "【教材第44题，2011统考】发生抖动时，下列哪些措施可有效缓解？\n\nⅠ. 撤销部分进程\nⅡ. 增加磁盘交换区容量\nⅢ. 提高用户进程优先级\n\n请选择一个正确选项。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "仅Ⅰ"
+        },
+        {
+          "key": "B",
+          "value": "仅Ⅱ"
+        },
+        {
+          "key": "C",
+          "value": "仅Ⅲ"
+        },
+        {
+          "key": "D",
+          "value": "仅Ⅰ、Ⅱ"
+        }
+      ],
+      "answer": "A",
+      "analysis": "撤销部分进程可降低多道程序度，为其余进程释放实际页框，减少反复换入换出。交换区容量与可用物理页框不同；提高优先级不补充缺少的驻留页面。",
+      "misconception": "将扩大磁盘空间误当成增加实际可用页框。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.thrashing-workingset",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.thrashing-workingset",
+        "pageStart": null,
+        "pageEnd": null,
+        "pageStatus": "NOT_VISIBLE",
+        "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+        "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+        "sourceQuestionNumber": "44",
+        "locator": "3.2 习题精选第44题及对应解析；题干按平台排版整理，保留条件与选项语义；印刷页码未进入截图"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.thrashing",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s3_2.045.adapt1",
+      "title": "虚拟存储的实现与容量限制",
+      "content": "【教材第45题，2012统考】关于虚拟存储器，下列叙述正确的是？（单选）",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "虚拟存储只能基于连续分配技术"
+        },
+        {
+          "key": "B",
+          "value": "虚拟存储只能基于非连续分配技术"
+        },
+        {
+          "key": "C",
+          "value": "虚拟存储容量只受外存容量限制"
+        },
+        {
+          "key": "D",
+          "value": "虚拟存储容量只受内存容量限制"
+        }
+      ],
+      "answer": "B",
+      "analysis": "按本教材的讨论，虚拟存储需要非连续分配来支持部分装入与换入换出。最大虚拟地址空间受地址位宽等限制，实际可用容量还受外存等条件限制，不能归结为只受某一种存储容量限制。",
+      "misconception": "忽略选项中的“只”或把虚拟地址空间等同于物理内存。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.virtual-concepts",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.virtual-concepts",
+        "pageStart": null,
+        "pageEnd": null,
+        "pageStatus": "NOT_VISIBLE",
+        "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+        "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+        "sourceQuestionNumber": "45",
+        "locator": "3.2 习题精选第45题及对应解析；题干按平台排版整理，保留条件与选项语义；印刷页码未进入截图"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.virtual_memory",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s3_2.046.adapt1",
+      "title": "发生缺页时的系统动作",
+      "content": "【教材第46题，2013统考】用户进程访问内存时发生缺页，操作系统可能执行哪些操作？\n\nⅠ. 处理越界错\nⅡ. 置换页\nⅢ. 分配内存\n\n请选择一个正确选项。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "仅Ⅰ、Ⅱ"
+        },
+        {
+          "key": "B",
+          "value": "仅Ⅱ、Ⅲ"
+        },
+        {
+          "key": "C",
+          "value": "仅Ⅰ、Ⅲ"
+        },
+        {
+          "key": "D",
+          "value": "Ⅰ、Ⅱ和Ⅲ"
+        }
+      ],
+      "answer": "B",
+      "analysis": "页面不在内存不等于地址越界。系统可能分配可用页框，也可能在没有可用页框时置换页面；当前进程要等待页面调入后再继续。",
+      "misconception": "把合法地址的缺页误当成地址越界。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.demand-paging",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.demand-paging",
+        "pageStart": null,
+        "pageEnd": null,
+        "pageStatus": "NOT_VISIBLE",
+        "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+        "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+        "sourceQuestionNumber": "46",
+        "locator": "3.2 习题精选第46题及对应解析；题干按平台排版整理，保留条件与选项语义；印刷页码未进入截图"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page_fault",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.replacement-basics",
+          "usage": "PRACTICE"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s3_2.047.adapt1",
+      "title": "哪些措施可加快地址翻译",
+      "content": "【教材第47题，2014统考】下列措施中，能加快虚实地址转换的是？\n\nⅠ. 增大快表（TLB）容量\nⅡ. 让页表常驻内存\nⅢ. 增大交换区（swap）\n\n请选择一个正确选项。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "仅Ⅰ"
+        },
+        {
+          "key": "B",
+          "value": "仅Ⅱ"
+        },
+        {
+          "key": "C",
+          "value": "仅Ⅰ、Ⅱ"
+        },
+        {
+          "key": "D",
+          "value": "仅Ⅱ、Ⅲ"
+        }
+      ],
+      "answer": "C",
+      "analysis": "增加TLB容量有助于提高快表命中率；页表驻留内存可避免取页表时再次换入。扩大swap空间不能直接提高一次地址翻译的速度。",
+      "misconception": "将虚拟存储容量措施与地址翻译速度混淆。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.address-translation",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.address-translation",
+        "pageStart": null,
+        "pageEnd": null,
+        "pageStatus": "NOT_VISIBLE",
+        "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+        "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+        "sourceQuestionNumber": "47",
+        "locator": "3.2 习题精选第47题及对应解析；题干按平台排版整理，保留条件与选项语义；印刷页码未进入截图"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.address_translation",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.memory.tlb",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s3_2.048.adapt1",
+      "title": "哪些算法可能发生 Belady 异常",
+      "content": "【教材第48题，2014统考】同一访问序列下，分配更多页框却出现更多缺页，称为Belady异常。下列哪些算法可能出现该现象？\n\nⅠ. LRU\nⅡ. FIFO\nⅢ. OPT\n\n请选择一个正确选项。",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "仅Ⅱ"
+        },
+        {
+          "key": "B",
+          "value": "仅Ⅰ、Ⅱ"
+        },
+        {
+          "key": "C",
+          "value": "仅Ⅰ、Ⅲ"
+        },
+        {
+          "key": "D",
+          "value": "仅Ⅱ、Ⅲ"
+        }
+      ],
+      "answer": "A",
+      "analysis": "在这三种算法中只有FIFO可能出现Belady异常；LRU与OPT具有相应的栈性质，不会因增加页框而产生该异常。",
+      "misconception": "以为更多页框对任意算法都必然减少缺页，或认为LRU也会出现该异常。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "pageStatus": "NOT_VISIBLE",
+        "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+        "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+        "sourceQuestionNumber": "48",
+        "locator": "3.2 习题精选第48题及对应解析；题干按平台排版整理，保留条件与选项语义；印刷页码未进入截图"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.belady",
+          "role": "PRIMARY",
+          "weight": 1
+        },
+        {
+          "nodeCode": "os.memory.fifo",
+          "role": "SECONDARY",
+          "weight": 0.3
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.page-comparison",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s3_2.049.adapt1",
+      "title": "页框分配与置换范围的组合",
+      "content": "【教材第49题，2015统考】在请求分页系统中，下列页框分配策略与页面置换策略不能组合使用的是？（单选）",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "可变分配、全局置换"
+        },
+        {
+          "key": "B",
+          "value": "可变分配、局部置换"
+        },
+        {
+          "key": "C",
+          "value": "固定分配、全局置换"
+        },
+        {
+          "key": "D",
+          "value": "固定分配、局部置换"
+        }
+      ],
+      "answer": "C",
+      "analysis": "全局置换可从其他进程取走页框，从而改变各进程实际拥有的页框数，与固定分配的前提冲突；其余三种组合是教材列出的管理方案。",
+      "misconception": "把分配数量和置换范围当成互不影响的独立开关。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.frame-allocation",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.frame-allocation",
+        "pageStart": null,
+        "pageEnd": null,
+        "pageStatus": "NOT_VISIBLE",
+        "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+        "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+        "sourceQuestionNumber": "49",
+        "locator": "3.2 习题精选第49题及对应解析；题干按平台排版整理，保留条件与选项语义；印刷页码未进入截图"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.frame_allocation",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.wd25.s3_2.050.adapt1",
+      "title": "由访问历史选择 LRU 换出页",
+      "content": "【教材第50题，2015统考】某进程分配到4个页框，已访问的页号序列为 `2,0,2,9,3,4,2,8,2,4,8,4,5`。下一次访问页面7，按LRU应换出哪个页？（单选）",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "2"
+        },
+        {
+          "key": "B",
+          "value": "3"
+        },
+        {
+          "key": "C",
+          "value": "4"
+        },
+        {
+          "key": "D",
+          "value": "8"
+        }
+      ],
+      "answer": "A",
+      "analysis": "从历史末尾倒着找4个不同页，依次为5、4、8、2；最近访问次序为5→4→8→2，最久未访问的驻留页是2。无需假设本次作答开始时页框为空。",
+      "misconception": "按首次出现时间或访问总次数选页，或者抄错序列中的4与2。",
+      "difficulty": 3,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "book.wangdao.os.2025",
+        "origin": "ADAPTED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "pageStatus": "NOT_VISIBLE",
+        "sourceAsset": "assets/wd25-memory-batch-001/exercises-q041-q050-page-unknown.png",
+        "answerAsset": "assets/wd25-memory-batch-001/answers-q043-q051-page-unknown.png",
+        "sourceQuestionNumber": "50",
+        "locator": "3.2 习题精选第50题及对应解析；题干按平台排版整理，保留条件与选项语义；印刷页码未进入截图"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.lru",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.lru",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.replacement.free-frame",
+      "title": "缺页与置换的条件",
+      "content": "判断：请求页面不在内存时，即使仍有空闲页框，也会发生缺页，但不必换出一个旧页面。",
+      "type": "JUDGE",
+      "options": [],
+      "answer": "true",
+      "analysis": "缺页由请求页面未驻留决定；只有可用页框不足时才需要选择旧页换出。",
+      "misconception": "将缺页与换出视为同一动作。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page_replacement",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.replacement-basics",
+          "usage": "PRACTICE"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.replacement.count-gap",
+      "title": "从缺页次数推算置换次数",
+      "content": "3个页框初始为空，整个运行中只进行按需调入、命中或页面置换，最终用满3个页框。若总缺页9次，则实际换出旧页 ______ 次。（一个空）",
+      "type": "FILL_BLANK",
+      "options": [],
+      "answer": [
+        "6"
+      ],
+      "analysis": "前3次不同页面装入空页框，产生缺页但没有换出；其余9−3=6次需要换出。此结论依赖题给初始与运行条件。",
+      "misconception": "不扣除装入空页框，或把简式用于任意初始状态。",
+      "difficulty": 3,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page_replacement",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.replacement-basics",
+          "usage": "PRACTICE"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.opt.future",
+      "title": "OPT 需要哪些信息",
+      "content": "OPT在页框已满时选择换出页，关键比较什么？（单选）",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "各页第一次调入的时间"
+        },
+        {
+          "key": "B",
+          "value": "各驻留页未来下一次访问的位置"
+        },
+        {
+          "key": "C",
+          "value": "过去访问次数最多的页"
+        },
+        {
+          "key": "D",
+          "value": "各页的页号大小"
+        }
+      ],
+      "answer": "B",
+      "analysis": "OPT使用未来访问序列，选择下一次使用最晚或不再使用的页。",
+      "misconception": "把历史最久未访问与未来最久不访问混淆。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.opt",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.opt",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.fifo.hit-order",
+      "title": "FIFO 命中是否改变队列",
+      "content": "判断：FIFO页面命中后，必须把该页移到调入队列尾部。",
+      "type": "JUDGE",
+      "options": [],
+      "answer": "false",
+      "analysis": "FIFO维护调入顺序，命中不相当于重新装入，不改变调入队列。",
+      "misconception": "把LRU的命中更新用于FIFO。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.fifo",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.fifo",
+          "usage": "PRACTICE"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.fifo.belady-count",
+      "title": "读取 Belady 对照结果",
+      "content": "对序列 `3,2,1,0,3,2,4,3,2,1,0,4`，FIFO在3页框时缺页9次、4页框时缺页10次。这说明什么？（单选）",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "LRU的维护代价更高"
+        },
+        {
+          "key": "B",
+          "value": "FIFO可能出现增加页框反而增加缺页的现象"
+        },
+        {
+          "key": "C",
+          "value": "增加页框总会减少缺页"
+        },
+        {
+          "key": "D",
+          "value": "两个配置的算法输入不同，不能比较"
+        }
+      ],
+      "answer": "B",
+      "analysis": "访问序列相同，只增加页框却增加了缺页，正是Belady异常的定义。",
+      "misconception": "只看置换次数或认为额外页框一定提高效果。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.belady",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.fifo",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.lru.hit-update",
+      "title": "LRU 命中的更新",
+      "content": "判断：LRU页面命中时不需要更新最近访问状态。",
+      "type": "JUDGE",
+      "options": [],
+      "answer": "false",
+      "analysis": "命中也是一次访问，必须将其反映到最近访问历史中。",
+      "misconception": "以为只有缺页才影响算法内部状态。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.lru",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.lru",
+          "usage": "PRACTICE"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.lru.sixth-victim",
+      "title": "LRU 前六步的换出页",
+      "content": "3页框初始为空，按LRU访问 `7,0,1,2,0,3`。最后访问3时应换出的页号是 ______。（一个空）",
+      "type": "FILL_BLANK",
+      "options": [],
+      "answer": [
+        "1",
+        "页面1",
+        "页面 1"
+      ],
+      "analysis": "访问2后最近到最久为2、1、0；命中0后为0、2、1，因此访问3换出1。",
+      "misconception": "忽略第5步对页面0的命中更新。",
+      "difficulty": 3,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.lru",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.lru",
+          "usage": "PRACTICE"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.lru.history",
+      "title": "识别 LRU 的真实依据",
+      "content": "关于LRU，哪些说法正确？（多选）",
+      "type": "MULTIPLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "每次访问都应维护最近使用信息"
+        },
+        {
+          "key": "B",
+          "value": "必须预先知道完整未来访问序列"
+        },
+        {
+          "key": "C",
+          "value": "需要换出时选择过去最长时间未被访问的驻留页"
+        },
+        {
+          "key": "D",
+          "value": "任意时刻LRU与OPT都选择相同页面"
+        }
+      ],
+      "answer": [
+        "A",
+        "C"
+      ],
+      "analysis": "A、C为LRU规则。未来序列属于OPT；二者偶然选择相同页面不表示规则相同。",
+      "misconception": "将LRU、OPT视为同一种算法。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.lru",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.lru",
+          "usage": "PRACTICE"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.clock.hit-pointer",
+      "title": "CLOCK 命中时是否推进替换指针",
+      "content": "按本节简单CLOCK规则，判断：页面命中时，置该页访问位为1，并必须把替换指针推进一格。",
+      "type": "JUDGE",
+      "options": [],
+      "answer": "false",
+      "analysis": "命中只更新该页访问位，替换指针不移动；指针用于寻找需要换出的页框。",
+      "misconception": "把每次访问都当成一次环形扫描。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.clock",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.clock",
+          "usage": "PRACTICE"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.clock.victim",
+      "title": "CLOCK 扫描后的换出页",
+      "content": "3个页框按框1→框2→框3成环，驻留页为 `[7,0,1]`，访问位为 `[1,0,0]`，替换指针指向框1。现访问未驻留的新页面，按简单CLOCK首先换出哪一页？（单选）",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "页面7"
+        },
+        {
+          "key": "B",
+          "value": "页面0"
+        },
+        {
+          "key": "C",
+          "value": "页面1"
+        },
+        {
+          "key": "D",
+          "value": "无法选出，需要等待所有A都变为1"
+        }
+      ],
+      "answer": "B",
+      "analysis": "扫描框1时A=1，清零后继续；框2原本A=0，因此换出页面0。不是清零框1后立即选中框1。",
+      "misconception": "把清访问位与立即换出混为一步。",
+      "difficulty": 3,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.clock",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.clock",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.clock-enhanced.clean",
+      "title": "改进型 CLOCK 的首轮候选",
+      "content": "按本教材改进型CLOCK，第一轮优先寻找哪类页？A为访问位，M为修改位。（单选）",
+      "type": "SINGLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "A=0，M=0"
+        },
+        {
+          "key": "B",
+          "value": "A=0，M=1"
+        },
+        {
+          "key": "C",
+          "value": "A=1，M=0"
+        },
+        {
+          "key": "D",
+          "value": "A=1，M=1"
+        }
+      ],
+      "answer": "A",
+      "analysis": "近期未访问且未修改的页无需写回，作为首轮候选。",
+      "misconception": "忽略修改位对应的写回代价。",
+      "difficulty": 2,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.clock_enhanced",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.clock-enhanced",
+          "usage": "ASSESSMENT"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.clock-enhanced.first-pass",
+      "title": "第一轮是否清访问位",
+      "content": "判断：本教材改进型CLOCK在第一轮寻找(A=0,M=0)时，应同时把经过页面的访问位A全部清零。",
+      "type": "JUDGE",
+      "options": [],
+      "answer": "false",
+      "analysis": "教材的第一轮只查找(0,0)，不修改A；找不到后，第二轮找(0,1)时才按规则将经过的A清零。",
+      "misconception": "把简单CLOCK规则或第二轮动作直接放进第一轮。",
+      "difficulty": 3,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.clock_enhanced",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.clock-enhanced",
+          "usage": "PRACTICE"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.clock-enhanced.second-pass",
+      "title": "改进型 CLOCK 的分轮规则",
+      "content": "按本教材改进型CLOCK，哪些说法正确？（多选）",
+      "type": "MULTIPLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "第一轮寻找(0,0)且不修改A"
+        },
+        {
+          "key": "B",
+          "value": "第一轮找不到就必须直接淘汰当前指针页"
+        },
+        {
+          "key": "C",
+          "value": "第二轮寻找(0,1)，并将经过的未选中页面A清零"
+        },
+        {
+          "key": "D",
+          "value": "可以忽略指针，按四类页面全局排序代替所有扫描"
+        }
+      ],
+      "answer": [
+        "A",
+        "C"
+      ],
+      "analysis": "A、C对应教材扫描流程。每轮从约定指针位置出发，未选出时再重复；不能以任意全局排序代替。",
+      "misconception": "记住四类优先级后忽略分轮与指针。",
+      "difficulty": 3,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.clock_enhanced",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.clock-enhanced",
+          "usage": "PRACTICE"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    },
+    {
+      "questionCode": "q.self.compare.count-metrics",
+      "title": "比较算法时的计数边界",
+      "content": "关于本节算法比较，哪些说法正确？（多选）",
+      "type": "MULTIPLE",
+      "options": [
+        {
+          "key": "A",
+          "value": "初始装入空页框可以产生缺页但不产生页面置换"
+        },
+        {
+          "key": "B",
+          "value": "缺页次数、换出次数和脏页写回次数总是相等"
+        },
+        {
+          "key": "C",
+          "value": "比较同一算法不同页框数时应保持访问序列相同"
+        },
+        {
+          "key": "D",
+          "value": "只要页面被访问过，换出时就一定要写回"
+        }
+      ],
+      "answer": [
+        "A",
+        "C"
+      ],
+      "analysis": "初始装入、换出和修改页写回是不同事件。被访问不等于被修改，比较时还要固定输入条件。",
+      "misconception": "把访问位、修改位和缺页统计混在一起。",
+      "difficulty": 3,
+      "sectionCode": "sec.memory.page-replacement",
+      "sourceRef": {
+        "sourceCode": "self.oslab",
+        "origin": "SELF_AUTHORED",
+        "sectionCode": "sec.memory.page-replacement",
+        "pageStart": null,
+        "pageEnd": null,
+        "sourceQuestionNumber": null,
+        "locator": "根据本批已核对知识编写的课程巩固练习"
+      },
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page_replacement",
+          "role": "PRIMARY",
+          "weight": 1
+        }
+      ],
+      "usageSuggestions": [
+        {
+          "unitCode": "unit.memory.page-comparison",
+          "usage": "PRACTICE"
+        }
+      ],
+      "parentQuestionCode": null,
+      "partIndex": null
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "runKey": "20261103-210725",
+  "baseUrl": "http://localhost:8121/api",
+  "courseCode": "course.operating-systems",
+  "sessionId": "2117604565077159938",
+  "turnId": "2117604565710499842",
+  "degraded": true,
+  "generatedAt": "2026-11-03T21:07:50+08:00",
+  "failures": 2,
+  "steps": [
+    {
+      "id": "S1",
+      "name": "学生 A 登录",
+      "status": "PASS",
+      "detail": "student_demo1"
+    },
+    {
+      "id": "S1b",
+      "name": "学生 B 登录",
+      "status": "PASS",
+      "detail": "student_demo2"
+    },
+    {
+      "id": "S2",
+      "name": "模型配置列表",
+      "status": "PASS",
+      "detail": "共 1 项；平台默认 deepseek-flash（ACTIVE）"
+    },
+    {
+      "id": "S3",
+      "name": "创建学习会话",
+      "status": "FAIL",
+      "detail": "冻结契约缺字段：createdAt"
+    },
+    {
+      "id": "S4",
+      "name": "读取学习会话",
+      "status": "PASS",
+      "detail": "courseCode=course.operating-systems"
+    },
+    {
+      "id": "S5a",
+      "name": "陈旧 rowVersion 被拒绝",
+      "status": "PASS",
+      "detail": "业务码 50001"
+    },
+    {
+      "id": "S5b",
+      "name": "修改会话（时间预算）",
+      "status": "PASS",
+      "detail": "rowVersion -> 1，预算 15 分钟"
+    },
+    {
+      "id": "S6",
+      "name": "轮次幂等（clientRequestId）",
+      "status": "PASS",
+      "detail": "两次提交同一 turnId=2117604565710499842"
+    },
+    {
+      "id": "S7",
+      "name": "轮次轮询到终态（规则降级）",
+      "status": "PASS",
+      "detail": "status=SUCCEEDED mode=FALLBACK 轮询 15 次；本轮为 FALLBACK，不是模型回答，原因："
+    },
+    {
+      "id": "S8",
+      "name": "工具/模型调用预算",
+      "status": "PASS",
+      "detail": "modelCalls=2，toolCalls=3，来源 0 条"
+    },
+    {
+      "id": "S9",
+      "name": "跨用户访问被拒绝",
+      "status": "PASS",
+      "detail": "2/2 项均返回非 0 业务码"
+    },
+    {
+      "id": "S10",
+      "name": "下一步任务",
+      "status": "PASS",
+      "detail": "2 个任务（PREDICT,PREDICT），到期复习 0 项"
+    },
+    {
+      "id": "S11",
+      "name": "活动 start",
+      "status": "FAIL",
+      "detail": "业务码 40400：任务不存在或计划已更新，请刷新后重试"
+    },
+    {
+      "id": "S14a",
+      "name": "创建个人资料",
+      "status": "PASS",
+      "detail": "materialId=2117604616209920002 块数=1 索引=KEYWORD_ONLY"
+    },
+    {
+      "id": "S14b",
+      "name": "个人资料列表",
+      "status": "PASS",
+      "detail": "共 1 份，含本次创建的资料"
+    },
+    {
+      "id": "S14c",
+      "name": "他人资料不可删除",
+      "status": "PASS",
+      "detail": "业务码 40101"
+    },
+    {
+      "id": "S14d",
+      "name": "删除个人资料",
+      "status": "PASS",
+      "detail": "演示资料已清理，不留残余"
+    },
+    {
+      "id": "S15a",
+      "name": "旧入口 /chat/ask",
+      "status": "PASS",
+      "detail": "回答长度 547 字符（经统一网关）"
+    },
+    {
+      "id": "S15b",
+      "name": "旧入口 /learning/tutor/ask",
+      "status": "PASS",
+      "detail": "mode=AI 来源 6 条，回答长度 686"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "questionId": "1930155484338507777",
+  "resourceCode": "exp.legacy.1930155484338507777",
+  "title": "实验3.8 创建进程",
+  "content": "### 任务描述\n\n本实验的目标是实现进程的创建和管理功能。具体任务包括编写 `env_create` 函数和 `env_create_priority` 函数，这些函数负责分配新的进程控制块（PCB），设置进程控制块，并加载二进制代码到对应的地址空间。\n\n### 知识要点\n\n1. **进程控制块（PCB）**：\n   - 理解 PCB 的结构和作用，包括进程状态、寄存器集合和内存管理信息。\n2. **进程创建**：\n   - 理解进程创建的基本步骤，包括分配 PCB、设置进程状态、分配内存空间等。\n3. **内存管理**：\n   - 理解虚拟内存的分配和管理，特别是页目录和页表的作用。\n4. **ELF 文件格式**：\n   - 理解 ELF 文件的结构，包括程序头和节头，以及如何从中提取段信息。\n5. **MIPS 架构**：\n   - 理解 MIPS 架构中的寄存器和指令，特别是与内存管理相关的指令。\n\n### 实验任务\n\n1. **实现 `env_create` 函数**：\n   - 分配一个新的 PCB 结构体。\n   - 设置 PCB 的基本属性，如进程状态、寄存器集合等。\n   - 调用 `env_alloc` 函数分配 PCB 并初始化。\n   - 调用 `load_icode` 函数加载二进制代码到虚拟内存。\n2. **实现 `env_create_priority` 函数**：\n   - 类似于 `env_create` 函数，但允许指定进程的优先级。\n   - 设置 PCB 的优先级属性。",
+  "tags": [
+    "内存管理",
+    "页",
+    "进程",
+    "进程创建",
+    "寄存器",
+    "页表",
+    "页目录",
+    "进程控制块",
+    "地址空间",
+    "文件"
+  ],
+  "referenceAnswer": "",
+  "originalCode": "",
+  "judgeCase": [
+    {
+      "input": "",
+      "output": ""
+    }
+  ],
+  "judgeConfig": {
+    "timeLimit": 1000,
+    "memoryLimit": 1000,
+    "stackLimit": 1000
+  },
+  "legacySetIds": [
+    "3"
+  ],
+  "legacySets": [
+    {
+      "id": "3",
+      "title": "第三章 进程管理"
+    }
+  ],
+  "snapshotUpdatedTime": "2025-06-04 14:51:42",
+  "runtimeValidated": false
+}

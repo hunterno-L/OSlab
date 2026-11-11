@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "oslab-experiment-maintenance/1.0",
+  "batchCode": "batch.a.experiments.memory.001",
+  "contributor": "A",
+  "note": "第三章实验实际维护；保留原questionId，补框架、参考解、真实用例和映射。无适用实验则不提交空包。",
+  "experiments": []
+}

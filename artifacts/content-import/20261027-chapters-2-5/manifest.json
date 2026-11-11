@@ -1,0 +1,87 @@
+{
+  "createdAt": "2026-10-27T14:27:00.555Z",
+  "knowledgeRoot": "C:\\Users\\one\\xwechat_files\\wxid_75sq699s4k1g22_0e2d\\msg\\attach\\9e20f478899dc29eb19741386f9343c8\\2026-10\\Rec\\ac49e5baed348ae1\\F\\0\\J-第二至五章-知识-交付",
+  "questionRoot": "C:\\Users\\one\\xwechat_files\\wxid_75sq699s4k1g22_0e2d\\msg\\attach\\9e20f478899dc29eb19741386f9343c8\\2026-10\\Rec\\ac49e5baed348ae1\\F\\1\\A-第二至五章-题目交付-2026-10-27\\A-第二至五章-题目交付-2026-10-27",
+  "reusedNodes": [
+    "os.cpu.scheduling",
+    "os.cpu.fcfs",
+    "os.cpu.sjf",
+    "os.cpu.hrrn",
+    "os.cpu.priority_nonpreemptive",
+    "os.cpu.priority_preemptive",
+    "os.cpu.rr",
+    "os.cpu.mlfq",
+    "os.memory.contiguous_allocation",
+    "os.memory.first_fit",
+    "os.memory.next_fit",
+    "os.memory.best_fit",
+    "os.memory.worst_fit",
+    "os.memory.page_table",
+    "os.memory.address_translation",
+    "os.memory.tlb",
+    "os.memory.locality",
+    "os.memory.virtual_memory",
+    "os.memory.access_bit",
+    "os.memory.dirty_bit",
+    "os.memory.page_fault",
+    "os.memory.frame_allocation",
+    "os.memory.opt",
+    "os.memory.page_replacement",
+    "os.memory.fifo",
+    "os.memory.belady",
+    "os.memory.lru",
+    "os.memory.clock",
+    "os.memory.clock_enhanced",
+    "os.memory.thrashing",
+    "os.disk.scheduling",
+    "os.disk.fcfs",
+    "os.disk.sstf",
+    "os.disk.scan",
+    "os.disk.cscan"
+  ],
+  "unapprovedSources": [
+    "web.hqwx.tiku"
+  ],
+  "chapters": [
+    {
+      "chapter": "第二章",
+      "code": "sec.process",
+      "nodes": 40,
+      "chunks": 57,
+      "relations": 66,
+      "units": 24,
+      "objective": 236,
+      "application": 51
+    },
+    {
+      "chapter": "第三章",
+      "code": "sec.memory",
+      "nodes": 20,
+      "chunks": 45,
+      "relations": 55,
+      "units": 19,
+      "objective": 133,
+      "application": 30
+    },
+    {
+      "chapter": "第四章",
+      "code": "sec.files",
+      "nodes": 33,
+      "chunks": 52,
+      "relations": 55,
+      "units": 25,
+      "objective": 87,
+      "application": 18
+    },
+    {
+      "chapter": "第五章",
+      "code": "sec.io",
+      "nodes": 33,
+      "chunks": 50,
+      "relations": 51,
+      "units": 26,
+      "objective": 100,
+      "application": 13
+    }
+  ]
+}
