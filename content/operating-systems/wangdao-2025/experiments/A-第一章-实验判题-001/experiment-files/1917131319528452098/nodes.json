@@ -1,0 +1,26 @@
+{
+  "questionId": "1917131319528452098",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.loading_linking",
+      "nodeName": "程序的链接与装入",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "子任务判的是顶层 Makefile 里 vmlinuz ← {modules, objects} ← kernel.o ← lib.o 的合法重建顺序，即「多个目标文件链接成一个可执行内核镜像」这一链接装入过程的构建前置阶段；实验任务 3 改 include.mk 的 CROSS_COMPILE/LD 正是为链接阶段选对工具链。"
+    },
+    {
+      "nodeCode": "os.boot.boot_process",
+      "nodeName": "操作系统引导过程",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "实验任务 5 要求检查 gzemul/vmlinuz 是否生成并能正确运行，该镜像就是 gxemul 引导的内核；构建顺序错误会让镜像缺段而无法引导。"
+    },
+    {
+      "nodeCode": "os.runtime.kernel",
+      "nodeName": "操作系统内核",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "构建产物 vmlinuz 是宏内核镜像，Makefile 里 modules 与 objects 两个变量的区别决定了内核是递归 make 各模块还是一次性链接全部 .o。"
+    }
+  ]
+}

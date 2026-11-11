@@ -1,0 +1,26 @@
+{
+  "questionId": "1930157867273605121",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.page_fault",
+      "nodeName": "缺页中断",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "user/fork.c 的 pgfault 判断出错页是否为写时复制页，若是则分配新物理页、复制原页内容、更新页表项映射到新页，最后恢复被中断进程执行。"
+    },
+    {
+      "nodeCode": "os.memory.sharing",
+      "nodeName": "内存共享",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "COW 的本质是父子进程先共享同一物理页（pp_ref>1），写的一方负责复制并解除共享。"
+    },
+    {
+      "nodeCode": "os.memory.demand_paging",
+      "nodeName": "请求分页存储管理",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "复制被推迟到第一次写触发缺页时才做，是按需调页思想在 fork 上的应用。"
+    }
+  ]
+}

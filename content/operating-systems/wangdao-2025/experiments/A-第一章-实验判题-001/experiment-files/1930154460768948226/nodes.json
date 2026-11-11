@@ -1,0 +1,26 @@
+{
+  "questionId": "1930154460768948226",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.runtime.kernel",
+      "nodeName": "操作系统内核",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "补全 lib/print.c 的 _Printf()：内核开发不使用 C 标准库，格式串解析、宽度/精度/填充/左对齐都必须自己实现，再经 console.c 逐字符输出。"
+    },
+    {
+      "nodeCode": "os.io.device_driver",
+      "nodeName": "设备驱动程序",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "_Printf 解析出的字符最终由 drivers/gzconsole/console.c 的控制台驱动写到串口设备，内核输出链是「格式化层 → 驱动层 → 设备」。"
+    },
+    {
+      "nodeCode": "os.runtime.kernel_mode",
+      "nodeName": "内核态",
+      "role": "RELATED",
+      "weight": 0.5,
+      "reason": "内核态下没有宿主 libc 可借用，子任务用 struct ArgList 模拟 va_list、用 print_char 模拟控制台 sink，正是内核态自给自足编程的体现。"
+    }
+  ]
+}

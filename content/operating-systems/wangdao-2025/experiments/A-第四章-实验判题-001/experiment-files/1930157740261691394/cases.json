@@ -1,0 +1,25 @@
+{
+  "description": "实验 4.12 sys_set_pgfault_handler(int sysno, u_int envid, u_int func, u_int xstacktop)。驱动操作符：I=env_init 并打印空闲 PCB 数；A parent=env_alloc 打印 返回码/下标/env_id；U idx=设 curenv；S idx st=设 env_status；R idx=插入就绪链表头；K s a0 a1 a2 a3 a4=填好 KERNEL_SP 现场后调 handle_sys 并打印 $v0（必须恰好 6 个数；s=10 即 SYS_set_pgfault_handler，a0=envid a1=func a2=xstacktop）；E idx=打印 env_pgfault_handler/env_ipc_receiving/env_ipc_dstva/env_ipc_from/env_ipc_value；T idx=打印 env_id/parent/status/pri/cr3；Q idx va=物理页基址（无映射 4294967295）；O idx va=页表项原始值（无页表 4294967295）；C=空闲物理页数；L=就绪链表下标；H=就绪链表头（空表 -1）。错误码按 int 解读：-2=E_BAD_ENV，-3=E_INVAL，-4=E_NO_MEM。关键常量：UTOP=1073741824，BY2PG=4096，PTE_V=1，PTE_R=2（MOS 的 PTE_R 即可写位），故异常栈页表项低 12 位应为 3。常用地址：func=4198400(0x00401000)、xstacktop=1056964608(UXSTACKTOP=0x3F000000) 对应栈页 va=1056960512(0x3EFFF000, PDX=252)；xstacktop=1073741824(UTOP) 对应栈页 va=1073737728(PDX=255)。宿主物理页账本：np=256/fm=8192 初始空闲 252 页，np=7 时 3 页；每次 env_alloc 占 1 页作页目录（envs[63].cr3=1044480、envs[62]=1040384；np=7 时 envs[63].cr3=24576）；首次映射某个 4MB 区间额外占 1 页作页表；同址重映射到不同物理页时旧页 pp_ref 归零被回收。",
+  "cases": [
+    {
+      "name": "正常设置：handler 写入 PCB，异常栈那一页必须建在 xstacktop-BY2PG 且可写（PTE_V|PTE_R），栈顶地址本身不映射",
+      "input": "256 8192\n10\nI\nA 0\nU 63\nK 10 191 4198400 1056964608 0 0\nE 63\nQ 63 1056960512\nO 63 1056960512\nC\nQ 63 1056964608\nT 63\n"
+    },
+    {
+      "name": "参数校验：func 为 0/内核地址/超大值、xstacktop 不足一页或伸进内核段都必须 -E_INVAL 且不留半个 handler；xstacktop 恰为 BY2PG 时栈页落在 va 0",
+      "input": "256 8192\n17\nI\nA 0\nU 63\nK 10 191 0 1056964608 0 0\nK 10 191 1073741824 1056964608 0 0\nK 10 191 4294967295 1056964608 0 0\nK 10 191 4198400 0 0 0\nK 10 191 4198400 4095 0 0\nK 10 191 4198400 1073741825 0 0\nK 10 999 4198400 1056964608 0 0\nE 63\nC\nK 10 191 4198400 4096 0 0\nQ 63 0\nO 63 0\nE 63\nC\n"
+    },
+    {
+      "name": "替别的进程设置（checkperm=0）且 xstacktop 恰为 UTOP：调用方自己的 handler 不得被改；重复设置会再申请一页而旧栈页仍挂着",
+      "input": "256 8192\n15\nI\nA 0\nA 0\nU 63\nK 10 318 4198400 1073741824 0 0\nE 62\nE 63\nQ 62 1073737728\nO 62 1073737728\nC\nK 10 318 4202496 1056964608 0 0\nE 62\nQ 62 1073737728\nQ 62 1056960512\nC\n"
+    },
+    {
+      "name": "物理页耗尽：np=7 时第一次成功用尽两页，第二次 sys_mem_alloc 的 -E_NO_MEM 必须原样上抛，不得崩溃也不得建出映射",
+      "input": "7 8192\n13\nI\nA 0\nU 63\nC\nK 10 191 4198400 4096 0 0\nC\nQ 63 0\nO 63 0\nE 63\nK 10 191 4202496 8192 0 0\nE 63\nC\nQ 63 4096\n"
+    },
+    {
+      "name": "envid=0 表示当前进程：只改目标进程的 handler，不得动就绪链表；同址重设必须换页且旧数据页被回收，空闲页数不多不少",
+      "input": "256 8192\n15\nI\nA 0\nA 0\nU 62\nS 63 2\nR 63\nK 10 0 4198400 1056964608 0 0\nE 62\nE 63\nT 62\nL\nH\nK 10 0 4198400 1056964608 0 0\nQ 62 1056960512\nC\n"
+    }
+  ]
+}

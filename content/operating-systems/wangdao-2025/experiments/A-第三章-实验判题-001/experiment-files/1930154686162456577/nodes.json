@@ -1,0 +1,26 @@
+{
+  "questionId": "1930154686162456577",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.process.pcb",
+      "nodeName": "进程控制块",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "lib/env.c 的 env_init() 把 NENV 个 Env 全部置 ENV_FREE 并挂进 env_free_list；判的是空闲 PCB 链表的插入顺序（content 特别提醒「注意插入的顺序」）。"
+    },
+    {
+      "nodeCode": "os.process.process_control",
+      "nodeName": "进程控制",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "env_free_list 是进程创建原语 env_alloc 取 PCB 的唯一来源，初始化顺序直接决定后续 envid 的分配次序。"
+    },
+    {
+      "nodeCode": "os.process.process_state",
+      "nodeName": "进程状态与转换",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "初始化时所有 PCB 的 env_status 必须置 ENV_FREE，否则 env_alloc 会把正在运行的进程当空闲 PCB 分配出去。"
+    }
+  ]
+}

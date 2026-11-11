@@ -1,0 +1,26 @@
+{
+  "questionId": "1930154980048949249",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.process_image",
+      "nodeName": "进程内存映像",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "env_setup_vm() 为新进程 page_alloc 一页作页目录，把 boot_pgdir 中内核部分的映射复制过来，并设置 env_pgdir 与 env_cr3，形成该进程的虚拟内存布局。"
+    },
+    {
+      "nodeCode": "os.memory.page_table",
+      "nodeName": "页表",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "复制的是页目录项（PDE）：每个进程有独立页目录但共享内核部分的二级页表，被共享页表的 pp_ref 需相应增加。"
+    },
+    {
+      "nodeCode": "os.memory.virtual_memory",
+      "nodeName": "虚拟内存",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "用户空间各自独立、内核空间所有进程共享，这就是虚拟内存给每个进程的地址空间抽象；content 还要求理解 CR3 存放页目录基地址的作用。"
+    }
+  ]
+}

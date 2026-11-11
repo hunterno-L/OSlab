@@ -1,0 +1,25 @@
+{
+  "description": "实验 4.6 sys_yield(void)。驱动操作符：I=env_init 并打印空闲 PCB 数；A parent=env_alloc 打印 返回码/下标/env_id；U idx=设 curenv；S idx st=设 env_status（0=FREE,1=NOT_RUNNABLE,2=RUNNABLE）；R idx=把 PCB 插入就绪链表头；K s a0 a1 a2 a3 a4=填好 KERNEL_SP 现场后调 handle_sys 并打印 $v0（必须恰好 6 个数，s=11 即 SYS_yield）；Y=打印 env_run 的记录日志（首行 Y 记录条数，随后每条 kind arg cur：kind 0=lcontext arg=页目录物理地址，kind 1=env_pop_tf arg=cp0_epc，cur=调用时刻 curenv 下标）；Z=清空记录日志；T idx=打印 env_id/parent/status/pri/cr3；H=打印就绪链表头下标（空表打印 -1）；L=按序打印就绪链表全部下标；C=打印空闲物理页数；Q idx va=打印物理页基址（无映射打印 4294967295）；P idx va perm=page_alloc+page_insert 并打印 返回码/物理页基址。宿主物理页账本：np=256/fm=8192 时启动期映射占 4 页，初始空闲 252 页；每次 env_alloc 占 1 页作页目录（envs[63].cr3=1044480、envs[62].cr3=1040384、envs[61].cr3=1036288）；首次映射某个 4MB 区间还要额外占 1 页作页表。env_alloc 出来的进程 pri=1、status=ENV_NOT_RUNNABLE，且不在就绪链表里，必须用 S+R 手工构造就绪场景。sched_yield 的时间片游标是函数内 static 变量，跨调用保持，故每个用例都是独立进程运行。",
+  "cases": [
+    {
+      "name": "只有一个就绪进程：让出 CPU 仍必须走完整 env_run 四步切回自己，且不得把自己阻塞掉",
+      "input": "256 8192\n12\nI\nA 0\nU 63\nS 63 2\nR 63\nK 11 0 0 0 0 0\nY\nT 63\nZ\nK 11 0 0 0 0 0\nY\nH\n"
+    },
+    {
+      "name": "两个就绪进程：时间片轮转必须真的换 curenv，旧进程现场从 TIMESTACK 存回且双方都保持 RUNNABLE",
+      "input": "256 8192\n15\nI\nA 0\nA 0\nU 63\nS 63 2\nS 62 2\nR 63\nR 62\nZ\nK 11 0 0 0 0 0\nY\nT 63\nK 11 0 0 0 0 0\nY\nL\n"
+    },
+    {
+      "name": "就绪链表为空：sched_yield 直接返回不调 env_run，curenv 与进程状态都不得被改动，也不得崩溃；随后入链再 yield 必须真的切换（用于区分「没写」与「写对」）",
+      "input": "256 8192\n14\nI\nA 0\nU 63\nS 63 2\nZ\nK 11 0 0 0 0 0\nY\nT 63\nH\nC\nR 63\nK 11 0 0 0 0 0\nY\nC\n"
+    },
+    {
+      "name": "切换后 curenv 必须真的换人：连续两次 yield 后用 envid=0 的 mem_alloc 验证内存落在新当前进程地址空间",
+      "input": "256 8192\n21\nI\nA 0\nA 0\nU 63\nS 63 2\nS 62 2\nR 63\nR 62\nP 63 4096 3\nC\nZ\nK 11 0 0 0 0 0\nT 63\nK 1 0 4096 3 0 0\nQ 62 4096\nK 11 0 0 0 0 0\nK 1 0 8192 3 0 0\nQ 63 8192\nQ 62 8192\nC\nY\n"
+    },
+    {
+      "name": "就绪队列中夹着 NOT_RUNNABLE 进程：环形查找必须跳过它，三次 yield走完 61->63->61 一整圈",
+      "input": "256 8192\n21\nI\nA 0\nA 0\nA 0\nU 63\nS 63 2\nS 62 1\nS 61 2\nR 63\nR 62\nR 61\nZ\nK 11 0 0 0 0 0\nY\nK 11 0 0 0 0 0\nY\nK 11 0 0 0 0 0\nY\nT 62\nL\nC\n"
+    }
+  ]
+}

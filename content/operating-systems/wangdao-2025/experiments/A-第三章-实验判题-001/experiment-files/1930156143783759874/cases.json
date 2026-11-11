@@ -1,0 +1,25 @@
+{
+  "description": "驱动 lib/sched.c 的 sched_yield()（北航 3.14：MIPS3000 上基于时间片轮转、由时钟中断触发的进程调度）。stdin 首行 npage freemem（1..256 / 0..65536），次行操作数 n（0..96），随后 n 个操作：I=平台 env_init()（重复打印 I SKIP）；B=镜像缓冲填成 seg_binary[i]=i&0xFF；G=清空段表；S va size perm=追加一段（最多8段，va<1073741824、size<=16384、perm 0..4095），打印「S 段数」；E entry=设 elf_entry；M epc sp sr badv cause=平台把五个值写进 TIMESTACK 时钟中断现场并原样打印；A x=ENV_CREATE(x)（x∈A/B/C，优先级1）；P x pri=ENV_CREATE_PRIORITY(x,pri)（pri 0..65535）；J=平台 env_alloc(&e,0)（不装镜像、不入就绪链表），打印「J 返回码 下标」；U idx st=平台把 envs[idx].env_status 设为 st（0=FREE,1=NOT_RUNNABLE,2=RUNNABLE），只改状态不动链表；D idx=平台 env_free(&envs[idx])（从就绪链表摘下、置FREE、清env_id、放回空闲链表，不回收物理页）；N=一个时钟滴答，调用学生填写的 sched_yield()；V=curenv 下标（NULL 为 -1）；T idx=打印「T idx env_id parent status pri cp0_epc sp」；Y=打印事件日志「Y 记录总数」随后每条一行「种类 参数 curenv下标」，种类0=lcontext（参数=页目录物理地址）、1=env_pop_tf（参数=现场cp0_epc）；env_run 每次调用追加两条，故记录总数=2×实际切换次数，每条的 curenv下标 即该滴答选中的进程；容量96条超出只计数；Z=清空事件日志；H=就绪链表头下标（空 -1）；L=就绪链表顺序（头插故为创建逆序）；F=空闲PCB数；C=空闲物理页数。idx<64。关键常量：ENV_RUNNABLE=2、ENV_NOT_RUNNABLE=1、ENV_FREE=0、USTACKTOP=1073741824、ENV_USER_SR=268439564、NENV=64。env_init 头插建空闲链表故分配顺序 63,62,61...；env_id=(生成号<<7)|下标，生成号从1起递增；单段非空镜像进程耗5页、空镜像3页、单纯 env_alloc 1页。算法契约：静态游标 cur 与剩余时间片 left 跨调用保持；cur为NULL/left为0/cur越界/cur非RUNNABLE 时从【cur的下一个】起环形查找第一个 RUNNABLE（最多NENV步，走到NULL绕回表头），找不到直接 return 不调用 env_run；找到则 left=max(1,env_pri)；然后 left-- 再 env_run(cur)。宿主等价：单条就绪链表 + env_pri 即一轮连续运行的滴答数（题面提到的「两个链表」是真实 MOS 部分版本的高低优先级双队列，此处按等价公开语义构造并已诚实标注）；env_run/lcontext/env_pop_tf 为平台件，切换行为由 Y 日志如实记录。",
+  "cases": [
+    {
+      "name": "官方锚：pri 2/1/3 三进程跑12个滴答，轮转周期 61×3→62×1→63×3 循环两轮，pri 与现场不被调度改写",
+      "input": "256 8192\n29\nI\nB\nG\nS 4096 4096 3\nE 4096\nM 4096 1073741824 268439564 0 0\nP A 2\nP B 1\nP C 3\nZ\nN\nN\nN\nN\nN\nN\nN\nN\nN\nN\nN\nN\nV\nT 61\nT 62\nT 63\nY\nF\nC\n"
+    },
+    {
+      "name": "优先级0边界：两个 pri=0 进程必须钳到至少1个滴答，6个滴答严格交替 62/63，不得活锁也不得饿死",
+      "input": "256 8192\n19\nI\nB\nG\nS 4096 4096 3\nE 4096\nM 4096 1073741824 268439564 0 0\nP A 0\nP B 0\nZ\nN\nN\nN\nN\nN\nN\nV\nY\nF\nC\n"
+    },
+    {
+      "name": "只有 RUNNABLE 参与：把62置 NOT_RUNNABLE 后8个滴答只在61/63间轮转；恢复62并把61置FREE后再4个滴答只在62/63间轮转",
+      "input": "256 8192\n30\nI\nB\nG\nS 4096 4096 3\nE 4096\nM 4096 1073741824 268439564 0 0\nP A 2\nP B 2\nP C 2\nZ\nU 62 1\nN\nN\nN\nN\nN\nN\nN\nN\nV\nU 62 2\nU 61 0\nN\nN\nN\nN\nV\nY\nT 62\nF\n"
+    },
+    {
+      "name": "时间片未用完即失效：cur 被置 NOT_RUNNABLE 必须立刻重选；D 销毁 cur 后重选；全部非就绪时两个滴答一次 env_run 都不许调用",
+      "input": "256 8192\n33\nI\nB\nG\nS 4096 4096 3\nE 4096\nM 4096 1073741824 268439564 0 0\nP A 1\nP B 3\nP C 2\nZ\nN\nN\nN\nN\nU 62 1\nN\nN\nD 61\nN\nN\nU 63 1\nN\nN\nU 62 2\nN\nN\nV\nY\nT 61\nH\nL\nF\nC\n"
+    },
+    {
+      "name": "空就绪链表：前两个滴答无进程可跑，curenv 保持 NULL 且日志为0条；建进程后恢复调度；再全部置非就绪时日志条数不得增长",
+      "input": "256 8192\n30\nI\nB\nG\nS 4096 4096 3\nE 4096\nM 4096 1073741824 268439564 0 0\nZ\nN\nN\nV\nY\nP A 2\nN\nN\nN\nV\nY\nU 63 1\nN\nN\nV\nY\nP B 1\nN\nV\nY\nH\nL\nF\nC\n"
+    }
+  ]
+}

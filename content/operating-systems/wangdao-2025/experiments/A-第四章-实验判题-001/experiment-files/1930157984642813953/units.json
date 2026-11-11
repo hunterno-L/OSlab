@@ -1,0 +1,15 @@
+{
+  "questionId": "1930157984642813953",
+  "unitMappings": [
+    {
+      "unitCode": "unit.process.states",
+      "required": false,
+      "completionRule": "PASS"
+    },
+    {
+      "unitCode": "unit.overview.system-calls",
+      "required": false,
+      "completionRule": "PASS"
+    }
+  ]
+}

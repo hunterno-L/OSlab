@@ -24,6 +24,9 @@ public class LearningAnswerRequest implements Serializable {
     /** 所属测评会话 id（旧入口不带该字段仍可用） */
     private Long assessmentRunId;
 
+    /** 普通练习尝试上下文 id（服务端建立；用于帮助资格与提交绑定） */
+    private Long attemptContextId;
+
     /** 提交幂等键（同键重发服务端去重；主动重试使用新键） */
     private String submissionKey;
     private String sourceUnitCode;

@@ -1,0 +1,11 @@
+static int sys_mem_unmap(int sysno, uint32_t envid, uint32_t va)
+{
+    struct Env *e = NULL;
+    int r;
+    (void)sysno;
+    if (va >= UTOP) { return -E_INVAL; }
+    r = envid2env(envid, &e, 0);
+    if (r != 0) { return r; }
+    page_remove(e->env_pgdir, va);
+    return 0;
+}

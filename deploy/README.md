@@ -71,6 +71,12 @@ repository's base dump plus every learning upgrade and seed:
 数据库文件/oslab_upgrade_v8_teaching_tasks.sql 学习任务与执行副本
 数据库文件/oslab_upgrade_v9_learning_activities.sql 演示运行记录
 数据库文件/oslab_upgrade_v10_classes.sql 班级与成员管理
+数据库文件/oslab_upgrade_v11_ai_session.sql AI 会话与资料
+数据库文件/oslab_upgrade_v12_ai_evidence.sql AI 模型与学习证据
+数据库文件/oslab_upgrade_v13_learning_selftest.sql 整组自测
+数据库文件/oslab_seed_v14_experiment_prerequisites.sql 实验单元公共课程依赖
+数据库文件/oslab_upgrade_v14_experiment_judge.sql 41 项实验与映射
+数据库文件/oslab_upgrade_v14_experiment_comments.sql 实验源码注释清理
 ```
 
 Every file is a mandatory read-only mount on the `mysql` service; the loader
@@ -79,6 +85,26 @@ via `information_schema` (learning tables, v4 columns, unique keys, snapshot
 columns, admin account, seed row counts 26/50/12) and fails the container if a
 check does not pass. The base dump already contains `uk_userAccount`; the v2
 script is intentionally not executed against fresh volumes.
+
+The v14 prerequisite seed supplies only the public dependency closure of the
+18 experiment units: 52 content chunks, 33 questions and their catalog/node
+references. It preserves existing rows and fills an empty v6 unit only when
+its complete shipped template matches. v14 preserves non-experiment activities
+and unit nodes, rejects conflicting unit edits, and can be reapplied. Run MySQL
+in its default batch mode, without `--force`, so an error stops execution and
+the uncommitted InnoDB transaction rolls back on disconnect. Back up an existing
+database before upgrading. Do not reapply the fresh prerequisite seed as a way
+to replace an independently edited curriculum.
+
+Apply the separate comment update after v14. It removes institution labels and
+internal production notes from current code templates and reference answers,
+preserves reviewed revision history, and changes no executable code or mappings.
+
+The exported state publishes 36 host-tested experiment resources and 12 units;
+5 MIPS local-build resources and 6 related units remain drafts. Fresh and
+upgrade SQL replay were verified with native MySQL; Docker startup, the actual
+sandbox and MIPS execution still require runtime verification. v13 was also
+added to first-install loading because the current application uses its columns.
 
 Initialization scripts are not rerun for an existing named volume. For an
 existing database, run the idempotent upgrade check instead:

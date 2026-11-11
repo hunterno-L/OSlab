@@ -4,6 +4,7 @@ import com.yupi.springbootinit.model.vo.ai.AiCourseContext;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * AI 会话与轮次请求 DTO（任务书 §3 冻结样例）。
@@ -48,6 +49,35 @@ public final class AiRequests {
         private String clientRequestId;
         private String message;
         private AiCourseContext context;
+        /** 统一导师场景/意图/作用域与用户明确附带的材料（本轮新增，旧客户端省略即按旧行为）。 */
+        private TutorDirective tutor;
+    }
+
+    /**
+     * 统一导师指令（01 契约 §2/§3.1）。
+     *
+     * <p>只描述本轮辅导方式与用户明确选择的材料；服务端会重新校验，
+     * 不接受客户端传来的掌握度、正确性或工具结论。
+     */
+    @Data
+    public static class TutorDirective implements Serializable {
+        /** GLOBAL / UNIT / NODE / QUESTION / EXPERIMENT */
+        private String scene;
+        /** ASK / EXPLAIN / HINT / DEBUG / PLAN */
+        private String intent;
+        /** PAGE / COURSE */
+        private String scope;
+        private List<TutorAttachment> attachments;
+    }
+
+    /** 用户明确附带的一段材料（单选段/代码/报错）。 */
+    @Data
+    public static class TutorAttachment implements Serializable {
+        /** SELECTION / CODE / ERROR */
+        private String kind;
+        private String label;
+        private String text;
+        private String sourceId;
     }
 
     /** {@code POST /learning/ai/actions/{id}/submit} */

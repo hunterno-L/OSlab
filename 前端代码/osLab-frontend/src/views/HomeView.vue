@@ -23,7 +23,13 @@
         </div>
         <div v-else-if="unitState === 'empty'" class="home-placeholder">
           暂时没有可继续的学习单元
-          <router-link to="/graph">进入课程学习</router-link>
+          <router-link
+            :to="{
+              path: '/graph',
+              query: course ? { courseCode: course.courseCode } : {},
+            }"
+            >进入课程学习</router-link
+          >
         </div>
         <template v-else-if="unit">
           <h2 class="home-unit-title">{{ unit?.title }}</h2>
@@ -51,7 +57,13 @@
             <router-link class="home-primary" :to="continueHref">
               {{ courseCompleted ? "复习课程" : "继续学习" }}
             </router-link>
-            <router-link class="home-secondary" to="/graph">
+            <router-link
+              class="home-secondary"
+              :to="{
+                path: '/graph',
+                query: course ? { courseCode: course.courseCode } : {},
+              }"
+            >
               查看课程图谱
             </router-link>
           </div>
@@ -61,6 +73,8 @@
       <ProfileCard
         :profile="profile"
         :recommend="recommend"
+        :recommend-code="recommendCode"
+        :course-code="course?.courseCode"
         :state="profileState"
         @retry="loadProfile"
       />
@@ -167,8 +181,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useStore } from "vuex";
+import { useRoute } from "vue-router";
+import { selectAvailableCourse } from "@/composables/useCurrentCourse";
 import { getTaskSummary } from "@/api/tasks";
 import { masteryRecommend, personalGraph } from "@/api/learning";
 import type { PersonalGraphVO } from "@/api/learning";
@@ -200,6 +216,7 @@ type Resume = {
 };
 
 const store = useStore();
+const route = useRoute();
 
 const {
   session,
@@ -273,7 +290,10 @@ const unitState = ref<LoadState>("loading");
 
 const profile = ref<PersonalGraphVO | null>(null);
 const recommend = ref<string | null>(null);
+const recommendCode = ref<string | null>(null);
 const profileState = ref<LoadState>("loading");
+let homeSequence = 0;
+let profileSequence = 0;
 
 const tasks = ref<Record<string, number>>({});
 const tasksState = ref<LoadState>("loading");
@@ -310,48 +330,101 @@ function findSectionTitle(
 }
 
 async function loadUnit() {
+  const sequence = ++homeSequence;
+  profileSequence += 1;
   unitState.value = "loading";
+  profileState.value = "loading";
+  course.value = null;
+  outline.value = null;
+  resume.value = null;
+  unit.value = null;
+  profile.value = null;
+  recommend.value = null;
+  recommendCode.value = null;
   try {
     const courses = await listCourses();
-    course.value = courses[0] || null;
+    if (sequence !== homeSequence) return;
+    const requested =
+      typeof route.query.courseCode === "string"
+        ? route.query.courseCode
+        : undefined;
+    course.value = selectAvailableCourse(courses, requested);
+    unit.value = null;
+    profile.value = null;
+    recommend.value = null;
+    recommendCode.value = null;
     if (!course.value) {
       unitState.value = "empty";
+      profileState.value = "empty";
       return;
     }
-    outline.value = await getCourseOutline(course.value.courseCode);
-    resume.value = await getCourseResume(course.value.courseCode);
+    const courseCode = course.value.courseCode;
+    void loadProfile();
+    void refreshPlan();
+    const [nextOutline, nextResume] = await Promise.all([
+      getCourseOutline(courseCode),
+      getCourseResume(courseCode),
+    ]);
+    if (sequence !== homeSequence) return;
+    outline.value = nextOutline;
+    resume.value = nextResume;
     const code = resume.value.unitCode || firstUnitCode(outline.value);
     if (!code) {
       unitState.value = "empty";
       return;
     }
-    unit.value = await getCourseUnit(code);
+    const nextUnit = await getCourseUnit(code);
+    if (sequence !== homeSequence) return;
+    unit.value = nextUnit;
     unitState.value = "ready";
-    void refreshPlan();
   } catch {
-    unitState.value = "error";
+    if (sequence === homeSequence) {
+      unitState.value = "error";
+      if (!course.value) profileState.value = "error";
+    }
   }
 }
 
 async function loadProfile() {
+  const code = course.value?.courseCode;
+  if (!code) {
+    profileState.value = "empty";
+    return;
+  }
+  const sequence = ++profileSequence;
   profileState.value = "loading";
   try {
-    const res = await personalGraph();
+    const res = await personalGraph(code);
+    if (sequence !== profileSequence || code !== course.value?.courseCode)
+      return;
     if (res.data.code !== 0) throw new Error(res.data.message);
     profile.value = res.data.data;
-    recommend.value = profile.value?.recommendedNodeName || null;
+    const node = profile.value?.nodes?.find(
+      (item) =>
+        item.name === profile.value?.recommendedNodeName ||
+        item.nodeCode === profile.value?.recommendedNodeName
+    );
+    recommend.value = node?.displayName || node?.name || null;
+    recommendCode.value = node?.nodeCode || null;
     if (!recommend.value) {
       try {
-        const rec = await masteryRecommend();
-        recommend.value =
-          rec.data.code === 0 ? rec.data.data?.[0]?.nodeName || null : null;
+        const rec = await masteryRecommend(code);
+        if (sequence !== profileSequence || code !== course.value?.courseCode)
+          return;
+        const first = rec.data.code === 0 ? rec.data.data?.[0] : null;
+        recommend.value = first?.displayName || first?.nodeName || null;
+        recommendCode.value = first?.nodeCode || null;
       } catch {
+        if (sequence !== profileSequence || code !== course.value?.courseCode)
+          return;
         recommend.value = null;
       }
     }
+    if (sequence !== profileSequence || code !== course.value?.courseCode)
+      return;
     profileState.value = "ready";
   } catch {
-    profileState.value = "error";
+    if (sequence === profileSequence) profileState.value = "error";
   }
 }
 
@@ -381,7 +454,8 @@ const currentActivityCode = computed(() => {
 
 const continueHref = computed(() => {
   if (!course.value || !unit.value) return "/graph";
-  if (resume.value?.reason === "COURSE_COMPLETED") return "/graph";
+  if (resume.value?.reason === "COURSE_COMPLETED")
+    return `/graph?courseCode=${encodeURIComponent(course.value.courseCode)}`;
   const base = unitPath(course.value.courseCode, unit.value.unitCode);
   return currentActivityCode.value
     ? `${base}?activity=${encodeURIComponent(currentActivityCode.value)}`
@@ -395,11 +469,19 @@ const courseCompleted = computed(
 onMounted(() => {
   registerAiPageContext(aiContextProvider);
   void loadUnit();
-  void loadProfile();
   void loadTasks();
 });
 
+watch(
+  () => route.query.courseCode,
+  (value, previous) => {
+    if (value !== previous) void loadUnit();
+  }
+);
+
 onBeforeUnmount(() => {
+  homeSequence += 1;
+  profileSequence += 1;
   unregisterAiPageContext(aiContextProvider);
 });
 </script>

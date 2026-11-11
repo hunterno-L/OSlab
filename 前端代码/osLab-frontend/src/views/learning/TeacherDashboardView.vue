@@ -2,17 +2,15 @@
   <div class="teacher-dashboard">
     <header class="page-head">
       <div class="page-head-text">
-        <h1 class="oslab-page-title">班级分析</h1>
-        <p class="page-desc">
-          全部数值来自学习事件、掌握度与作答记录的实时聚合，可对照数据库核验；页面不展示虚构的更新时间，样本为空时如实显示「暂无」而非
-          0%。
-        </p>
+        <h1 class="oslab-page-title">教学工作台</h1>
+        <p class="page-desc">查看班级学习情况，安排任务并跟进学生学习。</p>
       </div>
       <div class="page-actions">
         <span class="class-label">班级</span>
         <a-select
           v-model:model-value="className"
           class="class-select"
+          aria-label="选择班级"
           placeholder="选择班级"
           :loading="classesLoading"
           allow-search
@@ -36,6 +34,24 @@
       </div>
     </header>
 
+    <TeacherFollowUpPanel
+      ref="followUpPanel"
+      :class-name="className"
+      @node="showNodeEvidence"
+    />
+    <div v-if="className" class="analysis-toggle">
+      <a-button
+        :aria-expanded="analysisOpen"
+        aria-controls="class-analysis"
+        @click="analysisOpen = !analysisOpen"
+        >{{
+          analysisOpen
+            ? "收起班级分析（本班全部课程）"
+            : "查看班级分析（本班全部课程）"
+        }}</a-button
+      >
+    </div>
+
     <div v-if="classesError" class="oslab-error" role="alert">
       <span class="oslab-state-title">班级列表加载失败</span>
       <span class="oslab-state-hint">{{ classesError }}</span>
@@ -47,11 +63,16 @@
     >
       <span class="oslab-state-title">暂无班级数据</span>
       <span class="oslab-state-hint">
-        students 表暂无绑定账号的班级记录，无法生成班级分析。
+        暂无可分析的班级，请先在班级管理中创建班级并添加学生。
       </span>
     </div>
 
-    <template v-else-if="className">
+    <section
+      v-else-if="className && analysisOpen"
+      id="class-analysis"
+      aria-label="班级分析：本班全部课程"
+    >
+      <p>以下班级分析汇总本班全部课程，不随上方课程选择变化。</p>
       <div v-if="dashboardError && !dashboard" class="oslab-error" role="alert">
         <span class="oslab-state-title">班级数据加载失败</span>
         <span class="oslab-state-hint">{{ dashboardError }}</span>
@@ -75,7 +96,7 @@
           <div class="kpi-card">
             <span class="kpi-label">班级学生数</span>
             <span class="kpi-value">{{ dashboard.studentCount }}</span>
-            <span class="kpi-hint"> students 表中绑定本班级的有效账号数 </span>
+            <span class="kpi-hint"> 本班级已绑定账号的学生数 </span>
           </div>
           <div class="kpi-card">
             <span class="kpi-label">实验有效通过率</span>
@@ -104,9 +125,7 @@
             <span class="kpi-value">{{
               dashboard.questionAccuracy.length
             }}</span>
-            <span class="kpi-hint">
-              班级内有作答记录且未删除的题目个数（服务端按题目聚合）
-            </span>
+            <span class="kpi-hint"> 班级内有作答记录的题目数 </span>
           </div>
         </section>
 
@@ -115,8 +134,7 @@
             <div class="panel-head">
               <h2 class="oslab-section-title">薄弱知识点 Top 5</h2>
               <span class="panel-sub">
-                按薄弱（掌握状态＝薄弱）人数排序，服务端返回前
-                5；点击行查看节点详情
+                按薄弱人数排序，显示前 5 个；点击查看节点详情
               </span>
             </div>
             <div v-if="dashboard.weakTop.length" class="node-list">
@@ -275,7 +293,9 @@
             aria-label="节点下钻详情"
           >
             <div class="panel-head">
-              <h2 class="oslab-section-title">节点下钻 · {{ drillNode }}</h2>
+              <h2 class="oslab-section-title">
+                节点下钻 · {{ drill?.nodeName || drillNode }}
+              </h2>
               <a-button size="mini" @click="closeDrill">关闭</a-button>
             </div>
             <div v-if="drillLoading && !drill" class="oslab-loading">
@@ -317,7 +337,7 @@
                   <div class="fact">
                     <dt>班级人数</dt>
                     <dd>{{ drill.studentCount }}</dd>
-                    <dd class="fact-note">students 表绑定本班级的账号数</dd>
+                    <dd class="fact-note">本班级已绑定账号的学生数</dd>
                   </div>
                   <div class="fact">
                     <dt>首次测评正确率</dt>
@@ -389,9 +409,7 @@
                 <h3 class="block-title">
                   关联测评题（{{ drill.questions.length }}）
                 </h3>
-                <p class="block-note">
-                  服务端按节点映射表精确关联，不按标题模糊匹配。
-                </p>
+                <p class="block-note">按知识点关联的测评题。</p>
                 <p v-if="!drill.questions.length" class="hint">
                   该节点暂无关联测评题。
                 </p>
@@ -423,7 +441,7 @@
                   关联编程实验（{{ drill.experiments.length }}）
                 </h3>
                 <p class="block-note">
-                  服务端按知识标签精确关联；通过率按提交 ID 去重并排除系统错误。
+                  按知识标签关联；通过率去重并排除系统错误。
                 </p>
                 <p v-if="!drill.experiments.length" class="hint">
                   该节点暂无关联编程实验。
@@ -453,7 +471,7 @@
               <a-button
                 type="primary"
                 long
-                @click="openNodeWorkspace(drillNode)"
+                @click="openNodeWorkspace(drill?.nodeName || drillNode)"
               >
                 打开节点学习工作台
               </a-button>
@@ -469,7 +487,7 @@
             <div class="panel-head">
               <h2 class="oslab-section-title">题目正确率（低 → 高）</h2>
               <span class="panel-sub">
-                正确率分母为全部作答次数（含重复作答），服务端按题目聚合
+                正确率按全部作答次数计算，含重复作答
               </span>
             </div>
             <div
@@ -505,9 +523,7 @@
           <section class="section-card panel">
             <div class="panel-head">
               <h2 class="oslab-section-title">近期学习事件</h2>
-              <span class="panel-sub">
-                服务端返回最近 20 条；点击事件行查看原始证据
-              </span>
+              <span class="panel-sub"> 最近 20 条；点击查看学习证据 </span>
             </div>
             <div v-if="dashboard.recentEvents.length" class="event-list">
               <div
@@ -561,7 +577,7 @@
                   </span>
                 </button>
                 <div v-if="openEvidenceId === event.id" class="event-evidence">
-                  <p class="cell-label">原始证据（学习事件 evidence 字段）</p>
+                  <p class="cell-label">学习证据</p>
                   <pre class="oslab-mono">{{
                     evidenceText(event.evidence)
                   }}</pre>
@@ -681,7 +697,7 @@
                 </span>
               </button>
               <div v-if="openEvidenceId === event.id" class="event-evidence">
-                <p class="cell-label">原始证据（学习事件 evidence 字段）</p>
+                <p class="cell-label">学习证据</p>
                 <pre class="oslab-mono">{{ evidenceText(event.evidence) }}</pre>
               </div>
             </li>
@@ -767,9 +783,9 @@
           </template>
         </section>
       </template>
-    </template>
+    </section>
 
-    <div v-else class="oslab-loading">
+    <div v-else-if="classesLoading" class="oslab-loading">
       <span class="oslab-spinner" />
       <span class="oslab-state-hint">正在加载班级列表…</span>
     </div>
@@ -777,7 +793,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
+import TeacherFollowUpPanel from "@/components/teaching/TeacherFollowUpPanel.vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   teacherChapterCoverage,
@@ -808,6 +825,10 @@ const classesLoading = ref(false);
 const classesError = ref<string | null>(null);
 const classOptions = ref<ClassOptionVO[]>([]);
 const className = ref("");
+const analysisOpen = ref(false);
+const followUpPanel = ref<InstanceType<typeof TeacherFollowUpPanel> | null>(
+  null
+);
 
 // ---------- 班级大屏（按 className 缓存，切换班级不残留旧内容） ----------
 const dashboardCache = new Map<string, TeacherDashboardVO>();
@@ -1169,10 +1190,25 @@ const loadDrill = async (nodeName: string) => {
 // ========== 交互 ==========
 
 const syncClassQuery = (value: string) => {
+  if (route.query.className === value) return;
   router
     .replace({ query: { ...route.query, className: value } })
     .catch(() => undefined);
 };
+
+watch(
+  () => route.query.className,
+  (value) => {
+    const requested = Array.isArray(value) ? value[0] : value;
+    if (
+      typeof requested === "string" &&
+      requested !== className.value &&
+      classOptions.value.some((option) => option.className === requested)
+    ) {
+      className.value = requested;
+    }
+  }
+);
 
 watch(className, (next, prev) => {
   if (!next || next === prev) return;
@@ -1190,6 +1226,7 @@ watch(className, (next, prev) => {
 });
 
 const refreshAll = () => {
+  followUpPanel.value?.refresh();
   loadDashboard();
   loadTimeline();
   loadChapterCoverage();
@@ -1206,6 +1243,16 @@ const toggleDrill = (nodeName: string) => {
   }
   drillNode.value = nodeName;
   loadDrill(nodeName);
+};
+
+const showNodeEvidence = async (nodeName: string) => {
+  analysisOpen.value = true;
+  drillNode.value = nodeName;
+  await loadDrill(nodeName);
+  await nextTick();
+  document
+    .querySelector('[aria-label="节点下钻详情"]')
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
 };
 
 const closeDrill = () => {
@@ -1357,6 +1404,9 @@ loadClasses();
 </script>
 
 <style scoped>
+.analysis-toggle {
+  margin-bottom: 16px;
+}
 .teacher-dashboard {
   display: flex;
   flex-direction: column;
@@ -1392,6 +1442,7 @@ loadClasses();
 }
 
 .class-label {
+  white-space: nowrap;
   color: var(--oslab-muted-strong);
   font-size: var(--oslab-text-small);
 }
@@ -2094,6 +2145,12 @@ loadClasses();
 }
 
 @media (max-width: 480px) {
+  .page-actions :deep(.arco-btn),
+  .page-actions :deep(.arco-select-view),
+  .analysis-toggle :deep(.arco-btn) {
+    min-height: 44px;
+  }
+
   .kpi-grid {
     grid-template-columns: 1fr;
   }

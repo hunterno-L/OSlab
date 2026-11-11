@@ -114,6 +114,9 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
     @Resource
     private com.yupi.springbootinit.ai.evidence.LearningEvidenceContextService evidenceContexts;
 
+    @Resource
+    private com.yupi.springbootinit.learning.SelfTestPolicy selfTestPolicy;
+
     // region CRUD
 
     @Override
@@ -190,7 +193,9 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         boolean admin = userService.isAdmin(user);
         boolean published = LearningReviewStatusEnum.isStudentVisible(question.getReviewStatus());
         ThrowUtils.throwIf(!published && !owner && !admin, ErrorCode.NOT_FOUND_ERROR, "题目不存在或未发布");
-        return toVO(question, user, owner || admin);
+        LearningQuestionVO vo = toVO(question, user, owner || admin);
+        suppressLockedSelfTest(Collections.singletonList(vo), user);
+        return vo;
     }
 
     @Override
@@ -247,6 +252,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
             }
             result.add(vo);
         }
+        suppressLockedSelfTest(result, user);
         return result;
     }
 
@@ -356,6 +362,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
             }
             if (studentScope) {
                 fillAttemptFields(records, byQuestion);
+                suppressLockedSelfTest(records, user);
             }
             result.setRecords(records);
             return result;
@@ -365,8 +372,47 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         IPage<LearningQuestionVO> voPage = page.convert(q -> toVO(q, user, admin || q.getUserId().equals(user.getId())));
         if (studentScope) {
             fillAttemptFields(voPage.getRecords(), user.getId());
+            suppressLockedSelfTest(voPage.getRecords(), user);
         }
         return voPage;
+    }
+
+    /**
+     * 整组自测进行中：本组题不下发解析、历史对错与作答统计。
+     *
+     * <p>历史作答结果同样会暗示正确答案，因此在该轮交卷前一并隐藏；
+     * 交卷走 {@code /assessment/runs/{id}/result} 的独立结果页。
+     */
+    private void suppressLockedSelfTest(List<LearningQuestionVO> records, User user) {
+        if (selfTestPolicy == null || CollectionUtils.isEmpty(records) || user == null) {
+            return;
+        }
+        List<Long> ids = records.stream().map(LearningQuestionVO::getId)
+                .filter(Objects::nonNull).collect(Collectors.toList());
+        if (ids.isEmpty()) {
+            return;
+        }
+        Set<Long> locked = new HashSet<>();
+        for (LearningAssessmentRun run : selfTestPolicy.activeSelfTests(user.getId())) {
+            for (Long id : selfTestPolicy.queueIds(run)) {
+                if (ids.contains(id)) {
+                    locked.add(id);
+                }
+            }
+        }
+        if (locked.isEmpty()) {
+            return;
+        }
+        for (LearningQuestionVO vo : records) {
+            if (locked.contains(vo.getId())) {
+                vo.setAnalysis(null);
+                vo.setMisconception(null);
+                vo.setHasAttempted(false);
+                vo.setAttemptCount(0);
+                vo.setFirstResult(null);
+                vo.setLatestResult(null);
+            }
+        }
     }
 
     /**
@@ -397,13 +443,22 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
      */
     @Override
     public List<Long> listEligibleQuestionIds(LearningQuestionQueryRequest request, User user) {
+        return listEligibleQuestionIds(request, user, false);
+    }
+
+    @Override
+    public List<Long> listEligibleQuestionIds(LearningQuestionQueryRequest request, User user,
+                                              boolean includeComprehensive) {
         ThrowUtils.throwIf(request == null || user == null, ErrorCode.PARAMS_ERROR);
         LambdaQueryWrapper<LearningQuestion> wrapper = new LambdaQueryWrapper<>();
         // 测评为学生功能：固定学生口径（仅已发布），不开放审核队列/我的题目范围
         wrapper.eq(LearningQuestion::getReviewStatus, LearningReviewStatusEnum.PUBLISHED.name());
         wrapper.eq(LearningQuestion::getIsDelete, 0);
         wrapper.eq(LearningQuestion::getResourceScope, com.yupi.springbootinit.task.TaskConstants.SCOPE_SHARED);
-        wrapper.ne(LearningQuestion::getType, LearningQuestionTypeEnum.COMPREHENSIVE.name());
+        if (!includeComprehensive) {
+            // 逐题练习立即判分：综合题不进入客观题队列；整组自测允许进入并由交卷标记待自评
+            wrapper.ne(LearningQuestion::getType, LearningQuestionTypeEnum.COMPREHENSIVE.name());
+        }
         if (StringUtils.isNotBlank(request.getType())) {
             wrapper.eq(LearningQuestion::getType, request.getType());
         }
@@ -988,7 +1043,7 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
     public LearningAnswerResultVO answerQuestion(LearningAnswerRequest request, User user) {
         // 旧入口（练习/测评/任务）不带证据上下文：两个方法都标注事务，
         // 保证同类内部委托仍然运行在代理开启的事务里。
-        return answerQuestion(request, user, null);
+        return answerQuestion(request, user, request == null ? null : request.getAttemptContextId());
     }
 
     @Override
@@ -997,6 +1052,10 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
         ThrowUtils.throwIf(request == null || request.getQuestionId() == null, ErrorCode.PARAMS_ERROR);
         LearningQuestion question = this.getById(request.getQuestionId());
         ThrowUtils.throwIf(question == null || question.getIsDelete() == 1, ErrorCode.NOT_FOUND_ERROR, "题目不存在");
+        // 整组自测进行中：本组题一律不许走普通作答/解析路径（服务端按 ACTIVE 自测队列判定）
+        ThrowUtils.throwIf(selfTestPolicy != null
+                        && selfTestPolicy.isLocked(user.getId(), question.getId()),
+                ErrorCode.OPERATION_ERROR, "该题正在整组自测中，请先交卷后再作答");
         boolean taskScoped = com.yupi.springbootinit.task.TaskConstants.SCOPE_TASK.equals(question.getResourceScope());
         com.yupi.springbootinit.task.TaskExecutionContextService.Context context = null;
         Long sourceOriginalId = null;
@@ -1066,6 +1125,16 @@ public class LearningQuestionServiceImpl extends ServiceImpl<LearningQuestionMap
                                 || !Objects.equals(existing.getSourceTaskRound(), request.getSourceTaskRound()),
                         ErrorCode.PARAMS_ERROR, "提交标识与本次作答不匹配");
                 return rebuildResultFromAttempt(existing, question);
+            }
+        }
+        // 尝试上下文：必须绑定当前题目；归属/存在性由 lockAndQualify 兜底
+        // （缺失上下文按 UNKNOWN 处理，保持旧入口兼容）。幂等重发不触碰证据上下文。
+        if (evidenceContextId != null && evidenceContexts != null) {
+            com.yupi.springbootinit.model.entity.LearningEvidenceContext evidenceContext =
+                    evidenceContexts.findOwn(user.getId(), evidenceContextId);
+            if (evidenceContext != null) {
+                ThrowUtils.throwIf(!String.valueOf(question.getId()).equals(evidenceContext.getActivityCode()),
+                        ErrorCode.PARAMS_ERROR, "尝试上下文与题目不匹配");
             }
         }
         // 证据资格（AI 升级 §5.5）：帮助等级（NONE/HINT/ANSWER_REVEALED）已在本事务

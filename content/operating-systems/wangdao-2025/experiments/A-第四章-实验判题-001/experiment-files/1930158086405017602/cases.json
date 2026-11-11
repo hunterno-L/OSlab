@@ -1,0 +1,25 @@
+{
+  "description": "实验 4.15 fork(void)（user/fork.c，侧重父进程分支）。父进程必须：遍历 pn=0..VPN(USTACKTOP)-1 只对带 PTE_V 的页调 duppage(envid,pn)；syscall_mem_alloc(envid, UXSTACKTOP-BY2PG, PTE_V|PTE_R) 申请子进程异常栈；syscall_set_pgfault_handler(envid, PGFAULT_ENTRY, UXSTACKTOP) 登记处理函数；syscall_set_env_status(envid, ENV_RUNNABLE) 唤醒子进程；返回子进程 envid。驱动操作符（CH4_USER_DRIVER + CH4_FORK_DRIVER + CH4_DUPPAGE_DRIVER）：I=env_init 打印空闲 PCB 数；A parent=env_alloc 打印 返回码/下标/env_id；U idx=同时设 curenv 与用户态全局 env；P idx va perm=page_alloc+page_insert 建真实映射，打印 返回码/物理页基址；V=调 fork() 打印 返回值/子进程下标(ENVX)/env 下标；Y=子进程分支夹具（令 syscall_env_alloc 返回 0，env 先置 NULL 作哨兵）打印 返回值/env 下标；W dst src n=user_memcpy 打印返回码；T idx=env_id/parent/status/pri/cr3；E idx=env_pgfault_handler/env_ipc_receiving/env_ipc_dstva/env_ipc_from/env_ipc_value；Q idx va=物理页基址（无有效映射 4294967295）；O idx va=页表项原始值（无页表 4294967295）；C=空闲物理页数；L=就绪链表下标；H=就绪链表头（空表 -1）。本实验不装配 pgfault，故 X/Z 不可用；duppage 由平台提供（4.10 已考）。权限位：PTE_V=1，PTE_R=2（可写位），PTE_COW=8，PTE_LIBRARY=16；duppage 后可写页 3->11、只读页 1 与共享页 19 原样。关键地址：USTACKTOP=UTOP=1073741824，其栈页 va=1073737728(PDX=255,PTX=1023)；UXSTACKTOP=1056964608，异常栈页 va=1056960512(PDX=252)；PGFAULT_ENTRY=4198400；ENV_RUNNABLE=2，ENV_NOT_RUNNABLE=1。错误码：-2=E_BAD_ENV，-3=E_INVAL，-4=E_NO_MEM。宿主物理页账本：np=256/fm=8192 初始空闲 252 页，np=8 时 4 页；空闲链表 LIFO，头是最高号页；每次 env_alloc 占 1 页作页目录；首次进入某 4MB 区间额外占 1 页作页表；set_pgfault_handler 内部会再申请一页栈并回收前一次 mem_alloc 的栈页（同址重映射到不同物理页 -> page_remove 旧页，pp_ref 归零即回收），故一次空 fork 净耗 3 页。",
+  "cases": [
+    {
+      "name": "异常栈/handler/RUNNABLE 三件事都必须落在子进程身上：父进程的 handler、栈页映射、状态与就绪链表都不得被改",
+      "input": "256 8192\n16\nI\nA 0\nU 63\nV\nT 62\nE 62\nE 63\nQ 62 1056960512\nQ 63 1056960512\nO 62 1056960512\nL\nH\nC\nT 63\nY\nC\n"
+    },
+    {
+      "name": "地址空间遍历：只对有 PTE_V 的页调 duppage，可写页父子都标 COW(3->11)、只读页(1)与共享页(19)原权限共享、未映射页不得出现在子进程页表里",
+      "input": "256 8192\n18\nI\nA 0\nU 63\nP 63 4194304 3\nP 63 4198400 1\nP 63 4202496 19\nC\nV\nC\nO 63 4194304\nO 62 4194304\nO 62 4198400\nO 62 4202496\nO 62 4206592\nQ 62 1056960512\nE 62\nT 62\nL\n"
+    },
+    {
+      "name": "连续两次 fork：每个新子进程都要各自装好异常栈与 handler 并被置 RUNNABLE，就绪链表按头插累积，父进程状态始终不变",
+      "input": "256 8192\n14\nI\nA 0\nU 63\nV\nV\nL\nH\nT 62\nT 61\nE 61\nQ 61 1056960512\nC\nY\nT 63\n"
+    },
+    {
+      "name": "物理页耗尽：np=8 时异常栈第二次申请失败也不得崩溃，handler 仍须写入子进程 PCB、子进程仍须被置 RUNNABLE 并返回其 envid",
+      "input": "8 8192\n14\nI\nA 0\nU 63\nC\nV\nC\nT 62\nE 62\nQ 62 1056960512\nO 62 1056960512\nL\nH\nY\nT 63\n"
+    },
+    {
+      "name": "遍历必须覆盖用户空间最顶端：USTACKTOP-BY2PG(PDX=255) 的可写页与 va=4096 的只读页都要 duppage，且与 PDX=252 的异常栈页互不冲突",
+      "input": "256 8192\n16\nI\nA 0\nU 63\nP 63 1073737728 3\nP 63 4096 1\nC\nV\nC\nO 62 1073737728\nO 63 1073737728\nO 62 4096\nQ 62 1056960512\nE 62\nT 62\nL\nY\n"
+    }
+  ]
+}

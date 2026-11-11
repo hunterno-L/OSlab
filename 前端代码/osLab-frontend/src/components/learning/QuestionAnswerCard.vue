@@ -112,20 +112,21 @@
       暂不支持的题型：{{ question.type }}
     </div>
 
-    <div v-if="aiActionId" class="qa-help-row">
+    <div v-if="!result" class="qa-help-row">
       <span class="qa-help-label">提交前记录帮助：</span>
       <button
         type="button"
         class="qa-help-btn"
-        :disabled="!!result || helpSaving"
+        :disabled="helpSaving"
         @click="markHelp('HINT')"
       >
         我需要提示
       </button>
       <button
+        v-if="aiActionId"
         type="button"
         class="qa-help-btn qa-help-btn--reveal"
-        :disabled="!!result || helpSaving"
+        :disabled="helpSaving"
         @click="markHelp('ANSWER_REVEALED')"
       >
         我已查看答案
@@ -136,12 +137,28 @@
 
     <div class="qa-submit-row">
       <a-button
+        v-if="hasResult && hasNext"
+        type="primary"
+        @click="emit('next')"
+      >
+        下一题
+      </a-button>
+      <a-button
+        v-else
         :type="hasResult ? 'outline' : 'primary'"
         :loading="submitting"
         :disabled="!canSubmit"
         @click="submit"
       >
         {{ hasResult ? "再答一次" : "提交答案" }}
+      </a-button>
+      <a-button
+        v-if="hasResult && hasNext"
+        :loading="submitting"
+        :disabled="!canSubmit"
+        @click="submit"
+      >
+        再答一次
       </a-button>
       <span
         v-if="question.type === 'MULTIPLE' && !hasResult && !answerDisabled"
@@ -157,7 +174,7 @@
       }}</span>
     </div>
 
-    <!-- 提交后反馈就地展开：结果 → 解析 → 常见误区 → 掌握度变化 → 下一步 -->
+    <!-- 提交后反馈收敛：结果 + 简短依据 + 详细解析入口 -->
     <section
       v-if="result"
       class="qa-feedback"
@@ -173,7 +190,7 @@
       <div class="qa-result">
         <span class="qa-result-badge">{{
           result.correct === null
-            ? "已显示参考解析"
+            ? "待评阅：已显示参考解析"
             : result.correct
             ? "回答正确"
             : "回答错误"
@@ -183,114 +200,133 @@
         }}</span>
       </div>
 
-      <div class="qa-help-evidence">
-        <AiHelpBadge :level="evidence?.helpLevel || 'UNKNOWN'" />
-        <span v-if="evidence" class="qa-hint">{{
-          evidence.eligibleForObservation
-            ? evidence.eligibilityReason || "本次计入独立观测"
-            : evidence.eligibilityReason
-        }}</span>
-        <span v-else class="qa-hint"
-          >普通练习不生成帮助快照；从 AI 任务进入可记录提示与看答案。</span
+      <div class="qa-feedback-actions">
+        <button
+          type="button"
+          class="qa-detail-toggle"
+          :aria-expanded="detailedOpen"
+          @click="detailedOpen = !detailedOpen"
         >
-        <span v-if="nextReviewDueAt" class="qa-hint"
-          >下次复习：{{ nextReviewDueAt }}</span
-        >
-      </div>
-
-      <div class="qa-feedback-block">
-        <h3 class="qa-feedback-title">解析</h3>
-        <MdViewer
-          v-if="result.analysis"
-          class="qa-feedback-text"
-          :value="result.analysis"
-        />
-        <p v-else class="qa-feedback-text qa-hint">本题暂无解析</p>
-      </div>
-
-      <div v-if="result.misconception" class="qa-feedback-block">
-        <h3 class="qa-feedback-title">常见误区</h3>
-        <p class="qa-feedback-text">{{ result.misconception }}</p>
-      </div>
-
-      <div
-        v-if="result.masteryChanges && result.masteryChanges.length"
-        class="qa-feedback-block"
-      >
-        <h3 class="qa-feedback-title">掌握度变化</h3>
-        <ul class="qa-mastery-list">
-          <li
-            v-for="change in result.masteryChanges"
-            :key="change.nodeName"
-            class="qa-mastery-item"
-          >
-            <span class="qa-mastery-node">{{ change.nodeName }}</span>
-            <span class="oslab-mono qa-mastery-value"
-              >{{ percentText(change.masteryBefore) }} →
-              {{ percentText(change.masteryAfter) }}</span
-            >
-            <span
-              class="oslab-status-tag"
-              :class="statusTagClass(change.status)"
-              >{{ statusText(change.status) }}</span
-            >
-            <span v-if="change.countedAsObservation === false" class="qa-hint"
-              >重复作答，不计独立观测</span
-            >
-          </li>
-        </ul>
-      </div>
-
-      <div class="qa-feedback-block qa-next">
-        <h3 class="qa-feedback-title">下一步</h3>
-        <p class="qa-feedback-text">{{ nextHint }}</p>
-      </div>
-
-      <div class="qa-feedback-block qa-ai-analysis">
-        <div class="qa-ai-head">
-          <h3 class="qa-feedback-title">AI 分析</h3>
-          <AiModeBadge v-if="analysisTurn?.mode" :mode="analysisTurn.mode" />
-        </div>
+          {{ detailedOpen ? "收起详细解析" : "查看详细解析" }}
+        </button>
         <a-button
-          v-if="!analysisTurn"
-          size="small"
-          :loading="analysisLoading"
-          :disabled="analysisLoading"
-          @click="requestAnalysis"
+          v-if="result.correct === false"
+          size="mini"
+          @click="openRemedial"
+          >补学本题知识点</a-button
         >
-          请求 AI 分析
-        </a-button>
-        <p v-if="analysisError" class="qa-help-error" role="alert">
-          {{ analysisError }}
-        </p>
-        <template v-if="analysisTurn">
-          <MdViewer
-            v-if="analysisTurn.answer"
-            class="qa-feedback-text"
-            :value="analysisTurn.answer"
-          />
-          <AiDiagnosisPanel :diagnosis="analysisTurn.diagnosis" />
-          <AiToolTrace :entries="analysisTurn.toolTrace" />
-          <div v-if="analysisTurn.sources?.length" class="qa-ai-sources">
-            <AiSourceCard
-              v-for="(source, index) in analysisTurn.sources"
-              :key="source.sourceId + source.blockId"
-              :source="source"
-              :index="index"
-              @open="openAnalysisSource"
-            />
-          </div>
-          <AiNextActions
-            v-if="analysisTurn.nextActions?.length"
-            :actions="analysisTurn.nextActions"
-            :course-code="analysisCourseCode"
-            title="下一步"
-            empty-text=""
-            compact
-            :refreshable="false"
-          />
-        </template>
       </div>
+
+      <template v-if="detailedOpen">
+        <div class="qa-help-evidence">
+          <AiHelpBadge :level="evidence?.helpLevel || 'UNKNOWN'" />
+          <span v-if="evidence" class="qa-hint">{{
+            evidence.eligibleForObservation
+              ? evidence.eligibilityReason || "本次计入独立观测"
+              : evidence.eligibilityReason
+          }}</span>
+          <span v-else class="qa-hint"
+            >普通练习不生成帮助快照；从 AI 任务进入可记录提示与看答案。</span
+          >
+          <span v-if="nextReviewDueAt" class="qa-hint"
+            >下次复习：{{ nextReviewDueAt }}</span
+          >
+        </div>
+
+        <div class="qa-feedback-block">
+          <h3 class="qa-feedback-title">解析</h3>
+          <MdViewer
+            v-if="result.analysis"
+            class="qa-feedback-text"
+            :value="result.analysis"
+          />
+          <p v-else class="qa-feedback-text qa-hint">本题暂无解析</p>
+        </div>
+
+        <div v-if="result.misconception" class="qa-feedback-block">
+          <h3 class="qa-feedback-title">常见误区</h3>
+          <p class="qa-feedback-text">{{ result.misconception }}</p>
+        </div>
+
+        <div
+          v-if="result.masteryChanges && result.masteryChanges.length"
+          class="qa-feedback-block"
+        >
+          <h3 class="qa-feedback-title">掌握度变化</h3>
+          <ul class="qa-mastery-list">
+            <li
+              v-for="change in result.masteryChanges"
+              :key="change.nodeName"
+              class="qa-mastery-item"
+            >
+              <span class="qa-mastery-node">{{ change.nodeName }}</span>
+              <span class="oslab-mono qa-mastery-value"
+                >{{ percentText(change.masteryBefore) }} →
+                {{ percentText(change.masteryAfter) }}</span
+              >
+              <span
+                class="oslab-status-tag"
+                :class="statusTagClass(change.status)"
+                >{{ statusText(change.status) }}</span
+              >
+              <span v-if="change.countedAsObservation === false" class="qa-hint"
+                >重复作答，不计独立观测</span
+              >
+            </li>
+          </ul>
+        </div>
+
+        <div class="qa-feedback-block qa-next">
+          <h3 class="qa-feedback-title">下一步</h3>
+          <p class="qa-feedback-text">{{ nextHint }}</p>
+        </div>
+
+        <div class="qa-feedback-block qa-ai-analysis">
+          <div class="qa-ai-head">
+            <h3 class="qa-feedback-title">AI 分析</h3>
+            <AiModeBadge v-if="analysisTurn?.mode" :mode="analysisTurn.mode" />
+          </div>
+          <a-button
+            v-if="!analysisTurn"
+            size="small"
+            :loading="analysisLoading"
+            :disabled="analysisLoading"
+            @click="requestAnalysis"
+          >
+            请求 AI 分析
+          </a-button>
+          <p v-if="analysisError" class="qa-help-error" role="alert">
+            {{ analysisError }}
+          </p>
+          <template v-if="analysisTurn">
+            <MdViewer
+              v-if="analysisTurn.answer"
+              class="qa-feedback-text"
+              :value="analysisTurn.answer"
+            />
+            <AiDiagnosisPanel :diagnosis="analysisTurn.diagnosis" />
+            <AiToolTrace :entries="analysisTurn.toolTrace" />
+            <div v-if="analysisTurn.sources?.length" class="qa-ai-sources">
+              <AiSourceCard
+                v-for="(source, index) in analysisTurn.sources"
+                :key="source.sourceId + source.blockId"
+                :source="source"
+                :index="index"
+                @open="openAnalysisSource"
+              />
+            </div>
+            <AiNextActions
+              v-if="analysisTurn.nextActions?.length"
+              :actions="analysisTurn.nextActions"
+              :course-code="analysisCourseCode"
+              title="下一步"
+              empty-text=""
+              compact
+              :refreshable="false"
+            />
+          </template>
+        </div>
+      </template>
     </section>
   </article>
 </template>
@@ -312,6 +348,13 @@ import {
   type LearningQuestionVO,
   type QuestionOption,
 } from "@/api/learning";
+import {
+  createPracticeAttempt,
+  recordPracticeHelp,
+  type PracticeAttemptVO,
+} from "@/api/assessment";
+import { openAssessmentTutor } from "@/utils/assessmentTutor";
+import { notifyLearningUpdated } from "@/utils/learningEvents";
 import type {
   AiActivityRefVO,
   AiEvidenceSnapshot,
@@ -348,11 +391,14 @@ const props = defineProps<{
   aiActionId?: string;
   /** 当前课程编码（普通题卡也用于 AI 分析的会话作用域） */
   courseCode?: string;
+  /** 列表流中后面还有题目时，提交后主操作变为「下一题」 */
+  hasNext?: boolean;
 }>();
 
 // eslint-disable-next-line no-undef
 const emit = defineEmits<{
   (e: "answered", result: LearningAnswerResultVO): void;
+  (e: "next"): void;
 }>();
 
 const router = useRouter();
@@ -376,6 +422,8 @@ const analysisTurn = ref<AiTurnVO | null>(null);
 const analysisLoading = ref(false);
 const analysisError = ref("");
 const nextReviewDueAt = ref("");
+const detailedOpen = ref(false);
+const practiceAttempt = ref<PracticeAttemptVO | null>(null);
 
 const currentHelpLevel = computed(
   () => evidence.value?.helpLevel || aiRef.value?.helpLevel || "UNKNOWN"
@@ -417,10 +465,75 @@ watch(
   }
 );
 
+/** 建立/复用本题的练习尝试上下文；失败时不提交、不展示提示。 */
+async function ensurePracticeAttempt(): Promise<PracticeAttemptVO | null> {
+  if (practiceAttempt.value) return practiceAttempt.value;
+  const key = newSubmissionKey();
+  try {
+    const response = await createPracticeAttempt({
+      questionId: String(props.question.id),
+      courseCode: props.courseCode,
+      sourceUnitCode: props.sourceUnitCode,
+      sourceActivityCode: props.sourceActivityCode,
+      clientAttemptKey: key,
+    });
+    if (response.data?.code === 0 && response.data.data) {
+      practiceAttempt.value = response.data.data;
+      return practiceAttempt.value;
+    }
+    const message = response.data?.message || "无法建立练习尝试，请重试";
+    aiSubmitError.value = message;
+    return null;
+  } catch {
+    aiSubmitError.value = "无法建立练习尝试，请检查网络后重试";
+    return null;
+  }
+}
+
 /** 提交前记录帮助等级；答案揭示单独确认，提交后不可再改。 */
 async function markHelp(level: "HINT" | "ANSWER_REVEALED") {
+  if (result.value || helpSaving.value) return;
   const actionId = props.aiActionId;
-  if (!actionId || result.value || helpSaving.value) return;
+  if (!actionId) {
+    // 普通练习：帮助等级先落到服务端尝试上下文，再打开导师
+    if (level === "ANSWER_REVEALED") {
+      const confirmed = window.confirm(
+        "标记后本次作答不计独立观测，且提交后不可撤销。确认已查看答案或解析？"
+      );
+      if (!confirmed) return;
+    }
+    helpSaving.value = true;
+    helpNotice.value = "";
+    const attempt = await ensurePracticeAttempt();
+    if (!attempt) {
+      helpSaving.value = false;
+      helpNotice.value = aiSubmitError.value || "练习尝试建立失败，请重试。";
+      return;
+    }
+    const response = await recordPracticeHelp(attempt.attemptContextId, {
+      helpLevel: level,
+    });
+    helpSaving.value = false;
+    if (!response) {
+      helpNotice.value = "帮助等级记录失败，请重试。";
+      return;
+    }
+    helpNotice.value = response.eligibleForObservation
+      ? "已记录本次帮助等级。"
+      : response.eligibilityReason || "本次作答不再计为独立观测。";
+    if (level === "HINT") {
+      openAssessmentTutor({
+        intent: "HINT",
+        courseCode: analysisCourseCode.value,
+        questionId: String(props.question.id),
+        attemptContextId: attempt.attemptContextId,
+        assessmentRunId: props.assessmentRunId
+          ? String(props.assessmentRunId)
+          : undefined,
+      });
+    }
+    return;
+  }
   if (level === "ANSWER_REVEALED") {
     const confirmed = window.confirm(
       "标记后本次作答不计独立观测，且提交后不可撤销。确认已查看答案或解析？"
@@ -447,6 +560,23 @@ async function markHelp(level: "HINT" | "ANSWER_REVEALED") {
       "请给我一个不直接给出答案的提示，帮助我自己找到这道题的解法。"
     );
   }
+}
+
+/** 错题就地补学：回到本题来源单元的对应活动，不新建页面。 */
+function openRemedial() {
+  const courseCode = props.courseCode || getAiPageContext()?.courseCode || "";
+  if (courseCode && props.sourceUnitCode) {
+    void router.push({
+      path: `/courses/${encodeURIComponent(
+        courseCode
+      )}/units/${encodeURIComponent(props.sourceUnitCode)}`,
+      query: props.sourceActivityCode
+        ? { activity: props.sourceActivityCode }
+        : {},
+    });
+    return;
+  }
+  Message.info("可从课程目录进入对应单元复习本题知识点。");
 }
 
 async function requestAnalysis() {
@@ -497,6 +627,8 @@ watch(
   () => props.question.id,
   () => {
     showMetadata.value = false;
+    detailedOpen.value = false;
+    practiceAttempt.value = null;
   }
 );
 
@@ -658,17 +790,30 @@ const submit = async () => {
       emit("answered", result.value);
       return;
     }
+    const attempt = await ensurePracticeAttempt();
+    if (!attempt) return;
     const res = await answerLearningQuestion({
       questionId: props.question.id,
       answer,
       assessmentRunId: props.assessmentRunId,
+      attemptContextId: attempt.attemptContextId,
       sourceUnitCode: props.sourceUnitCode,
       sourceActivityCode: props.sourceActivityCode,
-      submissionKey: newSubmissionKey(),
+      submissionKey: attempt.submissionKey,
     });
     if (res.data?.code === 0) {
       result.value = res.data.data;
+      detailedOpen.value = false;
       emit("answered", result.value);
+      notifyLearningUpdated({
+        courseCode: props.courseCode || getAiPageContext()?.courseCode || "",
+        unitCode: props.sourceUnitCode,
+        activityCode: props.sourceActivityCode,
+        eventIds: evidence.value?.eventIds,
+        reason: "ANSWERED",
+      });
+      // 再答一次使用新的尝试上下文与提交键；终身观测去重仍由服务端判定
+      practiceAttempt.value = null;
     }
   } catch {
     // The global axios interceptor shows business and transport errors once.
@@ -956,6 +1101,25 @@ const statusTagClass = (status: string) =>
 .qa-result-hint {
   color: var(--oslab-muted-strong);
   font-size: var(--oslab-text-small);
+}
+.qa-feedback-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--oslab-space-2);
+}
+.qa-detail-toggle {
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--oslab-primary);
+  font: inherit;
+  font-size: var(--oslab-text-small);
+  cursor: pointer;
+}
+.qa-detail-toggle:hover,
+.qa-detail-toggle:focus-visible {
+  text-decoration: underline;
 }
 .qa-feedback-title {
   margin: 0 0 var(--oslab-space-1);

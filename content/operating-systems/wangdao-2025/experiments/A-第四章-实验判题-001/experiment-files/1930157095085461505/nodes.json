@@ -1,0 +1,26 @@
+{
+  "questionId": "1930157095085461505",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.process.ipc",
+      "nodeName": "进程间通信",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "sys_ipc_recv 设 env_ipc_receiving 标志并阻塞当前进程，sys_ipc_can_send 检查目标是否处于可接收状态后投递消息并更新其状态，构成 MOS 的进程间通信机制。"
+    },
+    {
+      "nodeCode": "os.process.message_passing",
+      "nodeName": "消息传递通信",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "IPC 传的是 (envid, value, dstva, perm) 消息，属消息传递通信；带页时再用 sys_mem_map/sys_mem_unmap 把物理页映射过去。"
+    },
+    {
+      "nodeCode": "os.process.process_state",
+      "nodeName": "进程状态与转换",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "接收方在 ENV_NOT_RUNNABLE 上阻塞、发送方把它置回 ENV_RUNNABLE，是进程状态转换的直接应用。"
+    }
+  ]
+}

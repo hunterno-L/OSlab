@@ -1,0 +1,25 @@
+{
+  "description": "实验 4.14 sys_set_env_status(int sysno, u_int envid, u_int status)。驱动操作符：I=env_init 并打印空闲 PCB 数；A parent=env_alloc 打印 返回码/下标/env_id；U idx=设 curenv；S idx st=直接置 env_status（0=FREE,1=NOT_RUNNABLE,2=RUNNABLE，仅构造夹具用）；R idx=不在就绪链表则头插（仅构造夹具用）；K s a0 a1 a2 a3 a4=填好 KERNEL_SP 现场后调 handle_sys 并打印 $v0（必须恰好 6 个数；s=5 即 SYS_set_env_status，a0=envid a1=status；s=11 即 SYS_yield）；T idx=打印 env_id/parent/status/pri/cr3；H=就绪链表头下标（空表 -1）；L=按序打印就绪链表全部下标（最多 NENV=64 个，学生写出环时会打印 64 个重复下标而不是死循环）；Y=env_run 记录日志（首行 Y 条数，随后每条 kind arg cur：0=lcontext arg=页目录物理地址，1=env_pop_tf arg=cp0_epc）；Z=清空日志；C=空闲物理页数。错误码按 int 解读：-2=E_BAD_ENV，-3=E_INVAL。envid=0 表示当前进程 curenv。env_alloc 出来的进程 status=NOT_RUNNABLE、pri=1、不在就绪链表上，envid 依次为 191(下标63)、318(下标62)、445(下标61)。宿主物理页账本：np=256/fm=8192 初始空闲 252 页，每次 env_alloc 占 1 页作页目录（envs[63].cr3=1044480、envs[62]=1040384、envs[61]=1036288）。sched_yield 的时间片游标是 static 变量，每个用例都是独立进程运行。",
+  "cases": [
+    {
+      "name": "RUNNABLE 必须头插就绪链表、NOT_RUNNABLE 不得入链；对已在链上的进程重复置 RUNNABLE 必须幂等，不得把同一 PCB 挂两次",
+      "input": "256 8192\n17\nI\nA 0\nA 0\nU 63\nK 5 191 2 0 0 0\nT 63\nH\nL\nK 5 318 1 0 0 0\nT 62\nL\nK 5 318 2 0 0 0\nL\nK 5 191 2 0 0 0\nL\nH\nC\n"
+    },
+    {
+      "name": "非法状态必须拒绝：ENV_FREE(0)、3、超大值都返回 -E_INVAL，坏 envid 返回 -E_BAD_ENV，且不得改动 PCB 与就绪链表",
+      "input": "256 8192\n14\nI\nA 0\nU 63\nS 63 2\nR 63\nK 5 191 0 0 0 0\nK 5 191 3 0 0 0\nK 5 191 4294967295 0 0 0\nK 5 999 2 0 0 0\nK 5 0 2 0 0 0\nT 63\nL\nH\nC\n"
+    },
+    {
+      "name": "阻塞与唤醒：置 NOT_RUNNABLE 不摘链但调度必须跳过它，重新置 RUNNABLE 后不得重复入链，时间片轮转要能切回它",
+      "input": "256 8192\n18\nI\nA 0\nA 0\nU 63\nK 5 191 2 0 0 0\nK 5 318 2 0 0 0\nZ\nK 11 0 0 0 0 0\nK 5 191 1 0 0 0\nT 63\nL\nK 11 0 0 0 0 0\nY\nK 5 191 2 0 0 0\nL\nK 11 0 0 0 0 0\nY\nC\n"
+    },
+    {
+      "name": "envid=0 跟随当前进程：yield 换人后再用 envid=0 设置状态，必须落在新的 curenv 上而不是原来的进程",
+      "input": "256 8192\n18\nI\nA 0\nA 0\nA 0\nU 63\nK 5 0 2 0 0 0\nK 5 318 2 0 0 0\nK 5 445 2 0 0 0\nK 11 0 0 0 0 0\nK 5 0 1 0 0 0\nT 61\nT 63\nL\nK 11 0 0 0 0 0\nK 5 0 2 0 0 0\nL\nH\nC\n"
+    },
+    {
+      "name": "反复阻塞/唤醒循环后就绪链表仍须无环：三次 yield 走完 62->63->62，链表长度与顺序都不变",
+      "input": "256 8192\n19\nI\nA 0\nA 0\nU 63\nK 5 191 2 0 0 0\nK 5 318 2 0 0 0\nK 5 191 1 0 0 0\nK 5 191 2 0 0 0\nK 5 318 1 0 0 0\nK 5 318 2 0 0 0\nL\nH\nZ\nK 11 0 0 0 0 0\nK 11 0 0 0 0 0\nK 11 0 0 0 0 0\nY\nL\nC\n"
+    }
+  ]
+}

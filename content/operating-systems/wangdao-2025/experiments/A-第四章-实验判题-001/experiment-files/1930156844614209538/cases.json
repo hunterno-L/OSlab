@@ -1,0 +1,25 @@
+{
+  "description": "实验 4.5 sys_mem_unmap(int sysno, u_int envid, u_int va)。驱动操作符：I=env_init；A parent=env_alloc 打印 返回码/下标/env_id；U idx=设 curenv；P idx va perm=page_alloc+page_insert 真实 backing 一页；C=空闲物理页数；K s a0 a1 a2 a3 a4=填好 KERNEL_SP 现场后调 handle_sys 并打印 $v0（必须恰好 6 个数，3 号调用即 K 3 envid va 0 0 0）；Q idx va=物理页基址（无映射 4294967295）；O idx va=页表项原始值（无页表 4294967295，页表存在但项被清零则打印 0）；G=只读当前 $v0。系统调用号：1=mem_alloc，2=mem_map，3=mem_unmap。错误码按 int 解读：-2=E_BAD_ENV，-3=E_INVAL。页账本：np=256/fm=8192 初始空闲 252 页；每次 env_alloc 占 1 页页目录；首次映射某 4MB 区间额外占 1 页页表；page_remove 递减 pp_ref 到 0 才回收，且总是把页表项清零。",
+  "cases": [
+    {
+      "name": "正常解除映射：物理页回到空闲链表、页表项被清零、地址翻译失效，空闲页数恰好加一",
+      "input": "256 8192\n10\nI\nA 0\nU 63\nP 63 4096 3\nC\nQ 63 4096\nK 3 191 4096 0 0 0\nQ 63 4096\nO 63 4096\nC\n"
+    },
+    {
+      "name": "未映射地址是空操作必须返回 0（幂等），内核地址返回 -E_INVAL，坏 envid 返回 -E_BAD_ENV，envid=0 表示当前进程",
+      "input": "256 8192\n9\nI\nA 0\nU 63\nK 3 191 65536 0 0 0\nK 3 191 1073741824 0 0 0\nK 3 999 4096 0 0 0\nK 3 0 4096 0 0 0\nC\nG\n"
+    },
+    {
+      "name": "共享页只递减引用计数：解除目标方后源方仍可访问且页不回收，解除源方后页才真正回到空闲链表",
+      "input": "256 8192\n13\nI\nA 0\nA 0\nU 63\nP 63 4096 3\nK 2 191 4096 318 8192 3\nC\nK 3 318 8192 0 0 0\nQ 62 8192\nQ 63 4096\nC\nK 3 191 4096 0 0 0\nC\n"
+    },
+    {
+      "name": "重复解除同一地址必须幂等：第二次仍返回 0，空闲页数不再变化，不得二次回收同一物理页",
+      "input": "256 8192\n11\nI\nA 0\nU 63\nP 63 4096 3\nC\nK 3 191 4096 0 0 0\nC\nK 3 191 4096 0 0 0\nC\nQ 63 4096\nG\n"
+    },
+    {
+      "name": "解除后重新分配另一虚拟地址：页表已存在不再额外占页，刚回收的物理页应被重新发出",
+      "input": "256 8192\n12\nI\nA 0\nU 63\nP 63 4096 3\nQ 63 4096\nK 3 191 4096 0 0 0\nC\nK 1 191 8192 3 0 0\nQ 63 8192\nC\nO 63 4096\nO 63 8192\n"
+    }
+  ]
+}

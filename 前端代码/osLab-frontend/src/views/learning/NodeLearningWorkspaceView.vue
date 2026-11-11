@@ -597,27 +597,10 @@
         </section>
       </div>
 
-      <!-- 右侧图谱导师面板：常驻，<1024px 折叠到内容底部 -->
+      <!-- 右侧学习侧栏：真实证据、下一步与统一导师入口；不再维护页面内独立聊天 -->
       <aside class="tutor-panel" aria-label="图谱导师">
         <div class="tutor-kicker">NODE MENTOR</div>
-        <button
-          type="button"
-          class="tutor-toggle"
-          :aria-expanded="!tutorCollapsed"
-          @click="toggleTutor"
-        >
-          <IconRobot class="tutor-icon" />
-          <span class="tutor-toggle-text">
-            <strong>图谱导师</strong>
-            <span class="side-hint">{{ nodeName }}</span>
-          </span>
-          <IconDown
-            v-if="isNarrow"
-            class="tutor-caret"
-            :class="{ open: !tutorCollapsed }"
-          />
-        </button>
-        <div v-show="!tutorCollapsed" class="tutor-body">
+        <div class="tutor-body">
           <div class="tutor-focus tutor-focus-note">
             <span class="tutor-focus-index">③</span>
             <div>
@@ -714,88 +697,17 @@
             />
           </section>
 
-          <div
-            ref="tutorScroll"
-            class="tutor-messages"
-            role="log"
-            aria-live="polite"
-          >
-            <div v-if="!currentSession.messages.length" class="tutor-welcome">
-              <p>{{ defaultTutorFocus }}</p>
-              <div class="tutor-prompts">
-                <button type="button" @click="askTutor('解释核心概念')">
-                  解释核心概念</button
-                ><button
-                  type="button"
-                  @click="askTutor('根据我最近的学习记录，下一步该学什么？')"
-                >
-                  下一步该学什么
-                </button>
-              </div>
-            </div>
-            <article
-              v-for="(message, index) in currentSession.messages"
-              :key="index"
-              :class="['tutor-message', message.role]"
-            >
-              <div class="message-meta">
-                <strong>{{ message.role === "user" ? "我" : "导师" }}</strong
-                ><span
-                  v-if="message.mode"
-                  :class="[
-                    'mode-tag',
-                    message.mode === 'AI' ? 'graphrag' : 'fallback',
-                  ]"
-                  >{{ message.mode === "AI" ? "GraphRAG" : "规则回答" }}</span
-                >
-              </div>
-              <p>{{ message.content }}</p>
-              <div v-if="message.sources?.length" class="tutor-sources">
-                <button
-                  v-for="(source, sourceIndex) in message.sources"
-                  :key="`${source.sourceType}-${source.sourceId}`"
-                  type="button"
-                  @click="openTutorSource(source)"
-                >
-                  {{ sourceIndex + 1 }}. {{ source.title
-                  }}<span v-if="source.sourceSectionTitle">
-                    · {{ source.sourceSectionTitle }}</span
-                  ><span v-if="source.revision">
-                    · 版本 {{ source.revision }}</span
-                  ><IconArrowRight />
-                </button>
-              </div>
-            </article>
-            <div v-if="currentSession.pending" class="tutor-pending">
-              <span class="oslab-spinner"></span>正在检索本节点证据
-            </div>
-          </div>
-          <div class="tutor-compose">
-            <a-textarea
-              v-model="currentSession.input"
-              aria-label="向节点导师提问"
-              placeholder="向导师提问"
-              :auto-size="{ minRows: 2, maxRows: 5 }"
-              :max-length="1000"
-            /><a-tooltip content="发送问题"
-              ><a-button
-                type="primary"
-                aria-label="发送问题"
-                :loading="currentSession.pending"
-                :disabled="!currentSession.input.trim()"
-                @click="askTutor()"
-                ><template #icon><IconSend /></template></a-button
-            ></a-tooltip>
-          </div>
-          <a-collapse v-if="currentSession.trace.length" class="tutor-trace"
-            ><a-collapse-item key="trace" header="检索轨迹"
-              ><ol>
-                <li v-for="step in currentSession.trace" :key="step">
-                  {{ step }}
-                </li>
-              </ol></a-collapse-item
-            ></a-collapse
-          >
+          <section class="tutor-launch" aria-label="向统一导师提问">
+            <p class="side-hint">
+              导师会带入当前节点、薄弱依据与证据；页面只提交上下文，不在此维护第二套会话。
+            </p>
+            <a-button type="primary" long @click="openNodeTutor('ASK')">
+              向导师提问
+            </a-button>
+            <a-button long @click="openNodeTutor('EXPLAIN')">
+              解释当前节点
+            </a-button>
+          </section>
         </div>
       </aside>
     </div>
@@ -808,7 +720,6 @@ import {
   nextTick,
   onBeforeUnmount,
   onMounted,
-  reactive,
   ref,
   watch,
 } from "vue";
@@ -821,16 +732,11 @@ import {
   IconDown,
   IconLaunch,
   IconRefresh,
-  IconRobot,
-  IconSend,
 } from "@arco-design/web-vue/es/icon";
 import MdViewer from "@/components/MdViewer.vue";
 import NodeCourseLinks from "@/components/learning/NodeCourseLinks.vue";
 import AnnotationNote from "@/components/learning/AnnotationNote.vue";
-import {
-  normalizedGraphRelation,
-  safeLocalLearningUrl,
-} from "@/utils/graphSemantics";
+import { normalizedGraphRelation } from "@/utils/graphSemantics";
 import { scoreText } from "@/utils/masteryDisplay";
 import QuestionAnswerCard from "@/components/learning/QuestionAnswerCard.vue";
 import { getResourcesForNode } from "@/data/learningResources";
@@ -845,12 +751,10 @@ import {
 } from "@/composables/useNodeWorkbench";
 import {
   personalGraph,
-  tutorAsk,
   type GraphLinkDTO,
   type LearningQuestionVO,
   type MasteryNodeVO,
   type NodeWorkbenchVO,
-  type TutorSourceVO,
 } from "@/api/learning";
 import {
   registerAiPageContext,
@@ -858,7 +762,12 @@ import {
 } from "@/composables/useAiPageContext";
 import AiNextActions from "@/components/ai/AiNextActions.vue";
 import { useAiConversation } from "@/composables/useAiConversation";
-import { askAiAssistant } from "@/composables/useAiLauncher";
+import {
+  currentCourseCode,
+  resolveCurrentCourse,
+} from "@/composables/useCurrentCourse";
+import { openTutor } from "@/composables/useAiLauncher";
+import type { TutorIntent } from "@/types/tutor";
 
 const {
   nextActions,
@@ -867,16 +776,19 @@ const {
   dueReviewCount,
   refreshNextActions,
 } = useAiConversation();
-const aiPlanCourseCode = computed(
-  () => workbench.value?.learningUnits?.[0]?.courseCode || ""
-);
+const aiPlanCourseCode = computed(() => currentCourseCode.value);
+const courseReady = ref(false);
 
 // AI 助手页面上下文（log3 阶段 4）：挂载注册、卸载注销；升级为课程上下文
 const aiPageContextProvider = () => ({
   pageName: "节点学习工作台",
-  courseCode: workbench.value?.learningUnits?.[0]?.courseCode || undefined,
-  unitCode: workbench.value?.learningUnits?.[0]?.unitCode,
-  unitName: workbench.value?.learningUnits?.[0]?.title,
+  courseCode: currentCourseCode.value || undefined,
+  unitCode: workbench.value?.learningUnits?.find(
+    (unit) => unit.courseCode === currentCourseCode.value
+  )?.unitCode,
+  unitName: workbench.value?.learningUnits?.find(
+    (unit) => unit.courseCode === currentCourseCode.value
+  )?.title,
   nodeName: nodeName.value || undefined,
   nodeCode: currentNodeCode.value || undefined,
   nodeCodes: currentNodeCode.value ? [currentNodeCode.value] : [],
@@ -911,7 +823,6 @@ const loadError = ref("");
 const workbench = ref<NodeWorkbenchVO | null>(null);
 const activeTab = ref("learn");
 const activeQuestionId = ref("");
-const tutorScroll = ref<HTMLElement | null>(null);
 let loadSequence = 0;
 let disposed = false;
 
@@ -943,48 +854,6 @@ const currentNodeCode = computed(
     ""
 );
 
-// ---- 窄屏（<1024px）导师面板折叠到内容底部 ----
-const narrowMedia = window.matchMedia("(max-width: 1023px)");
-const isNarrow = ref(narrowMedia.matches);
-const tutorCollapsed = ref(narrowMedia.matches);
-const handleMediaChange = (event: MediaQueryListEvent) => {
-  isNarrow.value = event.matches;
-  tutorCollapsed.value = event.matches;
-};
-narrowMedia.addEventListener("change", handleMediaChange);
-/** 折叠开关只在窄屏生效：桌面端导师面板常驻展开 */
-const toggleTutor = () => {
-  if (!isNarrow.value) return;
-  tutorCollapsed.value = !tutorCollapsed.value;
-};
-
-interface TutorMessage {
-  role: "user" | "ai";
-  content: string;
-  sources?: TutorSourceVO[];
-  mode?: string;
-}
-interface TutorSession {
-  input: string;
-  messages: TutorMessage[];
-  trace: string[];
-  pending: boolean;
-}
-const sessions = reactive(new Map<string, TutorSession>());
-const currentSession = computed(() => {
-  const key = nodeKey.value;
-  if (!sessions.has(key)) {
-    sessions.set(key, { input: "", messages: [], trace: [], pending: false });
-    if (sessions.size > 24) {
-      const idleKey = Array.from(sessions.keys()).find(
-        (candidate) => candidate !== key && !sessions.get(candidate)?.pending
-      );
-      if (idleKey) sessions.delete(idleKey);
-    }
-  }
-  return sessions.get(key) as TutorSession;
-});
-
 const load = async (force = false) => {
   const requestNode = nodeName.value;
   const requestUser = userId.value;
@@ -1004,9 +873,9 @@ const load = async (force = false) => {
     )
       return;
     workbench.value = data;
-    if (data.learningUnits?.[0]?.courseCode) {
+    if (courseReady.value && currentCourseCode.value) {
       void refreshNextActions({
-        courseCode: data.learningUnits[0].courseCode,
+        courseCode: currentCourseCode.value,
         limit: 5,
       });
     }
@@ -1022,11 +891,18 @@ const load = async (force = false) => {
 };
 
 const loadGraph = async () => {
-  if (graphState.value === "loading") return;
+  const course = currentCourseCode.value;
+  if (!course || !courseReady.value) return;
+  const request = ++nodeGraphSequence;
   graphState.value = "loading";
   try {
-    const response = await personalGraph();
-    if (disposed) return;
+    const response = await personalGraph(course);
+    if (
+      disposed ||
+      request !== nodeGraphSequence ||
+      course !== currentCourseCode.value
+    )
+      return;
     if (response.data.code === 0 && response.data.data) {
       graphNodes.value = response.data.data.nodes || [];
       graphLinks.value = response.data.data.links || [];
@@ -1035,9 +911,58 @@ const loadGraph = async () => {
       graphState.value = "error";
     }
   } catch {
-    if (!disposed) graphState.value = "error";
+    if (
+      !disposed &&
+      request === nodeGraphSequence &&
+      course === currentCourseCode.value
+    )
+      graphState.value = "error";
   }
 };
+
+let nodeGraphSequence = 0;
+let courseResolveSequence = 0;
+watch(
+  () => route.query.courseCode,
+  async (requested) => {
+    const sequence = ++courseResolveSequence;
+    nodeGraphSequence += 1;
+    courseReady.value = false;
+    graphNodes.value = [];
+    graphLinks.value = [];
+    graphState.value = "idle";
+    try {
+      await resolveCurrentCourse(
+        typeof requested === "string" ? requested : undefined,
+        () => !disposed && sequence === courseResolveSequence
+      );
+      if (disposed || sequence !== courseResolveSequence) return;
+      courseReady.value = true;
+      void loadGraph();
+      if (currentCourseCode.value && workbench.value)
+        void refreshNextActions({
+          courseCode: currentCourseCode.value,
+          limit: 5,
+        });
+    } catch {
+      if (!disposed && sequence === courseResolveSequence)
+        graphState.value = "error";
+    }
+  },
+  { immediate: true }
+);
+
+watch(currentCourseCode, (course) => {
+  nodeGraphSequence += 1;
+  graphNodes.value = [];
+  graphLinks.value = [];
+  graphState.value = "idle";
+  if (course && courseReady.value && !disposed) {
+    void loadGraph();
+    if (workbench.value)
+      void refreshNextActions({ courseCode: course, limit: 5 });
+  }
+});
 
 // ---- 知识详解（tab=resources）：复用静态 HTML 资源，iframe 懒加载 ----
 // 本块必须先于下方 watch(route.query.tab) 注册，否则直达 ?tab=resources 时
@@ -1226,6 +1151,7 @@ const switchNode = (keyOrName: string) => {
   )
     return;
   const query: Record<string, string> = {};
+  if (currentCourseCode.value) query.courseCode = currentCourseCode.value;
   const returnTo = queryText(route.query.returnTo);
   const returnActivity = queryText(route.query.returnActivity);
   const returnMode = queryText(route.query.returnMode);
@@ -1245,6 +1171,9 @@ const startAssessment = () =>
   router.push({
     path: "/assessments",
     query: {
+      ...(currentCourseCode.value
+        ? { courseCode: currentCourseCode.value }
+        : {}),
       nodeName: currentNodeName.value,
       ...(currentNodeCode.value ? { nodeCode: currentNodeCode.value } : {}),
       returnTo: route.fullPath,
@@ -1257,6 +1186,9 @@ const openExperiment = (id: number | string) =>
   router.push({
     path: `/experiments/code/${id}`,
     query: {
+      ...(currentCourseCode.value
+        ? { courseCode: currentCourseCode.value }
+        : {}),
       nodeName: currentNodeName.value,
       ...(currentNodeCode.value ? { nodeCode: currentNodeCode.value } : {}),
       returnTo: route.fullPath,
@@ -1276,91 +1208,6 @@ const openSimulator = () => {
       returnTo: route.fullPath,
     },
   });
-};
-
-const scrollTutor = async () => {
-  await nextTick();
-  tutorScroll.value?.scrollTo({
-    top: tutorScroll.value.scrollHeight,
-    behavior: "smooth",
-  });
-};
-
-const askTutor = async (suggestedQuestion?: string) => {
-  const session = currentSession.value;
-  const question = (suggestedQuestion || session.input).trim();
-  if (!question || session.pending) return;
-  const requestNode = nodeName.value;
-  const requestUser = userId.value;
-  session.messages.push({ role: "user", content: question });
-  session.input = "";
-  session.pending = true;
-  void scrollTutor();
-  try {
-    const response = await tutorAsk({
-      nodeName: currentNodeName.value,
-      ...(currentNodeCode.value ? { nodeCode: currentNodeCode.value } : {}),
-      question,
-    });
-    if (disposed || requestUser !== userId.value) return;
-    if (response.data.code === 0 && response.data.data) {
-      const answer = response.data.data;
-      session.messages.push({
-        role: "ai",
-        content: answer.answer,
-        sources: answer.sources,
-        mode: answer.mode,
-      });
-      session.trace = answer.retrievalTrace || [];
-    } else
-      session.messages.push({
-        role: "ai",
-        content: response.data.message || "导师暂时不可用，请稍后重试。",
-      });
-  } catch {
-    if (!disposed && requestUser === userId.value)
-      session.messages.push({
-        role: "ai",
-        content: "导师请求未完成，请稍后重试。",
-      });
-  } finally {
-    session.pending = false;
-    if (
-      !disposed &&
-      requestNode === nodeName.value &&
-      requestUser === userId.value
-    )
-      void scrollTutor();
-  }
-};
-
-const openTutorSource = (source: TutorSourceVO) => {
-  if (safeLocalLearningUrl(source.targetUrl)) {
-    activeTab.value = "learn";
-    return router.push(source.targetUrl as string);
-  }
-  if (source.sourceType === "NODE") {
-    activeTab.value = "learn";
-    return switchNode(source.sourceId);
-  }
-  if (!/^\d+$/.test(source.sourceId))
-    return Message.warning("该来源暂无可打开的资源");
-  if (source.sourceType === "QUESTION")
-    return router.push({
-      path: "/assessments",
-      query: {
-        nodeName: currentNodeName.value,
-        ...(currentNodeCode.value ? { nodeCode: currentNodeCode.value } : {}),
-        questionId: source.sourceId,
-      },
-    });
-  if (source.sourceType === "EXPERIMENT")
-    return openExperiment(source.sourceId);
-  if (source.sourceType === "EVENT")
-    return router.push({
-      path: "/records",
-      query: { nodeName: nodeName.value, eventId: source.sourceId },
-    });
 };
 
 // ============ 展示数据（全部来自真实 VO，不造演示数据） ============
@@ -1568,12 +1415,6 @@ const focusSummary = computed(() => {
     return "通过不同题型验证理解，继续关联知识";
   return "梳理核心概念，完成一次关联练习";
 });
-const defaultTutorFocus = computed(() => {
-  const description = workbench.value?.mastery?.description;
-  return description
-    ? `「${nodeName.value}」的重点是：${description}`
-    : `当前围绕「${nodeName.value}」学习，从概念、前置知识和练习证据逐步建立理解。`;
-});
 const lastFailure = computed(() => workbench.value?.lastFailure || null);
 
 /** 薄弱原因只展示服务端已有归因/推荐/误区，不由前端臆测 */
@@ -1597,22 +1438,55 @@ async function refreshNodePlan() {
   await refreshNextActions({ courseCode: aiPlanCourseCode.value, limit: 5 });
 }
 
-function askUnifiedTutor() {
+function buildNodeTutorDraft(intent: TutorIntent) {
   const evidence = (workbench.value?.events || [])
     .slice(0, 3)
     .map((event) => `#${event.id}`)
     .join("、");
-  askAiAssistant(
-    `我当前在节点「${currentNodeName.value}」${
+  if (intent === "EXPLAIN") {
+    return `请解释节点「${currentNodeName.value}」${
       currentNodeCode.value ? `（${currentNodeCode.value}）` : ""
-    }。${
-      weaknessReasons.value.length
-        ? `已有的薄弱依据：${weaknessReasons.value.join("；")}。`
-        : "目前还没有足够证据。"
-    }${
+    } 的核心规则，并联系前置知识。`;
+  }
+  if (!weaknessReasons.value.length) {
+    return `我在节点「${currentNodeName.value}」${
+      currentNodeCode.value ? `（${currentNodeCode.value}）` : ""
+    }。目前还没有足够证据判断薄弱点；请先解释这个节点的核心概念，再给出一个可以马上执行的下一步。${
       evidence ? `相关证据：${evidence}。` : ""
-    }请先说明可能原因（证据不足时保留不确定性），再给出可以马上执行的下一步。`
-  );
+    }`;
+  }
+  return `我当前在节点「${currentNodeName.value}」${
+    currentNodeCode.value ? `（${currentNodeCode.value}）` : ""
+  }。已有的薄弱依据：${weaknessReasons.value.join("；")}。${
+    evidence ? `相关证据：${evidence}。` : ""
+  }请说明可能原因，再给出可以马上执行的下一步。`;
+}
+
+/** 统一入口：只带入草稿与上下文，打开面板不调用模型。 */
+function openNodeTutor(intent: TutorIntent) {
+  const courseCode = aiPlanCourseCode.value;
+  if (!courseCode) {
+    Message.warning("当前节点还没有关联课程，暂时无法打开导师。");
+    return;
+  }
+  openTutor({
+    scene: "NODE",
+    intent,
+    courseCode,
+    scope: "PAGE",
+    unitCode: workbench.value?.learningUnits?.[0]?.unitCode,
+    nodeCodes: currentNodeCode.value ? [currentNodeCode.value] : [],
+    eventIds: (workbench.value?.events || [])
+      .slice(0, 3)
+      .map((event) => String(event.id)),
+    draft: buildNodeTutorDraft(intent),
+    delivery: "DRAFT",
+    sceneLabel: currentNodeName.value,
+  });
+}
+
+function askUnifiedTutor() {
+  openNodeTutor("ASK");
 }
 
 const safeResourceUrl = (url: string) => /^(https?:\/\/|\/(?!\/))/.test(url);
@@ -1736,7 +1610,6 @@ onBeforeUnmount(() => {
   disposed = true;
   loadSequence += 1;
   clearResourceTimer();
-  narrowMedia.removeEventListener("change", handleMediaChange);
 });
 </script>
 

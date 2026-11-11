@@ -1,0 +1,15 @@
+{
+  "questionId": "1908539875976839170",
+  "unitMappings": [
+    {
+      "unitCode": "unit.memory.paging-basics",
+      "required": false,
+      "completionRule": "PASS"
+    },
+    {
+      "unitCode": "unit.memory.tlb-multilevel",
+      "required": false,
+      "completionRule": "PASS"
+    }
+  ]
+}

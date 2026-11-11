@@ -3,9 +3,7 @@
   <div v-else class="task-editor">
     <a-card class="editor-head">
       <div class="head-top">
-        <a-button size="small" @click="router.push('/teaching/tasks')"
-          >返回任务列表</a-button
-        >
+        <a-button size="small" @click="backToTasks">返回任务列表</a-button>
         <a-space>
           <a-tag v-if="published" color="green">已发布 · 内容冻结</a-tag>
           <a-tag v-else color="gray">{{ task ? "草稿" : "新建任务" }}</a-tag>
@@ -30,13 +28,23 @@
           </a-button>
           <a-button
             v-if="published"
-            @click="router.push(`/teaching/tasks/${taskCode}/review`)"
+            @click="
+              router.push({
+                path: `/teaching/tasks/${taskCode}/review`,
+                query: taskContextQuery,
+              })
+            "
           >
             查看批阅
           </a-button>
         </a-space>
       </div>
       <h1 class="page-title">{{ task?.title || "新建学习任务" }}</h1>
+      <p v-if="sourceNodeName && !task" class="task-source-note">
+        围绕「{{
+          sourceNodeName
+        }}」安排学习或验证。已带入班级和课程，可在保存前调整。
+      </p>
     </a-card>
 
     <a-alert v-if="published" type="info" class="frozen-alert">
@@ -794,6 +802,17 @@ interface ItemDraft {
 
 const route = useRoute();
 const router = useRouter();
+const queryText = (value: unknown, max = 128) =>
+  String((Array.isArray(value) ? value[0] : value) || "")
+    .trim()
+    .slice(0, max);
+const taskContextQuery = computed(() => ({
+  className: queryText(route.query.className) || undefined,
+  courseCode: queryText(route.query.courseCode) || undefined,
+}));
+const backToTasks = () =>
+  router.push({ path: "/teaching/tasks", query: taskContextQuery.value });
+const sourceNodeName = ref("");
 const taskCode = computed(() => String(route.params.taskCode || ""));
 const task = ref<TaskDetail | null>(null);
 const loading = ref(false);
@@ -1286,7 +1305,10 @@ const saveDraft = async (silent = false): Promise<boolean> => {
       const res = await createTeachingTask(payload);
       if (res.data?.code === 0) {
         Message.success("草稿已创建");
-        await router.replace(`/teaching/tasks/${res.data.data.taskCode}/edit`);
+        await router.replace({
+          path: `/teaching/tasks/${res.data.data.taskCode}/edit`,
+          query: taskContextQuery.value,
+        });
         await loadTask();
         return true;
       }
@@ -1345,7 +1367,10 @@ const publish = () => {
           Message.success("任务已发布");
           task.value = res.data.data;
           markClean();
-          await router.push(`/teaching/tasks/${taskCode.value}/review`);
+          await router.push({
+            path: `/teaching/tasks/${taskCode.value}/review`,
+            query: taskContextQuery.value,
+          });
         } else {
           Message.error(res.data?.message || "发布失败");
         }
@@ -1419,13 +1444,24 @@ onMounted(async () => {
   window.addEventListener("beforeunload", handleBeforeUnload);
   await loadOptions();
   if (!taskCode.value) {
-    const requestedClass = Array.isArray(route.query.className)
-      ? route.query.className[0]
-      : route.query.className;
-    if (typeof requestedClass === "string" && requestedClass.trim()) {
-      form.audience.classNames = [requestedClass.trim()];
-      markClean();
+    const requestedClass = queryText(route.query.className);
+    if (
+      requestedClass &&
+      classes.value.some((item) => item.className === requestedClass)
+    )
+      form.audience.classNames = [requestedClass];
+    form.courseCode = queryText(route.query.courseCode);
+    const requestedNode = queryText(route.query.nodeCode);
+    const node = nodes.value.find((item) => item.nodeCode === requestedNode);
+    if (node) {
+      sourceNodeName.value = node.name;
+      const kind = queryText(route.query.followUpKind);
+      const goal =
+        kind === "DUE_REVIEW" ? "复习" : kind === "WEAK" ? "巩固" : "起点验证";
+      form.title = `${node.name} · ${goal}任务`;
+      form.description = `围绕「${node.name}」完成${goal}。请补充具体资料、题目或实验，并设置完成要求；学习状态以实际作答或运行证据为准。`;
     }
+    markClean();
   }
   await loadTask();
 });
@@ -1436,6 +1472,12 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.task-source-note {
+  margin: var(--oslab-space-2) 0 0;
+  max-width: 70ch;
+  color: var(--oslab-muted-strong);
+  line-height: 1.6;
+}
 .task-editor {
   display: flex;
   flex-direction: column;

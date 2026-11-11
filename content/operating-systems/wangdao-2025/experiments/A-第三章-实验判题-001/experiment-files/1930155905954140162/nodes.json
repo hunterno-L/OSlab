@@ -1,0 +1,26 @@
+{
+  "questionId": "1930155905954140162",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.runtime.exception",
+      "nodeName": "异常",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "在链接器脚本中把异常处理入口固定到 0x80000080，并在该处编写分发代码读 CP0 Cause 的 ExcCode（bit6..2）后跳转到相应处理程序。"
+    },
+    {
+      "nodeCode": "os.runtime.interrupt_handling",
+      "nodeName": "中断处理流程",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "异常与中断共用 0x80000080 通用入口，分发代码必须同时按 ExcCode 与 Cause.IP（bit15..8）分派，是中断处理流程的入口环节。"
+    },
+    {
+      "nodeCode": "os.memory.loading_linking",
+      "nodeName": "程序的链接与装入",
+      "role": "RELATED",
+      "weight": 0.5,
+      "reason": "入口地址由链接器脚本定位（专用 .exc.handler 段），是链接阶段决定代码物理位置的直接应用。"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "input": "d=%d x=%x c=%c s=%s\n4\ni 42\ni 255\ni 65\ns MOS\n",
+    "output": "d=42 x=ff c=A s=MOS"
+  },
+  {
+    "input": "[%08d][%8x][%-8d]\n3\ni -42\ni 255\ni 7\n",
+    "output": "[-0000042][      ff][7       ]"
+  },
+  {
+    "input": "[%.3s][%10.3s][%-10.3s][%.9s]\n4\ns abcdef\ns abcdef\ns abcdef\ns ab\n",
+    "output": "[abc][       abc][abc       ][ab]"
+  },
+  {
+    "input": "[%.5d][%8.5d][%08.5d][%.0d][%.0x]\n5\ni 42\ni 42\ni 42\ni 0\ni 0\n",
+    "output": "[00042][   00042][   00042][][]"
+  },
+  {
+    "input": "[%+d][% d][%+d][%08d]\n4\ni 42\ni 42\ni -42\ni -42\n",
+    "output": "[+42][ 42][-42][-0000042]"
+  },
+  {
+    "input": "100%% done %d%c%q\n2\ni 7\ni 33\n",
+    "output": "100% done 7!%q"
+  },
+  {
+    "input": "[%-08d][%-8s][%8s][%08x][%5c]\n5\ni 42\ns ab\ns ab\ni 48879\ni 65\n",
+    "output": "[42      ][ab      ][      ab][0000beef][    A]"
+  },
+  {
+    "input": "%x|%d|%d\n3\ni -1\ni -2147483648\ni 2147483647\n",
+    "output": "ffffffff|-2147483648|2147483647"
+  }
+]

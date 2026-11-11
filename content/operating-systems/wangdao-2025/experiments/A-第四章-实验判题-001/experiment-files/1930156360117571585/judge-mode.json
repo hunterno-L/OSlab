@@ -1,0 +1,4 @@
+{
+  "judgeMode": "LOCAL_BUILD",
+  "reason": "实验目标是编写 user/syscall_wrap.S 中的 syscall 封装：按 MIPS o32 调用规范把系统调用号与参数搬进 $v0/$a0-$a3（第 5 个及以后参数走栈），执行特权指令 syscall 陷入内核态，再从 $v0 取返回值。syscall 指令触发的是真实 CP0 异常（ExcCode=8 Sys）并切换到内核栈与内核页表，沙箱是 x86-64 用户态单文件 C，无 MIPS 交叉汇编器、无 CP0、无内核态，无法功能判题。用 C 函数调用模拟「陷入内核」不构成概念同构，不编造代理题。完成规则为 SUBMIT。"
+}

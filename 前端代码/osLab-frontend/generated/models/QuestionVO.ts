@@ -11,6 +11,7 @@ export type QuestionVO = {
     favourNum?: number;
     id?: number;
     judgeConfig?: JudgeConfig;
+    judgeMode?: 'AUTO' | 'LOCAL_BUILD' | 'CONCEPT_HARNESS';
     originalCode?: string;
     setId?: number;
     submitNum?: number;

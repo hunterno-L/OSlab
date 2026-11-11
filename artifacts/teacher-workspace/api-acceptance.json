@@ -1,0 +1,119 @@
+{
+  "passed": 22,
+  "checks": [
+    "teacher endpoint rejects anonymous and student",
+    "legacy and managed class membership deduplicates",
+    "follow-ups use real active class members",
+    "due reviews deduplicate repeated items and ignore future/done/deleted",
+    "zero-observation RED does not count as weak",
+    "unobserved students remain missing-evidence instead of weak",
+    "DUE_REVIEW limits to five stable nodes",
+    "WEAK limits to five stable nodes",
+    "MISSING_EVIDENCE limits to five stable nodes",
+    "follow-up ordering is stable",
+    "course-specific follow-ups exclude OS weak and review nodes",
+    "changing class never includes another class weak evidence",
+    "empty class returns real zeroes without fabricated weak nodes",
+    "class task list includes class-targeted draft",
+    "class task list includes individual-targeted draft",
+    "class task list excludes other class and other creator drafts",
+    "cross-class task summary counts only selected class",
+    "pending filter count and rows agree, class isolation holds",
+    "statistics retain all statuses in selected class",
+    "recipient and submission identifiers preserve exact strings",
+    "recipient pagination has stable distinct rows and scoped total",
+    "creator ownership stays enforced"
+  ],
+  "followUpA": {
+    "className": "验收一班",
+    "courseCode": "course.operating-systems",
+    "studentCount": 2,
+    "dueReviewStudentCount": 1,
+    "weakStudentCount": 1,
+    "missingEvidenceStudentCount": 2,
+    "items": [
+      {
+        "kind": "DUE_REVIEW",
+        "nodeCode": "os.boot.boot_process",
+        "nodeName": "操作系统引导过程",
+        "studentCount": 1
+      },
+      {
+        "kind": "WEAK",
+        "nodeCode": "os.boot.boot_process",
+        "nodeName": "操作系统引导过程",
+        "studentCount": 1
+      },
+      {
+        "kind": "MISSING_EVIDENCE",
+        "nodeCode": "os.cpu.mlfq",
+        "nodeName": "多级反馈队列",
+        "studentCount": 2
+      },
+      {
+        "kind": "MISSING_EVIDENCE",
+        "nodeCode": "os.cpu.mlq",
+        "nodeName": "多级队列调度算法",
+        "studentCount": 2
+      },
+      {
+        "kind": "MISSING_EVIDENCE",
+        "nodeCode": "os.cpu.rr",
+        "nodeName": "时间片轮转",
+        "studentCount": 2
+      },
+      {
+        "kind": "MISSING_EVIDENCE",
+        "nodeCode": "os.runtime.interrupt",
+        "nodeName": "中断",
+        "studentCount": 2
+      },
+      {
+        "kind": "MISSING_EVIDENCE",
+        "nodeCode": "os.runtime.interrupt_handling",
+        "nodeName": "中断处理流程",
+        "studentCount": 2
+      }
+    ]
+  },
+  "followUpOtherCourse": {
+    "className": "验收一班",
+    "courseCode": "course.database-systems",
+    "studentCount": 2,
+    "dueReviewStudentCount": 0,
+    "weakStudentCount": 0,
+    "missingEvidenceStudentCount": 2,
+    "items": [
+      {
+        "kind": "MISSING_EVIDENCE",
+        "nodeCode": "db.fd.attribute-closure",
+        "nodeName": "属性闭包",
+        "studentCount": 2
+      },
+      {
+        "kind": "MISSING_EVIDENCE",
+        "nodeCode": "db.fd.candidate-key",
+        "nodeName": "候选键",
+        "studentCount": 2
+      },
+      {
+        "kind": "MISSING_EVIDENCE",
+        "nodeCode": "db.fd.superkey",
+        "nodeName": "超键",
+        "studentCount": 2
+      }
+    ]
+  },
+  "scopedTask": {
+    "total": "1",
+    "stats": {
+      "total": "2",
+      "pending": "1",
+      "inProgress": "0",
+      "returned": "0",
+      "submitted": "1",
+      "reviewed": "0"
+    }
+  },
+  "fixtureDatabase": "oslab_terra_verify_1794398762955"
+}

@@ -1,0 +1,26 @@
+{
+  "questionId": "1930156493454495745",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.runtime.system_call",
+      "nodeName": "系统调用",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "handle_sys() 从 Trapframe 取 $v0 里的系统调用号，查 sys_call_table 分派到对应内核函数，并把返回值写回 Trapframe 的 $v0。"
+    },
+    {
+      "nodeCode": "os.runtime.mode_switch",
+      "nodeName": "处理器状态切换",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "handle_sys 运行在内核态，参数来自用户态保存在 Trapframe 里的寄存器，必须校验用户指针合法性后再解引用。"
+    },
+    {
+      "nodeCode": "os.runtime.exception",
+      "nodeName": "异常",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "系统调用在 MIPS 上按异常处理（ExcCode=8 Sys），handle_sys 是异常分发链上 Sys 分支的处理程序。"
+    }
+  ]
+}

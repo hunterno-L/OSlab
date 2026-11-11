@@ -141,6 +141,25 @@ export interface AiCourseContext {
   resourceRef?: string;
   eventIds?: string[];
   selectedSourceIds?: string[];
+  /** 服务端建立的答题尝试上下文（B 的普通尝试接口返回）。 */
+  attemptContextId?: string;
+  /** 服务端评估运行 id（自测/测评）。 */
+  assessmentRunId?: string;
+}
+
+/** 用户明确附带的材料；超出上限时前后端都明确拒绝，不静默截断。 */
+export interface AiTutorAttachment {
+  kind: "SELECTION" | "CODE" | "ERROR";
+  label: string;
+  text: string;
+  sourceId?: string;
+}
+
+export interface AiTutorDirective {
+  scene: "GLOBAL" | "UNIT" | "NODE" | "QUESTION" | "EXPERIMENT";
+  intent: "ASK" | "EXPLAIN" | "HINT" | "DEBUG" | "PLAN";
+  scope: "PAGE" | "COURSE";
+  attachments?: AiTutorAttachment[];
 }
 
 export interface AiCreateSessionRequest {
@@ -168,6 +187,37 @@ export interface AiCreateTurnRequest {
   clientRequestId: string;
   message: string;
   context?: AiCourseContext;
+  tutor?: AiTutorDirective;
+}
+
+/** 课程会话列表项（最近对话）。 */
+export interface AiSessionSummary {
+  sessionId: string;
+  courseCode: string;
+  title: string;
+  status: string;
+  updatedAt: string | null;
+  focus?: AiSessionFocus;
+}
+
+export interface AiSessionListVO {
+  items: AiSessionSummary[];
+  nextCursor: string | null;
+}
+
+/** 历史轮次项：用户消息 + 服务端真实轮次。 */
+export interface AiTurnHistoryItem {
+  turnId: string;
+  clientRequestId: string;
+  userMessage: string;
+  createdAt: string | null;
+  contextSummary: string;
+  turn: AiTurnVO;
+}
+
+export interface AiTurnHistoryVO {
+  items: AiTurnHistoryItem[];
+  nextCursor: string | null;
 }
 
 export interface AiNextActionsVO {
@@ -369,6 +419,26 @@ export function createAiTurn(
 
 export function getAiTurn(turnId: string): Promise<AiApiResponse<AiTurnVO>> {
   return axios.get(`${API}/learning/ai/turns/${encodeURIComponent(turnId)}`);
+}
+
+/** 指定课程的会话列表（最近对话）；分页读取，不预取整门课程。 */
+export function listAiSessions(params: {
+  courseCode: string;
+  cursor?: string;
+  limit?: number;
+}): Promise<AiApiResponse<AiSessionListVO>> {
+  return axios.get(`${API}/learning/ai/sessions`, { params });
+}
+
+/** 轮次历史分页；before 为上一页返回的 nextCursor。 */
+export function listAiTurns(
+  sessionId: string,
+  params: { before?: string; limit?: number } = {}
+): Promise<AiApiResponse<AiTurnHistoryVO>> {
+  return axios.get(
+    `${API}/learning/ai/sessions/${encodeURIComponent(sessionId)}/turns`,
+    { params }
+  );
 }
 
 export function startAiAction(actionId: string): Promise<

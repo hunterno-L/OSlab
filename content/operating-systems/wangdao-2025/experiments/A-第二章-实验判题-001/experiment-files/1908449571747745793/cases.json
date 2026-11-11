@@ -1,0 +1,25 @@
+{
+  "description": "驱动 include/queue.h 链表宏。操作码：T=尾插, A=在a后插b, H=头插, R=移除。输出为遍历 pp_ref 序列。",
+  "cases": [
+    {
+      "name": "官方尾插顺序（physical_memory_manage_check answer1）",
+      "input": "10\nT 0\nT 1\nT 2\nT 3\nT 4\nT 5\nT 6\nT 7\nT 8\nT 9\n"
+    },
+    {
+      "name": "官方后插顺序（physical_memory_manage_check answer2）",
+      "input": "11\nT 0\nT 1\nT 2\nT 3\nT 4\nT 5\nT 6\nT 7\nT 8\nT 9\nA 4 20\n"
+    },
+    {
+      "name": "空链表尾插 + 头插混合",
+      "input": "5\nT 7\nH 3\nT 9\nH 1\nT 5\n"
+    },
+    {
+      "name": "移除后再尾插（校验 le_prev 双向指向）",
+      "input": "8\nT 0\nT 1\nT 2\nT 3\nR 1\nR 0\nT 4\nT 5\n"
+    },
+    {
+      "name": "单元素反复移除与重插",
+      "input": "6\nT 2\nR 2\nT 3\nR 3\nT 4\nA 4 9\n"
+    }
+  ]
+}

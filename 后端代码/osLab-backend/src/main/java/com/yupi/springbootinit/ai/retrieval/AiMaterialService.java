@@ -47,6 +47,8 @@ public class AiMaterialService {
     @Resource
     private AiContentScopeService contentScope;
 
+    @Resource private com.yupi.springbootinit.course.EnabledCourses enabledCourses;
+
     @Resource
     private AiProperties properties;
 
@@ -56,6 +58,7 @@ public class AiMaterialService {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "courseCode 不能为空");
         }
         String courseCode = request.getCourseCode().trim();
+        enabledCourses.require(courseCode);
         if (contentScope.courseTitle(courseCode) == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "课程不存在：" + courseCode);
         }

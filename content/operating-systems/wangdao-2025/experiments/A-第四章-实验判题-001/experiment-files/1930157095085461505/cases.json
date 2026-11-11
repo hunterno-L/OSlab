@@ -1,0 +1,25 @@
+{
+  "description": "实验 4.7 sys_ipc_recv(int sysno, u_int dstva) 与 sys_ipc_can_send(int sysno, u_int envid, u_int value, u_int srcva, u_int perm)。驱动操作符：I=env_init 并打印空闲 PCB 数；A parent=env_alloc 打印 返回码/下标/env_id；U idx=设 curenv；S idx st=设 env_status（0=FREE,1=NOT_RUNNABLE,2=RUNNABLE）；R idx=把 PCB 插入就绪链表头；K s a0 a1 a2 a3 a4=填好 KERNEL_SP 现场后调 handle_sys 并打印 $v0（必须恰好 6 个数；s=8 即 SYS_ipc_recv，a0=dstva；s=9 即 SYS_ipc_can_send，a0=envid a1=value a2=srcva a3=perm；s=11 即 SYS_yield）；E idx=打印 env_pgfault_handler/env_ipc_receiving/env_ipc_dstva/env_ipc_from/env_ipc_value 五个字段；T idx=打印 env_id/parent/status/pri/cr3；Y=打印 env_run 记录日志（首行 Y 条数，随后每条 kind arg cur：0=lcontext arg=页目录物理地址，1=env_pop_tf arg=cp0_epc）；Z=清空日志；Q idx va=物理页基址（无映射 4294967295）；O idx va=页表项原始值；P idx va perm=page_alloc+page_insert 打印 返回码/物理页基址；C=空闲物理页数；L=按序打印就绪链表下标。错误码按 int 解读：-2=E_BAD_ENV，-3=E_INVAL，-4=E_NO_MEM，-11=E_IPC_NOT_RECV。宿主物理页账本：np=256/fm=8192 初始空闲 252 页；每次 env_alloc 占 1 页作页目录（envs[63].cr3=1044480、envs[62].cr3=1040384、envs[61].cr3=1036288）；首次映射某个 4MB 区间额外占 1 页作页表；共享已映射的页只递增 pp_ref，不再占新数据页。env_alloc 出来的进程 pri=1、status=NOT_RUNNABLE 且不在就绪链表里。",
+  "cases": [
+    {
+      "name": "接收态检查不可省：向没在等消息的进程发送必须 -E_IPC_NOT_RECV 且不改其字段；随后 recv 阻塞让出、send 唤醒并带回发送方 envid",
+      "input": "256 8192\n20\nI\nA 0\nA 0\nU 63\nS 63 2\nS 62 2\nR 63\nR 62\nK 9 318 777 0 3 0\nE 62\nT 62\nZ\nK 8 0 0 0 0 0\nE 63\nT 63\nY\nK 9 191 777 0 3 0\nE 63\nT 63\nC\n"
+    },
+    {
+      "name": "传页 IPC：recv 登记 dstva 后 send 必须把发送方 srcva 的页共享过去（pp_ref 递增、双方虚拟地址不同物理页相同），且第二次发送必须失败",
+      "input": "256 8192\n23\nI\nA 0\nA 0\nU 62\nS 63 2\nS 62 2\nR 63\nR 62\nP 63 4096 3\nK 8 8192 0 0 0 0\nE 62\nQ 62 8192\nK 9 318 4242 4096 3 0\nQ 62 8192\nQ 63 4096\nO 62 8192\nE 62\nT 62\nC\nK 9 318 999 4096 3 0\nE 62\nC\nY\n"
+    },
+    {
+      "name": "边界拒绝：dstva/srcva 触及内核段返回 -E_INVAL 且不得置接收标志，坏 envid 返回 -E_BAD_ENV，自发自收返回 -E_IPC_NOT_RECV，全程不触发调度",
+      "input": "256 8192\n17\nI\nA 0\nU 63\nS 63 2\nR 63\nK 8 1073741824 0 0 0 0\nE 63\nT 63\nK 8 4294967295 0 0 0 0\nK 9 191 5 0 3 0\nE 63\nK 9 999 5 0 3 0\nK 9 191 5 1073741824 3 0\nK 9 191 5 4294967295 3 0\nZ\nY\nC\n"
+    },
+    {
+      "name": "发送失败必须保持原子性：发送方 srcva 无映射时 sys_mem_map 报 -E_INVAL，接收方仍须处于接收态且仍被阻塞，补上映射后重发才成功",
+      "input": "256 8192\n23\nI\nA 0\nA 0\nU 62\nS 63 2\nS 62 2\nR 63\nR 62\nK 8 8192 0 0 0 0\nE 62\nT 62\nK 9 318 4242 4096 3 0\nE 62\nT 62\nC\nP 63 4096 3\nK 9 318 4242 4096 3 0\nE 62\nQ 62 8192\nT 62\nC\nK 9 318 1 0 3 0\nE 62\n"
+    },
+    {
+      "name": "多进程轮转下的重复接收：再次 recv 必须清掉上一轮 from/value 残留，阻塞与唤醒都要真的经过调度器",
+      "input": "256 8192\n25\nI\nA 0\nA 0\nA 0\nU 63\nS 63 2\nS 62 2\nS 61 2\nR 63\nR 62\nR 61\nK 8 0 0 0 0 0\nK 9 191 111 0 3 0\nE 63\nK 9 318 333 0 3 0\nE 62\nU 63\nK 8 0 0 0 0 0\nE 63\nT 63\nK 9 191 222 0 3 0\nE 63\nL\nY\nC\n"
+    }
+  ]
+}

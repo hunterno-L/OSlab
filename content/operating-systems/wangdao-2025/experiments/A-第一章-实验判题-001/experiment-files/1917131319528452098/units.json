@@ -1,0 +1,15 @@
+{
+  "questionId": "1917131319528452098",
+  "unitMappings": [
+    {
+      "unitCode": "unit.memory.functions",
+      "required": false,
+      "completionRule": "PASS"
+    },
+    {
+      "unitCode": "unit.overview.boot",
+      "required": false,
+      "completionRule": "PASS"
+    }
+  ]
+}

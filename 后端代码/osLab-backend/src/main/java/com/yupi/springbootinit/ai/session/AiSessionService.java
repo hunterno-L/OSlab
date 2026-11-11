@@ -45,6 +45,9 @@ public class AiSessionService {
     @Resource
     private AiLearningSessionMapper sessionMapper;
 
+    @Resource private com.yupi.springbootinit.course.EnabledCourses enabledCourses;
+    @Resource private com.yupi.springbootinit.learning.PublishedCourseScopeService courseScope;
+
     @Resource
     private ModelProfileService modelProfileService;
 
@@ -54,6 +57,8 @@ public class AiSessionService {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "courseCode 不能为空");
         }
         String courseCode = request.getCourseCode().trim();
+        enabledCourses.require(courseCode);
+        courseScope.requireUnit(courseCode, request.getUnitCode());
         String focus = normalizeFocus(request.getFocus());
         AiLearningSession session = new AiLearningSession();
         session.setUserId(user.getId());
@@ -110,6 +115,8 @@ public class AiSessionService {
             session.setTimeBudgetMinutes(normalizeBudget(request.getTimeBudgetMinutes()));
         }
         if (StringUtils.isNotBlank(request.getUnitCode())) {
+            enabledCourses.require(session.getCourseCode());
+            courseScope.requireUnit(session.getCourseCode(), request.getUnitCode());
             session.setUnitCode(request.getUnitCode().trim());
         }
         if (StringUtils.isNotBlank(request.getModelProfileId())) {

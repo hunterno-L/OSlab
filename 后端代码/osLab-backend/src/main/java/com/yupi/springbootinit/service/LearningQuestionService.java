@@ -57,6 +57,15 @@ public interface LearningQuestionService extends IService<LearningQuestion> {
     List<Long> listEligibleQuestionIds(LearningQuestionQueryRequest request, User user);
 
     /**
+     * 测评候选完整 ID 集（可选包含综合题）。
+     *
+     * <p>逐题练习（PRACTICE）保持 {@code includeComprehensive=false}；
+     * 整组自测（SELF_TEST）允许综合题进入队列，交卷时标记“待自评”，不自动计对错。
+     */
+    List<Long> listEligibleQuestionIds(LearningQuestionQueryRequest request, User user,
+                                       boolean includeComprehensive);
+
+    /**
      * 管理员题面/编辑 VO（U11）：含 correctAnswer 与审核历史。仅 ADMIN 端点调用。
      */
     LearningQuestionManageVO getManageQuestionVO(long questionId, User user);

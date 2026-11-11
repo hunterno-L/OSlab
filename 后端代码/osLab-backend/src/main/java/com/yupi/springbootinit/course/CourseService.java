@@ -14,15 +14,24 @@ import static com.yupi.springbootinit.course.CourseJson.*;
 @Service
 public class CourseService {
     @Resource CourseRepository db;
+    @Resource EnabledCourses enabledCourses;
 
     public List<Map<String,Object>> courses(long userId) {
         List<Map<String,Object>> out=new ArrayList<>();
+        Map<String, List<Map<String,Object>>> progressByUnit = allProgress(userId);
         for(Map<String,Object> row:db.rows("SELECT * FROM course_catalog WHERE isDelete=0 ORDER BY courseCode")) {
-            String code=db.value(row,"courseCode");List<JsonNode> units=publishedUnits(code);int completed=0;
-            for(JsonNode u:units)if("COMPLETED".equals(progress(u,userId).get("status")))completed++;
+            String code=db.value(row,"courseCode");if(!enabledCourses.contains(code))continue;List<JsonNode> units=publishedUnits(code);int completed=0;
+            for(JsonNode u:units)if("COMPLETED".equals(progress(u,progressByUnit.getOrDefault(text(u,"unitCode"), Collections.emptyList())).get("status")))completed++;
             out.add(map("courseCode",code,"title",row.get("title"),"description",row.get("description"),"status",units.isEmpty()?"AWAITING_CONTENT":"AVAILABLE","publishedUnitCount",units.size(),"completedUnitCount",completed,"progressPercent",units.isEmpty()?0:Math.round(100.0*completed/units.size())));
         }
         return out;
+    }
+    Map<String, List<Map<String,Object>>> allProgress(long userId) {
+        Map<String, List<Map<String,Object>>> result = new HashMap<>();
+        for (Map<String,Object> row : db.rows("SELECT * FROM learning_activity_progress WHERE userId=? AND isDelete=0", userId)) {
+            result.computeIfAbsent(db.value(row, "unitCode"), key -> new ArrayList<>()).add(row);
+        }
+        return result;
     }
     List<JsonNode> publishedUnits(String course) {
         List<JsonNode> units=new ArrayList<>();
@@ -52,21 +61,35 @@ public class CourseService {
     }
     JsonNode publishedUnit(String unitCode) {
         Map<String,Object> row=db.entity("learning_unit","unitCode",unitCode);
-        if(row==null||row.get("publishedJson")==null)throw bad("学习单元尚未发布");return parse(db.value(row,"publishedJson"));
+        if(row==null||row.get("publishedJson")==null)throw bad("学习单元尚未发布");JsonNode unit=parse(db.value(row,"publishedJson"));enabledCourses.require(text(unit,"courseCode"));return unit;
     }
     Map<String,Object> course(String code) { Map<String,Object> r=db.entity("course_catalog","courseCode",code);if(r==null)throw bad("课程不存在");return r; }
     public Map<String,Object> outline(String code,long userId,boolean manage) {
+        if(!manage)enabledCourses.require(code);
         Map<String,Object> course=course(code);
         List<Map<String,Object>> sections=db.rows("SELECT sectionCode,parentSectionCode,title,textbookNumber,sectionType,sortOrder,sourceCode,pageStart FROM course_section WHERE courseCode=? AND isDelete=0 ORDER BY sortOrder,sectionCode",code);
         Map<String,Map<String,Object>> index=new LinkedHashMap<>();List<Map<String,Object>> roots=new ArrayList<>();
         for(Map<String,Object> s:sections){s.put("children",new ArrayList<>());s.put("units",new ArrayList<>());index.put(db.value(s,"sectionCode"),s);}
         for(Map<String,Object> s:sections){Map<String,Object> parent=index.get(db.value(s,"parentSectionCode"));if(parent==null)roots.add(s);else ((List)parent.get("children")).add(s);}
         List<JsonNode> units=manage?draftUnits(code):publishedUnits(code);int completed=0;
-        for(JsonNode u:units){Map<String,Object> s=index.get(text(u,"sectionCode"));Map<String,Object> summary=summary(u,userId);if(s!=null)((List)s.get("units")).add(summary);if("COMPLETED".equals(((Map)summary.get("progress")).get("status")))completed++;}
+        Map<String,List<Map<String,Object>>> progressByUnit = allProgress(userId);
+        Map<String,String> nodeNames = new HashMap<>();
+        for (Map<String,Object> node : db.rows("SELECT nodeCode,name FROM knowledge_node_registry WHERE isDelete=0")) {
+            nodeNames.put(db.value(node,"nodeCode"), db.value(node,"name"));
+        }
+        for(JsonNode u:units){Map<String,Object> s=index.get(text(u,"sectionCode"));Map<String,Object> summary=summary(u,progressByUnit.getOrDefault(text(u,"unitCode"),Collections.emptyList()),nodeNames);if(s!=null)((List)s.get("units")).add(summary);if("COMPLETED".equals(((Map)summary.get("progress")).get("status")))completed++;}
         return map("courseCode",code,"title",course.get("title"),"description",course.get("description"),"sections",roots,"progress",map("publishedUnitCount",manage?publishedUnits(code).size():units.size(),"completedUnitCount",completed,"percent",units.isEmpty()?0:Math.round(100.0*completed/units.size())));
     }
     List<JsonNode> draftUnits(String course) {
         List<JsonNode> out=new ArrayList<>();for(Map<String,Object> r:db.rows("SELECT draftJson,reviewStatus FROM learning_unit WHERE courseCode=? AND isDelete=0 ORDER BY sortOrder",course)){ObjectNode n=object(parse(db.value(r,"draftJson")));n.put("status",db.value(r,"reviewStatus"));out.add(n);}sortUnits(course,out);return out;
+    }
+    Map<String,Object> summary(JsonNode u, List<Map<String,Object>> progressRows, Map<String,String> nodeNames) {
+        List<Map<String,Object>> mappings = new ArrayList<>();
+        for (JsonNode n : u.path("nodeMappings")) {
+            String code = text(n,"nodeCode");
+            mappings.add(map("nodeCode",code,"role",text(n,"role"),"name",nodeNames.get(code)));
+        }
+        return map("unitCode",text(u,"unitCode"),"courseCode",text(u,"courseCode"),"sectionCode",text(u,"sectionCode"),"title",text(u,"title"),"sortOrder",u.path("sortOrder").asInt(),"estimatedMinutes",u.path("estimatedMinutes").asInt(),"status",text(u,"status"),"nodeMappings",mappings,"progress",progress(u,progressRows));
     }
     Map<String,Object> summary(JsonNode u,long userId) {
         List<Map<String,Object>> mappings=new ArrayList<>();
@@ -78,24 +101,38 @@ public class CourseService {
     }
 
     public Map<String,Object> resume(String course,long userId) {
-        course(course);List<JsonNode> units=publishedUnits(course);
+        enabledCourses.require(course);course(course);List<JsonNode> units=publishedUnits(course);
         if(units.isEmpty())return map("courseCode",course,"unitCode",null,"activityCode",null,"reason","AWAITING_CONTENT");
+        Map<String,List<Map<String,Object>>> progressByUnit = allProgress(userId);
         Map<String,Object> pos=db.one("SELECT * FROM learning_course_position WHERE userId=? AND courseCode=? AND isDelete=0",userId,course);
-        if(pos!=null)for(JsonNode u:units)if(text(u,"unitCode").equals(db.value(pos,"unitCode"))&&!"COMPLETED".equals(progress(u,userId).get("status"))) {
-            Map<String,Object> result=resumeAt(course,u,userId,"CONTINUE");
+        if(pos!=null)for(JsonNode u:units)if(text(u,"unitCode").equals(db.value(pos,"unitCode"))&&!"COMPLETED".equals(progress(u,progressByUnit.getOrDefault(text(u,"unitCode"),Collections.emptyList())).get("status"))) {
+            Map<String,Object> result=resumeAt(course,u,progressByUnit,"CONTINUE");
             for(JsonNode a:u.path("activities"))if(text(a,"activityCode").equals(db.value(pos,"activityCode")))result.put("activityCode",db.value(pos,"activityCode"));
             return result;
         }
-        for(JsonNode u:units)if(!"COMPLETED".equals(progress(u,userId).get("status")))return resumeAt(course,u,userId,pos==null?"FIRST_UNIT":"CONTINUE");
-        return resumeAt(course,units.get(units.size()-1),userId,"COURSE_COMPLETED");
+        for(JsonNode u:units)if(!"COMPLETED".equals(progress(u,progressByUnit.getOrDefault(text(u,"unitCode"),Collections.emptyList())).get("status")))return resumeAt(course,u,progressByUnit,pos==null?"FIRST_UNIT":"CONTINUE");
+        return resumeAt(course,units.get(units.size()-1),progressByUnit,"COURSE_COMPLETED");
     }
-    Map<String,Object> resumeAt(String course,JsonNode u,long userId,String reason) {return map("courseCode",course,"unitCode",text(u,"unitCode"),"activityCode",nextActivity(u,userId),"reason",reason);}
+    Map<String,Object> resumeAt(String course,JsonNode u,Map<String,List<Map<String,Object>>> progressByUnit,String reason) {
+        Set<String> done = new HashSet<>();
+        for (Map<String,Object> row : progressByUnit.getOrDefault(text(u,"unitCode"),Collections.emptyList())) {
+            if (((Number)row.get("completed")).intValue() == 1) done.add(db.value(row,"activityCode"));
+        }
+        String next = null;
+        List<JsonNode> sorted = activities(u);
+        for (JsonNode activity : sorted) if (activity.path("required").asBoolean() && !done.contains(text(activity,"activityCode"))) { next = text(activity,"activityCode"); break; }
+        if (next == null && !sorted.isEmpty()) next = text(sorted.get(sorted.size()-1),"activityCode");
+        return map("courseCode",course,"unitCode",text(u,"unitCode"),"activityCode",next,"reason",reason);
+    }
     String nextActivity(JsonNode u,long userId) {Set<String> completed=completed(u,userId);for(JsonNode a:activities(u))if(a.path("required").asBoolean()&&!completed.contains(text(a,"activityCode")))return text(a,"activityCode");return u.path("activities").isEmpty()?null:text(activities(u).get(activities(u).size()-1),"activityCode");}
     List<JsonNode> activities(JsonNode u){List<JsonNode> out=new ArrayList<>();u.path("activities").forEach(out::add);out.sort(Comparator.comparingInt(n->n.path("sortOrder").asInt()));return out;}
     Set<String> completed(JsonNode u,long userId){Set<String> out=new HashSet<>();for(Map<String,Object> p:progressRows(u,userId))if(((Number)p.get("completed")).intValue()==1)out.add(db.value(p,"activityCode"));return out;}
     List<Map<String,Object>> progressRows(JsonNode u,long userId){return db.rows("SELECT * FROM learning_activity_progress WHERE userId=? AND unitCode=? AND isDelete=0",userId,text(u,"unitCode"));}
     public Map<String,Object> progress(JsonNode u,long userId) {
-        Map<String,Map<String,Object>> rows=new HashMap<>();for(Map<String,Object> p:progressRows(u,userId))rows.put(db.value(p,"activityCode"),p);
+        return progress(u, progressRows(u,userId));
+    }
+    private Map<String,Object> progress(JsonNode u, List<Map<String,Object>> progressRows) {
+        Map<String,Map<String,Object>> rows=new HashMap<>();for(Map<String,Object> p:progressRows)rows.put(db.value(p,"activityCode"),p);
         int required=0,done=0,seen=0,checks=0,passed=0;boolean failed=false;
         for(JsonNode a:u.path("activities")) {
             Map<String,Object> p=rows.get(text(a,"activityCode"));boolean complete=p!=null&&((Number)p.get("completed")).intValue()==1;
@@ -187,6 +224,7 @@ public class CourseService {
             if(unit!=null)break;
         }
         if(unit==null)throw bad("活动尚未发布");
+        enabledCourses.require(text(unit,"courseCode"));
         if(!text(unit,"unitCode").equals(required(request,"sourceUnitCode")))throw bad("sourceUnitCode与活动不匹配");
         String type=text(activity,"activityType"),rule=text(activity,"completionRule"),evidenceType=null,evidenceId=null;
         Boolean passed=null;boolean completed;
@@ -220,6 +258,6 @@ public class CourseService {
         return response;
     }
     public List<Map<String,Object>> nodeUnits(String nodeCode,long userId) {
-        List<Map<String,Object>> out=new ArrayList<>();for(Map<String,Object> c:db.rows("SELECT courseCode FROM course_catalog WHERE isDelete=0"))for(JsonNode u:publishedUnits(db.value(c,"courseCode")))for(JsonNode n:u.path("nodeMappings"))if(nodeCode.equals(text(n,"nodeCode"))){Map<String,Object> s=summary(u,userId);s.put("role",text(n,"role"));out.add(s);break;}return out;
+        List<Map<String,Object>> out=new ArrayList<>();for(Map<String,Object> c:db.rows("SELECT courseCode FROM course_catalog WHERE isDelete=0"))if(enabledCourses.contains(db.value(c,"courseCode")))for(JsonNode u:publishedUnits(db.value(c,"courseCode")))for(JsonNode n:u.path("nodeMappings"))if(nodeCode.equals(text(n,"nodeCode"))){Map<String,Object> s=summary(u,userId);s.put("role",text(n,"role"));out.add(s);break;}return out;
     }
 }

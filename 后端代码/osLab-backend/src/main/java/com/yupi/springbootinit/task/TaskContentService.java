@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.yupi.springbootinit.common.ErrorCode;
 import com.yupi.springbootinit.exception.BusinessException;
 import com.yupi.springbootinit.learning.NodeIdentityService;
+import com.yupi.springbootinit.learning.ExperimentJudgeModeService;
 import com.yupi.springbootinit.model.dto.task.TaskItemRequest;
 import com.yupi.springbootinit.model.entity.LearningTask;
 import com.yupi.springbootinit.model.entity.LearningTaskItem;
@@ -40,6 +41,8 @@ public class TaskContentService {
     private JdbcTemplate jdbc;
     @Resource
     private NodeIdentityService identities;
+    @Resource
+    private ExperimentJudgeModeService experimentJudgeModes;
 
     // ---------------- 草稿校验与规范化 ----------------
 
@@ -186,6 +189,8 @@ public class TaskContentService {
         if (TaskConstants.MODE_REFERENCE.equals(mode)) {
             long sourceId = longValue(content.path("sourceQuestionId"), "来源实验 id");
             ObjectNode source = loadExperimentSource(sourceId);
+            boolean localBuild = ExperimentJudgeModeService.LOCAL_BUILD.equals(source.path("judgeMode").asText());
+            if (localBuild) rejectAutomaticLocalBuild(content);
             long requestedAt = content.path("sourceUpdatedAt").asLong(0);
             if (requestedAt > 0 && source.path("sourceUpdatedAt").asLong() != requestedAt) {
                 throw bad("来源实验已更新，请重新选择");
@@ -195,6 +200,7 @@ public class TaskContentService {
             merged.put("sourceMode", mode);
             merged.put("sourceQuestionId", String.valueOf(sourceId));
             merged.put("sourceUpdatedAt", source.path("sourceUpdatedAt").asLong());
+            merged.put("judgeMode", source.path("judgeMode").asText());
             content = merged;
         } else {
             content.remove("sourceQuestionId");
@@ -244,6 +250,14 @@ public class TaskContentService {
         if (!content.path("samples").isArray()) content.putArray("samples");
         if (content.path("samples").size() > 5) throw bad("样例最多 5 条");
         if (!content.path("tags").isArray()) content.putArray("tags");
+    }
+
+    private void rejectAutomaticLocalBuild(JsonNode content) {
+        if ((content.hasNonNull("manualReview") && (!content.path("manualReview").isBoolean() || !content.path("manualReview").asBoolean()))
+                || (content.hasNonNull("requirePass") && (!content.path("requirePass").isBoolean() || content.path("requirePass").asBoolean()))
+                || (content.hasNonNull("judgeMode") && !ExperimentJudgeModeService.LOCAL_BUILD.equals(content.path("judgeMode").asText()))) {
+            throw bad("本地构建实验必须采用人工验收，不能启用自动判分");
+        }
     }
 
     private void mergeOverrides(ObjectNode target, JsonNode overrides) {
@@ -314,6 +328,13 @@ public class TaskContentService {
                 if (current == null) throw bad("来源实验已不可用，请重新选择");
                 if (current != draft.path("sourceUpdatedAt").asLong()) {
                     throw bad("来源实验已更新，请重新预览后发布");
+                }
+                if (ExperimentJudgeModeService.LOCAL_BUILD.equals(experimentJudgeModes.mode(sourceId))
+                        || ExperimentJudgeModeService.LOCAL_BUILD.equals(draft.path("judgeMode").asText())) {
+                    rejectAutomaticLocalBuild(draft);
+                    if (!draft.path("manualReview").asBoolean(false)) throw bad("本地构建实验必须采用人工验收");
+                    draft.put("judgeMode", ExperimentJudgeModeService.LOCAL_BUILD);
+                    draft.put("requirePass", false);
                 }
                 validateExperimentContent(draft);
             }
@@ -556,8 +577,12 @@ public class TaskContentService {
         out.set("judgeCase", parse(row.get("judgeCase"), "[]"));
         out.set("judgeConfig", parse(row.get("judgeConfig"), "{}"));
         out.put("originalCode", str(row.get("originalCode")));
-        out.put("manualReview", false);
-        out.put("requirePass", true);
+        String judgeMode = experimentJudgeModes.mode(id);
+        boolean localBuild = ExperimentJudgeModeService.LOCAL_BUILD.equals(judgeMode);
+        out.put("judgeMode", judgeMode);
+        out.put("manualReview", localBuild);
+        out.put("requirePass", !localBuild);
+        if (localBuild) out.putArray("judgeCase");
         ArrayNode languages = out.putArray("languages");
         languages.add("java");
         languages.add("cpp");

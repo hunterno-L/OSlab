@@ -31,6 +31,15 @@
           </p>
         </div>
         <div class="page-head-actions">
+          <a-radio-group
+            v-model="runMode"
+            type="button"
+            size="small"
+            aria-label="练习模式"
+          >
+            <a-radio value="PRACTICE">逐题练习</a-radio>
+            <a-radio value="SELF_TEST">整组自测</a-radio>
+          </a-radio-group>
           <a-input-number
             v-model="runCount"
             :min="1"
@@ -39,9 +48,14 @@
           >
             <template #prefix>题数</template>
           </a-input-number>
-          <a-tooltip content="使用当前目录、节点与作答状态范围开始连续测评">
-            <a-button :loading="starting" :disabled="!total" @click="startRun"
-              >连续测评</a-button
+          <a-tooltip :content="startTooltip">
+            <a-button
+              :loading="starting"
+              :disabled="!total"
+              @click="startRun"
+              >{{
+                runMode === "SELF_TEST" ? "开始整组自测" : "逐题测评"
+              }}</a-button
             >
           </a-tooltip>
         </div>
@@ -64,10 +78,28 @@
       <!-- 知识节点：来自 catalog.nodes，与教材目录共用稳定代码 -->
       <section class="filter-panel" aria-label="知识节点">
         <div class="filter-panel-head">
-          <span class="filter-label">知识节点</span>
-          <span class="filter-hint">按稳定 nodeCode 过滤</span>
+          <div class="filter-panel-title">
+            <span class="filter-label">知识节点</span>
+            <span class="filter-hint">按知识点筛选</span>
+            <span v-if="nodeParam" class="filter-active-summary">
+              当前：{{ currentNodeLabel }}
+            </span>
+          </div>
+          <button
+            type="button"
+            class="node-filter-toggle"
+            :aria-expanded="showNodeFilters"
+            aria-controls="knowledge-node-filters"
+            @click="showNodeFilters = !showNodeFilters"
+          >
+            {{ showNodeFilters ? "收起知识节点" : "显示知识节点" }}
+          </button>
         </div>
-        <div class="chip-row">
+        <div
+          v-show="showNodeFilters"
+          id="knowledge-node-filters"
+          class="chip-row"
+        >
           <button
             type="button"
             class="filter-chip"
@@ -106,6 +138,12 @@
             class="filter-hint"
             >当前目录范围暂无可练习的节点</span
           >
+        </div>
+        <div v-if="!showNodeFilters && nodeParam" class="filter-collapsed-note">
+          <span>已按“{{ currentNodeLabel }}”筛选题目。</span>
+          <button type="button" @click="selectNode(undefined)">
+            清除节点筛选
+          </button>
         </div>
       </section>
 
@@ -186,7 +224,9 @@
               :source-activity-code="sourceContext.sourceActivityCode"
               :ai-action-id="aiActionIdFor(question)"
               :course-code="courseCode || courseParam"
+              :has-next="hasNextQuestion(question)"
               @answered="(result) => onAnswered(question, result)"
+              @next="focusNextQuestion(question)"
             />
           </article>
 
@@ -504,6 +544,16 @@ const catalogNodes = computed<LearningCatalogNodeVO[]>(
   () => catalog.value?.nodes || []
 );
 
+const showNodeFilters = ref(false);
+const currentNodeLabel = computed(() => {
+  const current = nodeParam.value;
+  if (!current) return "全部节点";
+  const match = catalogNodes.value.find(
+    (node) => nodeKeyOf(node) === current || node.nodeName === current
+  );
+  return match?.displayName || match?.nodeName || current;
+});
+
 const nodeKeyOf = (node: LearningCatalogNodeVO) =>
   node.nodeCode || node.nodeName;
 
@@ -730,9 +780,36 @@ const onAnswered = (
   void refreshCatalog(false);
 };
 
-// ---------- 连续测评（继承同一范围；不是练习列表主界面） ----------
+/** 提交后主操作「下一题」：只滚动到下一张卡，不自动跳走或开新会话 */
+const hasNextQuestion = (question: LearningQuestionVO) => {
+  const index = streamQuestions.value.findIndex(
+    (item) => String(item.id) === String(question.id)
+  );
+  return index >= 0 && index < streamQuestions.value.length - 1;
+};
+
+const focusNextQuestion = (question: LearningQuestionVO) => {
+  const index = streamQuestions.value.findIndex(
+    (item) => String(item.id) === String(question.id)
+  );
+  const next = streamQuestions.value[index + 1];
+  if (!next) return;
+  document
+    .getElementById(`question-${next.id}`)
+    ?.scrollIntoView({ block: "start", behavior: "smooth" });
+};
+
+// ---------- 连续测评/整组自测（继承同一范围；不是练习列表主界面） ----------
+type RunMode = "PRACTICE" | "SELF_TEST";
+const runMode = ref<RunMode>("PRACTICE");
 const runCount = ref(5);
 const starting = ref(false);
+
+const startTooltip = computed(() =>
+  runMode.value === "SELF_TEST"
+    ? "整组自测：交卷后统一判分；答题中可保存草稿、标记不确定"
+    : "逐题练习：使用当前目录、节点与作答状态范围开始连续测评"
+);
 
 const startRun = async () => {
   const scope = effectiveScope();
@@ -745,6 +822,7 @@ const startRun = async () => {
       nodeCode: scope.nodeCode,
       studyState: scope.studyState || "ALL",
       count: runCount.value,
+      mode: runMode.value,
     });
     if (res.data?.code === 0 && res.data.data?.runId) {
       const query: Record<string, string> = {
@@ -881,8 +959,64 @@ onBeforeUnmount(() => {
 }
 .filter-panel-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--oslab-space-2);
+}
+.filter-panel-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  min-width: 0;
+}
+.filter-active-summary {
+  color: var(--oslab-primary);
+  font-size: var(--oslab-text-small);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.node-filter-toggle {
+  flex: none;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-sm);
+  background: var(--oslab-panel);
+  color: var(--oslab-primary);
+  font: inherit;
+  font-size: var(--oslab-text-small);
+  cursor: pointer;
+}
+.node-filter-toggle:hover {
+  border-color: var(--oslab-primary);
+  background: var(--oslab-primary-soft);
+}
+.node-filter-toggle:focus-visible,
+.filter-collapsed-note button:focus-visible {
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: 2px;
+}
+.filter-collapsed-note {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  color: var(--oslab-muted-strong);
+  font-size: var(--oslab-text-small);
+}
+.filter-collapsed-note button {
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--oslab-primary);
+  font: inherit;
+  cursor: pointer;
+}
+.filter-collapsed-note button:hover {
+  border-bottom-color: currentColor;
 }
 .filter-label {
   color: var(--oslab-ink-soft);
@@ -990,6 +1124,7 @@ onBeforeUnmount(() => {
 .filter-panel,
 .filter-row,
 .question-stream {
+  box-sizing: border-box;
   width: 100%;
   max-width: 1120px;
 }

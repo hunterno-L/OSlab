@@ -1,0 +1,15 @@
+{
+  "questionId": "1930155360556208129",
+  "unitMappings": [
+    {
+      "unitCode": "unit.memory.image-protection",
+      "required": false,
+      "completionRule": "PASS"
+    },
+    {
+      "unitCode": "unit.process.composition",
+      "required": false,
+      "completionRule": "PASS"
+    }
+  ]
+}

@@ -274,12 +274,19 @@ async function run() {
   }));
 
   const conversation = evaluate(
-    read("src/composables/useAiConversation.ts"),
+    read("src/composables/useTutorSession.ts"),
     (name) => {
       if (name === "vue") return vue;
       if (name === "@/store") return { __esModule: true, default: user.store };
       if (name === "@/api/ai") return api;
       if (name === "@/composables/useAiPageContext") return pageContext;
+      if (name === "@/composables/useCurrentCourse")
+        return { currentCourseCode: vue.ref(course) };
+      if (name === "@/types/tutor") {
+        return evaluate(read("src/types/tutor.ts"), () => {
+          throw new Error("types/tutor 不应有运行时外部依赖");
+        });
+      }
       throw new Error(`unexpected dependency: ${name}`);
     }
   );

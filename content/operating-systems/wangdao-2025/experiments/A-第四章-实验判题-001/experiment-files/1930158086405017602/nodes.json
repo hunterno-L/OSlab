@@ -1,0 +1,26 @@
+{
+  "questionId": "1930158086405017602",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.process.process_control",
+      "nodeName": "进程控制",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "fork 父进程部分：遍历地址空间逐页 duppage、为子进程分配异常处理栈、设置子进程处理函数、设置子进程运行状态、返回子进程 envid，是进程创建原语在用户态的完整组装。"
+    },
+    {
+      "nodeCode": "os.memory.sharing",
+      "nodeName": "内存共享",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "fork 后父子共享全部可写页的 COW 映射，地址空间遍历的每一步都在建立共享关系。"
+    },
+    {
+      "nodeCode": "os.process.pcb",
+      "nodeName": "进程控制块",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "子进程 PCB 由 sys_env_alloc 创建，fork 负责把父进程的内存映像与异常处理配置复制进去。"
+    }
+  ]
+}

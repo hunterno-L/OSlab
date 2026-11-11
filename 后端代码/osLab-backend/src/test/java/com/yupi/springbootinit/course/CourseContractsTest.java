@@ -48,26 +48,77 @@ class CourseContractsTest {
         assertTrue(db.mutations.stream().noneMatch(x->x.contains("publishedJson=")),"draft updates cannot replace publication");
     }
     @Test void otherUserOrDifferentActivityAttemptCannotComplete() {
-        MemoryRepository db=new MemoryRepository();db.published.add(map("publishedJson",UNIT));CourseService s=new CourseService();s.db=db;
+        MemoryRepository db=new MemoryRepository();db.published.add(map("publishedJson",UNIT));CourseService s=new CourseService();s.db=db;s.enabledCourses=new EnabledCourses("course.test");
         assertThrows(RuntimeException.class,()->s.complete("act.test",parse("{\"sourceUnitCode\":\"unit.test\",\"attemptId\":\"19\",\"correct\":true}"),77));
         assertArrayEquals(new Object[]{"19",77L,"q.test","unit.test","act.test"},db.evidenceArgs);
         assertTrue(db.mutations.isEmpty(),"rejected attempts must not write progress or mastery");
     }
     @Test void submissionCompletesFlowButFailureStillRecommendsReview() {
-        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;
+        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;s.enabledCourses=new EnabledCourses("course.test");
         db.progress.add(map("activityCode","act.test","completed",1,"passed",0));
         Map<String,Object> p=s.progress(parse(UNIT),42);
         assertEquals("COMPLETED",p.get("status"));assertEquals("REVIEW_RECOMMENDED",p.get("goalStatus"));
     }
     @Test void optionalActivitiesAreExcludedAndNoEvidenceIsNotChecked() {
-        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;
+        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;s.enabledCourses=new EnabledCourses("course.test");
         ObjectNode unit=object(parse(UNIT));ObjectNode optional=object(unit.path("activities").get(0));optional.put("activityCode","act.optional");optional.put("required",false);((com.fasterxml.jackson.databind.node.ArrayNode)unit.path("activities")).add(optional);
         Map<String,Object> p=s.progress(unit,42);assertEquals(1,p.get("requiredCount"));assertEquals("NOT_CHECKED",p.get("goalStatus"));assertEquals("NOT_STARTED",p.get("status"));
     }
     @Test void draftOnlyCatalogHasHonestAwaitingContentState() {
-        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;
+        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;s.enabledCourses=new EnabledCourses("course.test");
         assertEquals("AWAITING_CONTENT",s.courses(42).get(0).get("status"));
         assertThrows(RuntimeException.class,()->s.publishedUnit("unit.test"));
+    }
+    @Test void catalogLoadsProgressOnceAndRetainsCompletionRules() {
+        int[] progressQueries = {0};
+        MemoryRepository db = new MemoryRepository() {
+            @Override public List<Map<String,Object>> rows(String sql, Object... args) {
+                if (sql.contains("learning_activity_progress")) progressQueries[0]++;
+                return super.rows(sql, args);
+            }
+        };
+        ObjectNode first = object(parse(UNIT));
+        ObjectNode second = object(parse(UNIT)); second.put("unitCode", "unit.second");
+        db.published.add(map("publishedJson", json(first))); db.published.add(map("publishedJson", json(second)));
+        db.progress.add(map("unitCode", "unit.test", "activityCode", "act.test", "completed", 1, "passed", 0));
+        CourseService service = new CourseService(); service.db = db; service.enabledCourses = new EnabledCourses("course.test");
+        Map<String,Object> course = service.courses(42).get(0);
+        assertEquals(1, progressQueries[0]);
+        assertEquals(1, course.get("completedUnitCount"));
+        assertEquals(50L, course.get("progressPercent"));
+    }
+    @Test void outlineAndResumeBatchProgressAndOutlineNames() {
+        int[] progressQueries = {0};
+        int[] registryQueries = {0};
+        MemoryRepository db = new MemoryRepository() {
+            @Override public List<Map<String,Object>> rows(String sql, Object... args) {
+                if (sql.contains("learning_activity_progress")) progressQueries[0]++;
+                if (sql.contains("knowledge_node_registry")) {
+                    registryQueries[0]++;
+                    return Collections.singletonList(map("nodeCode", "os.a", "name", "A"));
+                }
+                return super.rows(sql,args);
+            }
+        };
+        db.entities.put("course_catalog:course.test", map("courseCode", "course.test", "title", "Course"));
+        db.sections.add(map("sectionCode", "sec.test", "parentSectionCode", null, "sortOrder", 1));
+        ObjectNode first = object(parse(UNIT));
+        ((com.fasterxml.jackson.databind.node.ArrayNode)first.path("nodeMappings")).addObject().put("nodeCode", "os.a").put("role", "TEACHES");
+        ObjectNode second = object(first); second.put("unitCode", "unit.second"); second.put("sortOrder", 2);
+        db.published.add(map("publishedJson", json(first))); db.published.add(map("publishedJson", json(second)));
+        db.progress.add(map("unitCode", "unit.test", "activityCode", "act.test", "completed", 1, "passed", 0));
+        CourseService service = new CourseService(); service.db = db; service.enabledCourses = new EnabledCourses("course.test");
+        Map<String,Object> outline = service.outline("course.test", 42, false);
+        List<Map<String,Object>> sections = (List<Map<String,Object>>) outline.get("sections");
+        List<Map<String,Object>> units = (List<Map<String,Object>>) sections.get(0).get("units");
+        List<Map<String,Object>> mappings = (List<Map<String,Object>>) units.get(0).get("nodeMappings");
+        assertEquals("A", mappings.get(0).get("name"));
+        assertEquals("REVIEW_RECOMMENDED", ((Map<?,?>)units.get(0).get("progress")).get("goalStatus"));
+        assertEquals(1, progressQueries[0]); assertEquals(1, registryQueries[0]);
+        Map<String,Object> resume = service.resume("course.test", 42);
+        assertEquals("unit.second", resume.get("unitCode"));
+        assertEquals("act.test", resume.get("activityCode"));
+        assertEquals(2, progressQueries[0]);
     }
     @Test void questionMappingsAreOptionalButStructuralUsageIsValidated() {
         CourseContentService s=new CourseContentService();s.db=new MemoryRepository();
@@ -97,7 +148,7 @@ class CourseContractsTest {
         assertThrows(RuntimeException.class,()->s.assetBytes(parse("{\"contentType\":\"image/svg+xml\",\"contentBase64\":\"PHN2Zz4=\"}")));
     }
     @Test void unitsUseCompleteSectionAncestryBeforeLocalOrder() {
-        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;
+        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;s.enabledCourses=new EnabledCourses("course.test");
         db.sections.add(map("sectionCode","sec.one","parentSectionCode",null,"sortOrder",1));
         db.sections.add(map("sectionCode","sec.one.last","parentSectionCode","sec.one","sortOrder",7));
         db.sections.add(map("sectionCode","sec.two","parentSectionCode",null,"sortOrder",2));
@@ -108,7 +159,7 @@ class CourseContractsTest {
         assertEquals("unit.one.last",text(s.publishedUnits("course.test").get(0),"unitCode"));
     }
     @Test void selectedActivityIsSavedBeforeCompletionAndReviewDoesNotReplaceMainline() {
-        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;
+        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;s.enabledCourses=new EnabledCourses("course.test");
         db.entities.put("learning_unit:unit.test",map("publishedJson",UNIT));
         assertEquals(false,s.selectActivity("unit.test",parse("{\"activityCode\":\"act.test\",\"mode\":\"REVIEW\"}"),42).get("mainlineUpdated"));
         assertTrue(db.mutations.stream().anyMatch(x->x.contains("learning_unit_position")));
@@ -119,13 +170,13 @@ class CourseContractsTest {
         assertEquals("act.test",s.resume("course.test",42).get("activityCode"));
     }
     @Test void wrongSourceUnitRejectedBeforeAnyAttemptLookupOrProgressWrite() {
-        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;db.published.add(map("publishedJson",UNIT));
+        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;s.enabledCourses=new EnabledCourses("course.test");db.published.add(map("publishedJson",UNIT));
         assertThrows(RuntimeException.class,()->s.complete("act.test",parse("{\"sourceUnitCode\":\"unit.other\",\"attemptId\":\"19\"}"),42));
         assertNull(db.evidenceArgs);assertTrue(db.mutations.isEmpty());
     }
     @Test void failedSubmitCompletesButFailedPassDoesNotAndBothReturnActualResult() {
         for(String rule:Arrays.asList("SUBMIT","PASS")) {
-            MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;db.evidence=map("isCorrect",0);
+            MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;s.enabledCourses=new EnabledCourses("course.test");db.evidence=map("isCorrect",0);
             db.published.add(map("publishedJson",UNIT.replace("SUBMIT",rule)));
             Map<String,Object> result=s.complete("act.test",parse("{\"sourceUnitCode\":\"unit.test\",\"attemptId\":\"19\"}"),42);
             assertEquals("SUBMIT".equals(rule),result.get("completed"));assertEquals(false,result.get("passed"));assertEquals(rule,result.get("completionRule"));
@@ -150,7 +201,7 @@ class CourseContractsTest {
         assertEquals("应用",graph.category(map("nodeType","IMPLEMENTATION","layer","IMPLEMENTATION")));
     }
     @Test void resourceConfigurationExposesRuntimeParametersWithoutMaintenanceAnswers() {
-        CourseService s=new CourseService();s.db=new MemoryRepository();
+        CourseService s=new CourseService();s.db=new MemoryRepository();s.enabledCourses=new EnabledCourses("course.test");
         JsonNode config=s.resourceConfig(map("metadataJson","{\"resourceConfig\":{\"frames\":3,\"pageSequence\":[1,2,3],\"correctAnswer\":\"secret\"},\"answer\":\"secret\",\"contentChanges\":[]}"));
         assertEquals(3,config.path("frames").asInt());assertFalse(config.has("answer"));
         assertFalse(config.has("correctAnswer"));
@@ -161,7 +212,7 @@ class CourseContractsTest {
             List<String> messages=status==3?Arrays.asList("Accepted","Wrong Answer","Compile Error","System Error","系统错误")
                     :Arrays.asList("System Error","系统错误"," system error ","sandbox unavailable");
             for(String message:messages) {
-                MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;
+                MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;s.enabledCourses=new EnabledCourses("course.test");
                 db.published.add(map("publishedJson",UNIT.replace("ASSESSMENT","EXPERIMENT").replace("QUESTION","RESOURCE").replace("SUBMIT",rule)));
                 db.evidence=map("status",status,"judgeInfo",json(map("message",message)));
                 assertThrows(RuntimeException.class,()->s.complete("act.test",parse("{\"sourceUnitCode\":\"unit.test\",\"submissionId\":\"19\"}"),42),rule+" status="+status+" "+message);
@@ -172,7 +223,7 @@ class CourseContractsTest {
     }
     @Test void completedExperimentJudgementsKeepSubmitAndPassRules() {
         for(String rule:Arrays.asList("SUBMIT","PASS"))for(String message:Arrays.asList("Accepted","成功","Wrong Answer","Compile Error","编译错误")) {
-            MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;
+            MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;s.enabledCourses=new EnabledCourses("course.test");
             db.published.add(map("publishedJson",UNIT.replace("ASSESSMENT","EXPERIMENT").replace("QUESTION","RESOURCE").replace("SUBMIT",rule)));
             db.evidence=map("status",2,"judgeInfo",json(map("message",message)));
             Map<String,Object> result=s.complete("act.test",parse("{\"sourceUnitCode\":\"unit.test\",\"submissionId\":\"19\"}"),42);
@@ -187,7 +238,7 @@ class CourseContractsTest {
      * 已发布的快照保留稳定 activityCode 与 revision，因此下一步任务能定位到真实活动。
      */
     @Test void aiPlannerCanOnlyReachPublishedUnitsWithStableActivityCodes() {
-        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;
+        MemoryRepository db=new MemoryRepository();CourseService s=new CourseService();s.db=db;s.enabledCourses=new EnabledCourses("course.test");
         // 草稿态：没有 publishedJson，规划器读不到任何可引用活动
         db.entities.put("learning_unit:unit.test",map("draftJson",UNIT,"courseCode","course.test","revision",1));
         assertThrows(RuntimeException.class,()->s.publishedUnit("unit.test"),

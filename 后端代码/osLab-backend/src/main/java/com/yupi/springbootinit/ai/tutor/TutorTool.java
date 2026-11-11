@@ -83,6 +83,14 @@ public interface TutorTool {
         private AiCourseContext courseContext;
         private String message;
 
+        /** 最近成功轮次（后端受限读取；只用于提示，不信任客户端历史）。 */
+        private java.util.List<TutorOrchestrator.ConversationTurn> history = new ArrayList<>();
+        /** 本轮场景与意图（GLOBAL/UNIT/NODE/QUESTION/EXPERIMENT；ASK/EXPLAIN/HINT/DEBUG/PLAN）。 */
+        private String scene;
+        private String intent;
+        /** 学生明确附带的材料（已校验长度）。 */
+        private java.util.List<TutorOrchestrator.Attachment> attachments = new ArrayList<>();
+
         /** 工具产出（累积）。 */
         private List<SourceRef> sources = new ArrayList<>();
         private EvidenceReadService.EvidenceSummary evidence;

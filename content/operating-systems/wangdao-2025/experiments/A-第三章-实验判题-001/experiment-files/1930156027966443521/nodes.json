@@ -1,0 +1,26 @@
+{
+  "questionId": "1930156027966443521",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.runtime.interrupt",
+      "nodeName": "中断",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "kclock_init 设置定时器频率并把时钟中断绑到 4 号中断线（CP0 Status.IM4 / Cause.IP4），timer_irq 在每次时钟中断发生时被调用。"
+    },
+    {
+      "nodeCode": "os.cpu.rr",
+      "nodeName": "时间片轮转",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "content 明确「时钟中断与时间片轮转算法的关系」：timer_irq 调 sched_yield，时间片由周期性时钟中断触发，没有时钟中断就没有轮转。"
+    },
+    {
+      "nodeCode": "os.runtime.interrupt_handling",
+      "nodeName": "中断处理流程",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "lds 把中断入口设到 0x80000080，分发代码识别 IP4 后跳 timer_irq，是中断处理流程在 MIPS 上的硬件落地。"
+    }
+  ]
+}

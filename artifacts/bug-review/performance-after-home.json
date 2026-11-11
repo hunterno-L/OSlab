@@ -1,0 +1,23 @@
+{
+  "phase": "after",
+  "database": "oslab_terra_verify_1794398762955",
+  "method": "Ten sequential warmed real HTTP calls per endpoint; MySQL performance_schema COUNT_STAR delta, no global counters reset; small isolated fixture data",
+  "samples": [
+    {
+      "name": "course-outline",
+      "requests": 10,
+      "sqlStatements": 70,
+      "sqlPerRequest": 7,
+      "p50Ms": 29.68,
+      "p95Ms": 44.6
+    },
+    {
+      "name": "course-resume",
+      "requests": 10,
+      "sqlStatements": 60,
+      "sqlPerRequest": 6,
+      "p50Ms": 19.87,
+      "p95Ms": 22.93
+    }
+  ]
+}

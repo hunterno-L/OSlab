@@ -1,0 +1,25 @@
+{
+  "description": "驱动 lib/env.c 的 load_icode()。stdin 首行 npage freemem（1..256 / 0..65536），次行操作数 n（0..48），随后 n 行：I=平台 env_init()（重复打印 I SKIP）；A=平台 env_alloc(&e,0)，打印「A 返回码 PCB下标」；U idx=选定后续 L 的目标进程；B=把镜像缓冲填成 seg_binary[i]=i&0xFF；G=清空段表；S va size perm=追加一段（最多 8 段，va<1073741824、size<=16384、perm 0..4095），打印「S 当前段数」；L entry=调学生 load_icode(目标进程,entry)，打印「L」（函数无返回值，必须先 U）；X idx=把该 PCB 的 sp 污染成 0xDEADBEEF、cp0_epc 污染成 0x12345678；N idx=打印「N idx cp0_epc sp」；Q idx va=物理地址（无映射 4294967295）；P idx va=原始 PTE；D idx va=该 va 处 32 位小端字（无映射或跨页 4294967295）；R idx va=所映射物理页的 pp_ref（无映射 -1）；C=空闲物理页数。idx 必须 <64。关键常量：USTACKTOP=1073741824，栈页映射在 USTACKTOP-BY2PG=1073737728，权限 PTE_R|PTE_V=3，pp_ref 恒为 1（page_insert 负责递增）。宿主等价：load_elf 遍历 stdin 给出的段表逐段回调 load_icode_mapper，遇错即停。",
+  "cases": [
+    {
+      "name": "官方锚：单段加载 + cp0_epc=入口 + 栈页映射在 USTACKTOP-BY2PG 且 sp=USTACKTOP",
+      "input": "256 8192\n14\nI\nA\nU 63\nB\nG\nS 4096 4096 3\nL 4096\nN 63\nQ 63 4096\nD 63 4096\nQ 63 1073737728\nP 63 1073737728\nR 63 1073737728\nC\n"
+    },
+    {
+      "name": "多段加载：非对齐段与第二段各自映射、入口可以落在段中间、perm 逐段透传",
+      "input": "256 8192\n16\nI\nA\nU 63\nB\nG\nS 6144 8192 3\nS 32768 4096 2\nL 8192\nN 63\nQ 63 6144\nD 63 6144\nQ 63 32768\nD 63 32768\nP 63 32768\nQ 63 1073737728\nC\n"
+    },
+    {
+      "name": "零段镜像：只建栈页，栈内容全清零，栈顶 USTACKTOP 本身不属于栈页",
+      "input": "256 8192\n13\nI\nA\nU 63\nB\nG\nL 0\nN 63\nQ 63 1073737728\nP 63 1073737728\nD 63 1073737728\nD 63 1073741820\nR 63 1073737728\nC\n"
+    },
+    {
+      "name": "load_elf 失败必须立即返回：cp0_epc 保持 0、栈页不得被映射",
+      "input": "8 8192\n13\nI\nA\nU 63\nB\nG\nS 4096 12288 3\nL 4096\nN 63\nQ 63 4096\nQ 63 8192\nQ 63 12288\nQ 63 1073737728\nC\n"
+    },
+    {
+      "name": "entry 原样透传不裁剪 + 先污染 sp/epc 再加载，两个字段必须被真正重写",
+      "input": "256 8192\n12\nI\nA\nU 63\nB\nG\nS 4096 4096 3\nX 63\nL 4294967295\nN 63\nR 63 1073737728\nR 63 4096\nC\n"
+    }
+  ]
+}

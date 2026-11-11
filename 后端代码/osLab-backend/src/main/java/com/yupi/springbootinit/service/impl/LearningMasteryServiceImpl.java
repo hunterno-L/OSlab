@@ -105,10 +105,24 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
     @Resource
     private com.yupi.springbootinit.mapper.LearningNodeContentMapper learningNodeContentMapper;
 
+    @Resource private com.yupi.springbootinit.learning.PublishedCourseScopeService courseScope;
+    @Resource private com.yupi.springbootinit.course.EnabledCourses enabledCourses;
+
     @Override
     public PersonalGraphVO personalGraph(User user) {
+        return personalGraph(user, null);
+    }
+
+    @Override
+    public PersonalGraphVO personalGraph(User user, String courseCode) {
         // Phase 1：改用一次性快照（全节点，含孤立节点与 chapter），不再走 N+1 关系查询
         GraphDataDTO graph = knowledgeGraphService.getGraphSnapshot();
+        Map<String, com.yupi.springbootinit.learning.NodeIdentityService.Identity> scope = null;
+        if (StringUtils.isNotBlank(courseCode)) {
+            enabledCourses.require(courseCode);
+            scope = courseScope.nodes(courseCode);
+            graph = courseScope.filterGraph(graph, scope);
+        }
         Map<String, LearningMastery> masteryMap = masteryMapOf(user.getId());
         Map<Long, LearningEvent> lastEventMap = lastEventsOf(masteryMap.values());
         PersonalGraphVO vo = new PersonalGraphVO();
@@ -124,7 +138,8 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
                 masteryNode.setCategory(node.getCategory());
                 masteryNode.setChapter(node.getChapter());
                 masteryNode.setDescription(node.getDescription());
-                LearningMastery mastery = masteryMap.get(storageKey(node));
+                LearningMastery mastery = masteryMap.get(scope != null && scope.containsKey(node.getNodeCode())
+                        ? scope.get(node.getNodeCode()).storageKey : storageKey(node));
                 applyMastery(masteryNode, mastery);
                 if (mastery != null && mastery.getLastEventId() != null) {
                     LearningEvent lastEvent = lastEventMap.get(mastery.getLastEventId());
@@ -166,12 +181,18 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
             }
             vo.setChapters(chapters);
         }
-        LearningEvent latest = learningEventMapper.selectOne(
-                new LambdaQueryWrapper<LearningEvent>()
-                        .eq(LearningEvent::getUserId, user.getId())
-                        .orderByDesc(LearningEvent::getCreateTime)
-                        .last("limit 1"));
-        vo.setLastUpdatedAt(latest == null ? null : latest.getCreateTime());
+        if (StringUtils.isBlank(courseCode)) {
+            LearningEvent latest = learningEventMapper.selectOne(
+                    new LambdaQueryWrapper<LearningEvent>().eq(LearningEvent::getUserId, user.getId())
+                            .orderByDesc(LearningEvent::getCreateTime).last("limit 1"));
+            vo.setLastUpdatedAt(latest == null ? null : latest.getCreateTime());
+        } else {
+            java.util.Set<Long> eventIds = nodes.stream().map(MasteryNodeVO::getLastEventId)
+                    .filter(java.util.Objects::nonNull).collect(Collectors.toSet());
+            vo.setLastUpdatedAt(eventIds.stream().map(lastEventMap::get).filter(java.util.Objects::nonNull)
+                    .map(LearningEvent::getCreateTime).filter(java.util.Objects::nonNull)
+                    .max(java.util.Date::compareTo).orElse(null));
+        }
         vo.setRecommendedNodeName(recommendedNodeName(nodes));
         return vo;
     }
@@ -426,11 +447,27 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
 
     @Override
     public List<RecommendationVO> recommendations(User user) {
+        return recommendations(user, null);
+    }
+
+    @Override
+    public List<RecommendationVO> recommendations(User user, String courseCode) {
         List<RecommendationVO> result = new ArrayList<>();
         // 掌握状态行仅在产生首个独立观测后创建，行存在即代表有证据
         List<LearningMastery> masteries = learningMasteryMapper.selectList(
                 new LambdaQueryWrapper<LearningMastery>()
                         .eq(LearningMastery::getUserId, user.getId()));
+        Set<String> allowedKeys = null;
+        if (StringUtils.isNotBlank(courseCode)) {
+            enabledCourses.require(courseCode);
+            allowedKeys = new HashSet<>();
+            for (com.yupi.springbootinit.learning.NodeIdentityService.Identity identity : courseScope.nodes(courseCode).values()) {
+                allowedKeys.add(identity.nodeCode);
+                allowedKeys.add(identity.storageKey);
+            }
+            final Set<String> allowed = allowedKeys;
+            masteries.removeIf(m -> !allowed.contains(m.getNodeName()) && !allowed.contains(m.getNodeCode()));
+        }
         // 薄弱节点优先（pKnown 升序）
         List<LearningMastery> weak = new ArrayList<>();
         for (LearningMastery m : masteries) {
@@ -444,6 +481,7 @@ public class LearningMasteryServiceImpl implements LearningMasteryService {
         if (!weak.isEmpty()) {
             try {
                 graph = knowledgeGraphService.getGraphSnapshot();
+                if (StringUtils.isNotBlank(courseCode)) graph = courseScope.filterGraph(graph, courseCode);
             } catch (Exception e) {
                 // 图谱暂不可用时仍返回基于本人掌握记录的推荐。
             }

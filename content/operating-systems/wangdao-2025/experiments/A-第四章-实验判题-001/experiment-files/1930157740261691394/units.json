@@ -1,0 +1,15 @@
+{
+  "questionId": "1930157740261691394",
+  "unitMappings": [
+    {
+      "unitCode": "unit.memory.demand-paging",
+      "required": false,
+      "completionRule": "PASS"
+    },
+    {
+      "unitCode": "unit.overview.system-calls",
+      "required": false,
+      "completionRule": "PASS"
+    }
+  ]
+}

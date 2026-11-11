@@ -1,0 +1,25 @@
+{
+  "description": "驱动 mm/pmap.c 的 mips_vm_init()（真实北航参考解的宿主等价版）。stdin 首行 npage freemem：npage 是物理页数（1..256），freemem 是启动期空闲内存起始物理地址（字节，0..65536，故意允许非页对齐以考查 alloc 的 ROUND 对齐）。次行操作数 n（0..32），随后 n 行每行一个操作码：V=调用一次 mips_vm_init()（重复 V 打印 V SKIP，不再调用）；E=查询 envs 数组与 UENVS 段映射；P=查询 pages 数组与 UPAGES 段映射；Q va=查询虚拟地址 va 的物理地址。输出：V 行为「V freemem mCONTEXT 页目录物理地址」；E 行为「E envs物理地址 UENVS连续映射页数 UENVS首页页表项低12位权限 UENVS首页物理地址 UENVS末页物理地址」；P 行为「P pages物理地址 UPAGES连续映射页数 UPAGES首页权限」；Q 行为「Q 物理地址」。指针为空/野指针、无映射、页表物理地址越界一律打印 4294967295（~0）。所有地址与页数均为十进制 uint32_t。",
+  "cases": [
+    {
+      "name": "官方锚：64 页物理内存，envs 占 4 页并以 PTE_R 映射到 UENVS",
+      "input": "64 8192\n5\nV\nE\nP\nQ 2134900736\nQ 2134917120\n"
+    },
+    {
+      "name": "freemem 非页对齐：alloc 必须先 ROUND 到 BY2PG 再分配",
+      "input": "64 9000\n4\nV\nE\nP\nQ 2130706432\n"
+    },
+    {
+      "name": "256 页：pages 数组 6144 字节需 ROUND 成 2 页映射到 UPAGES",
+      "input": "256 4096\n4\nV\nP\nE\nQ 2130710528\n"
+    },
+    {
+      "name": "16 页小内存 + freemem 从 0 起：pages 数组不足一页仍映射 1 页",
+      "input": "16 0\n4\nV\nP\nE\nQ 2134900736\n"
+    },
+    {
+      "name": "UENVS 逐页边界：第 4 页仍映射、第 5 页必须无映射",
+      "input": "128 8192\n7\nV\nE\nQ 2134900736\nQ 2134913024\nQ 2134917120\nQ 2134921216\nQ 2134925312\n"
+    }
+  ]
+}

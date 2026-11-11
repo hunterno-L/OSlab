@@ -1,0 +1,4 @@
+{
+  "judgeMode": "LOCAL_BUILD",
+  "reason": "实验目标是在 mm/tlb_asm.S 的 tlb_out 中填入 tlbp / tlbwi 两条 MIPS 特权指令，并解释 tlbp 之后 4 条 nop 的 CP0 冒险间隔。tlbp/tlbwi 直接操作 CP0 的 EntryHi/EntryLo0/EntryLo1/Index 与真实 TLB 硬件，沙箱是 x86-64 用户态进程、无 MIPS 交叉编译器、无 gxemul、无 CP0，用 C 写一个「像那样」的程序不构成概念同构（只会变成被否决的代理题），故不自动判分。完成规则为 SUBMIT。"
+}

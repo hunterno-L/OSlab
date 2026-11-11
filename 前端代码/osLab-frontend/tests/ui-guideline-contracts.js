@@ -112,20 +112,28 @@ for (const needle of [
   "@keydown.space",
   "ai-safe-probe",
   "env(safe-area-inset-bottom)",
-  "nudgePanel",
+  "ai-resize",
+  "onGlobalKeydown",
+  "data-tutor-dock",
 ]) {
   expectIncludes(fab, needle, "AI 浮动助手可访问性");
 }
+expectIncludes(
+  fab,
+  'aria-label="调整导师面板宽度',
+  "导师面板宽度调整必须可被读屏识别"
+);
 
-const panel = readSrc("components/assistant/AiChatPanel.vue");
+const panel = readSrc("components/assistant/TutorPanel.vue");
 for (const needle of [
-  'aria-label="关闭 AI 助手"',
+  'aria-label="关闭导师面板"',
   'role="log"',
   'aria-live="polite"',
-  'aria-label="向 AI 助手提问"',
+  'aria-label="向导师提问"',
   "inputRef",
-  "headerMove",
-  'tabindex="0"',
+  "compositionstart",
+  ":aria-modal",
+  "tutor-jump",
 ]) {
   expectIncludes(panel, needle, "AI 对话面板可访问性");
 }
@@ -165,7 +173,7 @@ for (const needle of [
   "aria-labelledby",
   "onTabKeydown",
   ':tabindex="activeTab === tab.key ? 0 : -1"',
-  'aria-label="向节点导师提问"',
+  'aria-label="向统一导师提问"',
 ]) {
   expectIncludes(nodeView, needle, "节点工作台页签与输入可访问性");
 }

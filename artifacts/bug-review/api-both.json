@@ -1,0 +1,23 @@
+{
+  "phase": "both",
+  "passed": 9,
+  "checks": [
+    "enabled directory matches configured course scope",
+    "OS profile contains only published OS nodes and internal edges",
+    "legacy graph request remains compatible",
+    "OS recommendations never use nodes from another course",
+    "OS path stays inside the selected published course",
+    "course outline resume and unit agree after query batching",
+    "experiment 1.1 returns its real C concept starter and exact id",
+    "opted-in DB profile contains the three DB nodes without OS evidence",
+    "cross-course path target fails instead of falling back to full graph"
+  ],
+  "evidence": {
+    "osNodeCount": 196,
+    "globalNodeCount": 349,
+    "osRecommendationCount": 1,
+    "publishedUnitCount": 104,
+    "dbNodeCount": 3
+  },
+  "data": "real isolated MySQL/Redis/Neo4j-backed HTTP APIs; no model turn executed"
+}

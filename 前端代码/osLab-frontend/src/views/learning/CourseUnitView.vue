@@ -380,7 +380,8 @@ import QuestionAnswerCard from "@/components/learning/QuestionAnswerCard.vue";
 import CourseCatalogSidebar from "@/components/learning/CourseCatalogSidebar.vue";
 import AiMaterialComposer from "@/components/ai/AiMaterialComposer.vue";
 import AiNextActions from "@/components/ai/AiNextActions.vue";
-import { askAiAssistant } from "@/composables/useAiLauncher";
+import { openTutorScene } from "@/utils/assessmentTutor";
+import { notifyLearningUpdated } from "@/utils/learningEvents";
 import { useAiConversation } from "@/composables/useAiConversation";
 import {
   registerAiPageContext,
@@ -480,11 +481,26 @@ function askSelected() {
   const quote = selectedText.value.trim();
   if (!quote) return;
   const a = activity.value;
-  askAiAssistant(
-    `请结合当前课程资料解释这段内容${
+  const chunkCode = a?.content?.chunkCode;
+  openTutorScene({
+    scene: "UNIT",
+    intent: "EXPLAIN",
+    courseCode: courseCode.value || "",
+    unitCode: selectedUnitCode.value || undefined,
+    selectedSourceIds: chunkCode ? [`chunk:${chunkCode}`] : [],
+    attachments: [
+      {
+        kind: "SELECTION",
+        label: a?.title || "当前资料选段",
+        text: quote.slice(0, 2000),
+        ...(chunkCode ? { sourceId: `chunk:${chunkCode}` } : {}),
+      },
+    ],
+    draft: `请结合当前课程资料解释这段内容${
       a?.title ? `（${a.title}）` : ""
-    }，并指出它对应的规则或例子：\n\n「${quote.slice(0, 600)}」`
-  );
+    }，并指出它对应的规则或例子：\n\n「${quote.slice(0, 600)}」`,
+    delivery: "DRAFT",
+  });
   selectedText.value = "";
 }
 
@@ -508,6 +524,9 @@ const {
   courseCodeOfSection,
   courseCodeOfUnit,
 } = useCourseCatalog();
+watch(courseCode, (code) => {
+  if (code && code === unit.value?.courseCode) refreshUnitPlan();
+});
 const expandedSections = ref<string[]>([]);
 const selectedUnitCode = computed(() => String(route.params.unitCode || ""));
 const selectedUnitSummary = computed(
@@ -823,6 +842,12 @@ async function complete(data: { confirmed?: boolean; attemptId?: string }) {
         }
       }
     }
+    notifyLearningUpdated({
+      courseCode: courseCode.value || catalogCourseParam.value || "",
+      unitCode: u.unitCode,
+      activityCode: a.activityCode,
+      reason: "ACTIVITY_DONE",
+    });
   } catch (e) {
     saveError.value =
       e instanceof Error ? e.message : "活动进度保存失败，请重试";

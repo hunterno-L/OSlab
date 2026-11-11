@@ -1,0 +1,25 @@
+{
+  "description": "驱动 mm/pmap.c 的 page_insert()/page_remove()。stdin 首行 npage freemem_bytes，次行操作数，随后每行：I pageidx va perm=插入映射；R va=解除映射；Q va=查询 va 对应物理地址；P pageidx=查询 pp_ref。输出：I 行为「I 返回码 物理地址 pp_ref」，R 行为「R 原页号 解除后物理地址 解除后 pp_ref」（原本未映射时页号为 -1），Q 行为「Q 物理地址」，P 行为「P 页号 pp_ref」；无映射时物理地址打印 4294967295（~0）。",
+  "cases": [
+    {
+      "name": "官方 page_check：同一页重复 insert 同一 va，pp_ref 不得重复递增",
+      "input": "16 8192\n5\nI 5 0 2\nI 5 0 2\nP 5\nQ 0\nI 5 4096 2\n"
+    },
+    {
+      "name": "官方 page_check：替换映射后旧页 pp_ref 归零并回收",
+      "input": "16 8192\n5\nI 5 0 2\nI 6 0 2\nP 5\nP 6\nQ 0\n"
+    },
+    {
+      "name": "remove 后 va2pa 为 ~0，页回到空闲链表",
+      "input": "16 8192\n4\nI 5 0 2\nR 0\nQ 0\nP 5\n"
+    },
+    {
+      "name": "同一页映射到两个 va：remove 其一，另一仍在且 pp_ref 只减一",
+      "input": "16 8192\n5\nI 5 0 2\nI 5 4096 2\nR 0\nQ 4096\nP 5\n"
+    },
+    {
+      "name": "remove 未映射地址不崩溃 + 页表分配耗尽返回 -E_NO_MEM",
+      "input": "4 12288\n3\nR 0\nI 2 0 2\nI 2 4194304 2\n"
+    }
+  ]
+}

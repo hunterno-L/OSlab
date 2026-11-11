@@ -1,0 +1,25 @@
+{
+  "description": "驱动内核系统调用入口 handle_sys()（北航 4.2：解析 $v0 里的系统调用号，经 sys_call_table[] 分发到对应内核函数，并把返回值写回 $v0）。stdin 首行 npage freemem（1..256 / 0..65536），次行操作数 n（0..64），随后 n 个操作：I=平台 env_init()（重复打印 I SKIP），打印「I 空闲PCB数」；A parent=平台 env_alloc(&e,parent)，打印「A 返回码 下标 env_id」；U idx=设 curenv=&envs[idx]，打印「U idx」；S idx st=直接改 env_status（st 0..2），打印「S idx st」；R idx=把 envs[idx] 头插就绪链表（判重），打印「R idx」；P idx va perm=平台 page_alloc+page_insert 给 envs[idx] 造一页映射（va<1073741824），打印「P 返回码 物理地址」；K sysno a0 a1 a2 a3 a4=把 6 个值填进 KERNEL_SP 现场的 regs[2]/regs[4..8]，调用学生填写的 handle_sys()，打印「K (int)regs[2]」；G=打印当前 regs[2]；Q idx va=envs[idx] 中 va 的物理地址（无映射 4294967295）；T idx=打印「T idx env_id parent status pri cr3」；E idx=打印「E idx pgfault_handler ipc_receiving ipc_dstva ipc_from ipc_value」；H=就绪链表头下标（空 -1）；L=就绪链表顺序；F=空闲PCB链表顺序；C=空闲物理页数；Y=打印 env_run 记录「Y 总数」后逐行「kind arg curenv下标」（kind 0=lcontext 传页目录物理地址，1=env_pop_tf 传 cp0_epc）；Z=清空记录。错误码以 uint32 补码打印：-E_NO_SYS=-10→4294967286，-E_BAD_ENV=-2→4294967294，-E_INVAL=-3→4294967293，-E_NO_MEM=-4→4294967292。系统调用号：1=mem_alloc 2=mem_map 3=mem_unmap 4=env_alloc 5=set_env_status 8=ipc_recv 9=ipc_can_send 10=set_pgfault_handler 11=yield；0/6/7 为空槽位，SYS_MAX=12。",
+  "cases": [
+    {
+      "name": "三个内存类系统调用正常分发：返回值必须写回 $v0，映射与解除映射真实生效",
+      "input": "256 8192\n13\nI\nA 0\nU 63\nP 63 4096 3\nK 1 191 8192 3 0 0\nQ 63 8192\nK 2 191 4096 191 12288 3\nQ 63 12288\nK 3 191 8192 0 0 0\nQ 63 8192\nC\nK 0 0 0 0 0 0\nK 6 0 0 0 0 0\n"
+    },
+    {
+      "name": "空槽位 0/6/7 与越界号 12/99/4294967295 必须返回 -E_NO_SYS，合法号 5 仍要分发",
+      "input": "256 8192\n10\nI\nA 0\nU 63\nK 7 0 0 0 0 0\nK 12 0 0 0 0 0\nK 99 0 0 0 0 0\nK 4294967295 0 0 0 0 0\nK 5 191 2 0 0 0\nT 63\nL\n"
+    },
+    {
+      "name": "SYS_yield 与 SYS_env_alloc 分发：时间片游标推进、子进程现场复制且不可立即调度",
+      "input": "256 8192\n16\nI\nA 0\nA 0\nU 63\nS 63 2\nR 63\nS 62 2\nR 62\nZ\nK 11 0 0 0 0 0\nY\nK 4 0 0 0 0 0\nT 61\nK 5 445 2 0 0 0\nL\nC\n"
+    },
+    {
+      "name": "五参数 SYS_mem_map 跨进程共享同一物理页，源页未映射/坏 envid/内核地址各自上抛错误码",
+      "input": "256 8192\n14\nI\nA 0\nA 0\nU 63\nP 63 4096 3\nK 2 191 4096 318 8192 3\nQ 62 8192\nQ 63 4096\nK 2 191 16384 318 8192 3\nK 1 999 4096 3 0 0\nK 1 191 1073741824 3 0 0\nK 3 191 1073741824 0 0 0\nC\nG\n"
+    },
+    {
+      "name": "IPC 两个槽位与 set_pgfault_handler 槽位：阻塞/唤醒/传页/登记处理函数与异常栈页",
+      "input": "256 8192\n19\nI\nA 0\nA 0\nU 63\nS 63 2\nR 63\nS 62 2\nR 62\nP 62 4096 3\nK 8 8192 0 0 0 0\nT 63\nU 62\nK 9 191 777 4096 3 0\nT 63\nQ 63 8192\nK 10 191 4198400 1056964608 0 0\nE 63\nQ 63 1056960512\nC\n"
+    }
+  ]
+}

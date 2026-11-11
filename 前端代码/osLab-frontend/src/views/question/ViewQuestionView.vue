@@ -50,14 +50,18 @@
         <a-button
           type="primary"
           :loading="submitting"
-          :disabled="phase === 'polling' || loading"
+          :disabled="isLocalBuild || phase === 'polling' || loading"
           @click="doSubmit"
         >
-          提交评测
+          {{ isLocalBuild ? "本地构建实验" : "提交评测" }}
         </a-button>
         <a-button type="text" @click="goRecords">查看提交记录</a-button>
       </a-space>
     </div>
+
+    <a-alert v-if="question" type="info" class="local-build-notice">
+      {{ judgeModeDescription }}
+    </a-alert>
 
     <div class="workbench-body">
       <!-- 左：实验说明 / 关联图谱 / 向导师提问 -->
@@ -68,7 +72,11 @@
               <MdViewer :value="question?.content || '暂无实验说明'" />
             </a-spin>
             <aside class="lab-margin-note">
-              草稿自动保存；提交后可在右侧查看判题进度与结果。
+              {{
+                isLocalBuild
+                  ? "草稿自动保存；请在本地环境查看构建与运行结果。"
+                  : "草稿自动保存；提交后可在右侧查看判题进度与结果。"
+              }}
             </aside>
           </a-tab-pane>
           <a-tab-pane key="graph" title="关联图谱">
@@ -86,101 +94,102 @@
             </a-button>
           </a-tab-pane>
           <a-tab-pane key="tutor" title="向导师提问">
-            <template v-if="tutorNodeName">
-              <div class="tutor-toolbar">
-                <span class="tutor-sub">
-                  回答结合当前实验、代码与最近提交状态
-                </span>
-                <a-button
-                  size="mini"
-                  type="text"
-                  :disabled="!tutorMessages.length || tutorPending"
-                  @click="clearTutor"
+            <section class="tutor-launch" aria-label="向统一导师提问">
+              <p class="hint">
+                打开导师不会自动调用模型。代码与报错只在你勾选后附带，可先编辑再发送。
+              </p>
+              <a-textarea
+                v-model="tutorQuestion"
+                aria-label="描述实验中的问题"
+                placeholder="例如：为什么我的实现会超时？应该先检查哪一步？"
+                :auto-size="{ minRows: 2, maxRows: 5 }"
+                :max-length="4000"
+                show-word-limit
+              />
+              <div class="tutor-attach">
+                <a-checkbox
+                  v-model="attachJudge"
+                  :disabled="!lastJudgeResultSummary"
                 >
-                  清空对话
-                </a-button>
-              </div>
-              <div ref="tutorMessagesEl" class="tutor-messages">
-                <template
-                  v-if="tutorMessages.length || tutorPending || tutorError"
-                >
-                  <div
-                    v-for="(msg, index) in tutorMessages"
-                    :key="index"
-                    class="tutor-msg"
-                    :class="msg.role === 'user' ? 'is-user' : 'is-tutor'"
-                  >
-                    <span class="tutor-role">
-                      {{ msg.role === "user" ? "我" : "导师" }}
-                      <span
-                        v-if="msg.role !== 'user' && msg.mode"
-                        class="tutor-mode"
-                        :class="msg.mode === 'AI' ? 'is-ai' : 'is-fallback'"
-                      >
-                        {{ msg.mode === "AI" ? "GraphRAG" : "规则回答" }}
-                      </span>
-                    </span>
-                    <div class="tutor-bubble">{{ msg.text }}</div>
-                    <div v-if="msg.sources?.length" class="tutor-sources">
-                      <button
-                        v-for="(source, sourceIndex) in msg.sources"
-                        :key="`${source.sourceType}-${source.sourceId}`"
-                        type="button"
-                        @click="openTutorSource(source)"
-                      >
-                        {{ sourceIndex + 1 }}. {{ source.title }}
-                      </button>
-                    </div>
-                  </div>
-                  <div v-if="tutorPending" class="tutor-msg is-tutor">
-                    <span class="tutor-role">导师</span>
-                    <div class="tutor-bubble tutor-bubble-pending">
-                      正在结合当前实验上下文思考…
-                    </div>
-                  </div>
-                  <a-alert v-if="tutorError" type="error" class="tutor-error">
-                    {{ tutorError }}
-                    <a-button
-                      size="mini"
-                      type="outline"
-                      style="margin-left: 8px"
-                      @click="retryTutor"
-                      >重试</a-button
-                    >
-                  </a-alert>
-                </template>
-                <div v-else class="hint tutor-empty">
-                  还没有对话。直接发送问题，或在评测后点击“向导师提问”预填问题，再由你点击发送；导师会带上实验、代码与最近提交状态。
-                </div>
-              </div>
-              <div class="tutor-input">
+                  附带最近判题结果{{ lastJudgeResultSummary ? "" : "（暂无）" }}
+                </a-checkbox>
                 <a-textarea
-                  v-model="tutorInput"
-                  :auto-size="{ minRows: 1, maxRows: 4 }"
-                  placeholder="追问一句，如：为什么我的实现会超时？"
-                  @keydown.enter.exact.prevent="sendTutor"
+                  v-if="attachJudge"
+                  v-model="judgeAttachmentText"
+                  aria-label="要附带的判题结果"
+                  :auto-size="{ minRows: 2, maxRows: 6 }"
                 />
+                <p
+                  v-if="attachJudge"
+                  class="hint"
+                  :class="{ 'is-over': judgeAttachmentText.length > 8000 }"
+                >
+                  {{ judgeAttachmentText.length }} / 8000 字{{
+                    judgeAttachmentText.length > 8000
+                      ? "，已超出上限，请手动精简"
+                      : ""
+                  }}
+                </p>
+                <a-checkbox v-model="attachCode">
+                  附带当前编辑器代码（仅你勾选后上传）
+                </a-checkbox>
+                <a-textarea
+                  v-if="attachCode"
+                  v-model="codeAttachmentText"
+                  aria-label="要附带的代码片段"
+                  :auto-size="{ minRows: 3, maxRows: 10 }"
+                />
+                <p
+                  v-if="attachCode"
+                  class="hint"
+                  :class="{ 'is-over': codeAttachmentText.length > 8000 }"
+                >
+                  {{ codeAttachmentText.length }} / 8000 字{{
+                    codeAttachmentText.length > 8000
+                      ? "，已超出上限，请手动精简"
+                      : ""
+                  }}
+                </p>
+                <a-collapse>
+                  <a-collapse-item header="可选：附带实验说明选段（≤2000 字）">
+                    <a-textarea
+                      v-model="selectionAttachmentText"
+                      aria-label="要附带的实验说明选段"
+                      :auto-size="{ minRows: 2, maxRows: 5 }"
+                    />
+                    <p
+                      class="hint"
+                      :class="{
+                        'is-over': selectionAttachmentText.length > 2000,
+                      }"
+                    >
+                      {{ selectionAttachmentText.length }} / 2000 字
+                    </p>
+                  </a-collapse-item>
+                </a-collapse>
+              </div>
+              <a-alert v-if="attachmentError" type="warning">
+                {{ attachmentError }}
+              </a-alert>
+              <a-space wrap>
                 <a-button
                   type="primary"
-                  size="small"
-                  :loading="tutorPending"
-                  :disabled="!canSendTutor"
-                  @click="sendTutor"
+                  :disabled="Boolean(attachmentError)"
+                  @click="openExperimentTutor('SEND')"
                 >
-                  发送
+                  发送给导师
                 </a-button>
-              </div>
-              <div class="hint tutor-guard-hint">
-                对话按 登录用户 + 当前实验
-                隔离；切换实验不会看到其他实验的回复。
-              </div>
-            </template>
-            <template v-else>
-              <a-empty description="该实验暂未关联知识节点" />
-              <div class="hint">
-                向导师提问需要实验关联知识节点；请先关联后再试。
-              </div>
-            </template>
+                <a-button
+                  :disabled="Boolean(attachmentError)"
+                  @click="openExperimentTutor('DRAFT')"
+                >
+                  只填入导师输入框
+                </a-button>
+              </a-space>
+              <p class="hint tutor-guard-hint">
+                导师会带入当前实验标题、关联节点与真实判题定位；页面内不再维护第二套聊天记录。
+              </p>
+            </section>
           </a-tab-pane>
         </a-tabs>
       </div>
@@ -189,8 +198,24 @@
       <div class="panel panel-editor">
         <div class="editor-heading">
           <span class="panel-kicker">CODE / EDITOR</span>
-          <span class="hint">草稿自动保存</span>
+          <span class="hint">{{ codeSourceLabel }}；编辑后自动保存</span>
+          <a-button
+            size="mini"
+            :disabled="!question || !starterCode"
+            @click="restoreStarter"
+            >恢复初始代码</a-button
+          >
+          <a-button v-if="hasBackup" size="mini" @click="restoreBackup"
+            >恢复替换前草稿</a-button
+          >
         </div>
+        <p
+          v-if="codeLanguageWarning"
+          class="code-language-warning"
+          role="status"
+        >
+          {{ codeLanguageWarning }}
+        </p>
         <CodeEditor
           :value="form.code as string"
           :language="form.language"
@@ -204,7 +229,13 @@
           <span class="panel-kicker">EVALUATION</span>
           <h3>评测结果</h3>
           <template v-if="phase === 'idle' && !submitDetail">
-            <a-empty description="提交评测后，在此查看判题进度与结果" />
+            <a-empty
+              :description="
+                isLocalBuild
+                  ? '按实验说明在本地环境验证，本实验不自动判分'
+                  : '提交评测后，在此查看判题进度与结果'
+              "
+            />
           </template>
 
           <template v-else-if="phase === 'polling'">
@@ -302,14 +333,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  watch,
-} from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import {
   CategoryDTO,
   KnowledgeGraphControllerService,
@@ -324,7 +348,16 @@ import message from "@arco-design/web-vue/es/message";
 import CodeEditor from "@/components/CodeEditor.vue";
 import MdViewer from "@/components/MdViewer.vue";
 import KnowledgeGraph from "@/components/KnowledgeGraph.vue";
-import { tutorAsk, type TutorSourceVO } from "@/api/learning";
+import { openTutor } from "@/composables/useAiLauncher";
+import {
+  currentCourseCode,
+  resolveCurrentCourse,
+} from "@/composables/useCurrentCourse";
+import {
+  validateTutorAttachments,
+  type TutorAttachment,
+  type TutorLaunchRequest,
+} from "@/types/tutor";
 import { useRoute, useRouter } from "vue-router";
 import CourseReturnBar from "@/components/learning/CourseReturnBar.vue";
 import { courseContext, completeCourseActivity } from "@/api/course";
@@ -347,10 +380,17 @@ const lastJudgeResultSummary = computed(() => {
   return `#${detail.id ?? "—"} ${label}${message}`;
 });
 
+const experimentCourseReady = ref(false);
+const experimentCourseCode = computed(() =>
+  experimentCourseReady.value ? currentCourseCode.value : ""
+);
 const aiPageContextProvider = () => ({
   pageName: "编程实验工作区",
+  courseCode: experimentCourseCode.value,
+  unitCode: routeValue(route.query.sourceUnitCode) || undefined,
   experimentTitle: question.value?.title || undefined,
   chapter: chapter.value || undefined,
+  resourceRef: `experiment:${props.id}`,
   lastJudgeResult: lastJudgeResultSummary.value,
 });
 onMounted(() => registerAiPageContext(aiPageContextProvider));
@@ -371,6 +411,18 @@ const route = useRoute();
 
 // ---------- 题面与关联图谱 ----------
 const question = ref<QuestionVO | null>(null);
+const isLocalBuild = computed(
+  () => question.value?.judgeMode === "LOCAL_BUILD"
+);
+const judgeModeDescription = computed(() => {
+  if (question.value?.judgeMode === "LOCAL_BUILD")
+    return "本实验需按说明在本地环境构建和验证，平台不自动判分。";
+  if (question.value?.judgeMode === "CONCEPT_HARNESS")
+    return "可在线提交概念验证代码；通过只说明验证程序符合测试，不代表已完成 Minix 内核构建。实际构建请按实验说明在本地完成。";
+  if (question.value?.judgeMode === "AUTO")
+    return "本实验可在线提交代码，平台按测试数据评测。";
+  return "当前实验的评测方式尚未提供，请查看实验说明。";
+});
 const loading = ref(false);
 const chapter = ref("");
 const nodes = ref<NodeDTO[]>([]);
@@ -388,6 +440,26 @@ const routeValue = (value: unknown) =>
     ? value
     : "";
 const contextNode = computed(() => routeValue(route.query.nodeName));
+let courseResolveSequence = 0;
+watch(
+  () => route.query.courseCode,
+  async (requested) => {
+    const sequence = ++courseResolveSequence;
+    experimentCourseReady.value = false;
+    try {
+      await resolveCurrentCourse(
+        routeValue(requested),
+        () => !disposed && sequence === courseResolveSequence
+      );
+      if (!disposed && sequence === courseResolveSequence)
+        experimentCourseReady.value = true;
+    } catch {
+      if (!disposed && sequence === courseResolveSequence)
+        currentCourseCode.value = "";
+    }
+  },
+  { immediate: true }
+);
 
 // ---------- 代码与草稿 ----------
 const form = ref<QuestionSubmitAddRequest>({
@@ -411,22 +483,115 @@ const currentUserId = () => store.state.user.loginUser?.id ?? "guest";
 /** 草稿按 用户+实验+语言 区分；失败与查询刷新不会覆盖草稿 */
 const draftKey = () =>
   `oslab:code-draft:${currentUserId()}:${props.id}:${form.value.language}`;
+const backupKey = () => `${draftKey()}:before-restore`;
+function saveBackup(value: string) {
+  const previous = localStorage.getItem(backupKey());
+  if (previous !== null) {
+    const archive = `${backupKey()}:history:${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2)}`;
+    localStorage.setItem(archive, previous);
+  }
+  localStorage.setItem(backupKey(), value);
+}
+const codeSource = ref<"starter" | "draft" | "empty">("empty");
+const hasBackup = ref(false);
+function detectedLanguage(code: string): string {
+  if (
+    /\b(?:std::|using\s+namespace\s+std)\b|#\s*include\s*<iostream>/.test(code)
+  )
+    return "cpp";
+  if (/\bpublic\s+class\b|\bSystem\.out\./.test(code)) return "java";
+  if (/\bpackage\s+main\b|\bfunc\s+main\s*\(/.test(code)) return "go";
+  if (/#\s*include\s*<(?:stdio|string|stdlib)\.h>/.test(code)) return "c";
+  return "";
+}
+const starterCode = computed(() => {
+  const code = question.value?.originalCode || "";
+  const language = detectedLanguage(code);
+  return !language || language === form.value.language ? code : "";
+});
+const codeSourceLabel = computed(() =>
+  codeSource.value === "draft"
+    ? "当前内容：本地草稿"
+    : codeSource.value === "starter"
+    ? "当前内容：题目初始代码"
+    : "当前语言暂无初始代码"
+);
+const codeLanguageWarning = computed(() => {
+  const language = detectedLanguage(form.value.code || "");
+  return language && language !== form.value.language
+    ? `当前内容看起来是 ${language.toUpperCase()}，与所选语言不一致；草稿已保留，请切换语言或自行修改。`
+    : "";
+});
 
 const loadDraft = () => {
   try {
     const draft = localStorage.getItem(draftKey());
-    form.value.code = draft ?? question.value?.originalCode ?? "";
+    form.value.code = draft ?? starterCode.value;
+    codeSource.value =
+      draft !== null ? "draft" : starterCode.value ? "starter" : "empty";
+    hasBackup.value = localStorage.getItem(backupKey()) !== null;
   } catch {
-    form.value.code = question.value?.originalCode ?? "";
+    form.value.code = starterCode.value;
+    codeSource.value = starterCode.value ? "starter" : "empty";
+    hasBackup.value = false;
   }
 };
 
 const changeCode = (value: string) => {
   form.value.code = value;
+  codeSource.value = "draft";
   try {
     localStorage.setItem(draftKey(), value);
   } catch {
     // 浏览器存储不可用时，编辑和提交仍可继续。
+  }
+};
+
+const restoreStarter = () => {
+  const starter = starterCode.value;
+  if (!starter) return;
+  const current = form.value.code || "";
+  if (current !== starter) {
+    if (
+      !window.confirm(
+        "恢复初始代码会替换当前内容。当前草稿会保留，可通过“恢复替换前草稿”找回。继续吗？"
+      )
+    )
+      return;
+    try {
+      saveBackup(current);
+      hasBackup.value = true;
+    } catch {
+      message.error("无法保存当前草稿，未恢复初始代码。");
+      return;
+    }
+  }
+  form.value.code = starter;
+  codeSource.value = "starter";
+  try {
+    localStorage.setItem(draftKey(), starter);
+  } catch {
+    message.warning("初始代码已载入，但无法保存到本地。");
+  }
+};
+const restoreBackup = () => {
+  try {
+    const backup = localStorage.getItem(backupKey());
+    if (backup === null) return;
+    if (
+      (form.value.code || "") !== backup &&
+      !window.confirm("恢复替换前草稿会替换当前内容。继续吗？")
+    )
+      return;
+    const current = form.value.code || "";
+    saveBackup(current);
+    localStorage.setItem(draftKey(), backup);
+    form.value.code = backup;
+    codeSource.value = "draft";
+  } catch {
+    message.error("无法读取或保存草稿。");
   }
 };
 
@@ -614,6 +779,10 @@ const doSubmit = async () => {
   if (disposed || submitting.value || !question.value?.id) {
     return;
   }
+  if (isLocalBuild.value) {
+    message.info("请按实验说明在本地 MIPS 环境构建与验证");
+    return;
+  }
   if (!form.value.code || !form.value.code.trim()) {
     message.warning("请先编写代码再提交");
     return;
@@ -647,236 +816,123 @@ const doSubmit = async () => {
   }
 };
 
-// ---------- 实验导师（/api/learning/tutor/ask，GraphRAG 节点导师，实验上下文打包进 question） ----------
-interface TutorMessage {
-  role: "user" | "assistant";
-  text: string;
-  mode?: string;
-  sources?: TutorSourceVO[];
-}
-
-const TUTOR_CODE_SNIPPET_LIMIT = 1200;
-const TUTOR_HISTORY_LIMIT = 50;
-
-/** 导师上下文节点：优先路由携带的节点，否则取实验题第一个映射节点；两者皆无则禁用导师入口 */
+// ---------- 实验导师：统一入口，代码/报错由学生明确勾选 ----------
+/** 导师上下文节点：优先路由携带的节点，否则取实验题第一个映射节点 */
 const tutorNodeName = computed(
   () => contextNode.value || question.value?.tags?.[0] || ""
 );
+const tutorQuestion = ref("");
+const attachCode = ref(false);
+const attachJudge = ref(false);
+const codeAttachmentText = ref("");
+const judgeAttachmentText = ref("");
+const selectionAttachmentText = ref("");
 
-const tutorMessages = ref<TutorMessage[]>([]);
-const tutorInput = ref("");
-const tutorPending = ref(false);
-const tutorError = ref("");
-/** 最近一次失败/待重试的完整请求文本 */
-const tutorLastRequest = ref("");
-let tutorRequestToken = 0;
-const tutorMessagesEl = ref<HTMLElement | null>(null);
+function buildJudgeAttachmentText() {
+  const detail = submitDetail.value;
+  if (!detail) return "";
+  const label =
+    detail.status === 2
+      ? isAccepted.value
+        ? "通过"
+        : "未通过"
+      : detail.status === 3
+      ? "判题失败"
+      : "判题中";
+  return `实验 #${props.id} 最近提交 #${detail.id ?? "—"} ${label}\n判题消息：${
+    judgeMessageText.value || "无"
+  }`;
+}
 
-const tutorStorageKey = () =>
-  `oslab:experiment-tutor:${currentUserId()}:${props.id}`;
-
-/** 历史按 用户+实验 隔离；切换实验时旧请求一并作废 */
-const loadTutorHistory = () => {
-  tutorRequestToken += 1;
-  tutorPending.value = false;
-  tutorMessages.value = [];
-  tutorError.value = "";
-  tutorLastRequest.value = "";
-  try {
-    const raw = localStorage.getItem(tutorStorageKey());
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    if (parsed && Array.isArray(parsed.messages)) {
-      tutorMessages.value = parsed.messages
-        .filter(
-          (item: any): item is TutorMessage =>
-            item &&
-            (item.role === "user" || item.role === "assistant") &&
-            typeof item.text === "string" &&
-            item.text.trim().length > 0
-        )
-        .slice(-TUTOR_HISTORY_LIMIT);
-    }
-  } catch {
-    // 历史读取失败不阻塞导师使用，从空会话开始
+watch(attachJudge, (on) => {
+  if (on && !judgeAttachmentText.value.trim()) {
+    judgeAttachmentText.value = buildJudgeAttachmentText();
   }
-};
+});
 
-const persistTutorHistory = () => {
-  try {
-    localStorage.setItem(
-      tutorStorageKey(),
-      JSON.stringify({
-        messages: tutorMessages.value.slice(-TUTOR_HISTORY_LIMIT),
-      })
-    );
-  } catch {
-    // 存储不可用时仅保留内存会话
+watch(attachCode, (on) => {
+  if (on && !codeAttachmentText.value.trim()) {
+    codeAttachmentText.value = form.value.code || "";
   }
-};
+});
 
-const truncateText = (value: string, limit: number) => {
-  if (value.length <= limit) return value;
-  return `${value.slice(0, limit)}\n…（代码片段已截断）`;
-};
-
-/** 上下文：实验标题/ID、关联节点、当前语言、代码片段、最近一次提交状态与判题消息 */
-const buildTutorContext = (userQuestion: string) => {
-  const lines: string[] = [];
-  lines.push(
-    `【实验导师请求】实验：${question.value?.title || "未知实验"}（ID: ${
-      props.id
-    }）`
-  );
-  lines.push(`关联知识节点：${tutorNodeName.value}`);
-  lines.push(`当前语言：${form.value.language || "未选择"}`);
-  const code = (form.value.code || "").trim();
-  lines.push(
-    code
-      ? `代码片段：\n${truncateText(code, TUTOR_CODE_SNIPPET_LIMIT)}`
-      : "代码片段：（当前代码为空）"
-  );
-  if (submitDetail.value) {
-    const status = submitDetail.value.status;
-    let statusLabel = "判题中";
-    if (status === 2) {
-      statusLabel = isAccepted.value ? "通过" : "未通过";
-    } else if (status === 3) {
-      statusLabel = "失败";
-    }
-    lines.push(
-      `最近提交：#${submitDetail.value.id ?? "—"} ${statusLabel}，判题消息：${
-        judgeMessageText.value
-      }`
-    );
-  } else {
-    lines.push("最近提交：尚未提交评测");
-  }
-  lines.push(
-    "请结合关联知识节点的内容，先给出提示与问题定位，再给解释和修改建议；不要直接输出完整的可提交代码。"
-  );
-  if (userQuestion) {
-    lines.push(`学生补充提问：${userQuestion}`);
-  }
-  return lines.join("\n");
-};
-
-const canSendTutor = computed(
-  () =>
-    Boolean(question.value) &&
-    Boolean(tutorNodeName.value) &&
-    tutorInput.value.trim().length > 0
-);
-
-const scrollTutorToBottom = () => {
-  void nextTick(() => {
-    const el = tutorMessagesEl.value;
-    if (el) el.scrollTop = el.scrollHeight;
-  });
-};
-
-const sendTutorRequest = async (fullText: string) => {
-  const requestId = props.id;
-  const token = ++tutorRequestToken;
-  tutorPending.value = true;
-  tutorError.value = "";
-  tutorLastRequest.value = fullText;
-  scrollTutorToBottom();
-  try {
-    const res = await tutorAsk({
-      nodeName: tutorNodeName.value || undefined,
-      question: fullText,
+/** 只收集学生明确勾选/编辑的内容；绝不自动抓取整个编辑器或实验全文。 */
+function buildExperimentAttachments(): TutorAttachment[] {
+  const items: TutorAttachment[] = [];
+  if (selectionAttachmentText.value.trim()) {
+    items.push({
+      kind: "SELECTION",
+      label: "实验说明选段",
+      text: selectionAttachmentText.value.trim(),
+      sourceId: `experiment:${props.id}`,
     });
-    // 切题/卸载守卫：旧实验的回复不再写入当前面板
-    const stale =
-      disposed || requestId !== props.id || token !== tutorRequestToken;
-    if (stale) return;
-    if (res.data.code === 0 && res.data.data) {
-      const answer = res.data.data;
-      tutorMessages.value.push({
-        role: "assistant",
-        text: answer.answer,
-        mode: answer.mode,
-        sources: answer.sources,
-      });
-      persistTutorHistory();
-    } else {
-      tutorError.value = res.data.message || "导师暂时不可用，请稍后重试";
-    }
-  } catch (error) {
-    const stale =
-      disposed || requestId !== props.id || token !== tutorRequestToken;
-    if (stale) return;
-    tutorError.value = "发送失败，请检查网络后重试";
-  } finally {
-    if (!disposed && requestId === props.id && token === tutorRequestToken) {
-      tutorPending.value = false;
-      scrollTutorToBottom();
-    }
   }
-};
-
-const sendTutor = () => {
-  if (!canSendTutor.value || tutorPending.value) return;
-  const userQuestion = tutorInput.value.trim();
-  tutorInput.value = "";
-  tutorMessages.value.push({ role: "user", text: userQuestion });
-  persistTutorHistory();
-  void sendTutorRequest(buildTutorContext(userQuestion));
-};
-
-const retryTutor = () => {
-  if (!tutorLastRequest.value || tutorPending.value) return;
-  void sendTutorRequest(tutorLastRequest.value);
-};
-
-/** 清空当前实验的导师会话（用户主动触发；发送中不可清空） */
-const clearTutor = () => {
-  if (tutorPending.value) return;
-  tutorRequestToken += 1;
-  tutorMessages.value = [];
-  tutorInput.value = "";
-  tutorError.value = "";
-  tutorLastRequest.value = "";
-  persistTutorHistory();
-};
-
-/** 来源跳转：参照工作台导师面板，节点/题目/实验/事件分别路由 */
-const openTutorSource = (source: TutorSourceVO) => {
-  if (source.sourceType === "NODE") {
-    return goNode(source.sourceId);
+  if (attachCode.value && codeAttachmentText.value.trim()) {
+    items.push({
+      kind: "CODE",
+      label: `当前代码（${form.value.language || "未选择语言"}）`,
+      text: codeAttachmentText.value.trim(),
+      sourceId: `experiment:${props.id}`,
+    });
   }
-  if (!/^\d+$/.test(source.sourceId)) {
-    message.warning("该来源暂无可打开的资源");
+  if (attachJudge.value && judgeAttachmentText.value.trim()) {
+    items.push({
+      kind: "ERROR",
+      label: "最近判题结果",
+      text: judgeAttachmentText.value.trim(),
+      sourceId: submitDetail.value
+        ? `submit:${submitDetail.value.id}`
+        : `experiment:${props.id}`,
+    });
+  }
+  return items;
+}
+
+const attachmentError = computed(() => {
+  if (
+    selectionAttachmentText.value.length > 2000 ||
+    codeAttachmentText.value.length > 8000 ||
+    judgeAttachmentText.value.length > 8000
+  ) {
+    return "附带内容超出长度上限，请手动精简后再发送（不会静默截断）。";
+  }
+  const check = validateTutorAttachments(buildExperimentAttachments());
+  return check.ok ? "" : check.error || "附带材料超限。";
+});
+
+function openExperimentTutor(delivery: "DRAFT" | "SEND") {
+  if (attachmentError.value) {
+    message.warning(attachmentError.value);
     return;
   }
-  const nodeNameQuery = tutorNodeName.value || undefined;
-  if (source.sourceType === "QUESTION") {
-    return router.push({
-      path: "/assessments",
-      query: { nodeName: nodeNameQuery, questionId: source.sourceId },
-    });
-  }
-  if (source.sourceType === "EXPERIMENT") {
-    if (source.sourceId === String(props.id)) return;
-    return router.push({
-      path: `/experiments/code/${source.sourceId}`,
-      query: { nodeName: nodeNameQuery },
-    });
-  }
-  if (source.sourceType === "EVENT") {
-    return router.push({
-      path: "/records",
-      query: { nodeName: nodeNameQuery, eventId: source.sourceId },
-    });
-  }
-};
+  const request: TutorLaunchRequest = {
+    scene: "EXPERIMENT",
+    intent: lastJudgeResultSummary.value ? "DEBUG" : "ASK",
+    courseCode: experimentCourseCode.value,
+    scope: "PAGE",
+    nodeCodes: routeValue(route.query.nodeCode)
+      ? [routeValue(route.query.nodeCode)]
+      : [],
+    resourceRef: `experiment:${props.id}`,
+    eventIds: [],
+    draft:
+      tutorQuestion.value.trim() ||
+      (lastJudgeResultSummary.value
+        ? "我的提交没有通过，请帮我定位问题并给出修改建议。"
+        : "请结合当前实验帮我梳理排查步骤。"),
+    attachments: buildExperimentAttachments(),
+    delivery,
+    sceneLabel: question.value?.title || undefined,
+  };
+  openTutor(request);
+}
 
-/** 失败提交后的导师入口：切到“向导师提问”页签并预填问题，由用户点击发送（不自动消耗 AI 配额） */
+/** 失败提交后的导师入口：切到“向导师提问”页签并预填，由用户明确发送（不自动消耗 AI 配额） */
 const askTutor = () => {
   descriptionTab.value = "tutor";
-  if (!tutorInput.value.trim()) {
-    tutorInput.value = isAccepted.value
+  attachJudge.value = true;
+  if (!tutorQuestion.value.trim()) {
+    tutorQuestion.value = isAccepted.value
       ? "请点评我的实现，并给出巩固相关知识点的方法。"
       : "我的提交没有通过，请帮我定位问题并给出修改建议。";
   }
@@ -885,17 +941,37 @@ const askTutor = () => {
 // ---------- 跳转 ----------
 const goNode = (nodeName: string) => {
   if (!nodeName) return;
-  router.push({ path: `/knowledge/node/${encodeURIComponent(nodeName)}` });
+  const code =
+    nodeName === contextNode.value
+      ? routeValue(route.query.nodeCode)
+      : nodes.value.find((node) => node.name === nodeName)?.nodeCode || "";
+  router.push({
+    path: code
+      ? `/knowledge/concept/${encodeURIComponent(code)}`
+      : `/knowledge/node/${encodeURIComponent(nodeName)}`,
+    query: experimentCourseCode.value
+      ? { courseCode: experimentCourseCode.value }
+      : {},
+  });
 };
 
 const goGraphPage = () => {
-  router.push({ path: "/graph" });
+  router.push({
+    path: "/graph",
+    query: experimentCourseCode.value
+      ? { courseCode: experimentCourseCode.value }
+      : {},
+  });
 };
 
 const goRecords = () => {
   router.push({
     path: "/records",
-    query: { eventType: "JUDGE", nodeName: contextNode.value || undefined },
+    query: {
+      eventType: "JUDGE",
+      nodeName: contextNode.value || undefined,
+      courseCode: experimentCourseCode.value || undefined,
+    },
   });
 };
 
@@ -908,6 +984,7 @@ const returnToCatalog = () => {
   router.push({
     path: "/experiments",
     query: {
+      courseCode: experimentCourseCode.value || undefined,
       nodeName: contextNode.value || undefined,
       chapter: chapter.value || undefined,
     },
@@ -927,7 +1004,6 @@ const resetSubmitState = () => {
 
 onMounted(() => {
   loadData();
-  loadTutorHistory();
 });
 
 // 切换实验（路由参数变化复用组件）时停止轮询并重置状态
@@ -937,7 +1013,6 @@ watch(
     if (newId !== oldId) {
       resetSubmitState();
       loadData();
-      loadTutorHistory();
     }
   }
 );
@@ -1021,6 +1096,8 @@ onBeforeUnmount(() => {
 }
 .editor-heading {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   justify-content: space-between;
   align-items: center;
   padding: 10px 14px;
@@ -1029,6 +1106,16 @@ onBeforeUnmount(() => {
 }
 .editor-heading .hint {
   margin: 0;
+  flex: 1 1 220px;
+}
+.code-language-warning {
+  margin: 0;
+  padding: 12px 14px;
+  color: var(--oslab-lab-ink-soft, var(--oslab-ink-soft));
+  background: var(--oslab-lab-panel, var(--oslab-panel));
+  border-bottom: 1px solid var(--oslab-line);
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .panel-left :deep(.arco-tabs-content) {
@@ -1342,6 +1429,132 @@ onBeforeUnmount(() => {
   }
   .panel-left {
     grid-row: auto;
+  }
+}
+
+/* 实验工作台：长文与编辑区域分别滚动，窄屏恢复自然页面流。 */
+.experiment-workbench {
+  --lab-workbench-gap: 16px;
+  --lab-reading-height: clamp(440px, calc(100vh - 205px), 900px);
+}
+
+.workbench-body {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: var(--lab-workbench-gap);
+}
+
+.panel-left {
+  max-height: var(--lab-reading-height);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.panel-left :deep(.arco-tabs) {
+  overflow: visible;
+}
+
+.panel-left :deep(.arco-tabs-nav) {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--oslab-lab-panel, #fff);
+}
+
+.oslab-lab-b :deep(.arco-btn-primary.arco-btn-disabled) {
+  color: #525b66;
+  background: #dbe2ea;
+  border-color: #c3cedb;
+  cursor: not-allowed;
+}
+
+.panel-left :deep(.markdown-body) {
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.panel-left :deep(.markdown-body h1),
+.panel-left :deep(.markdown-body h2),
+.panel-left :deep(.markdown-body h3) {
+  line-height: 1.35;
+  margin-top: 1.4em;
+}
+
+.oslab-lab-b .panel-left :deep(.markdown-body h2) {
+  font-size: 18px;
+}
+
+.oslab-lab-b .panel-left :deep(.markdown-body h3) {
+  font-size: 16px;
+}
+
+.panel-left :deep(.markdown-body pre),
+.panel-left :deep(.markdown-body table) {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.panel-left :deep(.markdown-body pre),
+.panel-left :deep(.markdown-body code) {
+  font-size: 13px;
+}
+
+.panel-editor :deep(.code-editor-container) {
+  height: clamp(340px, 52vh, 600px);
+}
+
+.panel-result {
+  max-height: 360px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 1024px) {
+  .workbench-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panel-left,
+  .panel-result {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .panel-left :deep(.arco-tabs-nav) {
+    position: static;
+  }
+}
+
+@media (max-width: 480px) {
+  .editor-heading :deep(.arco-btn) {
+    flex: 1 1 auto;
+    min-height: 44px;
+  }
+
+  .oslab-lab-b.experiment-workbench {
+    padding: 8px;
+  }
+
+  .workbench-body {
+    gap: 12px;
+  }
+
+  .panel-left {
+    padding: 0 12px 12px;
+  }
+
+  .panel-editor :deep(.code-editor-container) {
+    height: 360px;
+  }
+}
+
+@media (pointer: coarse) {
+  .experiment-workbench :deep(.arco-btn),
+  .experiment-workbench :deep(.arco-tabs-tab),
+  .experiment-workbench :deep(.arco-select-view) {
+    min-height: 44px;
   }
 }
 </style>

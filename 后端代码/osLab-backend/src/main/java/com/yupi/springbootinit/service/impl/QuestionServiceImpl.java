@@ -43,6 +43,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
     private UserService userService;
     @Resource
     private QuestionSetMapService questionSetMapService;
+    @Resource
+    private com.yupi.springbootinit.learning.ExperimentJudgeModeService experimentJudgeModes;
 
     /**
      * 校验题目是否合法
@@ -124,6 +126,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
     @Override
     public QuestionVO getQuestionVO(Question question, HttpServletRequest request) {
         QuestionVO questionVO = QuestionVO.objToVo(question);
+        questionVO.setJudgeMode(experimentJudgeModes.mode(question.getId()));
         // 1. 关联查询用户信息
         Long userId = question.getUserId();
         User user = null;

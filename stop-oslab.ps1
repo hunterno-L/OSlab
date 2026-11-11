@@ -4,15 +4,18 @@ param([switch]$Services)
 # Stop only this checkout's Java application and Vue development server.
 $ErrorActionPreference = "Stop"
 $BackendJar = Join-Path $PSScriptRoot "后端代码\osLab-backend\target\springboot-init-0.0.1-SNAPSHOT.jar"
+$RuntimeJar = Join-Path $PSScriptRoot "tmp\backend-runtime\springboot-init-0.0.1-SNAPSHOT.jar"
 $FrontendDir = Join-Path $PSScriptRoot "前端代码\osLab-frontend"
 $FrontendCli = Join-Path $FrontendDir "node_modules\@vue\cli-service\bin\vue-cli-service.js"
 
 try {
     $targets = @(Get-CimInstance Win32_Process -Filter "Name='java.exe' OR Name='node.exe'" | Where-Object {
         $_.CommandLine -and (
-            ($_.Name -eq "java.exe" -and $_.CommandLine.IndexOf($BackendJar, [StringComparison]::OrdinalIgnoreCase) -ge 0) -or
-            ($_.Name -eq "node.exe" -and $_.CommandLine.IndexOf($FrontendCli, [StringComparison]::OrdinalIgnoreCase) -ge 0 -and
-                $_.CommandLine -match 'vue-cli-service.+\bserve\b')
+            ($_.Name -eq "java.exe" -and (
+                $_.CommandLine.IndexOf($BackendJar, [StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+                $_.CommandLine.IndexOf($RuntimeJar, [StringComparison]::OrdinalIgnoreCase) -ge 0)) -or
+            ($_.Name -eq "node.exe" -and $_.CommandLine.IndexOf($FrontendDir, [StringComparison]::OrdinalIgnoreCase) -ge 0 -and
+                $_.CommandLine -match 'node_modules[\\/](?:\.bin[\\/]+\.\.[\\/])?@vue[\\/]cli-service[\\/]bin[\\/]vue-cli-service\.js.*\bserve\b')
         )
     })
     foreach ($process in $targets) {

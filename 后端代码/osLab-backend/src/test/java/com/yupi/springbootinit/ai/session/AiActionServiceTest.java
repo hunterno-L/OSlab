@@ -92,6 +92,7 @@ class AiActionServiceTest {
         context.setUserId(7L);
         context.setHelpLevel(EvidenceQualification.HELP_NONE);
 
+        ReflectionTestUtils.setField(service, "enabledCourses", new com.yupi.springbootinit.course.EnabledCourses("course.operating-systems"));
         ReflectionTestUtils.setField(service, "sessionService", sessionService);
         ReflectionTestUtils.setField(service, "evidenceContexts", evidenceContexts);
         ReflectionTestUtils.setField(service, "learningQuestionService", questionService);

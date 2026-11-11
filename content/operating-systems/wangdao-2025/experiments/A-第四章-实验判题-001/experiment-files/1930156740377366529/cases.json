@@ -1,0 +1,25 @@
+{
+  "description": "实验 4.4 sys_mem_map(int sysno, u_int srcid, u_int srcva, u_int dstid, u_int dstva, u_int perm)。驱动操作符：I=env_init；A parent=env_alloc 打印 返回码/下标/env_id；U idx=设 curenv；P idx va perm=page_alloc+page_insert 真实 backing 一页，打印 返回码/物理地址；C=空闲物理页数；K s a0 a1 a2 a3 a4=填好 KERNEL_SP 现场后调 handle_sys 并打印 $v0（必须恰好 6 个数，对 2 号调用即 K 2 srcid srcva dstid dstva perm）；Q idx va=物理页基址（无映射 4294967295）；O idx va=页表项原始值（无页表 4294967295）；G=只读当前 $v0。系统调用号：2=mem_map，3=mem_unmap。错误码按 int 解读：-2=E_BAD_ENV，-3=E_INVAL，-4=E_NO_MEM。页账本：np=256/fm=8192 初始空闲 252 页；每次 env_alloc 占 1 页页目录（envs[63].cr3=1044480、envs[62]=1040384）；首次映射某 4MB 区间额外占 1 页页表；page_insert 自己递增 pp_ref，page_remove 递减到 0 才回收，pp_ref==1 时 page_free 是空操作。",
+  "cases": [
+    {
+      "name": "跨进程共享同一物理页：两边地址翻译结果必须相同，只额外消耗目标进程的一页页表",
+      "input": "256 8192\n12\nI\nA 0\nA 0\nU 63\nP 63 4096 3\nQ 63 4096\nC\nK 2 191 4096 318 8192 3\nQ 62 8192\nQ 63 4096\nC\nO 62 8192\n"
+    },
+    {
+      "name": "四类非法输入各自上抛：源页未映射 -E_INVAL、坏 srcid/dstid -E_BAD_ENV、srcva 或 dstva 落在内核空间 -E_INVAL",
+      "input": "256 8192\n12\nI\nA 0\nA 0\nU 63\nK 2 191 4096 318 8192 3\nK 2 999 4096 318 8192 3\nK 2 191 4096 999 8192 3\nK 2 191 1073741824 318 8192 3\nK 2 191 4096 318 1073741824 3\nP 63 4096 3\nK 2 191 4096 318 8192 3\nC\n"
+    },
+    {
+      "name": "引用计数契约：共享页解除一方映射后另一方仍可访问，只有最后一个使用者解除后物理页才回到空闲链表",
+      "input": "256 8192\n14\nI\nA 0\nA 0\nU 63\nP 63 4096 3\nK 2 191 4096 318 8192 3\nC\nK 3 318 8192 0 0 0\nQ 62 8192\nQ 63 4096\nC\nK 3 191 4096 0 0 0\nQ 63 4096\nC\n"
+    },
+    {
+      "name": "同进程自共享：同一页映射到两个虚拟地址只占一页物理内存，两次解除后必须完整回收",
+      "input": "256 8192\n12\nI\nA 0\nU 63\nP 63 4096 3\nK 2 191 4096 191 8192 3\nQ 63 8192\nC\nK 3 191 4096 0 0 0\nK 3 191 8192 0 0 0\nQ 63 8192\nC\nG\n"
+    },
+    {
+      "name": "目标地址已有映射时必须先回收旧页再挂新页：空闲页数只增不减，源进程映射不受影响",
+      "input": "256 8192\n13\nI\nA 0\nA 0\nU 63\nP 63 4096 3\nP 62 8192 3\nC\nK 2 191 4096 318 8192 3\nQ 62 8192\nC\nK 3 191 4096 0 0 0\nQ 62 8192\nC\n"
+    }
+  ]
+}

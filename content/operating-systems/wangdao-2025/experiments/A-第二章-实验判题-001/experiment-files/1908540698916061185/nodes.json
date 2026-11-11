@@ -1,0 +1,26 @@
+{
+  "questionId": "1908540698916061185",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.tlb",
+      "nodeName": "TLB 快表",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "在 mm/tlb_asm.S 的 tlb_out 空出的两行填 tlbp/tlbwi：tlbp 按 EntryHi 的 VPN 查 TLB 并写 Index，未命中时 Index 最高位置 1 后跳 NOFOUND；tlbwi 把 EntryLo0/1 写入 Index 指定项。"
+    },
+    {
+      "nodeCode": "os.memory.address_translation",
+      "nodeName": "地址翻译",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "TLB 是 va→pa 翻译的硬件缓存，tlb_out 处理的正是翻译失败（TLB Miss / TLB Invalid）路径。"
+    },
+    {
+      "nodeCode": "os.runtime.exception",
+      "nodeName": "异常",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "TLB Miss 由 CP0 触发异常进入 0x80000000 的 TLB Refill 入口，tlb_out 是该异常处理链上的一环；tlbp 之后 4 条 nop 是 CP0 冒险间隔而非分支延迟槽。"
+    }
+  ]
+}

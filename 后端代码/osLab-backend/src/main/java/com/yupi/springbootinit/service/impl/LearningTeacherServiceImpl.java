@@ -42,6 +42,7 @@ import com.yupi.springbootinit.model.vo.learning.NodeHeatVO;
 import com.yupi.springbootinit.model.vo.learning.QuestionAccuracyVO;
 import com.yupi.springbootinit.model.vo.learning.TeacherDashboardVO;
 import com.yupi.springbootinit.model.vo.learning.TimelineVO;
+import com.yupi.springbootinit.model.vo.learning.TeacherFollowUpsVO;
 import com.yupi.springbootinit.service.KnowledgeGraphService;
 import com.yupi.springbootinit.service.LearningTeacherService;
 import org.apache.commons.collections4.CollectionUtils;
@@ -58,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Date;
 
 /**
  * 教师班级看板服务实现（契约 §3.5 / Phase 8）
@@ -133,6 +135,118 @@ public class LearningTeacherServiceImpl implements LearningTeacherService {
         return vo;
     }
 
+    @Resource
+    private com.yupi.springbootinit.learning.PublishedCourseScopeService courseScope;
+
+    @Override
+    public TeacherFollowUpsVO followUps(String className, String courseCode) {
+        if (StringUtils.isBlank(className) || StringUtils.isBlank(courseCode)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "班级和课程不能为空");
+        }
+        List<Long> members = validStudentIdsOfClass(className);
+        TeacherFollowUpsVO out = new TeacherFollowUpsVO();
+        out.setClassName(className);
+        out.setCourseCode(courseCode);
+        out.setStudentCount(members.size());
+        out.setItems(new ArrayList<>());
+        if (members.isEmpty()) {
+            return out;
+        }
+        Map<String, com.yupi.springbootinit.learning.NodeIdentityService.Identity> identities = courseScope.nodes(courseCode);
+        List<String> nodes = new ArrayList<>(identities.keySet());
+        if (nodes.isEmpty()) {
+            return out;
+        }
+        Map<String, String> names = new HashMap<>(), storageCodes = new HashMap<>();
+        for (com.yupi.springbootinit.learning.NodeIdentityService.Identity identity : identities.values()) {
+            names.put(identity.nodeCode, identity.name);
+            storageCodes.put(identity.storageKey, identity.nodeCode);
+        }
+        Set<Long> memberSet = new HashSet<>(members);
+        Map<String, Set<Long>> due = new HashMap<>(), weak = new HashMap<>(), missing = new HashMap<>();
+        Date now = new Date();
+        for (Map<String, Object> row : identityJdbc.queryForList(
+                "SELECT userId,nodeCode FROM learning_review_item WHERE userId IN (" + placeholders(members.size()) + ") "
+                        + "AND courseCode=? AND status='PENDING' AND isDelete=0 AND dueAt<=? AND nodeCode IN (" + placeholders(nodes.size()) + ")",
+                append(members, courseCode, now, nodes))) {
+            Long uid = number(row.get("userId"));
+            String code = String.valueOf(row.get("nodeCode"));
+            if (uid != null && memberSet.contains(uid) && names.containsKey(code)) {
+                due.computeIfAbsent(code, k -> new HashSet<>()).add(uid);
+            }
+        }
+        List<LearningMastery> mastery = learningMasteryMapper.selectList(new LambdaQueryWrapper<LearningMastery>().in(LearningMastery::getUserId, members));
+        Map<String, Set<Long>> observed = new HashMap<>();
+        for (LearningMastery m : mastery) {
+            String code = StringUtils.isNotBlank(m.getNodeCode()) ? m.getNodeCode() : storageCodes.get(m.getNodeName());
+            if (!memberSet.contains(m.getUserId()) || !names.containsKey(code)) {
+                continue;
+            }
+            if (independent(m)) {
+                observed.computeIfAbsent(code, k -> new HashSet<>()).add(m.getUserId());
+                if (MasteryStatusEnum.RED.name().equals(m.getStatus())) {
+                    weak.computeIfAbsent(code, k -> new HashSet<>()).add(m.getUserId());
+                }
+            }
+        }
+        for (String code : nodes) {
+            for (Long uid : members) {
+                if (!observed.getOrDefault(code, java.util.Collections.emptySet()).contains(uid)) {
+                    missing.computeIfAbsent(code, k -> new HashSet<>()).add(uid);
+                }
+            }
+        }
+        appendItems(out, "DUE_REVIEW", due, names);
+        appendItems(out, "WEAK", weak, names);
+        appendItems(out, "MISSING_EVIDENCE", missing, names);
+        out.setDueReviewStudentCount(distinct(due));
+        out.setWeakStudentCount(distinct(weak));
+        out.setMissingEvidenceStudentCount(distinct(missing));
+        return out;
+    }
+
+    private static boolean independent(LearningMastery mastery) {
+        return (mastery.getConceptEvidenceCount() != null && mastery.getConceptEvidenceCount() > 0)
+                || (mastery.getPracticeEvidenceCount() != null && mastery.getPracticeEvidenceCount() > 0);
+    }
+
+    private static int distinct(Map<String, Set<Long>> groups) {
+        Set<Long> ids = new HashSet<>();
+        groups.values().forEach(ids::addAll);
+        return ids.size();
+    }
+
+    private static void appendItems(TeacherFollowUpsVO out, String kind, Map<String, Set<Long>> groups,
+                                    Map<String, String> names) {
+        groups.entrySet().stream().sorted((a, b) -> {
+            int comparison = Integer.compare(b.getValue().size(), a.getValue().size());
+            return comparison != 0 ? comparison : a.getKey().compareTo(b.getKey());
+        }).limit(5).forEach(entry -> {
+            TeacherFollowUpsVO.Item item = new TeacherFollowUpsVO.Item();
+            item.setKind(kind);
+            item.setNodeCode(entry.getKey());
+            item.setNodeName(names.get(entry.getKey()));
+            item.setStudentCount(entry.getValue().size());
+            out.getItems().add(item);
+        });
+    }
+
+    private static String placeholders(int count) {
+        return String.join(",", java.util.Collections.nCopies(count, "?"));
+    }
+
+    private static Object[] append(List<Long> ids, String course, Date now, List<String> nodes) {
+        List<Object> parameters = new ArrayList<>(ids);
+        parameters.add(course);
+        parameters.add(now);
+        parameters.addAll(nodes);
+        return parameters.toArray();
+    }
+
+    private static Long number(Object value) {
+        return value instanceof Number ? ((Number) value).longValue() : null;
+    }
+
     @Override
     public TimelineVO timeline(Long userId, String className, String nodeName, String eventType, long current, long pageSize) {
         ThrowUtils.throwIf(pageSize > 100, ErrorCode.PARAMS_ERROR, "每页最多 100 条");
@@ -174,41 +288,40 @@ public class LearningTeacherServiceImpl implements LearningTeacherService {
 
     @Override
     public List<ClassOptionVO> classes() {
-        List<Students> rows = studentsMapper.selectList(new LambdaQueryWrapper<Students>()
-                .eq(Students::getIsDelete, 0)
-                .isNotNull(Students::getUserId));
-        Map<String, Integer> countByClass = new TreeMap<>();
-        for (Students row : rows) {
-            if (StringUtils.isNotBlank(row.getClassName())) {
-                countByClass.merge(row.getClassName(), 1, Integer::sum);
+        Map<String, Set<Long>> members = new TreeMap<>();
+        for (Map<String, Object> row : identityJdbc.queryForList(
+                "SELECT s.className,s.userId FROM students s JOIN `user` u ON u.id=s.userId AND u.isDelete=0 "
+                        + "WHERE s.isDelete=0 AND s.userId IS NOT NULL")) {
+            String name = (String) row.get("className");
+            Long userId = number(row.get("userId"));
+            if (StringUtils.isNotBlank(name) && userId != null) {
+                members.computeIfAbsent(name, key -> new HashSet<>()).add(userId);
+            }
+        }
+        if (classManagementService != null) {
+            try {
+                for (Map<String, Object> row : identityJdbc.queryForList(
+                        "SELECT c.className,u.id AS userId FROM teaching_class c "
+                                + "LEFT JOIN teaching_class_member m ON m.classId=c.id "
+                                + "LEFT JOIN `user` u ON u.id=m.userId AND u.isDelete=0 "
+                                + "WHERE c.isDelete=0")) {
+                    String name = (String) row.get("className");
+                    if (StringUtils.isBlank(name)) continue;
+                    Set<Long> users = members.computeIfAbsent(name, key -> new HashSet<>());
+                    Long userId = number(row.get("userId"));
+                    if (userId != null) users.add(userId);
+                }
+            } catch (RuntimeException ignored) {
+                // Managed class tables can be absent during a rolling upgrade.
             }
         }
         List<ClassOptionVO> result = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : countByClass.entrySet()) {
-            ClassOptionVO vo = new ClassOptionVO();
-            vo.setClassName(entry.getKey());
-            vo.setStudentCount(entry.getValue());
-            result.add(vo);
-        }
-        // Include classes created through the managed class workflow, even before
-        // a student has joined them, so teachers can publish a task immediately.
-        if (classManagementService != null) {
-            try {
-                for (Map<String, Object> row : classManagementService.listAllActiveClasses()) {
-                    String className = String.valueOf(row.get("className"));
-                    if (!countByClass.containsKey(className)) {
-                        ClassOptionVO vo = new ClassOptionVO();
-                        vo.setClassName(className);
-                        Object count = row.get("studentCount");
-                        vo.setStudentCount(count instanceof Number ? ((Number) count).intValue() : 0);
-                        result.add(vo);
-                    }
-                }
-            } catch (RuntimeException ignored) {
-                // The v10 tables may not exist while an old database is upgrading.
-            }
-        }
-        result.sort(Comparator.comparing(ClassOptionVO::getClassName, Comparator.nullsLast(String::compareTo)));
+        members.forEach((name, users) -> {
+            ClassOptionVO option = new ClassOptionVO();
+            option.setClassName(name);
+            option.setStudentCount(users.size());
+            result.add(option);
+        });
         return result;
     }
 
@@ -405,6 +518,23 @@ public class LearningTeacherServiceImpl implements LearningTeacherService {
     /**
      * 班级学生 id：students 表中该班级全部有效绑定 userId
      */
+    private List<Long> validStudentIdsOfClass(String className) {
+        List<Long> roster = new ArrayList<>(new java.util.LinkedHashSet<>(studentIdsOfClass(className)));
+        if (roster.isEmpty()) {
+            return roster;
+        }
+        Set<Long> valid = new HashSet<>();
+        for (Map<String, Object> row : identityJdbc.queryForList(
+                "SELECT id FROM `user` WHERE isDelete=0 AND userRole<>'ban' AND id IN (" + placeholders(roster.size()) + ")", roster.toArray())) {
+            Long uid = number(row.get("id"));
+            if (uid != null && roster.contains(uid)) {
+                valid.add(uid);
+            }
+        }
+        roster.removeIf(uid -> !valid.contains(uid));
+        return roster;
+    }
+
     private List<Long> studentIdsOfClass(String className) {
         List<Students> rows = studentsMapper.selectList(new LambdaQueryWrapper<Students>()
                 .eq(Students::getClassName, className)

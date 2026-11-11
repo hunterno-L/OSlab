@@ -8,6 +8,8 @@ import com.yupi.springbootinit.ai.plan.NextActionPlanner;
 import com.yupi.springbootinit.ai.plan.PredictCaseCatalog;
 import com.yupi.springbootinit.ai.retrieval.HybridRetrievalService;
 import com.yupi.springbootinit.learning.PageReplacer;
+import com.yupi.springbootinit.learning.NodeIdentityService;
+import com.yupi.springbootinit.learning.PublishedCourseScopeService;
 import com.yupi.springbootinit.model.vo.ai.NextAction;
 import com.yupi.springbootinit.model.vo.ai.SourceRef;
 import com.yupi.springbootinit.model.vo.learning.SimulationPageVO;
@@ -19,6 +21,8 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +53,9 @@ public class TutorToolkit {
 
     @Resource
     private EvidenceReadService evidenceReader;
+
+    @Resource
+    private PublishedCourseScopeService publishedCourseScope;
 
     @Resource
     private AiContentScopeService contentScope;
@@ -159,12 +166,39 @@ public class TutorToolkit {
 
         @Override
         public Outcome execute(Context context, JsonNode arguments) {
-            List<String> nodeCodes = stringList(arguments, "nodeCodes");
-            if (nodeCodes.isEmpty() && context.getCourseContext() != null) {
-                nodeCodes = context.getCourseContext().getNodeCodes();
+            String courseCode = StringUtils.trimToNull(context.courseCode());
+            if (courseCode == null || context.getUser() == null || context.getUser().getId() == null) {
+                return emptyEvidence(context, "缺少课程或用户上下文，无法读取学习证据", true);
             }
-            EvidenceReadService.EvidenceSummary summary =
-                    evidenceReader.read(context.getUser().getId(), nodeCodes, 12);
+            Map<String, NodeIdentityService.Identity> courseNodes;
+            try {
+                courseNodes = publishedCourseScope.nodes(courseCode);
+            } catch (RuntimeException e) {
+                log.warn("[tutor] course evidence scope unavailable: {}", e.getClass().getSimpleName());
+                return emptyEvidence(context, "课程证据范围暂不可用", true);
+            }
+            List<String> requested = stringList(arguments, "nodeCodes");
+            if (requested.isEmpty() && context.getCourseContext() != null
+                    && context.getCourseContext().getNodeCodes() != null) {
+                requested = context.getCourseContext().getNodeCodes();
+            }
+            Set<String> requestedKeys = new LinkedHashSet<>();
+            for (String value : requested) {
+                if (StringUtils.isNotBlank(value)) requestedKeys.add(value.trim());
+            }
+            Set<String> evidenceKeys = new LinkedHashSet<>();
+            for (NodeIdentityService.Identity identity : courseNodes.values()) {
+                if (requestedKeys.isEmpty() || requestedKeys.contains(identity.nodeCode)
+                        || requestedKeys.contains(identity.storageKey)) {
+                    if (StringUtils.isNotBlank(identity.nodeCode)) evidenceKeys.add(identity.nodeCode);
+                    if (StringUtils.isNotBlank(identity.storageKey)) evidenceKeys.add(identity.storageKey);
+                }
+            }
+            if (evidenceKeys.isEmpty()) {
+                return emptyEvidence(context, "当前课程范围内没有可读取的学习证据", false);
+            }
+            EvidenceReadService.EvidenceSummary summary = evidenceReader.read(
+                    context.getUser().getId(), new ArrayList<>(evidenceKeys), 12);
             context.setEvidence(summary);
             if (summary.getRecords().isEmpty()) {
                 return Outcome.empty(summary.getNarrative());
@@ -174,6 +208,13 @@ public class TutorToolkit {
                             + "、获得帮助 " + summary.getHelpedAttempts() + "）",
                     evidenceReader.describe(summary));
         }
+    }
+
+    private TutorTool.Outcome emptyEvidence(TutorTool.Context context, String reason, boolean failed) {
+        EvidenceReadService.EvidenceSummary summary = new EvidenceReadService.EvidenceSummary();
+        summary.setNarrative(reason);
+        context.setEvidence(summary);
+        return failed ? TutorTool.Outcome.failed(reason) : TutorTool.Outcome.empty(reason);
     }
 
     // endregion

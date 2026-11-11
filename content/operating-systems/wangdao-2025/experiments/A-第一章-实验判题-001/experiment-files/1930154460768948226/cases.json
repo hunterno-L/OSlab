@@ -1,0 +1,37 @@
+{
+  "description": "驱动 lib/print.c 的 _Printf()。stdin 第 1 行是格式串（原始文本，可含空格；\\n \\t \\r \\\\ 由驱动解码为真实控制字符；长度 ≤200；转换说明内部的 width/precision 数字串最多 2 位即取值 0..99，格式串中的普通数字文本不受此限）；第 2 行是参数个数 n（0..8）；随后 n 行每行一个参数：「i <int32>」表示整数参数、「s <无空格字符串>」表示字符串参数（≤63 字符）。支持的转换说明符：%[flags][width][.precision]conv，flags 为 '-' 左对齐 / '0' 零填充 / '+' 强制正号 / ' ' 正数前空格（可组合可重复），conv 为 d（十进制有符号）、x（十六进制小写无符号）、c（单字符）、s（字符串）、%（字面百分号，不取参）。语义与 C 标准 printf 在该子集内一致：d/x 的 precision 是最少数字位数（不足补前导 0，值为 0 且 precision 为 0 时不输出数字），指定 precision 时 '0' flag 失效，零填充补在符号之后数字之前，'-' 与 '0' 同时出现时 '-' 优先；s 的 precision 是最多输出字符数，'0' flag 对 s/c 无效；c 的 precision 无效；未识别的 conv 字符原样输出 '%' 与该字符且不取参；格式串在 conv 前结束则输出一个 '%' 后停止。参数按出现顺序用 arg_int/arg_str 取（va_arg 的主机等价物），参数耗尽时整数取 0、字符串取空串。输出：_Printf 产生的字符流原样输出，末尾由驱动补一个换行。",
+  "cases": [
+    {
+      "name": "four-specifiers-d-x-c-s",
+      "input": "d=%d x=%x c=%c s=%s\n4\ni 42\ni 255\ni 65\ns MOS\n"
+    },
+    {
+      "name": "width-zero-pad-and-left-align",
+      "input": "[%08d][%8x][%-8d]\n3\ni -42\ni 255\ni 7\n"
+    },
+    {
+      "name": "string-precision-truncate-and-pad",
+      "input": "[%.3s][%10.3s][%-10.3s][%.9s]\n4\ns abcdef\ns abcdef\ns abcdef\ns ab\n"
+    },
+    {
+      "name": "int-precision-and-zero-flag-ignored",
+      "input": "[%.5d][%8.5d][%08.5d][%.0d][%.0x]\n5\ni 42\ni 42\ni 42\ni 0\ni 0\n"
+    },
+    {
+      "name": "sign-flags-plus-and-space",
+      "input": "[%+d][% d][%+d][%08d]\n4\ni 42\ni 42\ni -42\ni -42\n"
+    },
+    {
+      "name": "percent-literal-and-unknown-conversion",
+      "input": "100%% done %d%c%q\n2\ni 7\ni 33\n"
+    },
+    {
+      "name": "left-align-overrides-zero-plus-char-width",
+      "input": "[%-08d][%-8s][%8s][%08x][%5c]\n5\ni 42\ns ab\ns ab\ni 48879\ni 65\n"
+    },
+    {
+      "name": "negative-hex-and-int32-extremes",
+      "input": "%x|%d|%d\n3\ni -1\ni -2147483648\ni 2147483647\n"
+    }
+  ]
+}

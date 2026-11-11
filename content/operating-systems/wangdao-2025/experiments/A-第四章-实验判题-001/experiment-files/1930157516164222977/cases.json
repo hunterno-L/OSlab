@@ -1,0 +1,25 @@
+{
+  "description": "实验 4.10 duppage(u_int envid, u_int pn)（user/fork.c，用户态）。三类页分别处理：只读页原权限共享一次；PTE_LIBRARY 共享页原权限共享一次；可写页先映射给子进程再映射给自己，两次都带 perm|PTE_COW。驱动操作符（CH4_USER_DRIVER）：I=env_init 并打印空闲 PCB 数；A parent=env_alloc 打印 返回码/下标/env_id；U idx=同时设 curenv 与用户态全局 env；S idx st=设 env_status；R idx=插入就绪链表头；P idx va perm=page_alloc+page_insert 建真实映射，打印 返回码/物理页基址；D envid pn=调 duppage(envid,pn) 后打印 父进程页表项/子进程页表项（子进程下标取 ENVX(envid)，无页表则 4294967295）；V=调 fork() 打印 返回值/子进程下标/env 下标；K s a0 a1 a2 a3 a4=填 KERNEL_SP 现场调 handle_sys 打印 $v0（必须恰好 6 个数；s=3 即 SYS_mem_unmap，a0=envid a1=va）；O idx va=页表项原始值（无页表 4294967295）；Q idx va=物理页基址（无有效映射 4294967295）；E idx=env_pgfault_handler/env_ipc_receiving/env_ipc_dstva/env_ipc_from/env_ipc_value；T idx=env_id/parent/status/pri/cr3；C=空闲物理页数；L=就绪链表下标；H=就绪链表头（空表 -1）。权限位：PTE_V=1，PTE_R=2（MOS 的可写位），PTE_COW=8，PTE_LIBRARY=16；perm=3 读写、1 只读、19 读写+共享、17 只读+共享、11 读写+COW。pn 与 va 换算：va=pn<<12，故 pn=1024->4194304、1025->4198400、1026->4202496、1027->4206592。UXSTACKTOP=1056964608，PGFAULT_ENTRY=4198400。宿主物理页账本：np=256/fm=8192 初始空闲 252 页，np=8 时 4 页；空闲链表 LIFO，头是最高号页；每次 env_alloc 占 1 页作页目录；首次进入某 4MB 区间额外占 1 页作页表；page_insert 到【同一物理页】只改权限不递增 pp_ref，到不同物理页则先 page_remove 旧页。用户态实验的平台裁掉了 yield 与 IPC 两段（源码预算），故 K 11/K 8/K 9 返回 -E_NO_SYS(-10)。",
+  "cases": [
+    {
+      "name": "三类页各自的处理：可写页父子双方都加 COW(3->11)、只读页原权限共享(1)、LIBRARY 共享页保持共享(19)、未映射页一个系统调用都不做",
+      "input": "256 8192\n22\nI\nA 0\nA 0\nU 63\nP 63 4194304 3\nP 63 4198400 1\nP 63 4202496 19\nC\nD 318 1024\nC\nD 318 1025\nC\nD 318 1026\nC\nD 318 1027\nC\nO 63 4194304\nO 62 4194304\nO 63 4198400\nO 63 4202496\nT 62\nL\n"
+    },
+    {
+      "name": "共享而非复制：duppage 后父子指向同一物理页，解除子进程映射不得回收该页，再解除父进程映射才回收；页被解除后 duppage 必须静默返回",
+      "input": "256 8192\n18\nI\nA 0\nA 0\nU 63\nP 63 4194304 3\nC\nD 318 1024\nC\nQ 62 4194304\nQ 63 4194304\nK 3 318 4194304 0 0 0\nC\nO 62 4194304\nO 63 4194304\nK 3 191 4194304 0 0 0\nC\nQ 63 4194304\nD 318 1024\n"
+    },
+    {
+      "name": "只读页(1)、读写共享页(19)、只读共享页(17)都不得被加 COW；LIBRARY 分支必须优先于可写分支，同批里的可写页(3)仍要父子双方标 COW",
+      "input": "256 8192\n20\nI\nA 0\nA 0\nU 63\nP 63 4194304 1\nP 63 4198400 19\nP 63 4202496 17\nP 63 4206592 3\nC\nD 318 1024\nD 318 1025\nD 318 1026\nD 318 1027\nC\nO 63 4194304\nO 62 4194304\nO 63 4198400\nO 62 4202496\nO 63 4206592\nO 62 4206592\n"
+    },
+    {
+      "name": "物理页耗尽：np=8 时子进程页表申请失败，duppage 不检查返回值故父进程仍被标 COW，但不得崩溃、不得回收父进程的页；重试结果必须稳定",
+      "input": "8 8192\n17\nI\nA 0\nA 0\nU 63\nP 63 4194304 3\nC\nD 318 1024\nC\nO 63 4194304\nO 62 4194304\nQ 62 4194304\nK 3 191 4194304 0 0 0\nC\nP 63 4194304 3\nD 318 1024\nC\nT 62\n"
+    },
+    {
+      "name": "fork 集成：V 触发完整 fork，逐页调 duppage 后再为子进程申请异常栈、登记 PGFAULT_ENTRY、置 RUNNABLE；父子可写页都必须是 COW，只读页保持只读",
+      "input": "256 8192\n16\nI\nA 0\nU 63\nP 63 4194304 3\nP 63 4198400 1\nC\nV\nC\nO 63 4194304\nO 62 4194304\nO 62 4198400\nE 62\nT 62\nL\nH\nQ 62 1056960512\n"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "description": "驱动 mm/pmap.c 的 page_init()。stdin 首行 npage freemem_bytes。输出第一行为空闲链表页号序列（真实源码头插，故为递减序），第二行为 freemem used_count free_count other_count。",
+  "cases": [
+    {
+      "name": "8 页 / 内核已用 8192 字节（页对齐）",
+      "input": "8 8192\n"
+    },
+    {
+      "name": "8 页 / 内核已用 9000 字节（freemem 需向上对齐）",
+      "input": "8 9000\n"
+    },
+    {
+      "name": "4 页 / 内核未占用任何页",
+      "input": "4 0\n"
+    },
+    {
+      "name": "4 页 / 全部被内核占用（空闲链表为空）",
+      "input": "4 16384\n"
+    },
+    {
+      "name": "12 页 / 已用 1 字节（最小非零对齐）",
+      "input": "12 1\n"
+    }
+  ]
+}

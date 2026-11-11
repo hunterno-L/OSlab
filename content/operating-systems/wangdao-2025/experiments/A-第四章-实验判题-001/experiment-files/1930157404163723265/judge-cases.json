@@ -1,0 +1,22 @@
+[
+  {
+    "input": "256 8192\n14\nI\nA 0\nU 63\nC\nY\nC\nT 63\nE 63\nL\nA 0\nU 62\nY\nC\nL\n",
+    "output": "I 64\nA 0 63 191\nU 63\nC 251\nY 0 63\nC 251\nT 63 191 0 1 1 1044480\nE 63 0 0 0 0 0\nL\nA 0 62 318\nU 62\nY 0 62\nC 250\nL"
+  },
+  {
+    "input": "256 8192\n14\nI\nA 0\nU 63\nV\nT 62\nT 63\nC\nV\nT 61\nL\nH\nY\nC\nE 62\n",
+    "output": "I 64\nA 0 63 191\nU 63\nV 318 62 63\nT 62 318 191 2 1 1040384\nT 63 191 0 1 1 1044480\nC 248\nV 445 61 63\nT 61 445 191 2 1 1036288\nL 61 62\nH 61\nY 0 63\nC 245\nE 62 4198400 0 0 0 0"
+  },
+  {
+    "input": "256 8192\n16\nI\nA 0\nA 0\nU 62\nC\nY\nC\nT 62\nE 62\nQ 62 1056960512\nL\nH\nT 61\nY\nU 63\nY\n",
+    "output": "I 64\nA 0 63 191\nA 0 62 318\nU 62\nC 250\nY 0 62\nC 250\nT 62 318 0 1 1 1040384\nE 62 0 0 0 0 0\nQ 4294967295\nL\nH -1\nT 61 0 0 0 0 0\nY 0 62\nU 63\nY 0 63"
+  },
+  {
+    "input": "5 8192\n14\nI\nA 0\nU 63\nC\nV\nC\nT 62\nL\nH\nE 63\nQ 63 1056960512\nY\nC\nT 63\n",
+    "output": "I 64\nA 0 63 191\nU 63\nC 0\nV -4 -1 63\nC 0\nT 62 0 0 0 0 0\nL\nH -1\nE 63 0 0 0 0 0\nQ 4294967295\nY 0 63\nC 0\nT 63 191 0 1 1 16384"
+  },
+  {
+    "input": "256 8192\n18\nI\nA 0\nU 63\nP 63 4194304 3\nV\nC\nU 62\nY\nQ 62 4194304\nO 62 4194304\nW 4198400 4194304 4096\nO 63 4194304\nT 62\nE 62\nL\nC\nU 63\nY\n",
+    "output": "I 64\nA 0 63 191\nU 63\nP 0 1040384\nV 318 62 63\nC 245\nU 62\nY 0 62\nQ 1040384\nO 1040395\nW -3\nO 1040395\nT 62 318 191 2 1 1032192\nE 62 4198400 0 0 0 0\nL 62\nC 245\nU 63\nY 0 63"
+  }
+]

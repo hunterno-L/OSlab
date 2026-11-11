@@ -1,0 +1,15 @@
+{
+  "questionId": "1930156972624367618",
+  "unitMappings": [
+    {
+      "unitCode": "unit.process.rr-mlq-mlfq",
+      "required": false,
+      "completionRule": "PASS"
+    },
+    {
+      "unitCode": "unit.overview.system-calls",
+      "required": false,
+      "completionRule": "PASS"
+    }
+  ]
+}

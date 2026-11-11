@@ -1,0 +1,25 @@
+{
+  "description": "实验 4.3 sys_mem_alloc(int sysno, u_int envid, u_int va, u_int perm)。驱动操作符：I=env_init 并打印空闲 PCB 数；A parent=env_alloc 打印 返回码/下标/env_id；U idx=设 curenv；C=打印空闲物理页数；K s a0 a1 a2 a3 a4=填好 KERNEL_SP 现场后调 handle_sys 并打印 $v0（必须恰好 6 个数）；Q idx va=打印物理页基址（无映射打印 4294967295）；O idx va=打印页表项原始值（无页表打印 4294967295）；T idx=打印 env_id/parent/status/pri/cr3。系统调用号：1=mem_alloc，3=mem_unmap。错误码以 uint32 补码打印后再按 int 解读：-2=E_BAD_ENV，-3=E_INVAL，-4=E_NO_MEM，-5=E_NO_FREE_ENV，-10=E_NO_SYS。宿主物理页账本：np=256/fm=8192 时启动期映射占 4 页，初始空闲 252 页；每次 env_alloc 占 1 页作页目录（envs[63].cr3=1044480、envs[62].cr3=1040384、envs[61].cr3=1036288）；首次映射某个 4MB 区间还要额外占 1 页作页表。np=6/fm=8192 时初始空闲仅 2 页，np=8 时 4 页。",
+  "cases": [
+    {
+      "name": "正常分配与同址重映射：perm 补 PTE_V、旧页必须被 page_remove 回收，空闲页数不多不少",
+      "input": "256 8192\n11\nI\nA 0\nU 63\nC\nK 1 191 4096 2 0 0\nQ 63 4096\nO 63 4096\nC\nK 1 191 4096 2 0 0\nQ 63 4096\nC\n"
+    },
+    {
+      "name": "内核地址与坏 envid 必须拒绝：va>=UTOP 返回 -E_INVAL，envid 不存在返回 -E_BAD_ENV，perm=0 仍要建出有效映射",
+      "input": "256 8192\n10\nI\nA 0\nU 63\nK 1 191 1073741824 3 0 0\nK 1 191 4294967295 3 0 0\nK 1 999 4096 3 0 0\nK 1 0 8192 0 0 0\nQ 63 8192\nO 63 8192\nC\n"
+    },
+    {
+      "name": "物理页仅剩一页时 page_insert 建页表失败：必须返回 -E_NO_MEM 且把刚 page_alloc 的页归还（漏 page_free 即泄漏）",
+      "input": "6 8192\n7\nI\nA 0\nU 63\nC\nK 1 191 4096 3 0 0\nC\nQ 63 4096\n"
+    },
+    {
+      "name": "替子进程分配（checkperm=0）后解除映射再分配：页目录与页表各占一页，数据页回收后可被重新发出",
+      "input": "256 8192\n13\nI\nA 0\nA 0\nU 63\nK 1 318 4096 3 0 0\nQ 62 4096\nT 62\nK 3 318 4096 0 0 0\nQ 62 4096\nC\nK 1 318 4096 3 0 0\nQ 62 4096\nC\n"
+    },
+    {
+      "name": "小内存下连续分配到耗尽：page_alloc 失败必须原样上抛 -E_NO_MEM，已建映射不受影响且不得崩溃",
+      "input": "8 8192\n12\nI\nA 0\nU 63\nK 1 191 4096 3 0 0\nK 1 191 8192 3 0 0\nK 1 191 12288 3 0 0\nK 1 191 16384 3 0 0\nC\nQ 63 4096\nQ 63 16384\nK 1 191 20480 3 0 0\nC\n"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "questionId": "1930155484338507777",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.process.process_control",
+      "nodeName": "进程控制",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "env_create() = env_alloc() + load_icode()，env_create_priority() 额外设置 env_pri；这是进程创建原语的完整实现。"
+    },
+    {
+      "nodeCode": "os.process.pcb",
+      "nodeName": "进程控制块",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "创建过程就是分配并初始化一个 Env：状态、寄存器集合、页目录、优先级全部落到 PCB 字段上。"
+    },
+    {
+      "nodeCode": "os.cpu.rr",
+      "nodeName": "时间片轮转",
+      "role": "RELATED",
+      "weight": 0.5,
+      "reason": "env_create_priority 设置的 env_pri 在 MOS 里被 sched_yield 用作时间片长度，是时间片轮转调度的参数来源。"
+    }
+  ]
+}

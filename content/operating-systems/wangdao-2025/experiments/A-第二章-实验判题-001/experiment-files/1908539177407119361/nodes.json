@@ -1,0 +1,26 @@
+{
+  "questionId": "1908539177407119361",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.paging",
+      "nodeName": "基本分页存储管理",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "page_alloc() 从 page_free_list 摘一页并清零，page_free() 把 pp_ref 归零的页重新挂回；判题观测量是分配返回的页号、首字是否为 0（驱动先写 0xDEADBEEF）与末态空闲链表序列。"
+    },
+    {
+      "nodeCode": "os.memory.memory_management",
+      "nodeName": "内存管理",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "分配与释放必须成对且维护 pp_ref，否则同一物理页会被两个页表项同时占用；实验还要求在 mips_init 中注释掉 page_check 以便逐步验证。"
+    },
+    {
+      "nodeCode": "os.memory.sharing",
+      "nodeName": "内存共享",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "page_free 只有在 pp_ref 归零时才能真正回收物理页，这是共享页安全回收的前提；子任务的 S 操作显式设置 pp_ref 来检验这一点。"
+    }
+  ]
+}

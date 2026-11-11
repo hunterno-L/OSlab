@@ -1,0 +1,369 @@
+{
+  "schemaVersion": "oslab-experiment-maintenance/1.0",
+  "batchCode": "batch.a.experiments.ch1.judge.001",
+  "contributor": "A",
+  "experiments": [
+    {
+      "questionId": "1917131319528452098",
+      "resourceCode": "exp.legacy.1917131319528452098",
+      "title": "实验1.1 构建 Minix 内核",
+      "sectionCode": "sec.memory.basic",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1917131319528452098/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1917131319528452098/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1917131319528452098/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1917131319528452098/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1917131319528452098/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.loading_linking",
+          "nodeName": "程序的链接与装入",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "子任务判的是顶层 Makefile 里 vmlinuz ← {modules, objects} ← kernel.o ← lib.o 的合法重建顺序，即「多个目标文件链接成一个可执行内核镜像」这一链接装入过程的构建前置阶段；实验任务 3 改 include.mk 的 CROSS_COMPILE/LD 正是为链接阶段选对工具链。"
+        },
+        {
+          "nodeCode": "os.boot.boot_process",
+          "nodeName": "操作系统引导过程",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "实验任务 5 要求检查 gzemul/vmlinuz 是否生成并能正确运行，该镜像就是 gxemul 引导的内核；构建顺序错误会让镜像缺段而无法引导。"
+        },
+        {
+          "nodeCode": "os.runtime.kernel",
+          "nodeName": "操作系统内核",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "构建产物 vmlinuz 是宏内核镜像，Makefile 里 modules 与 objects 两个变量的区别决定了内核是递归 make 各模块还是一次性链接全部 .o。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.functions",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.overview.boot",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "CONCEPT_HARNESS",
+      "conceptTarget": "make.dependency-order",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930153941795131394",
+      "resourceCode": "exp.legacy.1930153941795131394",
+      "title": "实验1.2 深入理解 ELF 文件格式",
+      "sectionCode": "sec.memory.basic",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930153941795131394/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930153941795131394/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930153941795131394/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930153941795131394/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930153941795131394/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.loading_linking",
+          "nodeName": "程序的链接与装入",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "readelf() 遍历 Section Header Table 输出每个节的序号与 sh_addr，正是「链接器把多个 .o 的节合并成一个可执行文件」的结果视图；实验任务 4 要求与 readelf 工具输出逐条比对。"
+        },
+        {
+          "nodeCode": "os.memory.process_image",
+          "nodeName": "进程内存映像",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "各节的 sh_addr 决定装入后代码段/数据段/BSS 在内存映像中的位置，读节表就是读进程内存映像的布局蓝图。"
+        },
+        {
+          "nodeCode": "os.memory.logical_address",
+          "nodeName": "逻辑地址与物理地址",
+          "role": "SECONDARY",
+          "weight": 0.5,
+          "reason": "sh_addr 是段的虚拟（逻辑）地址而非文件偏移，子任务用 e_shoff + i*e_shentsize 定位记录、再取偏移 12 处的 sh_addr，正是区分文件偏移与逻辑地址的练习。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.functions",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930154079598989313",
+      "resourceCode": "exp.legacy.1930154079598989313",
+      "title": "实验1.3 使用 Linker Script 控制内核加载地址",
+      "sectionCode": "sec.memory.basic",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930154079598989313/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930154079598989313/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930154079598989313/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930154079598989313/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930154079598989313/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.loading_linking",
+          "nodeName": "程序的链接与装入",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "layout_sections() 按 ld 的 location counter 语义逐段 ALIGN 向上对齐后顺序放置，算出 .text/.data/.bss 的 VMA 与按页对齐的 _end；这组数就是学生用 readelf -S/-s 核对的同一组加载地址。"
+        },
+        {
+          "nodeCode": "os.memory.process_image",
+          "nodeName": "进程内存映像",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "段顺序 .text → .rodata → .data → .bss 与段间页对齐决定了内核内存映像的布局，_end 之后才是可分配的空闲物理内存。"
+        },
+        {
+          "nodeCode": "os.boot.boot_process",
+          "nodeName": "操作系统引导过程",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "基址取 0x80000000 一带是 MIPS kseg0（不经 TLB 的固定映射区），内核启动早期页表未建好只能跑在这里；_end 不对齐会让 page_init 把内核自身占用的半页当空闲页分配出去。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.functions",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.overview.boot",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "CONCEPT_HARNESS",
+      "conceptTarget": "ld.section-address",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930154331844431873",
+      "resourceCode": "exp.legacy.1930154331844431873",
+      "title": "实验1.4 深入理解 MIPS 汇编与 C 语言的交互",
+      "sectionCode": "sec.overview.boot",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930154331844431873/content.md",
+          "reason": "提供原实验说明及本地实验材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930154331844431873/starter.c",
+          "reason": "提供原实验说明及本地实验材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.boot.boot_process",
+          "nodeName": "操作系统引导过程",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "boot/start.S 是内核引导的第一段汇编：必须先把 $sp 设到 bootstacktop、清 $fp，才能 jal main 进入 C 世界；缺栈指针时任何 C 函数调用都会踩坏内存。"
+        },
+        {
+          "nodeCode": "os.runtime.kernel_mode",
+          "nodeName": "内核态",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "启动汇编运行在 kseg0 内核态，分析对象 fib/main 经 mips-linux-gnu-gcc -S 生成的 slti/bnez 条件跳转与 jal/jr 调用返回都是内核态代码。"
+        },
+        {
+          "nodeCode": "os.runtime.kernel",
+          "nodeName": "操作系统内核",
+          "role": "SECONDARY",
+          "weight": 0.5,
+          "reason": "实验要求观察 C 的递归与循环在汇编层的栈操作（压栈/弹栈），这是理解内核为何不能依赖宿主 libc、必须自带启动代码的前提。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.overview.boot",
+          "required": false,
+          "completionRule": "SUBMIT"
+        },
+        {
+          "unitCode": "unit.overview.runtime-modes",
+          "required": false,
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "judgeMode": "LOCAL_BUILD",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "本地构建实验；未在平台自动判分",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930154460768948226",
+      "resourceCode": "exp.legacy.1930154460768948226",
+      "title": "实验1.5 实现内核中的 printf 函数",
+      "sectionCode": "sec.overview.runtime",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930154460768948226/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930154460768948226/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930154460768948226/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930154460768948226/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930154460768948226/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.runtime.kernel",
+          "nodeName": "操作系统内核",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "补全 lib/print.c 的 _Printf()：内核开发不使用 C 标准库，格式串解析、宽度/精度/填充/左对齐都必须自己实现，再经 console.c 逐字符输出。"
+        },
+        {
+          "nodeCode": "os.io.device_driver",
+          "nodeName": "设备驱动程序",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "_Printf 解析出的字符最终由 drivers/gzconsole/console.c 的控制台驱动写到串口设备，内核输出链是「格式化层 → 驱动层 → 设备」。"
+        },
+        {
+          "nodeCode": "os.runtime.kernel_mode",
+          "nodeName": "内核态",
+          "role": "SECONDARY",
+          "weight": 0.5,
+          "reason": "内核态下没有宿主 libc 可借用，子任务用 struct ArgList 模拟 va_list、用 print_char 模拟控制台 sink，正是内核态自给自足编程的体现。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.overview.runtime-modes",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.io.driver",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    }
+  ]
+}

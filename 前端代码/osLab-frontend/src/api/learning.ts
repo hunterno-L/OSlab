@@ -77,6 +77,12 @@ export interface LearningQuestionVO {
   firstResult?: "CORRECT" | "WRONG" | null;
   /** 测评会话占位：题目已下线时为 true（不可作答，从有效分母扣除） */
   offline?: boolean;
+  /** 整组自测：题目下线/版本变化说明，以及本人草稿（不含任何正确性信息） */
+  offlineReason?: string | null;
+  revisionChanged?: boolean;
+  questionRevision?: number;
+  draftAnswer?: string | string[] | null;
+  markedUnsure?: boolean;
   /** 仅本人已作答或管理视角后下发 */
   analysis: string | null;
   misconception: string | null;
@@ -174,6 +180,8 @@ export interface LearningEventVO {
 
 export interface RecommendationVO {
   nodeName: string;
+  nodeCode?: string;
+  displayName?: string;
   type: string;
   reason: string;
   score: number;
@@ -485,6 +493,8 @@ export function answerLearningQuestion(data: {
   answer: string | string[];
   /** 所属测评会话 id（测评流程作答时携带） */
   assessmentRunId?: number | string;
+  /** 练习尝试上下文 id（服务端建立；绑定帮助资格与提交） */
+  attemptContextId?: number | string;
   sourceUnitCode?: string;
   sourceActivityCode?: string;
   /** 提交幂等键（同键重发返回既有结果；主动重试使用新键） */
@@ -571,24 +581,37 @@ export function getLearningCatalog(params?: {
   return axios.post("/api/learning/questions/catalog", params || {});
 }
 
-// ========== 测评会话（Phase 4 §8） ==========
+// ========== 测评会话（Phase 4 §8；v13 整组自测） ==========
 
 export interface AssessmentRunVO {
   runId: string;
   status: "ACTIVE" | "FINISHED";
+  /** PRACTICE（旧 run 缺省）/ SELF_TEST */
+  mode?: "PRACTICE" | "SELF_TEST";
+  /** 草稿版本（整组自测） */
+  rowVersion?: number;
+  /** 最近一次草稿保存时间（epoch millis） */
+  savedAt?: number | null;
   questions: LearningQuestionVO[];
 }
 
 export interface AssessmentStartResult {
   runId: string;
   questionIds: string[];
+  mode?: "PRACTICE" | "SELF_TEST";
+  rowVersion?: number;
 }
 
 export interface AssessmentFinishResult {
   runId: string;
+  mode?: "PRACTICE" | "SELF_TEST";
   totalQuestions: number;
   answeredQuestions: number;
   firstCorrect: number;
+  validQuestions?: number;
+  unansweredQuestions?: number;
+  pendingSelfAssessmentCount?: number;
+  invalidCount?: number;
 }
 
 export function startAssessment(data: {
@@ -602,6 +625,8 @@ export function startAssessment(data: {
   difficulty?: number;
   studyState?: string;
   count: number;
+  /** 缺省 PRACTICE（旧行为）；SELF_TEST 为交卷后统一判分 */
+  mode?: "PRACTICE" | "SELF_TEST";
 }): Promise<LearningApiResponse<AssessmentStartResult>> {
   return axios.post("/api/learning/assessment/start", data);
 }
@@ -616,6 +641,9 @@ export function finishAssessment(data: {
   runId: string;
   answeredCount?: number;
   firstCorrect?: number;
+  /** 整组自测：交卷幂等键与服务端草稿版本 */
+  submissionKey?: string;
+  rowVersion?: number;
 }): Promise<LearningApiResponse<AssessmentFinishResult>> {
   return axios.post("/api/learning/assessment/finish", data);
 }
@@ -681,8 +709,10 @@ export function reviewLearningQuestion(data: {
 
 // ========== 个人图谱与掌握度 ==========
 
-export function personalGraph(): Promise<LearningApiResponse<PersonalGraphVO>> {
-  return axios.get("/api/learning/mastery/graph");
+export function personalGraph(
+  courseCode: string
+): Promise<LearningApiResponse<PersonalGraphVO>> {
+  return axios.get("/api/learning/mastery/graph", { params: { courseCode } });
 }
 
 // ---------- 补救学习路径（Phase 6 §10 / §6.3） ----------
@@ -718,10 +748,11 @@ export interface LearningPathVO {
 }
 
 export function masteryPath(
-  targetNodeName: string
+  targetNodeName: string,
+  courseCode: string
 ): Promise<LearningApiResponse<LearningPathVO>> {
   return axios.get("/api/learning/mastery/path", {
-    params: { targetNodeName },
+    params: { targetNodeName, courseCode },
   });
 }
 
@@ -733,10 +764,12 @@ export function nodeWorkbench(
   });
 }
 
-export function masteryRecommend(): Promise<
-  LearningApiResponse<RecommendationVO[]>
-> {
-  return axios.get("/api/learning/mastery/recommend");
+export function masteryRecommend(
+  courseCode: string
+): Promise<LearningApiResponse<RecommendationVO[]>> {
+  return axios.get("/api/learning/mastery/recommend", {
+    params: { courseCode },
+  });
 }
 
 // ========== 学习记录（Phase 7 §11） ==========

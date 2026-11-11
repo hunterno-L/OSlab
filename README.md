@@ -4,25 +4,26 @@
 
 > 当前产品品牌为 **ZhiCore**；仓库名、前端包名和部分历史文档仍沿用 `OSLab` / `oslab`。
 >
-> **2026-11 AI 升级**：平台把课程、资料、题目、模拟、图谱与记录连成可验证的 AI 学习流程——统一课程会话与导师编排（工具预算与轨迹可查）、语义+关键词+图谱联合检索（向量存 MySQL，不引入向量数据库）、帮助等级与证据资格、诊断与区分验证任务、下一步与复习阶梯、用户可配置模型档案；并以数据库系统第二课程包验证引擎跨课程复用。规格见 [交付计划](docs/ZhiCore整体AI升级-交付计划.md)，执行约束见 [开发约束与子代理任务书](docs/ZhiCore整体AI升级-开发约束与子代理任务书.md)。
+> 学生端围绕“学习计划 → 单元学习 → 练习或实验 → 证据与复习”组织，共享一位带课程上下文的 AI 导师；教师端围绕班级跟进、布置练习与批阅组织。当前整合契约见 [共享契约与验收](docs/学习体验与AI对话整合/01-共享契约与验收.md)。历史 AI 升级方案保留在 [历史交付计划](docs/useless/ZhiCore整体AI升级-交付计划.md) 和 [历史开发约束](docs/useless/ZhiCore整体AI升级-开发约束与子代理任务书.md)。
 
 公开入口为 `/welcome`（落地页 + 登录/注册弹层）；登录后学生默认进入 `/graph`（课程学习），`/home` 为学习首页，`/teaching/content` 为教师内容维护入口。教材驱动课程系统已实现，第一至第五章已完成教材内容编排；课程内容按章交付与发布，规范见 [课程与知识图谱总体设计](docs/教材驱动课程重构/01-课程与知识图谱总体设计.md)。
 
 ## 当前能力
 
 - **平台入口**：`/welcome` 落地页介绍学习主线、知识图谱/画像、三种练习与学习证据；顶部按钮打开 420px 登录/注册弹层，未登录访问受保护路由会带 `redirect` 回到登录。
-- **学习首页**：`/home` 展示当前课程/单元的继续学习、学习画像（已掌握/待巩固/薄弱/未学习与证据数）、活动时间线、页面置换演算台、任务账本和六个目录入口；数据来自课程、画像和任务接口，按区块加载与重试。
+- **学习首页**：`/home` 保持当前课程，优先提供到期复习、需要补学、缺少证据待验证的行动，也可按 15 分钟安排；继续学习、画像和下一步推荐使用同一课程范围。节点显示名称，稳定编码用于定位。
 - **知识图谱**：课程图谱按概念、算法、机制与实现组织，覆盖五章教材内容；四类关系语义（依赖/包含/相关/实现）与个人掌握状态双维可视化，薄弱节点一键生成补救路径并直达学习。
 - **节点工作台**：知识内容 / 知识详解（静态 HTML 讲义）/ 题目练习 / 实践四页签，常驻图谱导师（GraphRAG，可降级）。
 - **题目练习**：按教材章/节/单元、稳定知识节点和个人作答状态筛选的纵向多题卡流，判断/单选/多选/填空服务端判分；连续测评保留为次级入口，支持服务端固定队列、幂等作答、待巩固与历史快照回放。
-- **编程实验**：Monaco 编辑器、留页异步判题（Java/C/C++/Go 隔离沙箱）、草稿按用户保存、失败后带上下文的“向导师提问”。
+- **编程实验**：Monaco 编辑器、留页异步判题（Java/C/C++/Go 隔离沙箱）、按用户/实验/语言隔离的草稿、失败后带上下文的“向导师提问”。界面区分初始代码与本地草稿；恢复初始代码须确认，并保留替换前草稿。评测边界见下方说明。
 - **交互模拟**：18 项 CPU 调度、连续内存分配、页面置换和磁盘调度演示，共用 `/experiments/simulation` 与课程活动入口；另接入 legacy 模拟静态资源（`public/legacy-simulation`）兼容旧版演示。步骤由确定性纯函数生成，当前演示不写判题/掌握事件。
 - **学习记录**：事件时间线（作答/判题/预测，含掌握度前后快照）与只读图谱回放。
-- **班级与教学管理**：教师可维护班级与成员（`/teaching/classes`），学生查看我的班级（`/classes`）；教学端继续提供班级薄弱热力图谱、节点下钻、题目审核与导入、知识维护和用户管理。
+- **教学工作台**：管理员从 `/teaching/overview` 查看所选班级、课程的到期复习、薄弱与缺少证据人数，查看证据或带目标布置练习；分类人数可能重叠。任务列表支持班级草稿、个人定向草稿与待批阅筛选，进入任务、批阅和返回时保留班级/课程上下文。旧班级分析明确标注“本班全部课程”。
+- **班级与教学管理**：教师维护班级与成员（`/teaching/classes`），学生查看我的班级（`/classes`）；保留节点下钻、题目审核与导入、知识维护和用户管理。教师导师入口仅预填班级汇总，教师确认发送后才发起对话。
 - **全局 AI 助手**：可拖动悬浮助手，按用户隔离会话，显式页面上下文；升级后接入统一课程会话：来源引用卡可打开定位、工具轨迹面板、下一步卡与补学返回、模型设置页（测试通过才可激活，密钥加密存储、响应脱敏）。
 - **AI 导师编排**：每轮最多 3 次工具执行、2 次模型调用；工具含联合检索、本人证据读取、已核验活动选择与页面置换演算核验（`PageReplacer`）；模型或 embedding 不可用时如实标注 `mode=FALLBACK`，不伪装语义检索。
 - **学习证据**：帮助等级 `NONE/HINT/ANSWER_REVEALED` 在答题事务前落库并参与证据资格；重复提交、换会话、换模型不新增首次观测；系统/编译错误不降低掌握度。
-- **跨课程**：数据库系统课程包（3 知识点、3 段讲义、6 道客观题）复用同一套检索、问答、练习、诊断与复习服务；跨课程 smoke 21/21 通过。
+- **课程隔离**：默认仅开放操作系统课程。数据库系统内容包作为跨课程测试资料保留，默认不出现在正式学习目录中；已有内容和学习历史不删除。启用方式见下方配置。画像、图谱、推荐与路径接口支持 `courseCode`，显式课程范围为空时返回空结果，禁用课程返回“课程当前不可用”。
 - 支持账号注册、登录、学生批量管理和密码重置。
 
 掌握度模型：BKT（pLearn 学习转移项对对/错观测均生效，答错后验下降再叠加转移），状态阈值 GREEN≥0.70 且需概念+实践双证据；答错首次约 0.1123（薄弱）。判分、归因、路径全部有确定性规则，AI 不可用时闭环照常运行。
@@ -97,7 +98,7 @@ powershell -ExecutionPolicy Bypass -File ./start-oslab.ps1 -Status  # 查看进�
 powershell -ExecutionPolicy Bypass -File ./stop-oslab.ps1           # 只停止本仓库的前后端
 ~~~
 
-默认后端为 `http://localhost:8121/api`。前端从 8080 起寻找空闲端口；8080 常被 Multisim/NI Application Web Server 占用，脚本会自动改用 8081，实际地址以启动结果为准。启动成功前会检查后端健康状态、前端页面与 `/api` 代理。重复启动会复用已运行的进程；后端代码修改后，先停止再启动即可重新编译。首次缺少前端依赖时自动执行 `npm ci`。
+默认后端为 `http://localhost:8121/api`。前端从 8081 起寻找空闲端口，实际地址以启动结果为准。启动成功前会检查后端健康状态、前端页面与 `/api` 代理。重复启动会复用已运行的进程；后端代码修改后，先停止再启动即可重新编译。首次缺少前端依赖时自动执行 `npm ci`。
 
 ~~~powershell
 # 已编译且后端源码没有变化时，快速启动
@@ -111,7 +112,7 @@ Get-Content ./tmp/backend.log -Tail 50
 Get-Content ./tmp/frontend.log -Tail 50
 ~~~
 
-脚本不写入数据库密码，也不导入或清空数据。数据库连接、Neo4j 认证、AI 和真实代码沙箱沿用 `application.yml` 及当前环境变量；本机 Neo4j 关闭认证时无需密码。默认停止操作保留 MySQL/Redis/Neo4j；需要同时停止这三项 Windows 服务时使用 `stop-oslab.ps1 -Services`，通常需要管理员权限。原 `run-local.ps1` 继续用于 Docker Compose，和上述原生开发脚本用途不同。
+脚本不写入数据库密码，也不导入或清空数据。数据库连接、Neo4j 认证、AI 和真实代码沙箱沿用 `application.yml` 及当前环境变量；启动脚本不再强制切换到回显沙箱。后端从 `tmp/backend-runtime/` 的运行副本启动，避免 Windows 锁住 Maven 的构建产物；启停检测同时支持直接运行构建产物和该副本，也识别 npm 启动的前端。默认停止操作保留 MySQL/Redis/Neo4j；需要同时停止这三项 Windows 服务时使用 `stop-oslab.ps1 -Services`，通常需要管理员权限。原 `run-local.ps1` 继续用于 Docker Compose，和上述原生开发脚本用途不同。
 
 验收命令（前端 `前端代码/osLab-frontend`、后端 `后端代码/osLab-backend` 下执行）见下方 [验证](#验证) 章节。
 
@@ -178,18 +179,41 @@ docker compose --env-file .env up -d --build
 | AI_ALLOW_PRIVATE_BASE_URL | 否 | 是否允许个人模型地址指向回环/内网（本地模型部署），默认 false |
 | COS_ACCESS_KEY 等 | 否 | 配置后开启对象存储上传 |
 | CORS_ALLOWED_ORIGINS | 否 | 仅为额外跨域前端填写精确 HTTPS 来源 |
+| OSLAB_LEARNING_ENABLED_COURSES | 否 | 学习端启用课程，以逗号分隔；默认 `course.operating-systems`。对应 Spring 配置 `oslab.learning.enabled-courses` |
 
 完整的容器部署契约见 deploy/README.md 和 后端代码/osLab-backend/DEPLOYMENT.md。
+
+需要验证跨课程功能时，在启动后端前设置：
+
+~~~powershell
+$env:OSLAB_LEARNING_ENABLED_COURSES = 'course.operating-systems,course.database-systems'
+~~~
+
+恢复正式课程范围时，将该变量设为 `course.operating-systems` 并重启后端。Docker 部署须将变量传入后端容器；只修改宿主终端变量不会改变已运行的容器。管理员内容维护保留历史课程；学习端、课程导师和显式带课程的画像接口遵守启用范围。省略 `courseCode` 的旧画像接口保留兼容行为，新页面均传入已校验的当前课程。
+
+### 实验的评测边界
+
+| 模式 | 当前数量 | 验证范围 |
+| --- | --- | --- |
+| `AUTO` | 34 | 在线功能测试，只验证对应程序与测试数据 |
+| `CONCEPT_HARNESS` | 2（1.1、1.3） | 在线概念子任务；通过不代表完成 Minix 内核构建 |
+| `LOCAL_BUILD` | 5（1.4、2.8、3.12、3.13、4.1） | 本地 MIPS 环境构建与人工验收，禁止平台自动判分 |
+
+语言选择与代码内容不一致时会提示，保留已有草稿；需要切回题目代码时使用“恢复初始代码”，也可用“恢复替换前草稿”找回。离开实验页时释放编辑器和模型，避免多次进入持续积累 Monaco 实例。
 
 ## 数据初始化
 
 首次启动空数据卷时：
 
-- MySQL 自动导入 `数据库文件/oslab_db.sql`，并按 `deploy/mysql-init/10-load-oslab-db.sh` 的顺序加载 v3–v12 升级脚本（含 v10 班级与成员表、v11/v12 AI 会话与证据表，加载后逐项契约校验）。
+- MySQL 自动导入 `数据库文件/oslab_db.sql`，并按 `deploy/mysql-init/10-load-oslab-db.sh` 加载 v3–v14 升级及种子（含 v13 自测、v14 实验公共前置内容、判题映射和独立注释清理增量，加载后逐项契约校验）。
 - Neo4j 自动导入 `数据库文件/graph.db.dump`。
 - 图谱导入带有持久化标记，已有图数据不会被自动覆盖。
 
 请不要通过删除生产 Volume 的方式重新初始化数据。
+
+41 项操作系统实验的内容包位于 `content/operating-systems/wangdao-2025/experiments/`：34 项功能判题、2 项概念子任务、5 项本地 MIPS 构建。四章包可用 `node scripts/build-experiment-package.mjs --all` 重建，再用 `node scripts/import-experiment-package.mjs content/operating-systems/wangdao-2025/experiments --validate-only` 离线校验；在线预览和审核应用的参数见该脚本 `--help`。本地构建实验禁止自动评测，引用到学习任务时使用既有人工验收流程。
+
+v14 已完成宿主 gcc、独立数据库真实 API 导入、存量与全新安装迁移的重复应用验证；真实 Docker 沙箱和 5 项本地 MIPS 运行仍待验证，后者资源及关联单元保留草稿。完整矩阵见 [验收记录](artifacts/experiment-judge/validation.md)，演示步骤见 [演示说明](artifacts/experiment-judge/demo.md)。存量库使用 v14 前须满足 SQL 中的课程基线保护；全新安装先加载公共前置 seed。不要使用 `mysql --force` 绕过冲突检查。 随后执行 `oslab_upgrade_v14_experiment_comments.sql` 同步清理后的代码注释；该增量保留审核历史，不改可执行代码和映射。
 
 ## 开发说明
 
@@ -221,6 +245,20 @@ npm run build
 本地环境变量、Neo4j 认证和其他依赖配置请参考 application.yml 与 DEPLOYMENT.md。
 
 ## 验证
+
+2026-11-11 本轮修复与性能对照见 [bug 审查验收](artifacts/bug-review/validation.md)，教师工作台的交互说明见 [教师验收](artifacts/teacher-workspace/validation.md)。核心修复包括课程范围混用、节点编码直接展示、实验语言与旧草稿混淆、编辑器释放、教师班级计数/筛选与草稿删除，以及导师证据工具的课程边界。
+
+在同一隔离数据库、相同双课程配置下，每接口预热后连续请求 10 次，MySQL 实际 SQL 次数如下：
+
+| 接口 | 优化前 SQL/请求 | 优化后 SQL/请求 | p50 耗时（前 → 后） |
+| --- | --- | --- | --- |
+| 课程列表 | 111 | 7 | 55.05 → 23.51 ms |
+| 操作系统大纲 | 452 | 7 | 145.61 → 29.68 ms |
+| 教师跟进 | 203 | 7 | 145.02 → 89.14 ms |
+| 班级列表 | 11 | 3 | 13.20 → 11.67 ms |
+| 本班任务列表 | 23 | 9 | 41.21 → 59.26 ms |
+
+通过按请求批量读取进度、节点身份、任务统计与提交记录消除重复查询，没有新增全局缓存。小样本耗时存在波动，任务列表虽然查询减少，p50 并未改善；这些结果不代替生产压力测试。完整 p50/p95、样本与 SQL 计数方法保存在验收目录中。
 
 前端（`前端代码/osLab-frontend`）：
 
@@ -255,7 +293,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/smoke-ai-demo.ps1 -RequireA
 powershell -ExecutionPolicy Bypass -File scripts/dev/eval-retrieval.ps1
 ~~~
 
-`-RequireAiMode` 在配置真实模型后若本轮出现 FALLBACK 即失败，防止把降级当通过；报告与评价记录写入 `artifacts/ai-platform-demo/`（不纳入版本控制）。2026-11 本地实测：smoke 22/22 且 `mode=AI`；检索评价集 Top-5 命中 20/20、主线关键问句 8/8、课程隔离违规 0；诊断案例 8 例 0 断言失败；数据库课程跨课程 smoke 21/21。
+`-RequireAiMode` 在配置真实模型后若本轮出现 FALLBACK 即失败，防止把降级当通过；报告与评价记录写入 `artifacts/ai-platform-demo/`（不纳入版本控制）。此前 AI 升级阶段记录了 smoke 22/22、检索 Top-5 命中 20/20、主线关键问句 8/8、诊断 8 例，以及数据库课程 smoke 21/21；这些是历史结果。本轮 bug 审查未重跑真实模型评价。数据库课程 smoke 需要先显式启用该课程。
 
 ## 常见问题
 
@@ -281,7 +319,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/eval-retrieval.ps1
 前端代码/osLab-frontend/      Vue 3 前端
 后端代码/osLab-backend/       Spring Boot 后端
 代码沙箱/                     内部隔离判题服务
-数据库文件/                   MySQL/Neo4j 初始化数据与 v3–v12 升级脚本
+数据库文件/                   MySQL/Neo4j 初始化数据与 v3–v14 升级及种子
 content/                      教材内容包
 docs/                         课程、设计与交付文档
 scripts/                      内容导入与验收脚本

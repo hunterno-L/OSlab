@@ -51,19 +51,20 @@ public class LearningMasteryController {
     @GetMapping("/path")
     public BaseResponse<LearningPathVO> path(@RequestParam(value="targetNodeName",required=false) String targetNodeName,
                                              @RequestParam(value="targetNodeCode",required=false) String targetNodeCode,
+                                             @RequestParam(value="courseCode",required=false) String courseCode,
                                              HttpServletRequest request) {
         User user = userService.getLoginUser(request);
         return ResultUtils.success(learningPathService.buildPath(user,
-                StringUtils.isNotBlank(targetNodeCode) ? nodeIdentities.requireCode(targetNodeCode).nodeCode : targetNodeName));
+                StringUtils.isNotBlank(targetNodeCode) ? nodeIdentities.requireCode(targetNodeCode).nodeCode : targetNodeName, courseCode));
     }
 
     /**
      * 个人知识图谱（当前登录学生的掌握度叠加视角）
      */
     @GetMapping("/graph")
-    public BaseResponse<PersonalGraphVO> personalGraph(HttpServletRequest request) {
+    public BaseResponse<PersonalGraphVO> personalGraph(@RequestParam(value="courseCode",required=false) String courseCode, HttpServletRequest request) {
         User user = userService.getLoginUser(request);
-        return ResultUtils.success(learningMasteryService.personalGraph(user));
+        return ResultUtils.success(learningMasteryService.personalGraph(user, courseCode));
     }
 
     /**
@@ -82,9 +83,9 @@ public class LearningMasteryController {
      * 学习推荐（含原因）
      */
     @GetMapping("/recommend")
-    public BaseResponse<List<RecommendationVO>> recommendations(HttpServletRequest request) {
+    public BaseResponse<List<RecommendationVO>> recommendations(@RequestParam(value="courseCode",required=false) String courseCode, HttpServletRequest request) {
         User user = userService.getLoginUser(request);
-        return ResultUtils.success(learningMasteryService.recommendations(user));
+        return ResultUtils.success(learningMasteryService.recommendations(user, courseCode));
     }
 
     /**

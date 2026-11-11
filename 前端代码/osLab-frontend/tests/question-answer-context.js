@@ -129,6 +129,39 @@ function createHarness(props = {}, responseMode = "success") {
           },
         };
       if (name === "@/api/learning") return api;
+      if (name === "@/api/assessment") {
+        let attempts = 0;
+        return {
+          createPracticeAttempt: async () => ({
+            data: {
+              code: 0,
+              data: {
+                attemptContextId: `ctx-${++attempts}`,
+                questionId: "42",
+                questionRevision: 1,
+                submissionKey: `sk-practice-${attempts}`,
+                helpLevel: "NONE",
+                status: "READY",
+              },
+            },
+          }),
+          recordPracticeHelp: async () => ({
+            data: {
+              code: 0,
+              data: {
+                attemptContextId: "ctx-1",
+                helpLevel: "HINT",
+                eligibleForObservation: false,
+                eligibilityReason: "使用提示",
+              },
+            },
+          }),
+        };
+      }
+      if (name === "@/utils/assessmentTutor")
+        return { openAssessmentTutor: () => undefined };
+      if (name === "@/utils/learningEvents")
+        return { notifyLearningUpdated: () => undefined };
       if (name === "@/api/ai") return {};
       if (name === "@/utils/courseContext") return contextModule;
       if (name === "@/composables/useAiActions")

@@ -1,0 +1,4 @@
+{
+  "judgeMode": "LOCAL_BUILD",
+  "reason": "实验目标是在 kclock_init 中设置定时器频率并把时钟中断绑定到 4 号中断线，在链接器脚本中配置中断入口，再编写 timer_irq 汇编/C 服务程序调用 sched_yield。这需要真实定时器硬件（gxemul 模拟的 8253/8254 或 CP0 Count/Compare）、CP0 Status.IM4/Cause.IP4 的中断时序与 MIPS 交叉工具链；沙箱是 x86-64 用户态单文件 C，无硬件定时器、无 CP0、无交叉工具链，无法功能判题。用 C 写一个「模拟时钟中断」的程序不构成概念同构，不编造代理题。完成规则为 SUBMIT。"
+}

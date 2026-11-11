@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -88,7 +89,7 @@ class LearningAssessmentCandidatePoolTest {
         for (long id = 1; id <= 61; id++) {
             eligible.add(id);
         }
-        when(questionService.listEligibleQuestionIds(any(LearningQuestionQueryRequest.class), eq(user)))
+        when(questionService.listEligibleQuestionIds(any(LearningQuestionQueryRequest.class), eq(user), anyBoolean()))
                 .thenReturn(eligible);
 
         LearningAssessmentRunController.StartRequest request = new LearningAssessmentRunController.StartRequest();
@@ -111,13 +112,13 @@ class LearningAssessmentCandidatePoolTest {
         // 候选请求不要求前端传 questionIds，范围条件原值透传
         ArgumentCaptor<LearningQuestionQueryRequest> queryCaptor =
                 ArgumentCaptor.forClass(LearningQuestionQueryRequest.class);
-        verify(questionService).listEligibleQuestionIds(queryCaptor.capture(), eq(user));
+        verify(questionService).listEligibleQuestionIds(queryCaptor.capture(), eq(user), anyBoolean());
         assertNotNull(queryCaptor.getValue());
     }
 
     @Test
     void startRejectsEmptyEligiblePool() {
-        when(questionService.listEligibleQuestionIds(any(LearningQuestionQueryRequest.class), eq(user)))
+        when(questionService.listEligibleQuestionIds(any(LearningQuestionQueryRequest.class), eq(user), anyBoolean()))
                 .thenReturn(List.of());
 
         LearningAssessmentRunController.StartRequest request = new LearningAssessmentRunController.StartRequest();
@@ -127,7 +128,7 @@ class LearningAssessmentCandidatePoolTest {
 
     @Test
     void startPassesChapterFilterThroughToEligibleQuery() {
-        when(questionService.listEligibleQuestionIds(any(LearningQuestionQueryRequest.class), eq(user)))
+        when(questionService.listEligibleQuestionIds(any(LearningQuestionQueryRequest.class), eq(user), anyBoolean()))
                 .thenReturn(List.of(1L, 2L, 3L, 4L, 5L));
 
         LearningAssessmentRunController.StartRequest request = new LearningAssessmentRunController.StartRequest();
@@ -139,7 +140,7 @@ class LearningAssessmentCandidatePoolTest {
         // 章节条件原值透传（"未归类"哨兵语义由候选服务的共享谓词处理）
         ArgumentCaptor<LearningQuestionQueryRequest> queryCaptor =
                 ArgumentCaptor.forClass(LearningQuestionQueryRequest.class);
-        verify(questionService).listEligibleQuestionIds(queryCaptor.capture(), eq(user));
+        verify(questionService).listEligibleQuestionIds(queryCaptor.capture(), eq(user), anyBoolean());
         assertEquals("未归类", queryCaptor.getValue().getChapter());
     }
 

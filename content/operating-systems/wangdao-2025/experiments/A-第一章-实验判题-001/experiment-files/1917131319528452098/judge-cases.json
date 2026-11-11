@@ -1,0 +1,26 @@
+[
+  {
+    "input": "5\nvmlinuz 2 3 4\nkernel.o 1 2\nlib.o 0\nmodules 1 1\nobjects 1 1\n",
+    "output": "lib.o kernel.o modules objects vmlinuz OK"
+  },
+  {
+    "input": "4\na 2 1 2\nb 1 3\nc 1 3\nd 0\n",
+    "output": "d b c a OK"
+  },
+  {
+    "input": "3\na 1 1\nb 1 2\nc 1 0\n",
+    "output": "CYCLE"
+  },
+  {
+    "input": "4\nall 0\nboot 0\nmm 0\nlib 0\n",
+    "output": "all boot mm lib OK"
+  },
+  {
+    "input": "2\nvmlinuz 1 0\nobjects 0\n",
+    "output": "objects CYCLE"
+  },
+  {
+    "input": "4\nall 2 1 2\nb 1 3\nc 0\nd 0\n",
+    "output": "c d b all OK"
+  }
+]

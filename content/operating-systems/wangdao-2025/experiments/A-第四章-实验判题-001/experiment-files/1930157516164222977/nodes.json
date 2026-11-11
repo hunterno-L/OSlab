@@ -1,0 +1,26 @@
+{
+  "questionId": "1930157516164222977",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.sharing",
+      "nodeName": "内存共享",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "duppage(envid, pn) 按权限分类处理父进程的页：只读页直接映射给子进程、PTE_LIBRARY 共享页保持共享、可写页置 PTE_COW 后父子都只读映射。"
+    },
+    {
+      "nodeCode": "os.memory.page_fault",
+      "nodeName": "缺页中断",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "PTE_COW 页被写时触发缺页，由 pgfault 真正复制物理页；duppage 只是把复制推迟到写发生的那一刻。"
+    },
+    {
+      "nodeCode": "os.memory.page_table",
+      "nodeName": "页表",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "实现上读父进程页表项的 PTE_V/PTE_COW/PTE_LIBRARY 标志位，再用 sys_mem_map 建立子进程映射。"
+    }
+  ]
+}

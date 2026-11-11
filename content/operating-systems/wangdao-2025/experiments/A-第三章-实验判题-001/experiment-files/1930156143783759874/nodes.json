@@ -1,0 +1,26 @@
+{
+  "questionId": "1930156143783759874",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.cpu.rr",
+      "nodeName": "时间片轮转",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "补全 sched_yield()：用两个链表管理 ENV_RUNNABLE 进程，按 env_pri 决定时间片，时钟中断到来时把当前进程挂回就绪链表并切换到下一个。"
+    },
+    {
+      "nodeCode": "os.cpu.scheduler",
+      "nodeName": "调度程序",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "sched_yield 就是调度程序本体，负责从就绪队列挑下一个进程并交给 env_run 执行。"
+    },
+    {
+      "nodeCode": "os.process.process_state",
+      "nodeName": "进程状态与转换",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "调度只涉及就绪态与运行态之间的转换，ENV_NOT_RUNNABLE（阻塞）进程不得进就绪链表。"
+    }
+  ]
+}

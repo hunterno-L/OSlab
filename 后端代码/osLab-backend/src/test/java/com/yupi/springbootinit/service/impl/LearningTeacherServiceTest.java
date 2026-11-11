@@ -93,6 +93,7 @@ class LearningTeacherServiceTest {
         Assertions.assertTrue(os2026.getStudentCount() >= 2, "os2026 至少 2 名绑定学生");
     }
 
+
     @Test
     void nodeDetailMatchesMappingTableExactly() {
         NodeDrillVO drill = learningTeacherService.nodeDetail(CLASS_OS2026, NODE_LRU);

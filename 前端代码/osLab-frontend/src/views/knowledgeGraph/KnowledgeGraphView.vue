@@ -1019,7 +1019,7 @@ import { useCourseCatalog } from "@/composables/useCourseCatalog";
 import { scoreText } from "@/utils/masteryDisplay";
 import AiNextActions from "@/components/ai/AiNextActions.vue";
 import { useAiConversation } from "@/composables/useAiConversation";
-import { askAiAssistant } from "@/composables/useAiLauncher";
+import { openTutorScene } from "@/utils/assessmentTutor";
 import {
   personalGraph,
   masteryPath,
@@ -1136,19 +1136,29 @@ const graphWeaknessReasons = computed(() => {
 });
 
 function askGraphTutor() {
-  const evidence = (selectedWorkbench.value?.events || [])
+  const evidenceIds = (selectedWorkbench.value?.events || [])
     .slice(0, 3)
-    .map((event) => `#${event.id}`)
-    .join("、");
-  askAiAssistant(
-    `我在课程图谱里选中了节点「${selectedNode.value?.name || "未命名"}」${
-      selectedNode.value?.nodeCode ? `（${selectedNode.value.nodeCode}）` : ""
-    }。${
-      graphWeaknessReasons.value.length
-        ? `薄弱依据：${graphWeaknessReasons.value.join("；")}。`
-        : "目前证据不足。"
-    }${evidence ? `相关证据：${evidence}。` : ""}请说明可能原因并给出下一步。`
-  );
+    .map((event) => String(event.id));
+  const evidence = evidenceIds.map((id) => `#${id}`).join("、");
+  const nodeName = selectedNode.value?.name || "未命名";
+  const nodeCode = selectedNode.value?.nodeCode;
+  const nameSuffix = nodeCode ? `（${nodeCode}）` : "";
+  const weakness = graphWeaknessReasons.value.length
+    ? `薄弱依据：${graphWeaknessReasons.value.join("；")}。`
+    : "目前证据不足。";
+  const evidenceText = evidence ? `相关证据：${evidence}。` : "";
+  const draft = `我在课程图谱里选中了节点「${nodeName}」${nameSuffix}。${weakness}${evidenceText}请说明可能原因并给出下一步。`;
+  openTutorScene({
+    scene: "NODE",
+    intent: "EXPLAIN",
+    courseCode: courseCode.value || "",
+    nodeCodes: selectedNode.value?.nodeCode
+      ? [selectedNode.value.nodeCode]
+      : [],
+    eventIds: evidenceIds,
+    draft,
+    delivery: "SEND",
+  });
 }
 
 watch(
@@ -1976,7 +1986,10 @@ const lastFailure = computed(
 );
 
 // ============ 数据加载 ============
+let graphRequestSequence = 0;
 const loadGraphData = async () => {
+  const request = ++graphRequestSequence;
+  const requestCourse = courseCode.value;
   loading.value = true;
   graphError.value = "";
   // 状态脉冲：对比刷新前后 status 变化的节点（进步蓝 / 退步琥珀）
@@ -1987,9 +2000,14 @@ const loadGraphData = async () => {
   );
   let handled = false;
   try {
-    if (isLoggedIn()) {
+    if (!isTeaching.value && requestCourse && isLoggedIn()) {
       try {
-        const res = await personalGraph();
+        const res = await personalGraph(requestCourse);
+        if (
+          request !== graphRequestSequence ||
+          requestCourse !== courseCode.value
+        )
+          return;
         if (res.data?.code === 0 && res.data.data) {
           nodes.value = res.data.data.nodes || [];
           links.value = res.data.data.links || [];
@@ -2002,10 +2020,10 @@ const loadGraphData = async () => {
           handled = true;
         }
       } catch (e) {
-        console.warn("个人图谱加载失败，回退全量图谱", e);
+        console.warn("个人图谱加载失败", e);
       }
     }
-    if (!handled) {
+    if (!handled && isTeaching.value) {
       const res =
         await KnowledgeGraphControllerService.getAllKnowledgeGraphDataUsingGet();
       if (res.code === 0 && res.data) {
@@ -2018,21 +2036,31 @@ const loadGraphData = async () => {
         graphError.value = res.message || "加载知识图谱失败";
         Message.error("加载知识图谱失败: " + (res.message || "未知错误"));
       }
+    } else if (!handled) {
+      nodes.value = [];
+      links.value = [];
+      categories.value = [];
+      personalGraphMeta.value = null;
+      graphError.value = requestCourse
+        ? "加载当前课程图谱失败，请重试"
+        : "暂无可用课程";
     }
   } catch (error) {
     graphError.value = "加载知识图谱失败，请检查网络或稍后重试";
     Message.error("加载知识图谱失败");
     console.error(error);
   } finally {
-    loading.value = false;
-    if (
-      handled &&
-      selectedNodeKey.value &&
-      !nodeByKey.value.has(selectedNodeKey.value)
-    ) {
-      clearNodeSelection();
+    if (request === graphRequestSequence) {
+      loading.value = false;
+      if (
+        handled &&
+        selectedNodeKey.value &&
+        !nodeByKey.value.has(selectedNodeKey.value)
+      ) {
+        clearNodeSelection();
+      }
+      refreshPulse(prevStatus);
     }
-    refreshPulse(prevStatus);
   }
 };
 
@@ -2135,7 +2163,7 @@ const loadSelectedWorkbench = async (nodeName: string) => {
 /** 后端补救学习路径（教学维护视角不加载个人路径） */
 let pathRequestSeq = 0;
 const loadPath = async (nodeName: string) => {
-  if (!nodeName || isTeaching.value) {
+  if (!nodeName || isTeaching.value || !courseCode.value) {
     pathRequestSeq += 1;
     pathData.value = null;
     return;
@@ -2143,7 +2171,7 @@ const loadPath = async (nodeName: string) => {
   const seq = ++pathRequestSeq;
   pathData.value = null;
   try {
-    const res = await masteryPath(nodeName);
+    const res = await masteryPath(nodeName, courseCode.value);
     if (seq === pathRequestSeq) {
       pathData.value = res.data?.code === 0 ? res.data.data : null;
     }
@@ -2481,6 +2509,7 @@ const nodeWorkspaceTarget = (node: MasteryNodeVO) =>
 /** 节点上下文：稳定 nodeCode + 所属小节 + 当前单元（仅当单元映射了该节点） */
 const nodeContextQuery = (node: MasteryNodeVO) => {
   const query: Record<string, string> = {};
+  if (courseCode.value) query.courseCode = courseCode.value;
   if (node.nodeCode) query.nodeCode = node.nodeCode;
   const sectionCode = node.homeSectionCode || selectedSectionCode.value;
   if (sectionCode) query.sectionCode = sectionCode;
@@ -2908,15 +2937,21 @@ const saveNodeContentSubmit = async () => {
 onMounted(async () => {
   window.addEventListener("oslab:learning-changed", handleLearningChanged);
   const preferredCourse = queryText(route.query.courseCode) || undefined;
-  const tasks: Promise<unknown>[] = [loadGraphData()];
-  if (!isTeaching.value) tasks.push(loadCatalogSource(preferredCourse));
-  await Promise.all(tasks);
+  if (isTeaching.value) await loadGraphData();
+  else await loadCatalogSource(preferredCourse);
   if (isTeaching.value) {
     ensureSelection();
     return;
   }
   // 首次进入：query 优先；无 query 时定位 resume 单元，其次第一个已发布单元
   await applyRouteQuery();
+});
+
+watch(courseCode, () => {
+  if (!isTeaching.value) {
+    clearNodeSelection();
+    void loadGraphData();
+  }
 });
 
 watch(
@@ -2929,6 +2964,8 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  graphRequestSequence += 1;
+  pathRequestSeq += 1;
   window.removeEventListener("oslab:learning-changed", handleLearningChanged);
 });
 </script>

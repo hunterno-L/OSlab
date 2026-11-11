@@ -54,6 +54,12 @@ public class AiNextActionService {
     @Resource
     private NextActionPlanner planner;
 
+    @Resource private com.yupi.springbootinit.course.EnabledCourses enabledCourses;
+    @Resource private com.yupi.springbootinit.learning.PublishedCourseScopeService courseScope;
+
+    @Resource
+    private AiContentScopeService contentScope;
+
     public NextActionsVO nextActions(User user, String courseCode, Integer limit) {
         NextActionsVO vo = new NextActionsVO();
         vo.setGeneratedAt(AiJson.nowIso());
@@ -62,6 +68,7 @@ public class AiNextActionService {
             return vo;
         }
         String course = courseCode.trim();
+        enabledCourses.require(course);
         int cap = limit == null || limit <= 0 ? DEFAULT_LIMIT : Math.min(limit, MAX_LIMIT);
 
         AiLearningSession session = sessionService.latestActive(user.getId(), course);
@@ -77,6 +84,7 @@ public class AiNextActionService {
             vo.setActions(new ArrayList<>());
             return vo;
         }
+        courseScope.requireUnit(course, session.getUnitCode());
         vo.setSessionId(AiJson.id(session.getId()));
         vo.setFocus(session.getFocus());
         vo.setTimeBudgetMinutes(session.getTimeBudgetMinutes());
@@ -87,7 +95,14 @@ public class AiNextActionService {
         if (StringUtils.isNotBlank(session.getUnitCode())) {
             nodeCodes.add(session.getUnitCode());
         }
-        EvidenceReadService.EvidenceSummary evidence = evidenceReader.read(user.getId(), nodeCodes, 12);
+        java.util.Set<String> evidenceKeys = new java.util.LinkedHashSet<>();
+        for (com.yupi.springbootinit.learning.NodeIdentityService.Identity identity : courseScope.nodes(course).values()) {
+            evidenceKeys.add(identity.nodeCode);
+            evidenceKeys.add(identity.storageKey);
+        }
+        EvidenceReadService.EvidenceSummary evidence = evidenceKeys.isEmpty()
+                ? new EvidenceReadService.EvidenceSummary()
+                : evidenceReader.read(user.getId(), new ArrayList<>(evidenceKeys), 12);
         List<LearningReviewItem> due = reviewPlanner.due(user.getId(), course, now, cap);
 
         DiagnosisService.Result diagnosisResult = null;

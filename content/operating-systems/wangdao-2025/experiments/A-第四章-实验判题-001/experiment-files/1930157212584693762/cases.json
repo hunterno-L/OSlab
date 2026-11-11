@@ -1,0 +1,25 @@
+{
+  "description": "实验 4.8 sys_env_alloc(int sysno)。驱动操作符：I=env_init 并打印空闲 PCB 数；A parent=env_alloc 打印 返回码/下标/env_id（失败时打印 -1 与 0）；U idx=设 curenv；S idx st=设 env_status（0=FREE,1=NOT_RUNNABLE,2=RUNNABLE）；R idx=把 PCB 插入就绪链表头；N idx epc v0=给 envs[idx].env_tf 写可辨认的 cp0_epc 与 regs[2]，用来检验现场整体复制与子进程 $v0 归零；J idx=打印 env_tf 的 cp0_epc/regs[2]($v0)/regs[29]($sp)/cp0_status；K s a0 a1 a2 a3 a4=填好 KERNEL_SP 现场后调 handle_sys 并打印 $v0（必须恰好 6 个数；s=4 即 SYS_env_alloc，s=11 即 SYS_yield）；T idx=打印 env_id/parent/status/pri/cr3；Y=env_run 记录日志（首行 Y 条数，随后每条 kind arg cur：0=lcontext arg=页目录物理地址，1=env_pop_tf arg=cp0_epc）；Z=清空日志；H=就绪链表头下标（空表 -1）；L=按序打印就绪链表下标；F=按序打印空闲 PCB 链表下标；C=空闲物理页数。错误码按 int 解读：-2=E_BAD_ENV，-3=E_INVAL，-4=E_NO_MEM，-5=E_NO_FREE_ENV。宿主账本：np=256/fm=8192 初始空闲 252 页，np=6 时仅 2 页；每次 env_alloc 占 1 页作页目录，按空闲链表头顺序发出（envs[63].cr3=1044480、envs[62]=1040384、envs[61]=1036288，np=6 时 envs[63].cr3=20480、envs[62]=16384）；env_alloc 初始化 regs[29]=USTACKTOP=1073741824、cp0_status=ENV_USER_SR=268439564、pri=1、status=NOT_RUNNABLE；mkenvid 第 g 次分配给下标 k 的进程 envid=(g<<7)|k，故 64 次分配后 envs[0].env_id=8192、cr3=786432。操作条数上限 MAXOPS=96，足够先申请满 64 个 PCB 再触发 -E_NO_FREE_ENV。",
+  "cases": [
+    {
+      "name": "fork 第一步：返回带生成号的子进程 envid、父进程填 parent、现场整体复制且子进程 $v0 归零、状态 NOT_RUNNABLE 且不挂就绪链表",
+      "input": "256 8192\n12\nI\nA 0\nU 63\nN 63 4198400 777\nJ 63\nK 4 0 0 0 0 0\nJ 62\nT 62\nJ 63\nH\nL\nC\n"
+    },
+    {
+      "name": "子进程必须等父进程显式唤醒才可调度：未唤醒前 yield 只切回父进程，唤醒后 env_pop_tf 恢复的正是复制来的 cp0_epc",
+      "input": "256 8192\n18\nI\nA 0\nU 63\nS 63 2\nR 63\nN 63 4198400 777\nK 4 0 0 0 0 0\nZ\nK 11 0 0 0 0 0\nY\nL\nT 62\nS 62 2\nR 62\nK 11 0 0 0 0 0\nY\nJ 62\nC\n"
+    },
+    {
+      "name": "已挂进就绪链表但状态仍为 NOT_RUNNABLE 的子进程必须被环形查找跳过，不得抢占其他就绪进程",
+      "input": "256 8192\n18\nI\nA 0\nA 0\nU 63\nS 63 2\nS 62 2\nR 63\nR 62\nK 4 0 0 0 0 0\nR 61\nT 61\nZ\nK 11 0 0 0 0 0\nY\nK 11 0 0 0 0 0\nY\nL\nC\n"
+    },
+    {
+      "name": "PCB 耗尽：64 个进程全部申请完后 env_alloc 返回 -E_NO_FREE_ENV，必须原样上抛且不得破坏已分配进程",
+      "input": "256 8192\n70\nI\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nU 0\nK 4 0 0 0 0 0\nT 0\nC\nF\n"
+    },
+    {
+      "name": "物理页耗尽：np=6 时只剩一页，第二次创建必须返回 -E_NO_MEM，失败的 PCB 仍留在空闲链表上且字段未被污染",
+      "input": "6 8192\n11\nI\nA 0\nU 63\nC\nK 4 0 0 0 0 0\nC\nT 62\nK 4 0 0 0 0 0\nC\nT 61\nA 0\n"
+    }
+  ]
+}

@@ -100,25 +100,32 @@ public class TeacherTaskService {
                 .eq(StringUtils.isNotBlank(status), LearningTask::getStatus, status)
                 .orderByDesc(LearningTask::getUpdateTime);
         if (StringUtils.isNotBlank(className)) {
+            TaskAudienceRequest classAudience = new TaskAudienceRequest();
+            classAudience.setClassNames(Collections.singletonList(className.trim()));
+            ArrayNode classUserIds = JSON.createArrayNode();
+            for (Map<String, Object> student : audienceService.resolve(classAudience).getStudents()) {
+                String id = String.valueOf(student.get("userId"));
+                classUserIds.add(Long.valueOf(id));
+                classUserIds.add(id);
+            }
             Set<Long> taskIds = new HashSet<>();
             for (LearningTaskRecipient row : recipientMapper.selectList(
                     new LambdaQueryWrapper<LearningTaskRecipient>()
                             .eq(LearningTaskRecipient::getClassNameSnapshot, className.trim()))) {
                 taskIds.add(row.getTaskId());
             }
-            if (taskIds.isEmpty()) {
-                Map<String, Object> empty = new LinkedHashMap<>();
-                empty.put("records", Collections.emptyList());
-                empty.put("total", 0);
-                empty.put("current", current);
-                empty.put("pageSize", size);
-                return empty;
-            }
-            wrapper.in(LearningTask::getId, taskIds);
+            wrapper.and(scope -> {
+                if (!taskIds.isEmpty()) scope.in(LearningTask::getId, taskIds).or();
+                scope.eq(LearningTask::getStatus, TaskConstants.TASK_DRAFT).and(draft -> {
+                    draft.apply("JSON_CONTAINS(JSON_EXTRACT(audienceJson, '$.classNames'), JSON_QUOTE({0}))", className.trim());
+                    if (!classUserIds.isEmpty()) {
+                        draft.or().apply("JSON_OVERLAPS(JSON_EXTRACT(audienceJson, '$.userIds'), CAST({0} AS JSON))", classUserIds.toString());
+                    }
+                });
+            });
         }
         IPage<LearningTask> page = taskMapper.selectPage(new Page<>(Math.max(current, 1), size), wrapper);
-        List<Map<String, Object>> records = new ArrayList<>();
-        for (LearningTask task : page.getRecords()) records.add(summary(task));
+        List<Map<String, Object>> records = summaries(page.getRecords(), className);
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("records", records);
         out.put("total", page.getTotal());
@@ -540,9 +547,7 @@ public class TeacherTaskService {
         LearningTask task = access.requireCreator(taskCode, user);
         ThrowUtils.throwIf(!TaskConstants.TASK_DRAFT.equals(task.getStatus()),
                 ErrorCode.OPERATION_ERROR, "已发布任务只能关闭或归档");
-        task.setIsDelete(1);
-        task.setUpdateTime(null);
-        taskMapper.updateById(task);
+        taskMapper.deleteById(task.getId());
         itemMapper.delete(new LambdaQueryWrapper<LearningTaskItem>()
                 .eq(LearningTaskItem::getTaskId, task.getId()));
         Map<String, Object> out = new LinkedHashMap<>();
@@ -553,17 +558,49 @@ public class TeacherTaskService {
     // ---------------- 接收人 / 批阅 ----------------
 
     public Map<String, Object> recipients(User user, String taskCode, long current, long pageSize) {
+        return recipients(user, taskCode, current, pageSize, false);
+    }
+
+    public Map<String, Object> recipients(User user, String taskCode, long current, long pageSize, boolean pendingReview) {
+        return recipients(user, taskCode, current, pageSize, pendingReview, null);
+    }
+
+    public Map<String, Object> recipients(User user, String taskCode, long current, long pageSize,
+                                          boolean pendingReview, String className) {
         LearningTask task = access.requireCreator(taskCode, user);
         long size = Math.min(Math.max(pageSize, 1), 100);
         long offset = (Math.max(current, 1) - 1) * size;
+        String where = "r.taskId=?";
+        List<Object> params = new ArrayList<>();
+        params.add(task.getId());
+        if (StringUtils.isNotBlank(className)) {
+            where += " AND r.classNameSnapshot=?";
+            params.add(className.trim());
+        }
+        if (pendingReview) where += " AND r.status='SUBMITTED'";
         Long total = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM learning_task_recipient WHERE taskId=?", Long.class, task.getId());
+                "SELECT COUNT(*) FROM learning_task_recipient r WHERE " + where, Long.class, params.toArray());
+        List<Object> pageParams = new ArrayList<>(params);
+        pageParams.add(size);
+        pageParams.add(offset);
         List<Map<String, Object>> rows = jdbc.queryForList(
                 "SELECT r.id,r.userId,r.studentNumberSnapshot,r.classNameSnapshot,r.status,r.acceptedAt,"
                         + "r.latestSubmissionId,u.userName FROM learning_task_recipient r "
-                        + "LEFT JOIN user u ON u.id=r.userId WHERE r.taskId=? "
-                        + "ORDER BY r.classNameSnapshot,r.studentNumberSnapshot LIMIT ? OFFSET ?",
-                task.getId(), size, offset);
+                        + "LEFT JOIN user u ON u.id=r.userId WHERE " + where
+                        + " ORDER BY r.classNameSnapshot,r.studentNumberSnapshot,r.id LIMIT ? OFFSET ?",
+                pageParams.toArray());
+        Set<Long> submissionIds = new HashSet<>();
+        for (Map<String, Object> row : rows) {
+            if (row.get("latestSubmissionId") instanceof Number) {
+                submissionIds.add(((Number) row.get("latestSubmissionId")).longValue());
+            }
+        }
+        Map<Long, LearningTaskSubmission> submissions = new HashMap<>();
+        if (!submissionIds.isEmpty()) {
+            for (LearningTaskSubmission submission : submissionMapper.selectBatchIds(submissionIds)) {
+                submissions.put(submission.getId(), submission);
+            }
+        }
         List<Map<String, Object>> records = new ArrayList<>();
         Date now = new Date();
         for (Map<String, Object> row : rows) {
@@ -578,7 +615,7 @@ public class TeacherTaskService {
             record.put("latestSubmissionId", row.get("latestSubmissionId") == null
                     ? null : String.valueOf(row.get("latestSubmissionId")));
             if (row.get("latestSubmissionId") != null) {
-                LearningTaskSubmission submission = submissionMapper.selectById(
+                LearningTaskSubmission submission = submissions.get(
                         ((Number) row.get("latestSubmissionId")).longValue());
                 if (submission != null) {
                     record.put("roundNo", submission.getRoundNo());
@@ -595,7 +632,7 @@ public class TeacherTaskService {
             record.put("overdue", overdue);
             records.add(record);
         }
-        Map<String, Object> stats = recipientStats(task.getId());
+        Map<String, Object> stats = recipientStats(task.getId(), className);
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("records", records);
         out.put("total", total);
@@ -605,11 +642,19 @@ public class TeacherTaskService {
         return out;
     }
 
-    private Map<String, Object> recipientStats(Long taskId) {
+    private Map<String, Object> recipientStats(Long taskId, String className) {
+        List<Object> params = new ArrayList<>();
+        params.add(taskId);
+        String classFilter = "";
+        if (StringUtils.isNotBlank(className)) {
+            classFilter = " AND classNameSnapshot=?";
+            params.add(className.trim());
+        }
         Map<String, Object> row = jdbc.queryForMap(
                 "SELECT COUNT(*) total, SUM(status='PENDING') pending, SUM(status='IN_PROGRESS') inProgress,"
                         + " SUM(status='RETURNED') returned, SUM(status='SUBMITTED') submitted,"
-                        + " SUM(status='REVIEWED') reviewed FROM learning_task_recipient WHERE taskId=?", taskId);
+                        + " SUM(status='REVIEWED') reviewed FROM learning_task_recipient WHERE taskId=?" + classFilter,
+                params.toArray());
         return numbers(row);
     }
 
@@ -797,6 +842,62 @@ public class TeacherTaskService {
     }
 
     private Map<String, Object> summary(LearningTask task) {
+        return summaries(Collections.singletonList(task), null).get(0);
+    }
+
+    private List<Map<String, Object>> summaries(List<LearningTask> tasks, String className) {
+        List<Map<String, Object>> records = new ArrayList<>();
+        if (tasks.isEmpty()) return records;
+        List<Object> params = new ArrayList<>();
+        for (LearningTask task : tasks) params.add(task.getId());
+        String placeholders = String.join(",", Collections.nCopies(tasks.size(), "?"));
+        Map<Long, Map<String, Object>> itemCounts = indexTaskCounts(jdbc.queryForList(
+                "SELECT taskId,COUNT(*) itemCount,COALESCE(SUM(maxScore),0) totalMaxScore,"
+                        + "SUM(maxScore IS NOT NULL) scoredCount FROM learning_task_item "
+                        + "WHERE taskId IN (" + placeholders + ") GROUP BY taskId", params.toArray()));
+        List<Object> recipientParams = new ArrayList<>(params);
+        String classFilter = "";
+        if (StringUtils.isNotBlank(className)) {
+            classFilter = " AND classNameSnapshot=?";
+            recipientParams.add(className.trim());
+        }
+        Map<Long, Map<String, Object>> recipientCounts = indexTaskCounts(jdbc.queryForList(
+                "SELECT taskId,COUNT(*) recipientCount,SUM(status IN ('SUBMITTED','REVIEWED')) submittedCount,"
+                        + "SUM(status='SUBMITTED') pendingReviewCount FROM learning_task_recipient "
+                        + "WHERE taskId IN (" + placeholders + ")" + classFilter + " GROUP BY taskId",
+                recipientParams.toArray()));
+        for (LearningTask task : tasks) {
+            Map<String, Object> out = summaryFields(task);
+            Map<String, Object> item = itemCounts.getOrDefault(task.getId(), Collections.emptyMap());
+            Map<String, Object> recipients = recipientCounts.getOrDefault(task.getId(), Collections.emptyMap());
+            out.put("itemCount", count(item.get("itemCount")));
+            ObjectNode policy = parseObject(task.getPublishedPolicyJson());
+            out.put("scored", policy.has("scored") ? policy.path("scored").asBoolean(false)
+                    : count(item.get("scoredCount")) > 0);
+            out.put("totalMaxScore", policy.has("scored") ? policy.path("totalMaxScore").decimalValue()
+                    : item.getOrDefault("totalMaxScore", BigDecimal.ZERO));
+            out.put("manualRequired", policy.path("manualRequired").asBoolean(false));
+            out.put("recipientCount", count(recipients.get("recipientCount")));
+            out.put("submittedCount", count(recipients.get("submittedCount")));
+            out.put("pendingReviewCount", count(recipients.get("pendingReviewCount")));
+            records.add(out);
+        }
+        return records;
+    }
+
+    private Map<Long, Map<String, Object>> indexTaskCounts(List<Map<String, Object>> rows) {
+        Map<Long, Map<String, Object>> indexed = new HashMap<>();
+        for (Map<String, Object> row : rows) {
+            indexed.put(((Number) row.get("taskId")).longValue(), row);
+        }
+        return indexed;
+    }
+
+    private long count(Object value) {
+        return value instanceof Number ? ((Number) value).longValue() : 0L;
+    }
+
+    private Map<String, Object> summaryFields(LearningTask task) {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("taskCode", task.getTaskCode());
         out.put("title", task.getTitle());
@@ -807,34 +908,6 @@ public class TeacherTaskService {
         out.put("closedAt", formatDate(task.getClosedAt()));
         out.put("isArchived", Integer.valueOf(1).equals(task.getIsArchived()));
         out.put("updateTime", formatDate(task.getUpdateTime()));
-        out.put("itemCount", itemMapper.selectCount(new LambdaQueryWrapper<LearningTaskItem>()
-                .eq(LearningTaskItem::getTaskId, task.getId())));
-        ObjectNode policy = parseObject(task.getPublishedPolicyJson());
-        if (policy.has("scored")) {
-            out.put("scored", policy.path("scored").asBoolean(false));
-            out.put("totalMaxScore", policy.path("totalMaxScore").decimalValue());
-        } else {
-            BigDecimal draftTotal = jdbc.queryForObject(
-                    "SELECT COALESCE(SUM(maxScore),0) FROM learning_task_item WHERE taskId=?",
-                    BigDecimal.class, task.getId());
-            Long draftScored = jdbc.queryForObject(
-                    "SELECT COUNT(*) FROM learning_task_item WHERE taskId=? AND maxScore IS NOT NULL",
-                    Long.class, task.getId());
-            out.put("scored", draftScored != null && draftScored > 0);
-            out.put("totalMaxScore", draftTotal == null ? BigDecimal.ZERO : draftTotal);
-        }
-        out.put("manualRequired", policy.path("manualRequired").asBoolean(false));
-        long total = recipientMapper.selectCount(new LambdaQueryWrapper<LearningTaskRecipient>()
-                .eq(LearningTaskRecipient::getTaskId, task.getId()));
-        long submitted = recipientMapper.selectCount(new LambdaQueryWrapper<LearningTaskRecipient>()
-                .eq(LearningTaskRecipient::getTaskId, task.getId())
-                .in(LearningTaskRecipient::getStatus, TaskConstants.R_SUBMITTED, TaskConstants.R_REVIEWED));
-        long pending = recipientMapper.selectCount(new LambdaQueryWrapper<LearningTaskRecipient>()
-                .eq(LearningTaskRecipient::getTaskId, task.getId())
-                .eq(LearningTaskRecipient::getStatus, TaskConstants.R_SUBMITTED));
-        out.put("recipientCount", total);
-        out.put("submittedCount", submitted);
-        out.put("pendingReviewCount", pending);
         return out;
     }
 

@@ -1,0 +1,15 @@
+{
+  "questionId": "1930156605618573314",
+  "unitMappings": [
+    {
+      "unitCode": "unit.overview.system-calls",
+      "required": false,
+      "completionRule": "PASS"
+    },
+    {
+      "unitCode": "unit.memory.image-protection",
+      "required": false,
+      "completionRule": "PASS"
+    }
+  ]
+}
