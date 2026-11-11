@@ -1,0 +1,25 @@
+{
+  "description": "驱动 lib/env.c 的 env_run()（北航 3.10：保存当前进程状态→设置 curenv→lcontext 切换地址空间→env_pop_tf 恢复并进入用户态）。stdin 首行 npage freemem（1..256 / 0..65536），次行操作数 n（0..96），随后 n 个操作：I=平台 env_init()（重复打印 I SKIP）；B=镜像缓冲填成 seg_binary[i]=i&0xFF；G=清空段表；S va size perm=追加一段（最多8段，va<1073741824、size<=16384、perm 0..4095），打印「S 段数」；E entry=设 elf_entry；A x=ENV_CREATE(x)（x∈A/B/C，优先级1）；P x pri=ENV_CREATE_PRIORITY(x,pri)（pri 0..65535）；J=平台 env_alloc(&e,0)（不装镜像、不入就绪链表），打印「J 返回码 下标」；K idx=平台直接把 curenv 指向 envs[idx]（不改状态、不记日志）；M epc sp sr badv cause=平台把五个值写进 TIMESTACK 现场；X idx=调用学生填写的 env_run(&envs[idx])；V=curenv 下标（NULL 为 -1）；T idx=打印「T idx env_id parent status pri cp0_epc sp」；O idx=打印「O idx cp0_status cp0_badvaddr cp0_cause」；W idx=打印「W idx env_cr3 页目录物理地址」（非法页目录时后者 4294967295）；Y=打印事件日志「Y 记录总数」随后每条一行「种类 参数 curenv下标」，种类0=lcontext（参数=收到的地址）、1=env_pop_tf（参数=现场里的 cp0_epc，现场指针非法时 4294967295），curenv下标 -1 表示 NULL/越界，日志容量96条超出只计数；Z=清空事件日志；H=就绪链表头下标（空 -1）；L=就绪链表顺序（头插故为创建逆序）；F=空闲PCB数；C=空闲物理页数；Q idx va=物理地址（无映射 4294967295）。idx<64。关键常量：ENV_RUNNABLE=2、ENV_NOT_RUNNABLE=1、USTACKTOP=1073741824、ENV_USER_SR=268439564、栈页映射在 1073737728。env_init 头插建空闲链表故分配顺序 63,62,61...；env_id=(生成号<<7)|下标，生成号从1起递增；单段非空镜像进程耗5页、空镜像进程耗3页、单纯 env_alloc 占1页。宿主等价：lcontext/env_pop_tf 是记录函数（真实内核里是 MIPS 汇编），四步顺序、lcontext 收到物理地址还是虚拟地址、env_pop_tf 收到新进程现场还是 TIMESTACK、Step2 是否先于 Step3/4，全部由 Y 日志如实判定。",
+  "cases": [
+    {
+      "name": "首次运行：curenv 为 NULL 必须跳过保存步骤，新进程入口/sp/ENV_USER_SR 不被 TIMESTACK 覆盖，lcontext 收物理地址",
+      "input": "256 8192\n14\nI\nB\nG\nS 4096 4096 3\nE 4096\nA A\nM 8192 12345 2 999 777\nZ\nX 63\nV\nT 63\nO 63\nW 63\nY\n"
+    },
+    {
+      "name": "二次运行：TIMESTACK 整个结构体必须存回【旧】进程63，新进程62的现场保持 load_icode 值，日志 curenv 下标已是62",
+      "input": "256 8192\n20\nI\nB\nG\nS 4096 4096 3\nE 4096\nA A\nA B\nM 8192 12345 2 999 777\nK 63\nZ\nX 62\nV\nT 63\nO 63\nT 62\nO 62\nW 62\nY\nH\nL\n"
+    },
+    {
+      "name": "连续三次切换：每轮换不同 TIMESTACK，现场逐轮存回上一个进程，日志累计6条且 cr3 各不相同，pri 0/3 原样保留",
+      "input": "256 8192\n26\nI\nB\nG\nS 4096 4096 3\nE 4096\nA A\nP B 3\nP C 0\nZ\nM 1000 2000 4 3000 5000\nX 63\nM 1111 2222 8 3333 4444\nX 62\nM 5555 6666 12 7777 8888\nX 61\nV\nT 63\nO 63\nT 62\nO 62\nT 61\nO 61\nW 61\nY\nF\nC\n"
+    },
+    {
+      "name": "切回自身+空镜像：X 63 时 curenv 已是63，现场先存回再 pop（epc 变成 TIMESTACK 值）；随后 X 62 的 pop 参数必须是62自己的 epc=0",
+      "input": "256 8192\n17\nI\nG\nE 0\nA A\nA B\nM 4096 1073741824 268439564 0 0\nK 63\nZ\nX 63\nV\nT 63\nO 63\nY\nX 62\nT 63\nT 62\nY\n"
+    },
+    {
+      "name": "未入就绪链表的 PCB：J 分配的63号仍是 NOT_RUNNABLE，env_run 必须把它置成 RUNNABLE 但不得挂进就绪链表，且无镜像映射",
+      "input": "256 8192\n18\nI\nB\nG\nS 4096 4096 3\nE 4096\nJ\nA B\nM 7777 8888 4 1234 5678\nZ\nX 63\nV\nT 63\nH\nL\nF\nC\nY\nQ 63 4096\n"
+    }
+  ]
+}

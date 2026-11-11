@@ -20,6 +20,7 @@ public interface LearningMasteryService {
      * 个人图谱：图谱结构 + 当前学生的掌握状态叠加（同一节点在不同学生视角颜色不同）
      */
     PersonalGraphVO personalGraph(User user);
+    PersonalGraphVO personalGraph(User user, String courseCode);
 
     /**
      * 节点工作台：掌握状态、前置关系、关联已发布普通题、本人事件证据、推荐
@@ -30,6 +31,7 @@ public interface LearningMasteryService {
      * 学习推荐（每条含原因）：薄弱节点、前置缺口、练习巩固，上限 5 条
      */
     List<RecommendationVO> recommendations(User user);
+    List<RecommendationVO> recommendations(User user, String courseCode);
 
     /**
      * 单节点掌握状态（无证据返回 GRAY 零值）

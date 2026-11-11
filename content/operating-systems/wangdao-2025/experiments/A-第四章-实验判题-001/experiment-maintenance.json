@@ -1,0 +1,1132 @@
+{
+  "schemaVersion": "oslab-experiment-maintenance/1.0",
+  "batchCode": "batch.a.experiments.ch4.judge.001",
+  "contributor": "A",
+  "experiments": [
+    {
+      "questionId": "1930156360117571585",
+      "resourceCode": "exp.legacy.1930156360117571585",
+      "title": "实验4.1 实现用户空间到内核空间的系统调用机制",
+      "sectionCode": "sec.overview.runtime",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156360117571585/content.md",
+          "reason": "提供原实验说明及本地实验材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156360117571585/starter.c",
+          "reason": "提供原实验说明及本地实验材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.runtime.system_call",
+          "nodeName": "系统调用",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "编写 user/syscall_wrap.S 的 syscall 封装：按 MIPS o32 把调用号与参数搬进 $v0/$a0-$a3（第 5 个及以后参数走栈），执行特权 syscall 陷入内核，再从 $v0 取返回值。"
+        },
+        {
+          "nodeCode": "os.runtime.trap_instruction",
+          "nodeName": "访管指令",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "MIPS 的 syscall 就是访管指令，触发 ExcCode=8(Sys) 异常，是用户态主动请求内核服务的唯一入口。"
+        },
+        {
+          "nodeCode": "os.runtime.mode_switch",
+          "nodeName": "处理器状态切换",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "syscall 触发后 CPU 置 Status.EXL 进入内核态、切到内核栈与内核页表，返回时 eret 回用户态；内核侧须把返回值写回 Trapframe 的 $v0 并令 EPC += 4。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.overview.system-calls",
+          "required": false,
+          "completionRule": "SUBMIT"
+        },
+        {
+          "unitCode": "unit.overview.runtime-modes",
+          "required": false,
+          "completionRule": "SUBMIT"
+        }
+      ],
+      "judgeMode": "LOCAL_BUILD",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "本地构建实验；未在平台自动判分",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930156493454495745",
+      "resourceCode": "exp.legacy.1930156493454495745",
+      "title": "实验4.2 实现内核的系统调用处理机制",
+      "sectionCode": "sec.overview.runtime",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156493454495745/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156493454495745/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156493454495745/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156493454495745/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156493454495745/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.runtime.system_call",
+          "nodeName": "系统调用",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "handle_sys() 从 Trapframe 取 $v0 里的系统调用号，查 sys_call_table 分派到对应内核函数，并把返回值写回 Trapframe 的 $v0。"
+        },
+        {
+          "nodeCode": "os.runtime.mode_switch",
+          "nodeName": "处理器状态切换",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "handle_sys 运行在内核态，参数来自用户态保存在 Trapframe 里的寄存器，必须校验用户指针合法性后再解引用。"
+        },
+        {
+          "nodeCode": "os.runtime.exception",
+          "nodeName": "异常",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "系统调用在 MIPS 上按异常处理（ExcCode=8 Sys），handle_sys 是异常分发链上 Sys 分支的处理程序。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.overview.system-calls",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.overview.runtime-modes",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930156605618573314",
+      "resourceCode": "exp.legacy.1930156605618573314",
+      "title": "实验4.3 基础系统调用函数 `sys_mem_alloc`",
+      "sectionCode": "sec.overview.runtime",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156605618573314/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156605618573314/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156605618573314/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156605618573314/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156605618573314/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.runtime.system_call",
+          "nodeName": "系统调用",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "sys_mem_alloc(sysno, envid, va, perm) 是暴露给用户态的内存分配系统调用，内部用 envid2env 取目标 PCB 后调 pmap.c 的 page_alloc + page_insert。"
+        },
+        {
+          "nodeCode": "os.memory.virtual_memory",
+          "nodeName": "虚拟内存",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "为指定进程的指定虚拟地址按需分配一页物理内存并建立映射，是虚拟内存按需调页的内核侧实现，也是 IPC 与 fork 的基础。"
+        },
+        {
+          "nodeCode": "os.memory.page_table",
+          "nodeName": "页表",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "实际落地是 pmap.c 的 page_insert，perm 决定页表项的权限位，返回码必须遵循 MIPS 调用规范传回用户态。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.overview.system-calls",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.memory.image-protection",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930156740377366529",
+      "resourceCode": "exp.legacy.1930156740377366529",
+      "title": "实验4.4 基础系统调用函数`sys_mem_map`",
+      "sectionCode": "sec.memory.basic",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156740377366529/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156740377366529/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156740377366529/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156740377366529/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156740377366529/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.sharing",
+          "nodeName": "内存共享",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "sys_mem_map 把源进程 srcva 处的物理页映射到目标进程 dstva，两进程从此共享同一物理页、pp_ref 增 1；content 明确要求「确保内存映射后两个进程能够共享同一物理内存页」。"
+        },
+        {
+          "nodeCode": "os.runtime.system_call",
+          "nodeName": "系统调用",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "它是 IPC 传页的基础系统调用，参数含两个 envid，内核必须先用 envid2env 校验两个进程都存在再操作页表。"
+        },
+        {
+          "nodeCode": "os.memory.page_table",
+          "nodeName": "页表",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "实现上先 pgdir_walk 取源页表项拿到物理页，再 page_insert 到目标页目录，perm 决定目标侧权限。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.image-protection",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.memory.mmap-performance",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930156844614209538",
+      "resourceCode": "exp.legacy.1930156844614209538",
+      "title": "实验4.5 基础系统调用函数`sys_mem_unmap`",
+      "sectionCode": "sec.memory.basic",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156844614209538/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156844614209538/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156844614209538/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156844614209538/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156844614209538/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.sharing",
+          "nodeName": "内存共享",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "sys_mem_unmap(envid, va) 解除该进程 va 的映射，page_remove 令 pp_ref--；只有 pp_ref 归零物理页才真正回收，共享页不能因一方解映射而失效。"
+        },
+        {
+          "nodeCode": "os.runtime.system_call",
+          "nodeName": "系统调用",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "用户态通过它归还 IPC 收到的页，是 sys_mem_map 的逆操作系统调用；content 要求「解除映射后进程不再能访问之前映射的物理内存页」。"
+        },
+        {
+          "nodeCode": "os.memory.tlb",
+          "nodeName": "TLB 快表",
+          "role": "SECONDARY",
+          "weight": 0.5,
+          "reason": "解除映射后必须 tlb_invalidate，否则快表里仍留着旧翻译，进程还能访问已归还的物理页。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.image-protection",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.memory.mmap-performance",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930156972624367618",
+      "resourceCode": "exp.legacy.1930156972624367618",
+      "title": "实验4.6 基础系统调用函数`sys_yield`",
+      "sectionCode": "sec.process.cpu-algorithms",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930156972624367618/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930156972624367618/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930156972624367618/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930156972624367618/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930156972624367618/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.cpu.rr",
+          "nodeName": "时间片轮转",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "sys_yield() 让用户进程主动放弃 CPU，保存现场后调 sched_yield 切换到下一个就绪进程，是时间片轮转的自愿让出路径（与时钟中断的强制让出互补）。"
+        },
+        {
+          "nodeCode": "os.cpu.context_switch",
+          "nodeName": "上下文切换",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "content 要求实现现场保存（KERNEL_SP 与 TIMESTACK）与切换后正确恢复执行状态，正是上下文切换的两半。"
+        },
+        {
+          "nodeCode": "os.runtime.system_call",
+          "nodeName": "系统调用",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "用户态不能直接调内核函数 sched_yield，必须经 syscall 陷入内核由 sys_yield 代劳。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.process.rr-mlq-mlfq",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.overview.system-calls",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157095085461505",
+      "resourceCode": "exp.legacy.1930157095085461505",
+      "title": "实验4.7 实现进程间通信（IPC）机制",
+      "sectionCode": "sec.process.ipc",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157095085461505/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157095085461505/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157095085461505/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157095085461505/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157095085461505/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.ipc",
+          "nodeName": "进程间通信",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "sys_ipc_recv 设 env_ipc_receiving 标志并阻塞当前进程，sys_ipc_can_send 检查目标是否处于可接收状态后投递消息并更新其状态，构成 MOS 的进程间通信机制。"
+        },
+        {
+          "nodeCode": "os.process.message_passing",
+          "nodeName": "消息传递通信",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "IPC 传的是 (envid, value, dstva, perm) 消息，属消息传递通信；带页时再用 sys_mem_map/sys_mem_unmap 把物理页映射过去。"
+        },
+        {
+          "nodeCode": "os.process.process_state",
+          "nodeName": "进程状态与转换",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "接收方在 ENV_NOT_RUNNABLE 上阻塞、发送方把它置回 ENV_RUNNABLE，是进程状态转换的直接应用。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.process.ipc",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.process.states",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157212584693762",
+      "resourceCode": "exp.legacy.1930157212584693762",
+      "title": "实验4.8 进程创建系统调用 `sys_env_alloc`",
+      "sectionCode": "sec.process.process-control",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157212584693762/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157212584693762/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157212584693762/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157212584693762/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157212584693762/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.process_control",
+          "nodeName": "进程控制",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "sys_env_alloc 在内核里调 env_alloc 创建子进程环境、复制父进程 Trapframe，并把子进程置为不会立即被调度的状态（ENV_NOT_RUNNABLE）。"
+        },
+        {
+          "nodeCode": "os.runtime.system_call",
+          "nodeName": "系统调用",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "fork 的用户态实现必须经这个系统调用才能创建 PCB，用户态无权直接操作 envs 数组；返回值决定 fork 在父子两侧的不同返回。"
+        },
+        {
+          "nodeCode": "os.process.pcb",
+          "nodeName": "进程控制块",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "新进程的 env_id/env_parent_id/env_tf/env_pgdir 都在此初始化，env_parent_id 记录父进程 envid。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.process.control",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.overview.system-calls",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157404163723265",
+      "resourceCode": "exp.legacy.1930157404163723265",
+      "title": "实验4.9 实现 `fork` 系统调用中的 `sys_env_alloc` ",
+      "sectionCode": "sec.process.process-control",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157404163723265/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157404163723265/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157404163723265/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157404163723265/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157404163723265/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.process_control",
+          "nodeName": "进程控制",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "user/fork.c 的 fork() 调 sys_env_alloc 拿子进程 envid，按返回值区分父子：父返回子 envid，子返回 0 并从 fork 中返回开始执行。"
+        },
+        {
+          "nodeCode": "os.process.pcb",
+          "nodeName": "进程控制块",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "子进程必须把用户态的 env 指针指向自身的 Env（经 UENVS 与 envid 下标），否则后续 syscall 会操作父进程的控制块。"
+        },
+        {
+          "nodeCode": "os.runtime.system_call",
+          "nodeName": "系统调用",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "fork 不是单条系统调用，而是 sys_env_alloc + duppage + sys_set_pgfault_handler + sys_set_env_status 的系统调用序列。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.process.control",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.overview.system-calls",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157516164222977",
+      "resourceCode": "exp.legacy.1930157516164222977",
+      "title": "实验4.10 实现 `fork` 系统调用中的 `duppage` 函数",
+      "sectionCode": "sec.memory.virtual-concepts",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157516164222977/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157516164222977/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157516164222977/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157516164222977/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157516164222977/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.sharing",
+          "nodeName": "内存共享",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "duppage(envid, pn) 按权限分类处理父进程的页：只读页直接映射给子进程、PTE_LIBRARY 共享页保持共享、可写页置 PTE_COW 后父子都只读映射。"
+        },
+        {
+          "nodeCode": "os.memory.page_fault",
+          "nodeName": "缺页中断",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "PTE_COW 页被写时触发缺页，由 pgfault 真正复制物理页；duppage 只是把复制推迟到写发生的那一刻。"
+        },
+        {
+          "nodeCode": "os.memory.page_table",
+          "nodeName": "页表",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "实现上读父进程页表项的 PTE_V/PTE_COW/PTE_LIBRARY 标志位，再用 sys_mem_map 建立子进程映射。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.virtual-concepts",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.memory.demand-paging",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157629511094274",
+      "resourceCode": "exp.legacy.1930157629511094274",
+      "title": "实验4.11 实现缺页中断处理函数 `page_fault_handler`",
+      "sectionCode": "sec.memory.demand-paging",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157629511094274/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157629511094274/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157629511094274/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157629511094274/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157629511094274/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page_fault",
+          "nodeName": "缺页中断",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "lib/traps.c 的 page_fault_handler 取引发缺页的虚拟地址、校验合法性、为缺失页分配物理内存、更新页表项建立映射，并处理内存不足等异常后恢复被中断进程。"
+        },
+        {
+          "nodeCode": "os.memory.demand_paging",
+          "nodeName": "请求分页存储管理",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "缺页中断是请求分页的核心机制：页不在内存时由中断驱动调入，而不是预先全部装入。"
+        },
+        {
+          "nodeCode": "os.runtime.exception",
+          "nodeName": "异常",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "缺页在 MIPS 上是 TLB Miss/Mod 异常，处理程序运行在异常处理栈（Exception Stack Frame）上，content 明确要求理解异常现场保存。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.demand-paging",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.overview.interrupts",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157740261691394",
+      "resourceCode": "exp.legacy.1930157740261691394",
+      "title": "实验4.12 实现设置缺页处理函数的系统调用 `sys_set_pgfault_handler`",
+      "sectionCode": "sec.memory.demand-paging",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157740261691394/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157740261691394/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157740261691394/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157740261691394/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157740261691394/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page_fault",
+          "nodeName": "缺页中断",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "sys_set_pgfault_handler 校验用户传入的处理函数指针，用 syscall_mem_alloc 为异常处理栈分配内存，并把 handler 写进 Env 的 env_pgfault_handler。"
+        },
+        {
+          "nodeCode": "os.runtime.system_call",
+          "nodeName": "系统调用",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "用户态无法直接改内核里的 PCB 字段，必须经该系统调用登记自己的缺页处理函数，且内核须按 MIPS 调用规范正确处理错误情况。"
+        },
+        {
+          "nodeCode": "os.process.pcb",
+          "nodeName": "进程控制块",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "登记结果落在 struct Env 的 env_pgfault_handler 字段，缺页发生时内核据此把控制流转交给用户态处理函数。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.demand-paging",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.overview.system-calls",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157867273605121",
+      "resourceCode": "exp.legacy.1930157867273605121",
+      "title": "实验4.13 实现 `fork` 系统调用中的缺页处理函数 `pgfault`",
+      "sectionCode": "sec.memory.virtual-concepts",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157867273605121/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157867273605121/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157867273605121/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157867273605121/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157867273605121/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.memory.page_fault",
+          "nodeName": "缺页中断",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "user/fork.c 的 pgfault 判断出错页是否为写时复制页，若是则分配新物理页、复制原页内容、更新页表项映射到新页，最后恢复被中断进程执行。"
+        },
+        {
+          "nodeCode": "os.memory.sharing",
+          "nodeName": "内存共享",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "COW 的本质是父子进程先共享同一物理页（pp_ref>1），写的一方负责复制并解除共享。"
+        },
+        {
+          "nodeCode": "os.memory.demand_paging",
+          "nodeName": "请求分页存储管理",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "复制被推迟到第一次写触发缺页时才做，是按需调页思想在 fork 上的应用。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.memory.virtual-concepts",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.memory.demand-paging",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930157984642813953",
+      "resourceCode": "exp.legacy.1930157984642813953",
+      "title": "实验4.14 实现进程状态设置系统调用 `sys_set_env_status`",
+      "sectionCode": "sec.process.process-state",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930157984642813953/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930157984642813953/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930157984642813953/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930157984642813953/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930157984642813953/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.process_state",
+          "nodeName": "进程状态与转换",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "sys_set_env_status 检查传入状态是否有效后更新 Env 的 env_status，若为 RUNNABLE 则把进程加入调度链表。"
+        },
+        {
+          "nodeCode": "os.cpu.scheduler",
+          "nodeName": "调度程序",
+          "role": "SECONDARY",
+          "weight": 0.7,
+          "reason": "fork 的最后一步用该系统调用把子进程置为 RUNNABLE，子进程从此进入调度器的就绪队列。"
+        },
+        {
+          "nodeCode": "os.runtime.system_call",
+          "nodeName": "系统调用",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "进程状态是内核数据，用户态只能经系统调用请求修改，且内核必须拒绝非法状态值。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.process.states",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.overview.system-calls",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    },
+    {
+      "questionId": "1930158086405017602",
+      "resourceCode": "exp.legacy.1930158086405017602",
+      "title": "实验4.15 实现 `fork` 系统调用",
+      "sectionCode": "sec.process.process-control",
+      "contentChanges": [
+        {
+          "field": "content",
+          "file": "experiment-files/1930158086405017602/content.md",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "originalCode",
+          "file": "experiment-files/1930158086405017602/starter.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "answer",
+          "file": "experiment-files/1930158086405017602/reference.c",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeCase",
+          "file": "experiment-files/1930158086405017602/judge-cases.json",
+          "reason": "更新实验说明及宿主判题材料"
+        },
+        {
+          "field": "judgeConfig",
+          "file": "experiment-files/1930158086405017602/judge-config.json",
+          "reason": "更新实验说明及宿主判题材料"
+        }
+      ],
+      "nodeMappings": [
+        {
+          "nodeCode": "os.process.process_control",
+          "nodeName": "进程控制",
+          "role": "PRIMARY",
+          "weight": 1,
+          "reason": "fork 父进程部分：遍历地址空间逐页 duppage、为子进程分配异常处理栈、设置子进程处理函数、设置子进程运行状态、返回子进程 envid，是进程创建原语在用户态的完整组装。"
+        },
+        {
+          "nodeCode": "os.memory.sharing",
+          "nodeName": "内存共享",
+          "role": "SECONDARY",
+          "weight": 0.8,
+          "reason": "fork 后父子共享全部可写页的 COW 映射，地址空间遍历的每一步都在建立共享关系。"
+        },
+        {
+          "nodeCode": "os.process.pcb",
+          "nodeName": "进程控制块",
+          "role": "SECONDARY",
+          "weight": 0.6,
+          "reason": "子进程 PCB 由 sys_env_alloc 创建，fork 负责把父进程的内存映像与异常处理配置复制进去。"
+        }
+      ],
+      "unitMappings": [
+        {
+          "unitCode": "unit.process.control",
+          "required": false,
+          "completionRule": "PASS"
+        },
+        {
+          "unitCode": "unit.memory.demand-paging",
+          "required": false,
+          "completionRule": "PASS"
+        }
+      ],
+      "judgeMode": "FUNCTIONAL_HARNESS",
+      "verification": {
+        "fileReview": "内容一致性脚本检查通过",
+        "runtime": "判题参考输出来自已有 judge-cases.json；运行核验另行确认",
+        "openItems": "尚未进行在线预览、导入与部署验证"
+      },
+      "nodeProposals": [],
+      "unitProposals": []
+    }
+  ]
+}

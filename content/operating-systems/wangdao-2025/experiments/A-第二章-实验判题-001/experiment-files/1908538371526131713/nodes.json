@@ -1,0 +1,26 @@
+{
+  "questionId": "1908538371526131713",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.paging",
+      "nodeName": "基本分页存储管理",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "page_init() 把内核占用之外、npage 之内的物理页用 queue.h 宏头插进 page_free_list；判题输出空闲链表页号序列（真实源码头插故为递减序）与 used/free/other 计数。"
+    },
+    {
+      "nodeCode": "os.memory.memory_management",
+      "nodeName": "内存管理",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "区分已分配（内核占用）与未分配页、并统计各自数量，是物理内存管理的基本职责；pp_ref 非 0 的页不得进空闲链表。"
+    },
+    {
+      "nodeCode": "os.memory.logical_address",
+      "nodeName": "逻辑地址与物理地址",
+      "role": "RELATED",
+      "weight": 0.5,
+      "reason": "page_init 以物理页号为单位遍历 [0, npage)，处理的是物理地址 i*BY2PG 而非虚拟地址，体现物理地址空间与逻辑地址空间的分离。"
+    }
+  ]
+}

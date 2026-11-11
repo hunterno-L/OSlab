@@ -1,0 +1,26 @@
+{
+  "questionId": "1930155681017810946",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.process.process_control",
+      "nodeName": "进程控制",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "在 init/init.c 里加 ENV_CREATE_PRIORITY(user_A,2) 与 ENV_CREATE_PRIORITY(user_B,1)，宏展开后调用 env_create_priority 完成两次进程创建。"
+    },
+    {
+      "nodeCode": "os.boot.boot_process",
+      "nodeName": "操作系统引导过程",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "init.c 是内核引导完成后创建第一批用户进程的位置，宏必须插在内存/进程子系统初始化之后、调度器启动之前。"
+    },
+    {
+      "nodeCode": "os.cpu.rr",
+      "nodeName": "时间片轮转",
+      "role": "RELATED",
+      "weight": 0.5,
+      "reason": "两个进程优先级 2 与 1 不同，用于观察时钟中断驱动的时间片轮转下两者的交替输出比例。"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "description": "驱动 mm/pmap.c 的 boot_pgdir_walk()/pgdir_walk()。stdin 首行 npage freemem_bytes，次行操作数，随后每行：B va create=启动期步行；W va create=运行期步行；Q pageidx=查询该页 pp_ref。输出：B 行为「B 页表物理地址 PTX」，W 行为「W 返回码 页表物理地址 PTX」，取不到页表项时两个字段均为 -1；Q 行为「Q 页号 pp_ref」；末行为空闲链表页号序列。",
+  "cases": [
+    {
+      "name": "boot_pgdir_walk：create=0 不创建，create=1 创建后可复用",
+      "input": "16 8192\n5\nB 0 0\nB 0 1\nB 0 0\nB 4096 1\nB 8192 0\n"
+    },
+    {
+      "name": "pgdir_walk：新页表来自 page_alloc 且 pp_ref 必须加一",
+      "input": "16 8192\n4\nW 4194304 1\nQ 15\nW 4194304 0\nW 8388608 0\n"
+    },
+    {
+      "name": "两种步行共享同一张页目录（PTX=256 边界）",
+      "input": "8 4096\n4\nB 1048576 0\nW 1048576 0\nW 1048576 1\nB 1048576 0\n"
+    },
+    {
+      "name": "页表逐张消耗空闲页直至耗尽：pgdir_walk 返回 -E_NO_MEM",
+      "input": "6 8192\n5\nW 0 1\nW 4194304 1\nW 8388608 1\nW 12582912 1\nW 16777216 1\n"
+    },
+    {
+      "name": "跨页目录项与 PTX 上下边界（0x3FFFFF/0x400000/0x7FFFFF/0x800000）",
+      "input": "32 8192\n4\nB 4194303 1\nB 4194304 1\nB 8388607 1\nB 8388608 1\n"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "questionId": "1930154079598989313",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.loading_linking",
+      "nodeName": "程序的链接与装入",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "layout_sections() 按 ld 的 location counter 语义逐段 ALIGN 向上对齐后顺序放置，算出 .text/.data/.bss 的 VMA 与按页对齐的 _end；这组数就是学生用 readelf -S/-s 核对的同一组加载地址。"
+    },
+    {
+      "nodeCode": "os.memory.process_image",
+      "nodeName": "进程内存映像",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "段顺序 .text → .rodata → .data → .bss 与段间页对齐决定了内核内存映像的布局，_end 之后才是可分配的空闲物理内存。"
+    },
+    {
+      "nodeCode": "os.boot.boot_process",
+      "nodeName": "操作系统引导过程",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "基址取 0x80000000 一带是 MIPS kseg0（不经 TLB 的固定映射区），内核启动早期页表未建好只能跑在这里；_end 不对齐会让 page_init 把内核自身占用的半页当空闲页分配出去。"
+    }
+  ]
+}

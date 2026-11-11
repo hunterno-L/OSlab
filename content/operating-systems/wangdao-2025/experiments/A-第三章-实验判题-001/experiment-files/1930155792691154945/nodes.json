@@ -1,0 +1,26 @@
+{
+  "questionId": "1930155792691154945",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.cpu.context_switch",
+      "nodeName": "上下文切换",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "env_run() 保存当前进程现场到 TIMESTACK 上的 Trapframe、设 curenv、用 lcontext 切换页目录、再 env_pop_tf 恢复寄存器进入用户态，是上下文切换的完整实现。"
+    },
+    {
+      "nodeCode": "os.process.process_state",
+      "nodeName": "进程状态与转换",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "切换前后进程在就绪态与运行态之间转换，curenv 指向当前占用 CPU 的 PCB。"
+    },
+    {
+      "nodeCode": "os.runtime.mode_switch",
+      "nodeName": "处理器状态切换",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "env_pop_tf 通过恢复 CP0 Status 并 eret 从内核态回到用户态，是处理器状态切换的具体落地。"
+    }
+  ]
+}

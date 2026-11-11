@@ -1,0 +1,26 @@
+{
+  "questionId": "1908540360305704962",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.address_translation",
+      "nodeName": "地址翻译",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "boot_map_segment(pgdir, va, size, pa, perm) 逐页调用 boot_pgdir_walk 并写入 pa|perm|PTE_V；判题观测量是区间首页与末页的页表项原值。"
+    },
+    {
+      "nodeCode": "os.memory.page_table",
+      "nodeName": "页表",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "映射的落地形式就是页表项：所属页表不存在时槽位读作 4294967295(~0)，页表已存在但未映射读作 0，已映射读作 pa|perm|PTE_V。"
+    },
+    {
+      "nodeCode": "os.memory.logical_address",
+      "nodeName": "逻辑地址与物理地址",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "内核启动期把 kseg0 虚拟地址映射到对应物理地址（va − 0x80000000），是逻辑地址与物理地址关系的直接构造。"
+    }
+  ]
+}

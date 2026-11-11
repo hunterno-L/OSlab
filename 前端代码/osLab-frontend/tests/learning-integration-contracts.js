@@ -39,7 +39,7 @@ assert(
   "稳定节点工作台路由存在"
 );
 assert(
-  /path:\s*"\/experiments\/simulation"[\s\S]{0,160}contentWidth:\s*"wide"/.test(
+  /path:\s*"\/experiments\/simulation"[\s\S]{0,320}contentWidth:\s*"wide"/.test(
     routes
   ),
   "模拟入口应使用宽内容区"

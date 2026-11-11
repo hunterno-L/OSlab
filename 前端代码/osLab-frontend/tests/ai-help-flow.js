@@ -179,6 +179,42 @@ async function run() {
         };
       if (name === "@/api/learning")
         return { answerLearningQuestion: async () => ({ data: { code: 0 } }) };
+      if (name === "@/api/assessment")
+        return {
+          createPracticeAttempt: async () => ({
+            data: {
+              code: 0,
+              data: {
+                attemptContextId: "ctx-1",
+                questionId: "42",
+                questionRevision: 1,
+                submissionKey: "sk-practice",
+                helpLevel: "NONE",
+                status: "READY",
+              },
+            },
+          }),
+          recordPracticeHelp: async () => ({
+            data: {
+              code: 0,
+              data: {
+                attemptContextId: "ctx-1",
+                helpLevel: "HINT",
+                eligibleForObservation: false,
+                eligibilityReason: "使用提示",
+              },
+            },
+          }),
+        };
+      if (name === "@/utils/assessmentTutor")
+        return {
+          openAssessmentTutor: (request) =>
+            prompts.push(`hint:${request.intent}`),
+        };
+      if (name === "@/utils/learningEvents")
+        return {
+          notifyLearningUpdated: () => events.push("oslab:learning-updated"),
+        };
       if (name === "@/api/ai") return {};
       if (name === "@/composables/useAiActions") return actions;
       if (name === "@/composables/useAiConversation")
@@ -281,6 +317,42 @@ async function run() {
         };
       if (name === "@/api/learning")
         return { answerLearningQuestion: async () => ({ data: { code: 0 } }) };
+      if (name === "@/api/assessment")
+        return {
+          createPracticeAttempt: async () => ({
+            data: {
+              code: 0,
+              data: {
+                attemptContextId: "ctx-1",
+                questionId: "42",
+                questionRevision: 1,
+                submissionKey: "sk-practice",
+                helpLevel: "NONE",
+                status: "READY",
+              },
+            },
+          }),
+          recordPracticeHelp: async () => ({
+            data: {
+              code: 0,
+              data: {
+                attemptContextId: "ctx-1",
+                helpLevel: "HINT",
+                eligibleForObservation: false,
+                eligibilityReason: "使用提示",
+              },
+            },
+          }),
+        };
+      if (name === "@/utils/assessmentTutor")
+        return {
+          openAssessmentTutor: (request) =>
+            prompts.push(`hint:${request.intent}`),
+        };
+      if (name === "@/utils/learningEvents")
+        return {
+          notifyLearningUpdated: () => events.push("oslab:learning-updated"),
+        };
       if (name === "@/api/ai") return {};
       if (name === "@/composables/useAiLauncher")
         return { askAiAssistant: (text) => prompts.push(text) };

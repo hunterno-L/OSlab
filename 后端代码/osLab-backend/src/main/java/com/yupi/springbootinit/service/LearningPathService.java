@@ -18,4 +18,5 @@ public interface LearningPathService {
      * @param targetNodeName 目标节点名
      */
     LearningPathVO buildPath(User user, String targetNodeName);
+    LearningPathVO buildPath(User user, String targetNodeName, String courseCode);
 }

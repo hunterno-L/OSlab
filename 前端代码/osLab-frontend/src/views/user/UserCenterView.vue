@@ -385,7 +385,6 @@ const onPageChange = (page: number) => {
   fetchStudents(); // 明确调用数据加载
 };
 const doSubmit = () => {
-  console.log("搜索条件：", searchParams.value); // 打印 searchParams 的内容
   fetchStudents(); // 明确调用数据加载
 };
 // 新增查看详情处理函数

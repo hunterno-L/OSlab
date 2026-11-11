@@ -1,0 +1,26 @@
+{
+  "questionId": "1930157984642813953",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.process.process_state",
+      "nodeName": "进程状态与转换",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "sys_set_env_status 检查传入状态是否有效后更新 Env 的 env_status，若为 RUNNABLE 则把进程加入调度链表。"
+    },
+    {
+      "nodeCode": "os.cpu.scheduler",
+      "nodeName": "调度程序",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "fork 的最后一步用该系统调用把子进程置为 RUNNABLE，子进程从此进入调度器的就绪队列。"
+    },
+    {
+      "nodeCode": "os.runtime.system_call",
+      "nodeName": "系统调用",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "进程状态是内核数据，用户态只能经系统调用请求修改，且内核必须拒绝非法状态值。"
+    }
+  ]
+}

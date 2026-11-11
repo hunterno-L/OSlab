@@ -49,6 +49,30 @@ public class LearningAssessmentRun implements Serializable {
      */
     private String status;
 
+    /** 模式：PRACTICE / SELF_TEST；历史 run 为 NULL，按 PRACTICE 处理。 */
+    private String mode;
+
+    /** 草稿乐观锁版本（整组自测）。 */
+    private Integer rowVersion;
+
+    /** 开始时的题目版本快照 {questionId: revision}。 */
+    private String questionRevisionsJson;
+
+    private String courseCode;
+
+    /** 最近一次草稿保存的客户端幂等键与时间。 */
+    private String lastSaveId;
+
+    private Date lastSaveAt;
+
+    /** 交卷幂等键与交卷时的草稿版本。 */
+    private String submissionKey;
+
+    private Integer submissionRowVersion;
+
+    /** 服务端最终结果 JSON（FINISHED 后只读回放）。 */
+    private String finishResultJson;
+
     private Date createTime;
 
     private Date finishTime;

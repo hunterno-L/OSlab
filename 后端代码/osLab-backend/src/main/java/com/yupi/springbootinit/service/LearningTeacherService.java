@@ -5,6 +5,7 @@ import com.yupi.springbootinit.model.vo.learning.ClassOptionVO;
 import com.yupi.springbootinit.model.vo.learning.NodeDrillVO;
 import com.yupi.springbootinit.model.vo.learning.TeacherDashboardVO;
 import com.yupi.springbootinit.model.vo.learning.TimelineVO;
+import com.yupi.springbootinit.model.vo.learning.TeacherFollowUpsVO;
 
 import java.util.List;
 
@@ -18,6 +19,8 @@ public interface LearningTeacherService {
      * 班级大屏：节点热力、薄弱 Top5、题型正确率、实验通过率、最近事件
      */
     TeacherDashboardVO dashboard(String className);
+
+    TeacherFollowUpsVO followUps(String className, String courseCode);
 
     /**
      * 成长时间轴：回放不可变事件（不重算），支持按学生/节点/类型筛选。

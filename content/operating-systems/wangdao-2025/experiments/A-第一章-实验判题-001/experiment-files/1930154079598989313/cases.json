@@ -1,0 +1,29 @@
+{
+  "description": "驱动 SECTIONS 段布局计算。输入首行「起始VMA 段数n」（n 为 1..16），随后 n 行「段名 大小 对齐」（段名 ≤15 字符，大小与对齐为十进制无符号 32 位）。从起始VMA 起逐段放置：每段先把当前地址向上对齐到该段的对齐值（对齐为 0 时视为不对齐），该地址即段 VMA，然后当前地址前进该段大小；全部段放完后把当前地址向上对齐到 4096 得到 _end。输出每段「段名 0x%08x」，末行「_end 0x%08x」（8 位十六进制小写、0x 前缀）。",
+  "cases": [
+    {
+      "name": "kernel-typical",
+      "input": "2147483648 3\n.text 8192 4096\n.data 1000 4\n.bss 2048 4096\n"
+    },
+    {
+      "name": "zero-length-bss",
+      "input": "2147549184 3\n.text 4096 16\n.data 1 8\n.bss 0 4096\n"
+    },
+    {
+      "name": "unaligned-base",
+      "input": "2147483904 2\n.text 100 4096\n.data 100 4\n"
+    },
+    {
+      "name": "single-section",
+      "input": "2147483648 1\n.text 1 1\n"
+    },
+    {
+      "name": "large-align",
+      "input": "2147483648 3\n.text 65536 65536\n.data 4096 4096\n.bss 8192 4096\n"
+    },
+    {
+      "name": "zero-align-and-small-align-on-unaligned",
+      "input": "2147483904 2\n.text 100 0\n.data 100 8\n"
+    }
+  ]
+}

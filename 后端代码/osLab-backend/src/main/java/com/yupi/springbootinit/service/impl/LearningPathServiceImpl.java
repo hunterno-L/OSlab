@@ -68,21 +68,36 @@ public class LearningPathServiceImpl implements LearningPathService {
     @Resource
     private com.yupi.springbootinit.course.CourseService courseService;
 
+    @Resource private com.yupi.springbootinit.learning.PublishedCourseScopeService courseScope;
+    @Resource private com.yupi.springbootinit.course.EnabledCourses enabledCourses;
+
     @Override
     public LearningPathVO buildPath(User user, String targetNodeName) {
+        return buildPath(user, targetNodeName, null);
+    }
+
+    @Override
+    public LearningPathVO buildPath(User user, String targetNodeName, String courseCode) {
         if (StringUtils.isBlank(targetNodeName)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "目标节点不能为空");
         }
         com.yupi.springbootinit.learning.NodeIdentityService.Identity identity=nodeIdentities==null?null:nodeIdentities.resolve(targetNodeName);
         if(identity!=null)targetNodeName=identity.storageKey;
         GraphDataDTO graph = knowledgeGraphService.getGraphSnapshot();
+        Map<String, com.yupi.springbootinit.learning.NodeIdentityService.Identity> scopeIdentities = null;
+        if (StringUtils.isNotBlank(courseCode)) {
+            enabledCourses.require(courseCode);
+            scopeIdentities = courseScope.nodes(courseCode);
+            graph = courseScope.filterGraph(graph, scopeIdentities);
+        }
         NodeDTO selected=KnowledgeGraphService.resolveNode(graph,identity==null?null:identity.nodeCode,targetNodeName);
         if(selected==null)throw new BusinessException(ErrorCode.NOT_FOUND_ERROR,"知识节点不存在："+targetNodeName);
         Map<String, NodeDTO> nodeByName = new HashMap<>();
         Set<String> ambiguous=new HashSet<>();
         Map<String, String> idToName = new HashMap<>();
         for (NodeDTO node : graph.getNodes() == null ? new ArrayList<NodeDTO>() : graph.getNodes()) {
-            String key=storageKey(node);
+            String key = scopeIdentities != null && scopeIdentities.containsKey(node.getNodeCode())
+                    ? scopeIdentities.get(node.getNodeCode()).storageKey : storageKey(node);
             if(nodeByName.putIfAbsent(key,node)!=null)ambiguous.add(key);
             if (node.getId() != null) {
                 idToName.put(node.getId(), key);

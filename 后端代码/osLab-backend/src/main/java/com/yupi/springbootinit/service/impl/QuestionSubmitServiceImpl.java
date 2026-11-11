@@ -52,6 +52,8 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     @Resource
     private com.yupi.springbootinit.learning.ExperimentMappingService experimentMappings;
     @Resource
+    private com.yupi.springbootinit.learning.ExperimentJudgeModeService experimentJudgeModes;
+    @Resource
     private com.yupi.springbootinit.task.TaskExecutionContextService taskContext;
     @Resource
     private com.yupi.springbootinit.task.TaskAccessService taskAccess;
@@ -89,6 +91,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         if (question == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
+        experimentJudgeModes.requireAutomaticJudge(questionId);
         boolean taskScoped = com.yupi.springbootinit.task.TaskConstants.SCOPE_TASK.equals(question.getResourceScope());
         com.yupi.springbootinit.task.TaskExecutionContextService.Context context = null;
         if (taskScoped) {
@@ -100,6 +103,13 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
             context = taskContext.validate(loginUser, questionSubmitAddRequest.getSourceTaskCode(),
                     questionSubmitAddRequest.getSourceTaskItemCode(), questionId,
                     questionSubmitAddRequest.getSourceTaskRound(), true);
+            if (context.snapshot != null && (context.snapshot.path("manualReview").asBoolean(false)
+                    || "LOCAL_BUILD".equals(context.snapshot.path("judgeMode").asText()))) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "该任务实验须人工验收，不自动判分");
+            }
+            if (context.sourceQuestionId != null) {
+                experimentJudgeModes.requireAutomaticJudge(context.sourceQuestionId);
+            }
         } else {
             if (StringUtils.isNotBlank(questionSubmitAddRequest.getSourceTaskCode())) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "共享实验不能携带任务上下文");

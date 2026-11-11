@@ -60,24 +60,20 @@ const showSidebar = computed(() => {
 <style scoped>
 .themed-layout {
   min-height: 100vh;
-  background-color: var(--oslab-canvas);
-  background-image: radial-gradient(
-    rgba(32, 36, 43, 0.075) 1px,
-    transparent 1px
-  );
-  background-size: 22px 22px;
+  /* 底色由 body::before 的固定渐变层承载，布局壳保持透明 */
+  background-color: transparent;
 }
 .themed-layout .header {
   height: auto;
   line-height: normal;
-  padding: 12px 12px 0;
+  padding: var(--oslab-space-3) var(--oslab-space-3) 0;
   margin-bottom: 0;
   background: transparent;
   box-shadow: none;
 }
 .themed-layout .content {
   background: transparent;
-  padding: 20px 32px 32px;
+  padding: var(--oslab-space-5) var(--oslab-space-8) var(--oslab-space-8);
   min-height: calc(100vh - 84px);
   box-sizing: border-box;
 }
@@ -86,13 +82,13 @@ const showSidebar = computed(() => {
   max-width: 1440px;
   margin: 0 auto;
   display: flex;
-  gap: 12px;
+  gap: var(--oslab-space-3);
   align-items: flex-start;
 }
 .page-title-row {
   width: 100%;
   max-width: 1440px;
-  margin: 0 auto 16px;
+  margin: 0 auto var(--oslab-space-4);
 }
 .page-title-row.content-wide {
   max-width: 1760px;
@@ -101,8 +97,8 @@ const showSidebar = computed(() => {
   margin: 0 0 2px;
   color: var(--oslab-muted-strong);
   font-family: var(--oslab-font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: 11px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 .page-title-row .page-title {
@@ -124,7 +120,7 @@ const showSidebar = computed(() => {
 }
 @media (max-width: 1024px) {
   .themed-layout .header {
-    padding: 8px 8px 0;
+    padding: var(--oslab-space-2) var(--oslab-space-2) 0;
   }
   .page-title-row .page-title {
     font-size: 28px;

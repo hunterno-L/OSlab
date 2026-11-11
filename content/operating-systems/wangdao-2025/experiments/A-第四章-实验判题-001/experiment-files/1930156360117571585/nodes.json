@@ -1,0 +1,26 @@
+{
+  "questionId": "1930156360117571585",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.runtime.system_call",
+      "nodeName": "系统调用",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "编写 user/syscall_wrap.S 的 syscall 封装：按 MIPS o32 把调用号与参数搬进 $v0/$a0-$a3（第 5 个及以后参数走栈），执行特权 syscall 陷入内核，再从 $v0 取返回值。"
+    },
+    {
+      "nodeCode": "os.runtime.trap_instruction",
+      "nodeName": "访管指令",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "MIPS 的 syscall 就是访管指令，触发 ExcCode=8(Sys) 异常，是用户态主动请求内核服务的唯一入口。"
+    },
+    {
+      "nodeCode": "os.runtime.mode_switch",
+      "nodeName": "处理器状态切换",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "syscall 触发后 CPU 置 Status.EXL 进入内核态、切到内核栈与内核页表，返回时 eret 回用户态；内核侧须把返回值写回 Trapframe 的 $v0 并令 EPC += 4。"
+    }
+  ]
+}

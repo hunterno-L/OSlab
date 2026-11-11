@@ -4,7 +4,6 @@
   position: relative;
   display: flex;
   gap: 40px;
-  width: 128px;
 }
 
 #userLayout .os-tab {
@@ -14,7 +13,9 @@
   color: var(--oslab-muted-strong);
   font: inherit;
   font-size: 14px;
+  min-height: 36px;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 #userLayout .os-tab[aria-selected="true"] {
@@ -37,25 +38,26 @@
   transition: transform var(--oslab-duration-fast) var(--oslab-ease);
 }
 
+/* 指示条宽度等于一个页签，位移量 = 自身宽度 + 页签间距 */
 #userLayout .os-tab-rule.is-register {
-  transform: translateX(69px);
+  transform: translateX(calc(100% + 40px));
 }
 
 #userLayout .os-auth-panel h2 {
   margin: 20px 0 0;
   font-size: 26px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.4;
 }
 
 #userLayout .os-field {
   display: block;
-  margin: 22px 0 0;
+  margin: var(--oslab-space-5) 0 0;
 }
 
 #userLayout .os-field-label {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: var(--oslab-space-2);
   color: var(--oslab-ink-soft);
   font-size: 12px;
 }
@@ -71,10 +73,17 @@
   color: var(--oslab-ink);
   font: inherit;
   font-size: 14px;
+  transition: border-color var(--oslab-duration-fast) var(--oslab-ease);
+}
+
+#userLayout input:hover {
+  border-color: var(--oslab-line-strong);
 }
 
 #userLayout input::placeholder {
-  color: var(--oslab-muted);
+  /* 占位符同样满足 4.5:1，不使用极弱的 --oslab-muted */
+  color: var(--oslab-muted-strong);
+  opacity: 1;
 }
 
 #userLayout input:focus-visible {
@@ -94,16 +103,25 @@
 
 #userLayout .os-eye {
   position: absolute;
-  top: 5px;
-  right: 5px;
+  top: 4px;
+  right: 4px;
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border: 0;
+  border-radius: var(--oslab-radius-sm);
   background: none;
   color: var(--oslab-muted-strong);
   cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color var(--oslab-duration-fast) var(--oslab-ease),
+    color var(--oslab-duration-fast) var(--oslab-ease);
+}
+
+#userLayout .os-eye:hover {
+  background: var(--oslab-panel-soft);
+  color: var(--oslab-ink);
 }
 
 #userLayout .os-eye svg {
@@ -117,7 +135,7 @@
 }
 
 #userLayout .os-form-extra {
-  margin: 14px 0 18px;
+  margin: var(--oslab-space-3) 0 var(--oslab-space-4);
   font-size: 12px;
 }
 
@@ -125,6 +143,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-height: 28px;
+  cursor: pointer;
 }
 
 #userLayout .os-remember input {
@@ -148,6 +168,8 @@
   font: inherit;
   font-size: 14px;
   cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color var(--oslab-duration-fast) var(--oslab-ease);
 }
 
 #userLayout .os-submit:hover {
@@ -212,9 +234,35 @@
   }
 }
 
+/* 触屏：页签、密码可见性开关、记住账号统一 44px 触控目标 */
+@media (pointer: coarse) {
+  #userLayout .os-tab {
+    min-height: 44px;
+  }
+
+  #userLayout .os-remember {
+    min-height: 44px;
+  }
+
+  #userLayout .os-eye {
+    top: 2px;
+    right: 2px;
+    width: 44px;
+    height: 44px;
+  }
+
+  #userLayout .os-password {
+    padding-right: 52px !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   #userLayout .os-tab-rule,
-  #userLayout .os-confirm-row {
+  #userLayout .os-confirm-row,
+  #userLayout .os-submit,
+  #userLayout .os-eye,
+  #userLayout input[type="text"],
+  #userLayout input[type="password"] {
     transition: none;
   }
 }

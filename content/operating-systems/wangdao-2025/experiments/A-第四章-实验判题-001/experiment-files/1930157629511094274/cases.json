@@ -1,0 +1,25 @@
+{
+  "description": "实验 4.11 page_fault_handler(struct Trapframe *tf)（宿主签名适配：真实 MOS 从 TIMESTACK 取现场）。按需分页语义：把「PTE_V 已置位但 PTE_ADDR 为 0」的页表项补上物理页，原样保留低 12 位权限。驱动操作符：I=env_init 并打印空闲 PCB 数；A parent=env_alloc 打印 返回码/下标/env_id；U idx=设 curenv；S idx st=设 env_status；R idx=插入就绪链表头；P idx va perm=page_alloc+page_insert 建一条真实映射，打印 返回码/物理页基址；B idx va perm=缺页夹具，pgdir_walk(create=1) 后把页表项低 12 位直接写成 perm（PTE_ADDR 留 0，造出「已登记未分配」的洞），必要时新建页表；M va=把 va 写进 TIMESTACK 的 cp0_badvaddr 后调 page_fault_handler(TIMESTACK)，再打印 curenv 在 va 处的页表项原始值（curenv 为空则 4294967295）；O idx va=页表项原始值（无页表 4294967295）；Q idx va=物理页基址（无有效映射 4294967295）；T idx=env_id/parent/status/pri/cr3；J idx=env_tf 的 cp0_epc/$v0/$sp/cp0_status；C=空闲物理页数；L=就绪链表下标；H=就绪链表头（空表 -1）。权限位：PTE_V=1，PTE_R=2（MOS 的 PTE_R 即可写位），PTE_COW=8，PTE_LIBRARY=16；故 perm=3 是读写页、perm=1 是只读页、perm=11 是读写+COW、perm=9 是只读+COW。UTOP=1073741824，BY2PG=4096。宿主物理页账本：np=256/fm=8192 初始空闲 252 页，np=7 时 3 页；每次 env_alloc 占 1 页作页目录（envs[63].cr3=1044480、envs[62]=1040384；np=7 时 envs[63].cr3=24576）；首次进入某个 4MB 区间（B 或 P）额外占 1 页作页表；空闲链表 LIFO，头是最高号页。内核段只有 PDX(UTOP)=256 与 PDX(UENVS)=509 两条页目录项有效，故 M 1073741824 打印 3、M 4294967295 打印 4294967295。",
+  "cases": [
+    {
+      "name": "基本按需分页：登记未分配的洞被补上物理页，低 12 位权限原样保留（读写页 3、读写+COW 页 11、只读页 1），页内偏移的重复缺页不得再分配",
+      "input": "256 8192\n18\nI\nA 0\nU 63\nC\nB 63 4194304 3\nC\nO 63 4194304\nM 4194304\nO 63 4194304\nQ 63 4194304\nM 4195328\nC\nB 63 4198400 11\nM 4198400\nO 63 4198400\nB 63 4202496 1\nM 4202496\nC\n"
+    },
+    {
+      "name": "非法地址必须原地返回：PTE_V=0 的未登记页、va>=UTOP 的内核地址、根本没有页表的区间都不得分配物理页，空闲页数一页不少",
+      "input": "256 8192\n18\nI\nA 0\nU 63\nC\nB 63 8388608 0\nM 8388608\nC\nM 1073741824\nM 4294967295\nM 12582912\nO 63 12582912\nC\nB 63 8388608 11\nM 8388608\nO 63 8388608\nQ 63 8388608\nC\nT 63\n"
+    },
+    {
+      "name": "内存不足：np=7 时先成功补一页（COW 权限必须保留），物理页耗尽后 page_alloc 失败必须让页表项一个字节都不变，重复缺页与再次 env_alloc 都不得崩溃",
+      "input": "7 8192\n17\nI\nA 0\nU 63\nC\nB 63 4194304 11\nC\nM 4194304\nO 63 4194304\nC\nB 63 4198400 3\nM 4198400\nO 63 4198400\nC\nM 4198400\nA 0\nC\nT 63\n"
+    },
+    {
+      "name": "缺页只作用于 curenv：切换当前进程后同一 va 落到另一张页目录，别的进程页表项不得被改；现场、就绪链表、进程状态全程不动",
+      "input": "256 8192\n21\nI\nA 0\nA 0\nU 63\nS 63 2\nR 63\nB 63 4194304 11\nB 62 4194304 1\nM 4194304\nO 63 4194304\nO 62 4194304\nC\nU 62\nM 4194304\nO 62 4194304\nO 63 4194304\nC\nL\nH\nT 63\nJ 63\n"
+    },
+    {
+      "name": "已有物理页的映射不是缺页：page_insert 建好的页不得被重复分配；三个不同 4MB 区间的洞各自建页表并补页，只读 COW 页(perm=9)权限不得被改写",
+      "input": "256 8192\n21\nI\nA 0\nU 63\nP 63 4194304 3\nC\nO 63 4194304\nM 4194304\nC\nB 63 4198400 11\nM 4198400\nB 63 8388608 9\nM 8388608\nB 63 12582912 1\nM 12582912\nC\nO 63 4198400\nO 63 8388608\nO 63 12582912\nQ 63 8390655\nM 4198400\nC\n"
+    }
+  ]
+}

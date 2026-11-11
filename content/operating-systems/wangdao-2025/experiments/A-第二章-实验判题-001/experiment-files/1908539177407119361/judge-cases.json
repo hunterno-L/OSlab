@@ -1,0 +1,22 @@
+[
+  {
+    "input": "8 8192\n7\nA\nA\nA\nS 1 0\nF 1\nA\nA\n",
+    "output": "A 7 0\nA 6 0\nA 5 0\nF 7 0\nA 7 0\nA 4 0\n3 2"
+  },
+  {
+    "input": "6 8192\n6\nA\nA\nA\nA\nA\nA\n",
+    "output": "A 5 0\nA 4 0\nA 3 0\nA 2 0\nA -4\nA -4"
+  },
+  {
+    "input": "6 8192\n5\nA\nS 1 1\nF 1\nA\nA\n",
+    "output": "A 5 0\nF 5 1\nA 4 0\nA 3 0\n2"
+  },
+  {
+    "input": "8 8192\n6\nA\nA\nF 2\nF 1\nA\nA\n",
+    "output": "A 7 0\nA 6 0\nF 6 0\nF 7 0\nA 7 0\nA 6 0\n5 4 3 2"
+  },
+  {
+    "input": "5 4096\n4\nA\nA\nF 1\nF 2\n",
+    "output": "A 4 0\nA 3 0\nF 4 0\nF 3 0\n3 4 2 1"
+  }
+]

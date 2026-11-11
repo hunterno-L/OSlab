@@ -1,0 +1,25 @@
+{
+  "description": "驱动 lib/env.c 的 env_create()/env_create_priority()。stdin 首行 npage freemem（1..256 / 0..65536），次行操作数 n（0..80），随后 n 个操作：I=平台 env_init()（重复打印 I SKIP）；B=把镜像缓冲填成 seg_binary[i]=i&0xFF；G=清空段表；S va size perm=追加一段（最多8段，va<1073741824、size<=16384、perm 0..4095），打印「S 当前段数」；E entry=设 elf_entry；A x=ENV_CREATE(x)（x∈A/B/C，默认优先级1），打印「A x」；P x pri=ENV_CREATE_PRIORITY(x,pri)（pri 0..65535），打印「P x pri」；Z size=env_create(binary_user_A,size)（size=0 触发空镜像守卫）；Y=env_create(NULL,64)（NULL 触发守卫）；J=平台 env_alloc(&e,0)（不加载、不入就绪链表，用于耗尽空闲PCB），打印「J 返回码 下标」；H=就绪链表头下标（空 -1）；T idx=打印「T idx env_id parent status pri cp0_epc sp」；L=就绪链表顺序（头插故为创建逆序）；F=空闲PCB数；C=空闲物理页数；Q idx va=物理地址（无映射 4294967295）；D idx va=32位小端字（无映射/跨页 4294967295）；R idx va=所映射物理页 pp_ref（无映射 -1）。idx<64。关键常量：ENV_RUNNABLE=2、ENV_NOT_RUNNABLE=1、USTACKTOP=1073741824、栈页映射在 USTACKTOP-BY2PG=1073737728。宿主等价：load_icode 用 stdin 段表+elf_entry 加载，binary/size 仅用于「空镜像(NULL或size0)不创建进程」守卫；env_create 默认优先级1，env_create_priority 原样保存 pri（0 合法），必须置 ENV_RUNNABLE 并头插 env_sched_list，env_alloc 失败立即返回。",
+  "cases": [
+    {
+      "name": "官方锚：单段镜像 ENV_CREATE(A) 默认优先级1，PCB字段/就绪链表头/镜像映射/栈页/空闲计数全检查",
+      "input": "256 8192\n15\nI\nB\nG\nS 4096 4096 3\nE 4096\nA A\nH\nT 63\nL\nF\nC\nQ 63 4096\nD 63 4096\nQ 63 1073737728\nR 63 1073737728\n"
+    },
+    {
+      "name": "优先级变体：P(B,5)/P(C,0)/默认A(1)，pri 原样保存(0合法) + 就绪链表头插逆序 + envid 生成号",
+      "input": "256 8192\n15\nI\nB\nG\nS 4096 4096 3\nE 4096\nP B 5\nP C 0\nA A\nH\nL\nT 63\nT 62\nT 61\nF\nC\n"
+    },
+    {
+      "name": "多段镜像：env_create 必须真调 load_icode，两段各自映射+内容正确+入口落段中+栈页 pp_ref=1",
+      "input": "256 8192\n16\nI\nB\nG\nS 6144 8192 3\nS 32768 4096 2\nE 8192\nA B\nH\nT 63\nQ 63 6144\nD 63 6144\nQ 63 32768\nD 63 32768\nQ 63 1073737728\nR 63 1073737728\nC\n"
+    },
+    {
+      "name": "耗尽边界：先建1个空镜像进程再耗尽64个PCB，第65次 ENV_CREATE 因 env_alloc 失败不得挂进就绪链表",
+      "input": "256 8192\n76\nI\nG\nE 0\nA A\nT 63\nQ 63 1073737728\nF\nC\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nA A\nH\nF\nC\nQ 63 1073737728\n"
+    },
+    {
+      "name": "空镜像守卫：Z(size=0)与Y(binary=NULL)都不创建进程，随后正常 ENV_CREATE(A) 才建1个",
+      "input": "256 8192\n15\nI\nB\nG\nS 4096 4096 3\nE 4096\nZ 0\nY\nH\nF\nC\nA A\nH\nT 63\nF\nC\n"
+    }
+  ]
+}

@@ -55,6 +55,8 @@ import java.util.Map;
 @Service
 public class AiActionService {
 
+    @Resource private com.yupi.springbootinit.course.EnabledCourses enabledCourses;
+
     @Resource
     private AiSessionService sessionService;
 
@@ -479,6 +481,7 @@ public class AiActionService {
         }
         // 归属校验：actionId 反解出的会话必须属于当前用户
         AiLearningSession session = sessionService.requireOwned(user, sessionId);
+        enabledCourses.require(session.getCourseCode());
         List<NextAction> plan = sessionService.plan(session);
         int index = AiSessionService.actionIndexOf(actionId);
         if (index < 0 || index >= plan.size()) {

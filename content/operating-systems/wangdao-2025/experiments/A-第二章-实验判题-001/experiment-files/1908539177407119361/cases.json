@@ -1,0 +1,25 @@
+{
+  "description": "驱动 mm/pmap.c 的 page_alloc()/page_free()。stdin 首行 npage freemem_bytes，次行操作数，随后每行一个操作：A=分配一页；S k r=把第 k 次成功分配的页 pp_ref 设为 r；F k=释放第 k 次成功分配的页。输出：A 行为「A 页号 首字」（失败为「A -4」，首字用于验证清零，驱动分配后会写入 0xDEADBEEF），F 行为「F 页号 pp_ref」，末行为空闲链表页号序列。",
+  "cases": [
+    {
+      "name": "官方 page_check：三次分配互不相同 + 回收后重分配必须清零",
+      "input": "8 8192\n7\nA\nA\nA\nS 1 0\nF 1\nA\nA\n"
+    },
+    {
+      "name": "分配至空闲链表耗尽：前四次成功，之后返回 -E_NO_MEM",
+      "input": "6 8192\n6\nA\nA\nA\nA\nA\nA\n"
+    },
+    {
+      "name": "pp_ref==1 时 page_free 不得回收",
+      "input": "6 8192\n5\nA\nS 1 1\nF 1\nA\nA\n"
+    },
+    {
+      "name": "回收顺序 LIFO：后释放的先被分配",
+      "input": "8 8192\n6\nA\nA\nF 2\nF 1\nA\nA\n"
+    },
+    {
+      "name": "page_alloc 不得递增 pp_ref",
+      "input": "5 4096\n4\nA\nA\nF 1\nF 2\n"
+    }
+  ]
+}

@@ -46,6 +46,12 @@ module.exports = defineConfig({
     },
   },
   chainWebpack(config) {
-    config.plugin("monaco").use(new MonacoWebpackPlugin());
+    // CodeEditor 只使用 c/cpp（同一语法贡献）、java、go；默认配置会打包全部
+    // 语言及其 ts/json/css/html worker，显著放大产物（ts.worker 单文件 5.8MB）。
+    config.plugin("monaco").use(
+      new MonacoWebpackPlugin({
+        languages: ["cpp", "java", "go"],
+      })
+    );
   },
 });

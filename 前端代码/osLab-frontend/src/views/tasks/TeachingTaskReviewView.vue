@@ -2,9 +2,7 @@
   <div v-if="task" class="task-review">
     <a-card class="review-head">
       <div class="head-top">
-        <a-button size="small" @click="router.push('/teaching/tasks')"
-          >返回任务列表</a-button
-        >
+        <a-button size="small" @click="backToTasks">返回任务列表</a-button>
         <a-space>
           <a-tag :color="task.taskStatus === 'PUBLISHED' ? 'green' : 'orange'">
             {{
@@ -17,7 +15,12 @@
           </a-tag>
           <a-button
             size="small"
-            @click="router.push(`/teaching/tasks/${task.taskCode}/edit`)"
+            @click="
+              router.push({
+                path: `/teaching/tasks/${task.taskCode}/edit`,
+                query: taskContextQuery,
+              })
+            "
           >
             任务设置
           </a-button>
@@ -25,6 +28,9 @@
       </div>
       <h1 class="task-title">{{ task.title }}</h1>
       <div class="task-meta">
+        <span v-if="taskContextQuery.className"
+          >当前班级：{{ taskContextQuery.className }} ·
+        </span>
         截止时间：{{ task.dueAt ? formatTime(task.dueAt) : "不限" }}
         <span class="muted"> · 共 {{ task.items?.length || 0 }} 个内容块</span>
         <span v-if="task.publishedPolicy?.manualRequired" class="muted">
@@ -35,7 +41,7 @@
 
     <div class="stat-grid">
       <div v-for="stat in statsCards" :key="stat.key" class="stat-card">
-        <span class="stat-value">{{ stat.value }}</span>
+        <span class="stat-value">{{ statsReady ? stat.value : "—" }}</span>
         <span class="stat-label">{{ stat.label }}</span>
       </div>
     </div>
@@ -44,16 +50,26 @@
       <template #title>
         <div class="list-title">
           <span>接收人与提交情况</span>
+          <a-checkbox v-model="pendingOnly" @change="onReviewFilterChange"
+            >仅看待批阅</a-checkbox
+          >
           <a-button size="small" :loading="loading" @click="loadRecipients"
             >刷新</a-button
           >
         </div>
       </template>
+      <div v-if="recipientsError" class="oslab-error" role="alert">
+        <span>{{ recipientsError }}</span>
+        <a-button size="small" @click="loadRecipients">重试</a-button>
+      </div>
       <a-table
         :data="recipients"
         :loading="loading"
         :pagination="pagination"
+        :scroll="{ x: 1090 }"
         row-key="recipientId"
+        @page-change="onRecipientPageChange"
+        @page-size-change="onRecipientPageSizeChange"
       >
         <template #columns>
           <a-table-column title="学生" :width="180">
@@ -107,14 +123,22 @@
           </a-table-column>
         </template>
         <template #empty>
-          <a-empty description="还没有接收人" />
+          <a-empty
+            :description="
+              recipientsError
+                ? '提交情况尚未加载成功'
+                : pendingOnly
+                ? '暂无待批阅提交'
+                : '还没有接收人'
+            "
+          />
         </template>
       </a-table>
     </a-card>
 
     <a-drawer
       v-model:visible="drawerVisible"
-      :width="860"
+      width="min(860px, 100vw)"
       :footer="false"
       title="提交详情与批阅"
     >
@@ -281,10 +305,16 @@
       </a-form>
     </a-modal>
   </div>
+  <div v-else-if="taskError" class="oslab-error" role="alert">
+    <span>{{ taskError }}</span>
+    <a-button @click="reloadReview">重试</a-button>
+    <a-button @click="backToTasks">返回任务列表</a-button>
+  </div>
+  <div v-else class="oslab-loading" role="status">正在加载任务…</div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Message } from "@arco-design/web-vue";
 import {
@@ -298,11 +328,29 @@ import {
 
 const route = useRoute();
 const router = useRouter();
+const taskContextQuery = computed(() => ({
+  className:
+    typeof route.query.className === "string"
+      ? route.query.className
+      : undefined,
+  courseCode:
+    typeof route.query.courseCode === "string"
+      ? route.query.courseCode
+      : undefined,
+}));
+const backToTasks = () =>
+  router.push({ path: "/teaching/tasks", query: taskContextQuery.value });
+const pendingOnly = ref(route.query.pendingReview === "1");
+const recipientsError = ref("");
+let recipientSeq = 0;
 const taskCode = computed(() => String(route.params.taskCode || ""));
 const task = ref<TaskDetail | null>(null);
+const taskError = ref("");
+let taskSeq = 0;
 const loading = ref(false);
 const recipients = ref<any[]>([]);
 const stats = ref<any>({});
+const statsReady = ref(false);
 const current = ref(1);
 const pageSize = ref(20);
 const total = ref(0);
@@ -343,28 +391,74 @@ const statsCards = computed(() => [
 ]);
 
 const loadTask = async () => {
-  const res = await getTeachingTask(taskCode.value);
-  if (res.data?.code === 0) task.value = res.data.data;
-  else Message.error(res.data?.message || "任务加载失败");
+  const seq = ++taskSeq;
+  task.value = null;
+  taskError.value = "";
+  try {
+    const res = await getTeachingTask(taskCode.value);
+    if (seq !== taskSeq) return false;
+    if (res.data?.code !== 0)
+      throw new Error(res.data?.message || "任务加载失败");
+    task.value = res.data.data;
+    return true;
+  } catch (error) {
+    if (seq === taskSeq)
+      taskError.value =
+        error instanceof Error ? error.message : "任务加载失败，请重试";
+    return false;
+  }
 };
 
 const loadRecipients = async () => {
+  const seq = ++recipientSeq;
   loading.value = true;
+  recipientsError.value = "";
+  recipients.value = [];
+  total.value = 0;
+  stats.value = {};
+  statsReady.value = false;
   try {
     const res = await listTaskRecipients(taskCode.value, {
       current: current.value,
       pageSize: pageSize.value,
+      pendingReview: pendingOnly.value,
+      className: taskContextQuery.value.className,
     });
+    if (seq !== recipientSeq) return;
     if (res.data?.code === 0) {
       recipients.value = res.data.data?.records || [];
       total.value = Number(res.data.data?.total || 0);
       stats.value = res.data.data?.stats || {};
+      statsReady.value = true;
     } else {
-      Message.error(res.data?.message || "接收人加载失败");
+      recipientsError.value = res.data?.message || "提交情况加载失败，请重试";
     }
+  } catch {
+    if (seq === recipientSeq)
+      recipientsError.value = "提交情况加载失败，请检查网络后重试";
   } finally {
-    loading.value = false;
+    if (seq === recipientSeq) loading.value = false;
   }
+};
+
+const onReviewFilterChange = () => {
+  current.value = 1;
+  recipients.value = [];
+  router.replace({
+    query: {
+      ...route.query,
+      pendingReview: pendingOnly.value ? "1" : undefined,
+    },
+  });
+};
+const onRecipientPageChange = (page: number) => {
+  current.value = page;
+  loadRecipients();
+};
+const onRecipientPageSizeChange = (size: number) => {
+  pageSize.value = size;
+  current.value = 1;
+  loadRecipients();
 };
 
 const openSubmission = async (id: string) => {
@@ -512,10 +606,22 @@ const renderAnswer = (value: any) => {
   return typeof value === "string" ? value : JSON.stringify(value);
 };
 
-onMounted(async () => {
-  await loadTask();
-  await loadRecipients();
-});
+const reloadReview = async () => {
+  recipientSeq++;
+  statsReady.value = false;
+  if (await loadTask()) await loadRecipients();
+};
+watch(
+  () => [taskCode.value, route.query.className, route.query.pendingReview],
+  () => {
+    pendingOnly.value = route.query.pendingReview === "1";
+    current.value = 1;
+    drawerVisible.value = false;
+    detail.value = null;
+    void reloadReview();
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
@@ -567,6 +673,8 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 .student-name {
   font-weight: 600;
@@ -653,6 +761,19 @@ onMounted(async () => {
 @media (max-width: 1000px) {
   .stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .head-top,
+  .detail-head,
+  .manual-grade {
+    flex-wrap: wrap;
+  }
+  .task-title {
+    overflow-wrap: anywhere;
+  }
+  .task-review :deep(.arco-btn) {
+    min-height: 44px;
   }
 }
 </style>
