@@ -19,6 +19,10 @@ set -eu
 #  11. oslab_upgrade_v10_classes.sql 班级与成员管理
 #  12. oslab_upgrade_v11_ai_session.sql   AI 会话/轮次/资料与个人密钥密文（2026-11 升级）
 #  13. oslab_upgrade_v12_ai_evidence.sql  模型配置/证据上下文与复习项（2026-11 升级）
+#  14. oslab_upgrade_v13_learning_selftest.sql 整组自测字段（原首装挂载缺失补齐）
+#  15. oslab_seed_v14_experiment_prerequisites.sql 18 个实验单元的公共课程依赖
+#  16. oslab_upgrade_v14_experiment_judge.sql 41 项实验内容、判题及映射
+#  17. oslab_upgrade_v14_experiment_comments.sql 实验代码注释清理
 # 所有文件均为必需：缺挂载即失败退出，不再静默跳过（失败即失败，不吞错）。
 # 已有数据卷不会重跑本目录脚本；存量库请使用
 #   数据库文件/oslab_upgrade_existing_check.sql
@@ -40,19 +44,23 @@ load_required_seed() {
 }
 
 echo "=== OSLab 数据库初始化：开始加载 ==="
-load_required_seed /seed/oslab_db.sql                    "1/13 基础库 oslab_db.sql"
-load_required_seed /seed/oslab_upgrade_v3_learning.sql   "2/13 v3 学习闭环表"
-load_required_seed /seed/oslab_upgrade_v4_flow.sql       "3/13 v4 测评会话/幂等/快照"
-load_required_seed /seed/oslab_upgrade_v5_teaching.sql   "4/13 v5 教学素材表"
-load_required_seed /seed/oslab_demo_seed_v3.sql          "5/13 v3 演示种子"
-load_required_seed /seed/oslab_seed_v4_content.sql       "6/13 v4 内容种子"
-load_required_seed /seed/oslab_upgrade_v6_courses.sql    "7/13 v6 课程/内容/进度草稿"
-load_required_seed /seed/oslab_upgrade_v7_identity.sql   "8/13 v7 稳定身份/修订/提交上下文"
-load_required_seed /seed/oslab_upgrade_v8_teaching_tasks.sql "9/13 v8 学习任务/执行副本/任务附件"
-load_required_seed /seed/oslab_upgrade_v9_learning_activities.sql "10/13 v9 普通演示运行记录"
-load_required_seed /seed/oslab_upgrade_v10_classes.sql "11/13 v10 班级与成员管理"
-load_required_seed /seed/oslab_upgrade_v11_ai_session.sql "12/13 v11 AI 会话/轮次/资料/密钥密文"
-load_required_seed /seed/oslab_upgrade_v12_ai_evidence.sql "13/13 v12 模型配置/证据上下文/复习项"
+load_required_seed /seed/oslab_db.sql                    "1/17 基础库 oslab_db.sql"
+load_required_seed /seed/oslab_upgrade_v3_learning.sql   "2/17 v3 学习闭环表"
+load_required_seed /seed/oslab_upgrade_v4_flow.sql       "3/17 v4 测评会话/幂等/快照"
+load_required_seed /seed/oslab_upgrade_v5_teaching.sql   "4/17 v5 教学素材表"
+load_required_seed /seed/oslab_demo_seed_v3.sql          "5/17 v3 演示种子"
+load_required_seed /seed/oslab_seed_v4_content.sql       "6/17 v4 内容种子"
+load_required_seed /seed/oslab_upgrade_v6_courses.sql    "7/17 v6 课程/内容/进度草稿"
+load_required_seed /seed/oslab_upgrade_v7_identity.sql   "8/17 v7 稳定身份/修订/提交上下文"
+load_required_seed /seed/oslab_upgrade_v8_teaching_tasks.sql "9/17 v8 学习任务/执行副本/任务附件"
+load_required_seed /seed/oslab_upgrade_v9_learning_activities.sql "10/17 v9 普通演示运行记录"
+load_required_seed /seed/oslab_upgrade_v10_classes.sql "11/17 v10 班级与成员管理"
+load_required_seed /seed/oslab_upgrade_v11_ai_session.sql "12/17 v11 AI 会话/轮次/资料/密钥密文"
+load_required_seed /seed/oslab_upgrade_v12_ai_evidence.sql "13/17 v12 模型配置/证据上下文/复习项"
+load_required_seed /seed/oslab_upgrade_v13_learning_selftest.sql "14/17 v13 整组自测"
+load_required_seed /seed/oslab_seed_v14_experiment_prerequisites.sql "15/17 v14 实验公共课程前置内容"
+load_required_seed /seed/oslab_upgrade_v14_experiment_judge.sql "16/17 v14 实验判题与映射"
+load_required_seed /seed/oslab_upgrade_v14_experiment_comments.sql "17/17 v14 实验代码注释清理"
 
 # ---------------------------------------------------------------------
 # 加载后契约校验（§6.1.2-6）：逐项核对 information_schema，任一不符即整体失败。
@@ -158,4 +166,13 @@ expect_scalar \
 expect_scalar \
     "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('teaching_class','teaching_class_member')" \
     2 "v10 teaching_class / teaching_class_member 表存在"
+expect_scalar \
+    "SELECT COUNT(*) FROM experiment_revision r WHERE reviewStatus='APPLIED' AND revision=(SELECT MAX(r2.revision) FROM experiment_revision r2 WHERE r2.questionId=r.questionId) AND batchCode IN ('batch.a.experiments.ch1.judge.001','batch.a.experiments.ch2.judge.001','batch.a.experiments.ch3.judge.001','batch.a.experiments.ch4.judge.001')" \
+    41 "v14 已应用实验修订"
+expect_scalar \
+    "SELECT COUNT(*) FROM experiment_node WHERE questionId IN (SELECT questionId FROM experiment_revision WHERE batchCode LIKE 'batch.a.experiments.ch%.judge.001')" \
+    123 "v14 实验节点映射"
+expect_scalar \
+    "SELECT COUNT(*) FROM learning_unit_activity WHERE activityType='EXPERIMENT' AND isDelete=0 AND referenceCode IN (SELECT resourceCode FROM experiment_revision WHERE batchCode LIKE 'batch.a.experiments.ch%.judge.001')" \
+    77 "v14 实验单元活动"
 echo "=== OSLab 数据库初始化：加载与契约校验全部通过 ==="

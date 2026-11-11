@@ -143,8 +143,10 @@ public class TeachingTaskController {
     public BaseResponse<Map<String, Object>> recipients(@PathVariable String taskCode,
                                                         @RequestParam(defaultValue = "1") long current,
                                                         @RequestParam(defaultValue = "20") long pageSize,
+                                                        @RequestParam(defaultValue = "false") boolean pendingReview,
+                                                        @RequestParam(required = false) String className,
                                                         HttpServletRequest request) {
-        return ResultUtils.success(teacherTaskService.recipients(user(request), taskCode, current, pageSize));
+        return ResultUtils.success(teacherTaskService.recipients(user(request), taskCode, current, pageSize, pendingReview, className));
     }
 
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)

@@ -68,7 +68,7 @@
             把教材内容、知识关系和实践入口放在同一条学习路径上，先理解，再动手验证。
           </p>
           <nav class="landing-feature-list" aria-label="学习功能">
-            <a class="landing-feature-item is-active" href="#mainline">
+            <a class="landing-feature-item" href="#mainline">
               <span class="landing-feature-index">01</span>
               <span>
                 <strong>章节学习</strong>
@@ -199,7 +199,8 @@ import ACCESS_ENUM from "@/access/accessEnum";
 import "@/styles/landing-demo.css";
 
 const brandMarkUrl = `${process.env.BASE_URL}brand-mark.svg`;
-const landingHeroUrl = `${process.env.BASE_URL}landing-hero.png`;
+// 原图 1536×1024 的 PNG（1.7MB）转成同尺寸 JPEG（≈127KB），视觉一致且首屏更快。
+const landingHeroUrl = `${process.env.BASE_URL}landing-hero.jpg`;
 const router = useRouter();
 const store = useStore();
 const revealHost = ref<HTMLElement | null>(null);
@@ -267,8 +268,9 @@ onBeforeUnmount(() => {
   --landing-max: 1200px;
   min-height: 100vh;
   overflow-x: clip;
-  background: var(--oslab-canvas);
-  color: var(--oslab-ink);
+  /* 底色来自 body::before / .public-sky 的固定星图层；长页面不重复铺背景 */
+  background: transparent;
+  color: var(--public-ink);
   scroll-behavior: smooth;
 }
 
@@ -294,6 +296,9 @@ onBeforeUnmount(() => {
   display: block;
   width: 31px;
   height: 31px;
+  border-radius: 9px;
+  /* 深底下给深色 mark 一圈极细亮边，避免图形与星图糊在一起 */
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
 .landing-brand-name {
@@ -313,35 +318,49 @@ onBeforeUnmount(() => {
 }
 
 .landing-nav a {
-  color: var(--oslab-ink-soft);
+  color: var(--public-ink-soft);
   text-decoration: none;
   transition: color var(--oslab-duration-fast) var(--oslab-ease);
 }
 
 .landing-nav a:hover {
-  color: var(--oslab-primary);
+  color: var(--public-ink);
 }
 
+.landing-brand:focus-visible,
 .landing-nav a:focus-visible,
 .landing-feature-item:focus-visible,
 .landing-footer a:focus-visible {
-  outline: 2px solid var(--oslab-primary);
+  outline: 2px solid var(--public-focus);
   outline-offset: 3px;
 }
 
+/* 页头右侧：深底幽灵按钮（浅边线 + 浅字），不与 hero 的荧光黄 CTA 抢层级 */
 .landing-cta {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   min-height: 40px;
   padding: 0 18px;
-  border: 1px solid var(--oslab-ink);
+  border: 1px solid rgba(196, 214, 244, 0.34);
   border-radius: var(--oslab-radius-control);
-  background: var(--oslab-ink);
-  color: var(--oslab-on-primary);
+  background: var(--public-cta-bg);
+  color: var(--public-ink);
   font: inherit;
   font-size: 14px;
   cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color var(--oslab-duration-fast) var(--oslab-ease),
+    border-color var(--oslab-duration-fast) var(--oslab-ease);
+}
+
+.landing-cta:hover {
+  border-color: rgba(157, 184, 255, 0.62);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.landing-cta:active {
+  transform: translateY(1px);
 }
 
 .landing-cta svg {
@@ -349,7 +368,12 @@ onBeforeUnmount(() => {
   height: 16px;
 }
 
-.landing-cta:focus-visible,
+.landing-cta:focus-visible {
+  outline: 2px solid var(--public-focus);
+  outline-offset: 2px;
+}
+
+/* 荧光黄 CTA 上亮蓝环对比不足，改用钴蓝 */
 .landing-primary:focus-visible {
   outline: 2px solid var(--oslab-primary);
   outline-offset: 2px;
@@ -362,6 +386,7 @@ onBeforeUnmount(() => {
 
 .landing-hero {
   position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   width: 100vw;
@@ -369,17 +394,79 @@ onBeforeUnmount(() => {
   margin-left: calc(50% - 50vw);
   padding: clamp(72px, 10vw, 148px)
     max(48px, calc((100vw - var(--landing-max)) / 2)) clamp(88px, 11vw, 160px);
-  background-color: #eef0e9;
+  background-color: var(--public-bg);
+  color: var(--public-ink);
+}
+
+/* 右侧光场：保留定制首屏图，压暗后只作为深蓝背景里的一块冷光，
+   左缘用蒙版融进夜色，不做玻璃拟态。 */
+.landing-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background-image: var(
     --landing-hero-image,
-    linear-gradient(135deg, #eef0e9, #dce5eb)
+    linear-gradient(135deg, #0d1830, #0a1224 60%, #070d1c)
   );
-  background-position: center;
+  background-position: 76% center;
   background-size: cover;
-  color: #20242b;
+  opacity: 0.42;
+  -webkit-mask-image: linear-gradient(
+    100deg,
+    transparent 12%,
+    rgba(0, 0, 0, 0.6) 46%,
+    #000 74%
+  );
+  mask-image: linear-gradient(
+    100deg,
+    transparent 12%,
+    rgba(0, 0, 0, 0.6) 46%,
+    #000 74%
+  );
+}
+
+/* 左侧蓝黑罩层：保证标题/导语/按钮在任何图区上 ≥4.5:1，
+   并向星图底色渐隐，避免出现生硬的图片下边界。 */
+.landing-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: radial-gradient(
+      1px 1px at 43px 61px,
+      rgba(226, 236, 255, 0.5),
+      transparent 100%
+    ),
+    radial-gradient(
+      1.2px 1.2px at 151px 19px,
+      rgba(226, 236, 255, 0.38),
+      transparent 100%
+    ),
+    linear-gradient(
+      96deg,
+      rgba(5, 10, 22, 0.97) 0%,
+      rgba(5, 10, 22, 0.94) 30%,
+      rgba(6, 12, 26, 0.72) 52%,
+      rgba(6, 12, 26, 0.4) 78%,
+      rgba(6, 12, 26, 0.24) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(7, 13, 28, 0.7) 0%,
+      rgba(7, 13, 28, 0) 24%,
+      rgba(7, 13, 28, 0) 64%,
+      var(--public-bg) 100%
+    );
+  background-size: 300px 300px, 380px 380px, auto, auto;
+  background-position: 0 0, 90px 60px, 0 0, 0 0;
 }
 
 .landing-hero-copy {
+  position: relative;
+  z-index: 2;
   width: min(var(--landing-max), 100%);
   margin: 0 auto;
   animation: landing-hero-rise 900ms var(--oslab-ease) both;
@@ -388,8 +475,10 @@ onBeforeUnmount(() => {
 .landing-hero h1 {
   max-width: 820px;
   margin: 0;
+  color: var(--public-ink);
   font-family: var(--oslab-font-display);
-  font-size: clamp(48px, 7.5vw, 112px);
+  /* 上限 96px（6rem）：超过后首屏标题会压过学习入口 */
+  font-size: clamp(48px, 7.5vw, 96px);
   font-weight: 700;
   line-height: 1.08;
   letter-spacing: 0;
@@ -399,7 +488,7 @@ onBeforeUnmount(() => {
 .landing-hero-lede {
   max-width: 500px;
   margin: 24px 0 0;
-  color: rgba(32, 36, 43, 0.74);
+  color: var(--public-ink-soft);
   font-size: clamp(17px, 2vw, 22px);
   line-height: 1.65;
 }
@@ -411,17 +500,28 @@ onBeforeUnmount(() => {
   margin-top: 36px;
 }
 
+/* hero 主 CTA：荧光黄 + 墨色字，是星图上唯一的暖色行动点 */
 .landing-primary {
   min-height: 46px;
   padding: 0 22px;
   border: 0;
   border-radius: var(--oslab-radius-control);
-  background: #f2d64b;
-  color: #17212a;
+  background: var(--oslab-highlight);
+  color: var(--oslab-ink);
   font: inherit;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color var(--oslab-duration-fast) var(--oslab-ease);
+}
+
+.landing-primary:hover {
+  background: var(--oslab-highlight-strong);
+}
+
+.landing-primary:active {
+  transform: translateY(1px);
 }
 
 .landing-feature,
@@ -435,7 +535,7 @@ onBeforeUnmount(() => {
   gap: clamp(36px, 6vw, 88px);
   align-items: center;
   padding: 104px 0 112px;
-  border-bottom: 1px solid var(--oslab-line);
+  border-bottom: 1px solid var(--public-line);
 }
 
 .landing-feature-copy {
@@ -444,7 +544,7 @@ onBeforeUnmount(() => {
 
 .landing-feature-copy h2 {
   margin: 0;
-  color: var(--oslab-ink);
+  color: var(--public-ink);
   font-family: var(--oslab-font-display);
   font-size: clamp(32px, 4vw, 50px);
   line-height: 1.18;
@@ -452,7 +552,7 @@ onBeforeUnmount(() => {
 
 .landing-feature-copy > p {
   margin: 20px 0 0;
-  color: var(--oslab-ink-soft);
+  color: var(--public-ink-soft);
   font-size: 16px;
   line-height: 1.8;
 }
@@ -463,6 +563,7 @@ onBeforeUnmount(() => {
   margin-top: 32px;
 }
 
+/* 功能索引是深底上的行，不是白卡：细线 + 透明底，hover 只提亮边线与背景 */
 .landing-feature-item {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr) auto;
@@ -470,9 +571,9 @@ onBeforeUnmount(() => {
   align-items: center;
   min-height: 68px;
   padding: 12px 14px;
-  border: 1px solid var(--oslab-line);
+  border: 1px solid var(--public-line);
   border-radius: var(--oslab-radius-control);
-  color: var(--oslab-ink);
+  color: var(--public-ink);
   text-decoration: none;
   transition: border-color var(--oslab-duration-fast) var(--oslab-ease),
     background-color var(--oslab-duration-fast) var(--oslab-ease),
@@ -480,14 +581,14 @@ onBeforeUnmount(() => {
 }
 
 .landing-feature-item:hover,
-.landing-feature-item.is-active {
-  border-color: var(--oslab-primary);
-  background: var(--oslab-highlight-soft);
+.landing-feature-item:focus-visible {
+  border-color: rgba(242, 214, 75, 0.55);
+  background: rgba(242, 214, 75, 0.08);
   transform: translateX(4px);
 }
 
 .landing-feature-index {
-  color: var(--oslab-muted-strong);
+  color: var(--public-muted);
   font-family: var(--oslab-font-mono);
   font-size: 12px;
 }
@@ -503,12 +604,12 @@ onBeforeUnmount(() => {
 
 .landing-feature-item small {
   margin-top: 4px;
-  color: var(--oslab-muted-strong);
+  color: var(--public-muted);
   font-size: 12px;
 }
 
 .landing-feature-arrow {
-  color: var(--oslab-primary);
+  color: var(--public-accent);
   font-size: 20px;
 }
 
@@ -517,7 +618,8 @@ onBeforeUnmount(() => {
 }
 
 .landing-feature-media :deep(.paging-theater) {
-  box-shadow: var(--oslab-shadow-card);
+  box-shadow: var(--public-shadow-paper);
+  border-color: transparent;
 }
 
 .landing-feature-caption {
@@ -525,12 +627,12 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   gap: 16px;
   margin-top: 12px;
-  color: var(--oslab-muted-strong);
+  color: var(--public-muted);
   font-size: 13px;
 }
 
 .landing-feature-caption strong {
-  color: var(--oslab-ink);
+  color: var(--public-ink-soft);
 }
 
 .landing-section {
@@ -539,7 +641,7 @@ onBeforeUnmount(() => {
   gap: 64px;
   align-items: start;
   padding: 104px 0;
-  border-bottom: 1px solid var(--oslab-line);
+  border-bottom: 1px solid var(--public-line);
 }
 
 .landing-section.is-reversed .landing-section-copy {
@@ -556,7 +658,7 @@ onBeforeUnmount(() => {
 
 .landing-section-copy h2 {
   margin: 0;
-  color: var(--oslab-ink);
+  color: var(--public-ink);
   font-family: var(--oslab-font-display);
   font-size: clamp(30px, 3vw, 42px);
   line-height: 1.2;
@@ -564,7 +666,7 @@ onBeforeUnmount(() => {
 
 .landing-section-copy p {
   margin: 20px 0 0;
-  color: var(--oslab-ink-soft);
+  color: var(--public-ink-soft);
   font-size: 16px;
   line-height: 1.8;
 }
@@ -617,7 +719,7 @@ onBeforeUnmount(() => {
   width: min(var(--landing-max), calc(100% - 96px));
   margin: 0 auto;
   padding: 28px 0 36px;
-  color: var(--oslab-muted-strong);
+  color: var(--public-muted);
   font-size: 13px;
 }
 
@@ -632,7 +734,7 @@ onBeforeUnmount(() => {
 }
 
 .landing-footer a:hover {
-  color: var(--oslab-primary);
+  color: var(--public-ink);
 }
 
 @keyframes landing-hero-rise {
@@ -660,7 +762,36 @@ onBeforeUnmount(() => {
   .landing-hero {
     min-height: 620px;
     padding: 72px 20px 88px;
-    background-position: left center;
+    background-color: var(--public-bg);
+  }
+
+  /* 移动端不改动图层，只压暗：图片收成顶部一块冷光，文字区统一深蓝 */
+  .landing-hero::before {
+    opacity: 0.55;
+    background-position: 66% 12%;
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.85) 0%,
+      rgba(0, 0, 0, 0.45) 46%,
+      transparent 86%
+    );
+    mask-image: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.85) 0%,
+      rgba(0, 0, 0, 0.45) 46%,
+      transparent 86%
+    );
+  }
+
+  .landing-hero::after {
+    background-image: linear-gradient(
+      180deg,
+      rgba(6, 11, 24, 0.6) 0%,
+      rgba(6, 11, 24, 0.88) 44%,
+      var(--public-bg) 100%
+    );
+    background-size: auto;
+    background-position: 0 0;
   }
 
   .landing-hero-copy {
@@ -714,6 +845,17 @@ onBeforeUnmount(() => {
   }
 }
 
+/* 触屏：页头/页脚链接与主按钮统一 44px 触控目标 */
+@media (pointer: coarse) {
+  .landing-cta,
+  .landing-nav a,
+  .landing-footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .landing,
   .landing-reveal,
@@ -721,13 +863,24 @@ onBeforeUnmount(() => {
   .landing-reveal .landing-feature-copy > *,
   .landing-reveal .landing-feature-media > *,
   .landing-hero-copy,
-  .landing-feature-item {
+  .landing-feature-item,
+  .landing-cta,
+  .landing-primary {
     animation: none !important;
     transition: none !important;
   }
 
+  .landing {
+    scroll-behavior: auto;
+  }
+
   .landing-reveal {
     opacity: 1;
+    transform: none;
+  }
+
+  .landing-feature-item:hover,
+  .landing-feature-item:focus-visible {
     transform: none;
   }
 

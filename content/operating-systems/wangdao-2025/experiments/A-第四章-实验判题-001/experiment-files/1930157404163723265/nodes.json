@@ -1,0 +1,26 @@
+{
+  "questionId": "1930157404163723265",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.process.process_control",
+      "nodeName": "进程控制",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "user/fork.c 的 fork() 调 sys_env_alloc 拿子进程 envid，按返回值区分父子：父返回子 envid，子返回 0 并从 fork 中返回开始执行。"
+    },
+    {
+      "nodeCode": "os.process.pcb",
+      "nodeName": "进程控制块",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "子进程必须把用户态的 env 指针指向自身的 Env（经 UENVS 与 envid 下标），否则后续 syscall 会操作父进程的控制块。"
+    },
+    {
+      "nodeCode": "os.runtime.system_call",
+      "nodeName": "系统调用",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "fork 不是单条系统调用，而是 sys_env_alloc + duppage + sys_set_pgfault_handler + sys_set_env_status 的系统调用序列。"
+    }
+  ]
+}

@@ -80,6 +80,12 @@ export const APP_NAVIGATION: NavItem[] = [
     access: ACCESS_ENUM.ADMIN,
     children: [
       {
+        key: "teaching-overview",
+        label: "教学工作台",
+        path: "/teaching/overview",
+        access: ACCESS_ENUM.ADMIN,
+      },
+      {
         key: "teaching-content",
         label: "课程内容管理",
         path: "/teaching/content",
@@ -95,12 +101,6 @@ export const APP_NAVIGATION: NavItem[] = [
         key: "teaching-classes",
         label: "班级管理",
         path: "/teaching/classes",
-        access: ACCESS_ENUM.ADMIN,
-      },
-      {
-        key: "teaching-overview",
-        label: "班级分析",
-        path: "/teaching/overview",
         access: ACCESS_ENUM.ADMIN,
       },
       {
@@ -131,29 +131,8 @@ export const APP_NAVIGATION: NavItem[] = [
   },
 ];
 
-/** 非顶栏入口：由头像菜单进入，但页面仍可使用自己的上下文侧栏。 */
-export const AUXILIARY_NAVIGATION: NavItem[] = [
-  {
-    key: "records",
-    label: "学习记录",
-    path: "/records",
-    access: ACCESS_ENUM.USER,
-    children: [
-      {
-        key: "records-timeline",
-        label: "时间线",
-        path: "/records",
-        access: ACCESS_ENUM.USER,
-      },
-      {
-        key: "records-review",
-        label: "待巩固",
-        path: "/records?view=review",
-        access: ACCESS_ENUM.USER,
-      },
-    ],
-  },
-];
+/** /records 使用页面内导航，不再保留旧的时间线/待巩固侧栏入口。 */
+export const AUXILIARY_NAVIGATION: NavItem[] = [];
 
 /** 学生默认首页 / 管理员默认首页 */
 export const ROLE_HOME: Record<string, string> = {

@@ -1,0 +1,26 @@
+{
+  "questionId": "1908449571747745793",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.memory.paging",
+      "nodeName": "基本分页存储管理",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "实现 include/queue.h 的 LIST_INSERT_AFTER/LIST_INSERT_TAIL，操作对象是 Page 结构体的 pp_link；判题观测量是遍历得到的 pp_ref 序列，即 4KB 物理页框在 page_free_list 中的挂链顺序。"
+    },
+    {
+      "nodeCode": "os.memory.memory_management",
+      "nodeName": "内存管理",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "Page 的 pp_ref 记录一页被多少页表项引用，是物理内存管理的元数据；宏写成 do{...}while(0) 才能保证链表操作在 if/else 分支中语义正确。"
+    },
+    {
+      "nodeCode": "os.memory.page_table",
+      "nodeName": "页表",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "pp_ref 的增减由 page_insert/page_remove 维护，这两个链表宏是页表项引用计数得以正确工作的基础设施。"
+    }
+  ]
+}

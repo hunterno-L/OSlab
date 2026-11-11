@@ -130,7 +130,8 @@ public class LearningQuestionController {
     public BaseResponse<LearningAnswerResultVO> answerQuestion(@RequestBody LearningAnswerRequest request,
                                                                HttpServletRequest servletRequest) {
         User user = userService.getLoginUser(servletRequest);
-        return ResultUtils.success(learningQuestionService.answerQuestion(request, user));
+        return ResultUtils.success(learningQuestionService.answerQuestion(request, user,
+                request == null ? null : request.getAttemptContextId()));
     }
 
     /**

@@ -4,11 +4,40 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-    <meta name="theme-color" content="#eef0e9">
+    <meta name="theme-color" content="#e6e9d1">
     <meta name="color-scheme" content="light">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <link rel="icon" type="image/svg+xml" sizes="any" href="<%= BASE_URL %>brand-mark.svg">
     <title>ZhiCore 操作系统学习平台</title>
+    <script>
+      // 首帧主题：公开页在解析 HTML 时就标记深蓝，避免等待 Vue 挂载期间
+      // 先闪一帧浅色纸面。与 App.vue 的 PUBLIC_PATHS 保持一致。
+      (function () {
+        var path = window.location.pathname;
+        if (
+          path === "/welcome" ||
+          path === "/user/login" ||
+          path === "/user/register"
+        ) {
+          document.documentElement.dataset.theme = "public";
+          var themeColor = document.querySelector('meta[name="theme-color"]');
+          if (themeColor) themeColor.setAttribute("content", "#070d1c");
+        }
+      })();
+    </script>
+    <script>
+      // 平台介绍页的首屏背景图由 LandingView 在挂载后才写入 CSS 变量，
+      // 这里在浏览器解析 HTML 时就预加载，避免 LCP 图片被 JS 执行顺序推迟。
+      (function () {
+        if (window.location.pathname !== "/welcome") return;
+        var heroLink = document.createElement("link");
+        heroLink.rel = "preload";
+        heroLink.as = "image";
+        heroLink.setAttribute("fetchpriority", "high");
+        heroLink.href = "<%= BASE_URL %>landing-hero.jpg";
+        document.head.appendChild(heroLink);
+      })();
+    </script>
   </head>
   <body>
     <noscript>

@@ -1,0 +1,26 @@
+{
+  "questionId": "1930154848414912513",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.process.pcb",
+      "nodeName": "进程控制块",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "env.c 的 envid2env() 由 env_id 反查 Env*：mkenvid 把数组下标与代际计数编码进 envid，envid2env 必须校验下标范围与代际匹配后才能返回 PCB 指针。"
+    },
+    {
+      "nodeCode": "os.process.process",
+      "nodeName": "进程",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "env_id 是进程存在的唯一标识，content 要求理解「如何通过 env_id 找到对应 PCB」，即进程与 PCB 一一对应关系。"
+    },
+    {
+      "nodeCode": "os.process.process_control",
+      "nodeName": "进程控制",
+      "role": "RELATED",
+      "weight": 0.5,
+      "reason": "系统调用层（sys_ipc_can_send、sys_env_alloc）都先用 envid2env 把用户传来的 envid 转成内核 PCB 指针并校验合法性，是进程控制原语的入口守卫。"
+    }
+  ]
+}

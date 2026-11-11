@@ -1,0 +1,26 @@
+{
+  "questionId": "1930156972624367618",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.cpu.rr",
+      "nodeName": "时间片轮转",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "sys_yield() 让用户进程主动放弃 CPU，保存现场后调 sched_yield 切换到下一个就绪进程，是时间片轮转的自愿让出路径（与时钟中断的强制让出互补）。"
+    },
+    {
+      "nodeCode": "os.cpu.context_switch",
+      "nodeName": "上下文切换",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "content 要求实现现场保存（KERNEL_SP 与 TIMESTACK）与切换后正确恢复执行状态，正是上下文切换的两半。"
+    },
+    {
+      "nodeCode": "os.runtime.system_call",
+      "nodeName": "系统调用",
+      "role": "RELATED",
+      "weight": 0.6,
+      "reason": "用户态不能直接调内核函数 sched_yield，必须经 syscall 陷入内核由 sys_yield 代劳。"
+    }
+  ]
+}

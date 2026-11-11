@@ -1,0 +1,25 @@
+{
+  "description": "驱动 lib/env.c 的 env_setup_vm()。stdin 首行 npage freemem stale（npage 1..256，freemem 0..65536，stale 0/1）；stale=1 时驱动在 boot_pgdir 里额外留一条用户态映射 va 0x00400000 -> pa 4096，用来检验「只拷内核段」这一边界。次行操作数 n（0..48），随后 n 行：I=调用平台 env_init()（重复打印 I SKIP）；A=调平台 env_alloc(&e,0)（内部会调学生 env_setup_vm），打印「A 返回码 PCB下标」；V idx=直接对 envs[idx] 调学生 env_setup_vm，打印「V 返回码 idx」；W idx=打印「W idx 页目录物理地址 env_cr3 两者是否一致 内核段拷贝项数 UVPT项 pp_ref」，页目录为空/野指针时物理地址与项数均为 4294967295、pp_ref 为 -1；Q idx va=打印该进程地址空间里 va 的物理地址（无映射 4294967295）；B va=打印 boot_pgdir 里 va 的物理地址（证明夹具存在）；C=打印空闲物理页数。内核段拷贝项数满分 767（PDX(UTOP)=256..1023 共 768 项，减去被 UVPT 自映射合法覆盖的 PDX(UVPT)=510 一项）。idx 必须 <64，否则驱动直接结束。",
+  "cases": [
+    {
+      "name": "官方锚：首个进程页目录 pa 与 env_cr3 一致、内核段 767 项、UVPT 自映射、pp_ref=1",
+      "input": "256 8192 0\n3\nI\nA\nW 63\n"
+    },
+    {
+      "name": "两个进程各自持有独立页目录页，不得共用同一张",
+      "input": "256 8192 0\n5\nI\nA\nA\nW 63\nW 62\n"
+    },
+    {
+      "name": "不经 env_alloc 直接建页目录：UTOP/UENVS 可翻译、用户 va 0 无映射、UVPT 窗口能读到自己的页目录",
+      "input": "256 8192 0\n7\nI\nV 0\nW 0\nQ 0 1073741824\nQ 0 2134900736\nQ 0 0\nQ 0 2140143616\n"
+    },
+    {
+      "name": "拷贝范围下界：boot 期遗留的用户态映射（B 证明其存在）不得被拷进新进程",
+      "input": "256 8192 1\n5\nI\nB 4194304\nA\nQ 63 4194304\nW 63\n"
+    },
+    {
+      "name": "物理页耗尽：第 5 个进程返回 -E_NO_MEM 且不留半成品页目录，前 4 个 pp_ref 仍为 1",
+      "input": "8 8192 0\n9\nI\nA\nA\nA\nA\nA\nW 60\nW 59\nC\n"
+    }
+  ]
+}

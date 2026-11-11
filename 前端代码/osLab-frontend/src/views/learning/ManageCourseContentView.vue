@@ -510,7 +510,12 @@ async function perform(operation: () => Promise<void>) {
   try {
     await operation();
   } catch (e) {
-    error.value = e instanceof Error ? e.message : "操作失败，请重试";
+    // 保留业务/附件错误文案；axios 的技术错误（Request failed…）换成可读提示
+    const message = e instanceof Error ? e.message : "";
+    error.value =
+      message && !message.startsWith("Request failed")
+        ? message
+        : "操作未完成，请检查网络后重试";
   } finally {
     busy.value = false;
   }

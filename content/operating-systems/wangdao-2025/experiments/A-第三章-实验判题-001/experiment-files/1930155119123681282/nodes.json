@@ -1,0 +1,26 @@
+{
+  "questionId": "1930155119123681282",
+  "nodeMappings": [
+    {
+      "nodeCode": "os.process.pcb",
+      "nodeName": "进程控制块",
+      "role": "PRIMARY",
+      "weight": 1,
+      "reason": "env_alloc() 从 env_free_list 摘一个 PCB，初始化 env_id/env_status/env_parent_id/env_pri，设置 env_tf 的 $sp 与 cp0_status，并调用 env_setup_vm。"
+    },
+    {
+      "nodeCode": "os.runtime.mode_switch",
+      "nodeName": "处理器状态切换",
+      "role": "RELATED",
+      "weight": 0.8,
+      "reason": "content 明确要求设置 cpo_status 的 KUc/IEc/KUp 位，使进程首次被 env_pop_tf 恢复时进入用户态而不是留在内核态。"
+    },
+    {
+      "nodeCode": "os.process.process_control",
+      "nodeName": "进程控制",
+      "role": "RELATED",
+      "weight": 0.7,
+      "reason": "env_alloc 是进程创建原语的核心一步，与 env_setup_vm/load_icode 串成完整创建流程。"
+    }
+  ]
+}

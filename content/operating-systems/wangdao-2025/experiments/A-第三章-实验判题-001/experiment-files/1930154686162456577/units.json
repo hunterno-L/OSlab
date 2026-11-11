@@ -1,0 +1,15 @@
+{
+  "questionId": "1930154686162456577",
+  "unitMappings": [
+    {
+      "unitCode": "unit.process.composition",
+      "required": false,
+      "completionRule": "PASS"
+    },
+    {
+      "unitCode": "unit.process.control",
+      "required": false,
+      "completionRule": "PASS"
+    }
+  ]
+}

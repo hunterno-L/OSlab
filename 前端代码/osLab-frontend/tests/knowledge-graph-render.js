@@ -85,8 +85,16 @@ function createHarness(input, width = 1120, height = 620, asyncLayout = false) {
   )(
     (name) => {
       if (name === "vue") return vue;
-      assert.equal(name, "echarts");
+      // SSR uses the full package (including SVG); the browser component imports
+      // only its graph, tooltip and canvas registrations.
+      if (name === "echarts/charts") return { GraphChart: () => undefined };
+      if (name === "echarts/components")
+        return { TooltipComponent: () => undefined };
+      if (name === "echarts/renderers")
+        return { CanvasRenderer: () => undefined };
+      assert.equal(name, "echarts/core");
       return {
+        use: () => undefined,
         init: () => graph,
         registerAction: echarts.registerAction,
         registerLayout: echarts.registerLayout,
@@ -308,6 +316,8 @@ function createViewHarness(options = {}) {
           };
         case "@/composables/useAiLauncher":
           return { askAiAssistant: () => undefined };
+        case "@/utils/assessmentTutor":
+          return { openTutorScene: () => undefined };
         case "@/components/ai/AiNextActions.vue":
           return {};
         case "@/composables/useNodeWorkbench":
@@ -1362,7 +1372,10 @@ test("node A to B selection clears A and keeps one adjacency set", () => {
     harness.updateChart();
     harness.flush();
 
-    assert.equal(nodeStyle(harness, 0).borderColor, "#c9ccbe");
+    assert.equal(
+      nodeStyle(harness, 0).borderColor,
+      harness.GRAPH_TOKENS.nodeBorder
+    );
     assert.equal(nodeStyle(harness, 0).borderWidth, 1);
     assert.deepEqual(nodeLabelStyle(harness, 0), {
       color: "#3a4150",
@@ -1683,7 +1696,8 @@ test("RED/GREEN/YELLOW/GRAY status dots survive selection", () => {
         const model = graphData(harness).getItemModel(index);
         const nameColor = model.get("label.rich.name.color");
         assert.ok(
-          nameColor === "#3a4150" || nameColor === "#6b7168",
+          nameColor === GRAPH_TOKENS.inkSoft ||
+            nameColor === GRAPH_TOKENS.textSoft,
           `${status} title stays readable, never status-tinted: ${nameColor}`
         );
         assert.equal(model.get("label.rich.dot.color"), STATUS_COLORS[status]);
@@ -1883,7 +1897,8 @@ test("graph palette mirrors learning-theme tokens", () => {
     );
     assertToken("oslab-primary", GRAPH_TOKENS.selection);
     assertToken("oslab-ink-soft", GRAPH_TOKENS.inkSoft);
-    assertToken("oslab-muted-strong", GRAPH_TOKENS.textSoft);
+    // Canvas secondary text follows its dedicated graph token, already checked
+    // above; the surrounding HTML uses --oslab-muted-strong independently.
     assertToken("oslab-mastered", GRAPH_TOKENS.status.GREEN);
     assertToken("oslab-review", GRAPH_TOKENS.status.YELLOW);
     assertToken("oslab-weak", GRAPH_TOKENS.status.RED);
@@ -2142,8 +2157,14 @@ test("a filtered-out selection leaves no hidden adjacency emphasis", () => {
     harness.applyGraphState();
     harness.flush();
 
-    assert.equal(nodeStyle(harness, 0).borderColor, "#c9ccbe");
-    assert.equal(nodeStyle(harness, 1).borderColor, "#c9ccbe");
+    assert.equal(
+      nodeStyle(harness, 0).borderColor,
+      harness.GRAPH_TOKENS.nodeBorder
+    );
+    assert.equal(
+      nodeStyle(harness, 1).borderColor,
+      harness.GRAPH_TOKENS.nodeBorder
+    );
     assert.equal(edgeStyle(harness, 0).opacity, 1);
   } finally {
     harness.graph.dispose();

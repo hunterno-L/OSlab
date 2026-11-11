@@ -1,0 +1,25 @@
+{
+  "description": "驱动 lib/env.c 的 load_icode_mapper()。stdin 首行 npage freemem（1..256 / 0..65536），次行操作数 n（0..48），随后 n 行：I=平台 env_init()（重复打印 I SKIP）；A=平台 env_alloc(&e,0)，打印「A 返回码 PCB下标」；U idx=选定后续 M 的目标进程；B=把镜像缓冲填成 seg_binary[i]=i&0xFF（位置相关图样）；M va size perm=调学生 load_icode_mapper(seg_binary,size,va,perm,目标进程)，打印「M 返回码」，要求 va<1073741824、size<=16384、perm 0..4095，且必须先 U；Q idx va=打印物理地址（无映射 4294967295）；P idx va=打印原始 PTE（含权限位）；D idx va=打印该 va 处的 32 位小端字（无映射或跨页 4294967295）；R idx va=打印该 va 所映射物理页的 pp_ref（无映射 -1）；C=空闲物理页数。idx 必须 <64。引用计数契约：page_insert 自身 pp_ref++，mapper 不得重复递增，故每个数据页 pp_ref 恒为 1。注意 page_insert 首次映射某个 4MB 区间时还会额外分配一页作页表，C 的计数包含页表页。",
+  "cases": [
+    {
+      "name": "官方锚：整页对齐单段，内容/物理页/权限位/pp_ref 全部正确",
+      "input": "256 8192\n10\nI\nA\nU 63\nB\nM 4096 4096 2\nQ 63 4096\nD 63 4096\nR 63 4096\nP 63 4096\nC\n"
+    },
+    {
+      "name": "非对齐 va=6144 跨三页：镜像第 0 字节落在 va 处（首页前 2048 字节保持清零）、末页只拷 2048 字节",
+      "input": "256 8192\n15\nI\nA\nU 63\nB\nM 6144 8192 3\nQ 63 4096\nQ 63 8192\nQ 63 12288\nQ 63 16384\nD 63 6144\nD 63 4096\nD 63 14332\nD 63 14336\nR 63 12288\nC\n"
+    },
+    {
+      "name": "size=0 不消耗物理页；perm 透传进 PTE（page_insert 会再或上 PTE_V）",
+      "input": "256 8192\n10\nI\nA\nU 63\nB\nM 4096 0 2\nC\nM 8192 4096 5\nP 63 8192\nQ 63 8192\nC\n"
+    },
+    {
+      "name": "物理页耗尽：中途 page_alloc 失败必须原样返回 -E_NO_MEM，已映射的页保留",
+      "input": "8 8192\n10\nI\nA\nU 63\nB\nM 4096 16384 3\nC\nQ 63 4096\nQ 63 8192\nQ 63 12288\nQ 63 16384\n"
+    },
+    {
+      "name": "同一 va 重复映射：旧页 pp_ref 归零被回收、新页 pp_ref 仍为 1（不得双重计数）",
+      "input": "256 8192\n12\nI\nA\nU 63\nB\nM 4096 4096 3\nR 63 4096\nM 4096 4096 3\nR 63 4096\nQ 63 4096\nM 8192 4096 2\nR 63 8192\nC\n"
+    }
+  ]
+}

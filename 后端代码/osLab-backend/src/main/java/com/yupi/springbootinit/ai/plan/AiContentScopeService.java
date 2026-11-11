@@ -67,8 +67,8 @@ public class AiContentScopeService {
         List<UnitRef> out = new ArrayList<>();
         try {
             for (Map<String, Object> row : jdbc.queryForList(
-                    "SELECT unitCode, courseCode, sectionCode, title, estimatedMinutes, sortOrder "
-                            + "FROM learning_unit WHERE courseCode=? AND reviewStatus='PUBLISHED' "
+                    "SELECT JSON_UNQUOTE(JSON_EXTRACT(publishedJson, '$.unitCode')) unitCode, courseCode, JSON_UNQUOTE(JSON_EXTRACT(publishedJson, '$.sectionCode')) sectionCode, JSON_UNQUOTE(JSON_EXTRACT(publishedJson, '$.title')) title, CAST(JSON_UNQUOTE(JSON_EXTRACT(publishedJson, '$.estimatedMinutes')) AS UNSIGNED) estimatedMinutes, CAST(JSON_UNQUOTE(JSON_EXTRACT(publishedJson, '$.sortOrder')) AS SIGNED) sortOrder "
+                            + "FROM learning_unit WHERE courseCode=? "
                             + "AND publishedJson IS NOT NULL AND isDelete=0 ORDER BY sortOrder, id",
                     courseCode)) {
                 UnitRef unit = new UnitRef();
@@ -94,10 +94,12 @@ public class AiContentScopeService {
         List<ActivityRef> out = new ArrayList<>();
         try {
             for (Map<String, Object> row : jdbc.queryForList(
-                    "SELECT a.activityCode, a.unitCode, a.activityType, a.referenceKind, a.referenceCode, a.sortOrder "
-                            + "FROM learning_unit_activity a JOIN learning_unit u ON u.unitCode=a.unitCode "
-                            + "WHERE u.courseCode=? AND u.reviewStatus='PUBLISHED' AND u.publishedJson IS NOT NULL "
-                            + "AND u.isDelete=0 AND a.isDelete=0 ORDER BY u.sortOrder, a.sortOrder",
+                    "SELECT a.activityCode, u.unitCode, a.activityType, a.referenceKind, a.referenceCode, a.sortOrder "
+                            + "FROM learning_unit u JOIN JSON_TABLE(u.publishedJson, '$.activities[*]' COLUMNS("
+                            + "activityCode VARCHAR(128) PATH '$.activityCode', activityType VARCHAR(32) PATH '$.activityType', "
+                            + "referenceKind VARCHAR(32) PATH '$.reference.kind', referenceCode VARCHAR(128) PATH '$.reference.code', "
+                            + "sortOrder INT PATH '$.sortOrder')) a "
+                            + "WHERE u.courseCode=? AND u.publishedJson IS NOT NULL AND u.isDelete=0 ORDER BY u.sortOrder, a.sortOrder",
                     courseCode)) {
                 ActivityRef activity = new ActivityRef();
                 activity.setActivityCode(str(row.get("activityCode")));
@@ -160,31 +162,38 @@ public class AiContentScopeService {
         if (StringUtils.isBlank(nodeCode)) {
             return null;
         }
-        try {
-            List<String> codes = jdbc.queryForList(
-                    "SELECT u.courseCode FROM learning_unit_node n "
-                            + "JOIN learning_unit u ON u.unitCode=n.unitCode "
-                            + "WHERE n.nodeCode=? AND u.reviewStatus='PUBLISHED' AND u.isDelete=0 LIMIT 1",
-                    String.class, nodeCode);
-            return codes.isEmpty() ? null : codes.get(0);
-        } catch (RuntimeException e) {
-            log.warn("[ai-scope] course of node unavailable node={}: {}", nodeCode, e.getClass().getSimpleName());
-            return null;
+        String found = null;
+        for (String code : new java.util.TreeSet<>(enabledCourses.all())) {
+            if (courseScope.nodes(code).containsKey(nodeCode)) {
+                if (found != null) return null;
+                found = code;
+            }
         }
+        return found;
+    }
+
+    /**
+     * 课程下所有已发布单元引用的节点编码；用于把“下一步”证据限制在当前课程，
+     * 避免数据库课程引用操作系统薄弱节点。
+     */
+    @Resource private com.yupi.springbootinit.learning.PublishedCourseScopeService courseScope;
+    @Resource private com.yupi.springbootinit.course.EnabledCourses enabledCourses;
+
+    public List<String> publishedNodeCodes(String courseCode) {
+        if (StringUtils.isBlank(courseCode)) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(courseScope.nodes(courseCode).keySet());
     }
 
     /**
      * 平台当前唯一未删除的课程；多于一个时返回 null（不猜）。
      */
     public String singleCourseCode() {
-        try {
-            List<String> codes = jdbc.queryForList(
-                    "SELECT courseCode FROM course_catalog WHERE isDelete=0 ORDER BY courseCode", String.class);
-            return codes.size() == 1 ? codes.get(0) : null;
-        } catch (RuntimeException e) {
-            log.warn("[ai-scope] course catalog unavailable: {}", e.getClass().getSimpleName());
-            return null;
-        }
+        List<String> codes = jdbc.queryForList(
+                "SELECT courseCode FROM course_catalog WHERE isDelete=0 ORDER BY courseCode", String.class);
+        codes.removeIf(code -> !enabledCourses.contains(code));
+        return codes.size() == 1 ? codes.get(0) : null;
     }
 
     /**

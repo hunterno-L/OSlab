@@ -176,37 +176,54 @@ onBeforeUnmount(() => {
   z-index: 900;
   display: grid;
   place-items: center;
-  padding: 24px;
-  background: rgba(32, 36, 43, 0.32);
+  padding: var(--oslab-space-6);
+  /* 星图之上压一层深蓝黑罩层，让白纸卡成为唯一焦点（不做磨砂玻璃） */
+  background: rgba(4, 8, 20, 0.74);
 }
 
 .os-auth-dialog {
   width: min(420px, 100%);
   max-height: 90vh;
   overflow-y: auto;
-  padding: 24px;
+  overscroll-behavior: contain;
+  padding: var(--oslab-space-6);
   background: var(--oslab-panel);
-  border: 1px solid var(--oslab-line);
+  border: 1px solid transparent;
   border-radius: var(--oslab-radius-container);
-  box-shadow: var(--oslab-shadow-overlay);
+  box-shadow: 0 30px 80px rgba(2, 6, 18, 0.6);
 }
 
 .os-auth-dialog-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--oslab-space-4);
 }
 
 .os-auth-close {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
+  margin: -4px -4px 0 0;
   border: 0;
+  border-radius: var(--oslab-radius-sm);
   background: none;
   color: var(--oslab-muted-strong);
   cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color var(--oslab-duration-fast) var(--oslab-ease),
+    color var(--oslab-duration-fast) var(--oslab-ease);
+}
+
+.os-auth-close:hover {
+  background: var(--oslab-panel-soft);
+  color: var(--oslab-ink);
+}
+
+.os-auth-close:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .os-auth-close svg {
@@ -243,9 +260,18 @@ onBeforeUnmount(() => {
   }
 }
 
+@media (pointer: coarse) {
+  .os-auth-close {
+    width: 44px;
+    height: 44px;
+    margin: -6px -8px 0 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .os-dialog-enter-active,
-  .os-dialog-leave-active {
+  .os-dialog-leave-active,
+  .os-auth-close {
     transition: none;
   }
 }

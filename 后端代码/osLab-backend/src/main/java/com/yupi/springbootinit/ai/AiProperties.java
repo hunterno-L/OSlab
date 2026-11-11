@@ -64,6 +64,12 @@ public class AiProperties {
         private int answerMaxTokens = 4096;
         /** 工具决策的 token 上限（推理型模型的思考 token 也计入该上限）。 */
         private int planMaxTokens = 2048;
+        /** 多轮上下文：只读最近 N 个成功轮次（01 契约 §3.2）。 */
+        private int historyMaxTurns = 6;
+        /** 多轮上下文总字符预算；超出时优先保留较新的轮次。 */
+        private int historyMaxChars = 6000;
+        /** 单轮"问题+回答"字符上限；超出部分截断并标注。 */
+        private int historyTurnChars = 1200;
     }
 
     @Data

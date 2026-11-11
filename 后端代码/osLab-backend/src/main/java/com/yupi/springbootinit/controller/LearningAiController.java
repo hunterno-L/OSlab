@@ -5,6 +5,7 @@ import com.yupi.springbootinit.ai.plan.AiNextActionService;
 import com.yupi.springbootinit.ai.retrieval.AiMaterialService;
 import com.yupi.springbootinit.ai.retrieval.MaterialIndexService;
 import com.yupi.springbootinit.ai.session.AiActionService;
+import com.yupi.springbootinit.ai.session.AiHistoryService;
 import com.yupi.springbootinit.ai.session.AiSessionService;
 import com.yupi.springbootinit.ai.session.AiTurnService;
 import com.yupi.springbootinit.common.BaseResponse;
@@ -16,6 +17,7 @@ import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.model.vo.ai.ActionSubmitResultVO;
 import com.yupi.springbootinit.model.vo.ai.ActivityRefVO;
 import com.yupi.springbootinit.model.vo.ai.AiMaterialVO;
+import com.yupi.springbootinit.model.vo.ai.AiHistoryVO;
 import com.yupi.springbootinit.model.vo.ai.AiSessionVO;
 import com.yupi.springbootinit.model.vo.ai.AiTurnVO;
 import com.yupi.springbootinit.model.vo.ai.NextActionsVO;
@@ -72,6 +74,9 @@ public class LearningAiController {
     private AiTurnService turnService;
 
     @Resource
+    private AiHistoryService historyService;
+
+    @Resource
     private AiActionService actionService;
 
     @Resource
@@ -96,6 +101,31 @@ public class LearningAiController {
     public BaseResponse<AiSessionVO> getSession(@PathVariable("id") String id, HttpServletRequest request) {
         User user = userService.getLoginUser(request);
         return ResultUtils.success(sessionService.get(user, id));
+    }
+
+    /**
+     * 当前用户在指定课程下的会话列表（最近对话）。
+     * 标题取既有目标或首条用户问题截断，不额外调用模型。
+     */
+    @GetMapping("/sessions")
+    public BaseResponse<AiHistoryVO.SessionPage> listSessions(
+            @RequestParam("courseCode") String courseCode,
+            @RequestParam(value = "cursor", required = false) String cursor,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            HttpServletRequest request) {
+        User user = userService.getLoginUser(request);
+        return ResultUtils.success(historyService.listSessions(user, courseCode, cursor, limit));
+    }
+
+    /** 轮次分页：真实持久数据；已关闭会话本人可只读查看；读取不产生新轮次。 */
+    @GetMapping("/sessions/{id}/turns")
+    public BaseResponse<AiHistoryVO.TurnPage> listTurns(
+            @PathVariable("id") String id,
+            @RequestParam(value = "before", required = false) String before,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            HttpServletRequest request) {
+        User user = userService.getLoginUser(request);
+        return ResultUtils.success(historyService.listTurns(user, id, before, limit));
     }
 
     @PatchMapping("/sessions/{id}")

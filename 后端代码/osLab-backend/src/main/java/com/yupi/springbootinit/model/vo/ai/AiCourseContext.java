@@ -30,4 +30,13 @@ public class AiCourseContext implements Serializable {
 
     /** 用户在资料中选中的来源块 id。 */
     private List<String> selectedSourceIds = new ArrayList<>();
+
+    /**
+     * 服务端建立的答题证据上下文（B 的普通尝试接口返回）。
+     * 由 TutorAssessmentGuard 校验归属与帮助资格；前端不能自造成交或资格。
+     */
+    private String attemptContextId;
+
+    /** 服务端评估运行 id（自测/测评）。守卫据此识别 ACTIVE 自测限制。 */
+    private String assessmentRunId;
 }

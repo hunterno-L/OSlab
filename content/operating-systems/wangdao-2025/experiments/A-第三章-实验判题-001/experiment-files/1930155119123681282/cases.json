@@ -1,0 +1,25 @@
+{
+  "description": "驱动 lib/env.c 的 env_alloc()。stdin 首行 npage freemem（1..256 / 0..65536），次行操作数 n（0..80），随后 n 行：I=调用平台 env_init()（重复打印 I SKIP）；A parent=调用学生 env_alloc(&e,parent)，打印「A 返回码 PCB下标 新envid」（*newenv 为空或越界时下标 -1、envid 0）；N idx=打印「N idx env_id parent_id status pri sp sr KUc IEc KUp IEp」；P idx=打印「P idx env_pgfault_handler ipc_receiving ipc_from ipc_value」；D idx=驱动把该 PCB 的 Trapframe 全寄存器污染成 0xDEADBEEF、cp0_status 污染成 0xFFFFFFFF、env_pri=99、env_status=ENV_RUNNABLE、pgfault=12345、ipc=1/777/888，用于检验 env_alloc 是否真的重新初始化；F idx=平台 env_free；U idx=设 curenv；L k=打印空闲 PCB 链表前 k 个下标；W idx=打印「W idx 页目录物理地址 env_cr3」；C=空闲物理页数。idx 必须 <64。错误码：-5=-E_NO_FREE_ENV（空闲 PCB 耗尽），-4=-E_NO_MEM（env_setup_vm 拿不到物理页）。ENV_USER_SR=KUp|IEp|IM4|CU0=268439564，USTACKTOP=0x40000000=1073741824。",
+  "cases": [
+    {
+      "name": "官方锚：新 PCB 的 id/parent/status/pri/sp/SR 逐字段与 SR 四个模式位",
+      "input": "256 8192\n6\nI\nA 0\nN 63\nP 63\nL 4\nC\n"
+    },
+    {
+      "name": "parent_id 透传与 mkenvid 生成号递增：三个进程的父子链",
+      "input": "256 8192\n7\nI\nA 0\nA 191\nA 318\nN 63\nN 62\nN 61\n"
+    },
+    {
+      "name": "env_setup_vm 失败必须原样返回 -E_NO_MEM，且 PCB 仍留在空闲链表表头",
+      "input": "8 8192\n9\nI\nA 0\nA 0\nA 0\nA 0\nA 0\nL 4\nN 59\nC\n"
+    },
+    {
+      "name": "空闲 PCB 耗尽：64 次全部分配成功，第 65 次返回 -E_NO_FREE_ENV",
+      "input": "256 8192\n68\nI\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nA 0\nL 1\nC\n"
+    },
+    {
+      "name": "槽位复用：先污染 Trapframe 与 IPC 字段再分配，必须被彻底重新初始化",
+      "input": "256 8192\n8\nI\nA 0\nF 63\nD 63\nA 7\nN 63\nP 63\nL 3\n"
+    }
+  ]
+}

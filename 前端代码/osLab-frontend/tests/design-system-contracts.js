@@ -25,16 +25,16 @@ const expectToken = (name, value) => {
   );
 };
 
-expectToken("oslab-canvas", "#eef0e9");
+expectToken("oslab-canvas", "#e6e9d1");
 expectToken("oslab-panel", "#ffffff");
-expectToken("oslab-panel-soft", "#f7f8f2");
-expectToken("oslab-panel-muted", "#f1f3ea");
+expectToken("oslab-panel-soft", "#f4f7fb");
+expectToken("oslab-panel-muted", "#e9eef5");
 expectToken("oslab-ink", "#20242b");
 expectToken("oslab-ink-soft", "#3a4150");
-expectToken("oslab-muted-strong", "#6b7168");
-expectToken("oslab-line", "#dddfd3");
-expectToken("oslab-line-soft", "#eceee6");
-expectToken("oslab-line-strong", "#c9ccbe");
+expectToken("oslab-muted-strong", "#525b66");
+expectToken("oslab-line", "#dbe2ea");
+expectToken("oslab-line-soft", "#e9eef4");
+expectToken("oslab-line-strong", "#c3cedb");
 expectToken("oslab-primary", "#2447d8");
 expectToken("oslab-primary-hover", "#1a35a8");
 expectToken("oslab-primary-active", "#142a87");
@@ -52,18 +52,18 @@ expectToken("oslab-review-soft", "#f6edd9");
 expectToken("oslab-weak", "#b8543f");
 expectToken("oslab-weak-soft", "#f6e3de");
 expectToken("oslab-unseen", "#6b7168");
-expectToken("oslab-unseen-soft", "#eeefe9");
+expectToken("oslab-unseen-soft", "#eceff4");
 expectToken("oslab-graph-surface", "transparent");
-expectToken("oslab-graph-node-border", "#c9ccbe");
+expectToken("oslab-graph-node-border", "#c3cedb");
 expectToken("oslab-graph-node-radius", "8px");
 expectToken("oslab-graph-category-concept", "#e8eefc");
 expectToken("oslab-graph-category-algorithm", "#f1e9fa");
 expectToken("oslab-graph-category-function", "#e4f2ed");
-expectToken("oslab-graph-category-default", "#eeefe7");
+expectToken("oslab-graph-category-default", "#ecf0f5");
 expectToken("oslab-graph-node-fill-concept", "#f8faff");
 expectToken("oslab-graph-node-fill-algorithm", "#fbf8ff");
 expectToken("oslab-graph-node-fill-function", "#f6fbf9");
-expectToken("oslab-graph-node-fill-default", "#fafbf7");
+expectToken("oslab-graph-node-fill-default", "#fafbfd");
 expectToken("oslab-graph-node-shadow", "rgba(32, 36, 43, 0.08)");
 expectToken("oslab-graph-selection", "#2447d8");
 expectToken("oslab-graph-selection-ring", "rgba(36, 71, 216, 0.18)");
@@ -72,7 +72,7 @@ expectToken("oslab-graph-path-strong", "#6b809f");
 expectToken("oslab-graph-path-edge", "#3f66a5");
 expectToken("oslab-graph-path-ring", "rgba(107, 128, 159, 0.28)");
 expectToken("oslab-graph-review-ring", "rgba(184, 137, 46, 0.26)");
-expectToken("oslab-graph-text-soft", "#6b7168");
+expectToken("oslab-graph-text-soft", "#66707c");
 expectToken("oslab-graph-label-surface", "#ffffff");
 expectToken("oslab-graph-highlight-soft", "#fff7c2");
 expectToken("oslab-graph-relation-dependent", "#4f72b8");
@@ -108,8 +108,8 @@ assert.ok(
   "page title must use the highlighter token"
 );
 assert.ok(
-  headerSource.includes("border-radius: 4px"),
-  "global navigation must use the new 4px radius"
+  headerSource.includes("border-radius: var(--oslab-radius-control)"),
+  "global navigation must use the control radius token"
 );
 
 const annotationFile = path.join(

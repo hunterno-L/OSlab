@@ -1,0 +1,15 @@
+{
+  "questionId": "1930157867273605121",
+  "unitMappings": [
+    {
+      "unitCode": "unit.memory.virtual-concepts",
+      "required": false,
+      "completionRule": "PASS"
+    },
+    {
+      "unitCode": "unit.memory.demand-paging",
+      "required": false,
+      "completionRule": "PASS"
+    }
+  ]
+}

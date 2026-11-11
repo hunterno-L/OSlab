@@ -1,4 +1,5 @@
-import { computed, ref } from "vue";
+import { computed, getCurrentScope, onScopeDispose, ref } from "vue";
+import { selectAvailableCourse } from "@/composables/useCurrentCourse";
 import {
   getCourseOutline,
   getCourseResume,
@@ -38,6 +39,10 @@ export function useCourseCatalog() {
   const outlineLoading = ref<Record<string, boolean>>({});
   const outlineErrors = ref<Record<string, string>>({});
   let epoch = 0;
+  if (getCurrentScope())
+    onScopeDispose(() => {
+      epoch += 1;
+    });
 
   /**
    * 侧栏必须来自全部已发布课程，而不是当前课程的一份 outline；
@@ -67,11 +72,11 @@ export function useCourseCatalog() {
       if (request !== epoch) return null;
       outlines.value = { ...outlines.value, [code]: data };
       return data;
-    } catch (e) {
+    } catch {
       if (request === epoch) {
         outlineErrors.value = {
           ...outlineErrors.value,
-          [code]: e instanceof Error ? e.message : "课程目录加载失败",
+          [code]: "课程目录加载失败，请检查网络后重试",
         };
       }
       return null;
@@ -86,15 +91,19 @@ export function useCourseCatalog() {
     const request = ++epoch;
     loading.value = true;
     error.value = "";
+    courseCode.value = "";
+    courses.value = [];
+    outline.value = null;
+    resume.value = null;
+    outlines.value = {};
+    outlineLoading.value = {};
+    outlineErrors.value = {};
     try {
       const list = await listCourses();
       if (request !== epoch) return;
       courses.value = list;
       const available = list.filter((item) => item.publishedUnitCount > 0);
-      const picked =
-        available.find((item) => item.courseCode === preferredCourseCode) ||
-        available.find((item) => item.courseCode === courseCode.value) ||
-        available[0];
+      const picked = selectAvailableCourse(list, preferredCourseCode);
       if (!picked) {
         outline.value = null;
         courseCode.value = "";
@@ -102,7 +111,21 @@ export function useCourseCatalog() {
         return;
       }
       courseCode.value = picked.courseCode;
-      const pickedOutline = await fetchOutline(picked.courseCode, request);
+      resume.value = null;
+      const pickedOutlinePromise = fetchOutline(picked.courseCode, request);
+      const resumePromise = getCourseResume(picked.courseCode).catch(
+        () => null
+      );
+      // Other courses populate the sidebar progressively without blocking this course.
+      void Promise.all(
+        available
+          .filter((item) => item.courseCode !== picked.courseCode)
+          .map((item) => fetchOutline(item.courseCode, request))
+      );
+      const [pickedOutline, resumeData] = await Promise.all([
+        pickedOutlinePromise,
+        resumePromise,
+      ]);
       if (request !== epoch) return;
       outline.value = pickedOutline;
       if (!pickedOutline) {
@@ -110,25 +133,11 @@ export function useCourseCatalog() {
           outlineErrors.value[picked.courseCode] || "课程目录加载失败";
         return;
       }
-      // 其余已发布课程并行加载；单门课程失败只影响该分组，不阻断当前课程。
-      const rest = available.filter(
-        (item) => item.courseCode !== picked.courseCode
-      );
-      await Promise.all(
-        rest.map((item) => fetchOutline(item.courseCode, request))
-      );
-      if (request !== epoch) return;
-      outline.value = outlines.value[picked.courseCode] || pickedOutline;
-      try {
-        const resumeData = await getCourseResume(picked.courseCode);
-        if (request === epoch) resume.value = resumeData;
-      } catch {
-        if (request === epoch) resume.value = null;
-      }
-    } catch (e) {
+      resume.value = resumeData;
+    } catch {
       if (request !== epoch) return;
       outline.value = null;
-      error.value = e instanceof Error ? e.message : "课程目录加载失败";
+      error.value = "课程目录加载失败，请检查网络后重试";
     } finally {
       if (request === epoch) loading.value = false;
     }

@@ -45,7 +45,7 @@ lacks(landing, "沿着章节，逐步掌握操作系统", "旧的长主标题必
 lacks(landing, "查看平台功能", "平台功能辅助按钮必须删除");
 lacks(landing, "landing-eyebrow", "蓝色眉题必须删除");
 lacks(landing, "landing-kicker", "首屏装饰性小字必须删除");
-has(landing, "landing-hero.png", "首屏必须使用定制背景图");
+has(landing, "landing-hero.jpg", "首屏必须使用定制背景图");
 has(landing, 'id="features"', "首屏之后必须展示功能概览");
 const heroMarkup = landing.split('id="features"')[0];
 lacks(heroMarkup, "PagingTheater", "分页演示应放在功能介绍中而非首屏");

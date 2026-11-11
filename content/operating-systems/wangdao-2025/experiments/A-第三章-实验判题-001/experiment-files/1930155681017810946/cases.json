@@ -1,0 +1,25 @@
+{
+  "description": "驱动 init/init.c 的初始化片段 init_user_envs()（北航 3.9：把 ENV_CREATE_PRIORITY(user_A,2); 与 ENV_CREATE_PRIORITY(user_B,1); 两条语句加进 init.c）。stdin 首行 npage freemem（1..256 / 0..65536），次行操作数 n（0..96），随后 n 个操作：I=平台 env_init()（重复打印 I SKIP）；B=把镜像缓冲填成 seg_binary[i]=i&0xFF；G=清空段表；S va size perm=追加一段（最多8段，va<1073741824、size<=16384、perm 0..4095），打印「S 当前段数」；E entry=设 elf_entry；J=平台 env_alloc(&e,0) 占用一个 PCB（不装镜像、不入就绪链表），打印「J 返回码 下标」；N=调用学生填写的 init_user_envs()，打印「N」；H=就绪链表头下标（空 -1）；L=就绪链表顺序（头插故为创建逆序）；T idx=打印「T idx env_id parent status pri cp0_epc sp」；F=空闲PCB数；C=空闲物理页数；Q idx va=物理地址（无映射 4294967295）；D idx va=32位小端字（无映射/跨页 4294967295）；R idx va=所映射物理页 pp_ref（无映射 -1）。idx<64。关键常量：ENV_RUNNABLE=2、ENV_NOT_RUNNABLE=1、ENV_FREE=0、USTACKTOP=1073741824、栈页映射在 USTACKTOP-BY2PG=1073737728。env_init 头插建空闲链表，故分配顺序 63,62,61...；env_id=(生成号<<7)|下标，生成号从1起每次分配递增。每个非空镜像进程耗5页（单段）或8页（本驱动两段样例），空镜像进程耗3页，单纯 env_alloc 占1页。宏参数是镜像名后缀（user_A），不是字符串也不是 A。正确实现必须创建两个进程：先 user_A 优先级2，再 user_B 优先级1，二者都置 ENV_RUNNABLE 并头插就绪链表。",
+  "cases": [
+    {
+      "name": "官方锚：单段镜像下一次 N 创建 A(pri2)/B(pri1)，PCB字段/就绪链表逆序/镜像内容/栈页/空闲计数全检查",
+      "input": "256 8192\n16\nI\nB\nG\nS 4096 4096 3\nE 4096\nN\nH\nL\nT 63\nT 62\nF\nC\nQ 63 4096\nD 63 4096\nQ 62 1073737728\nR 62 1073737728\n"
+    },
+    {
+      "name": "预占槽位：J×3 占掉 63/62/61 后 N 只能拿到 60/59，envid 生成号续算，且 J 的 PCB 不入就绪链表、仍是 NOT_RUNNABLE",
+      "input": "256 8192\n18\nI\nB\nG\nS 4096 4096 3\nE 4096\nJ\nJ\nJ\nN\nH\nL\nT 60\nT 59\nT 63\nF\nC\nQ 60 4096\nD 59 4096\n"
+    },
+    {
+      "name": "多段镜像：两段(6144/8192 与 32768/4096)+入口8192，两个进程各自映射与内容正确、栈页 pp_ref=1",
+      "input": "256 8192\n18\nI\nB\nG\nS 6144 8192 3\nS 32768 4096 2\nE 8192\nN\nH\nL\nT 63\nT 62\nQ 63 6144\nD 63 6144\nQ 62 32768\nD 62 32768\nQ 63 1073737728\nR 63 1073737728\nC\n"
+    },
+    {
+      "name": "部分耗尽边界：J×63 只剩1个空闲PCB，N 里 A 成功(pri2)、B 因 env_alloc 失败不得挂进就绪链表",
+      "input": "256 8192\n74\nI\nB\nG\nS 4096 4096 3\nE 4096\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nJ\nN\nH\nL\nT 0\nF\nC\n"
+    },
+    {
+      "name": "空镜像+重复调用：零段镜像下连续两次 N 共建4个进程(63/62/61/60)，pri 交替 2/1/2/1，头插逆序与页数递减",
+      "input": "256 8192\n17\nI\nG\nE 0\nN\nH\nL\nF\nC\nN\nH\nL\nT 61\nT 60\nF\nC\nQ 61 1073737728\nR 61 1073737728\n"
+    }
+  ]
+}

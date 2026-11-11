@@ -1,0 +1,26 @@
+[
+  {
+    "input": "2147483648 3\n.text 8192 4096\n.data 1000 4\n.bss 2048 4096\n",
+    "output": ".text 0x80000000\n.data 0x80002000\n.bss 0x80003000\n_end 0x80004000"
+  },
+  {
+    "input": "2147549184 3\n.text 4096 16\n.data 1 8\n.bss 0 4096\n",
+    "output": ".text 0x80010000\n.data 0x80011000\n.bss 0x80012000\n_end 0x80012000"
+  },
+  {
+    "input": "2147483904 2\n.text 100 4096\n.data 100 4\n",
+    "output": ".text 0x80001000\n.data 0x80001064\n_end 0x80002000"
+  },
+  {
+    "input": "2147483648 1\n.text 1 1\n",
+    "output": ".text 0x80000000\n_end 0x80001000"
+  },
+  {
+    "input": "2147483648 3\n.text 65536 65536\n.data 4096 4096\n.bss 8192 4096\n",
+    "output": ".text 0x80000000\n.data 0x80010000\n.bss 0x80011000\n_end 0x80013000"
+  },
+  {
+    "input": "2147483904 2\n.text 100 0\n.data 100 8\n",
+    "output": ".text 0x80000100\n.data 0x80000168\n_end 0x80001000"
+  }
+]
