@@ -4,12 +4,30 @@ param(
     [switch]$Status,
     [ValidateRange(1, 65535)][int]$BackendPort = 8121,
     [ValidateRange(1, 65525)][int]$FrontendPort = 8081,
-    [string]$JavaHome
+    [string]$JavaHome,
+    [string]$EnvFile
 )
 
 # Native Windows development launcher. Docker users should use run-local.ps1.
 $ErrorActionPreference = "Stop"
 $Root = $PSScriptRoot
+$backendPortSpecified = $PSBoundParameters.ContainsKey('BackendPort')
+. (Join-Path $Root 'scripts/lib/import-env.ps1')
+if (-not $Status) {
+    if ($EnvFile) {
+        Import-ProjectEnvironment -Path $EnvFile
+    } elseif (Test-Path -LiteralPath (Join-Path $Root '.env')) {
+        Import-ProjectEnvironment -Path (Join-Path $Root '.env')
+    }
+    if (-not $backendPortSpecified -and $env:SERVER_PORT) {
+        $parsedBackendPort = 0
+        if (-not [int]::TryParse($env:SERVER_PORT, [ref]$parsedBackendPort) -or
+            $parsedBackendPort -lt 1 -or $parsedBackendPort -gt 65535) {
+            throw 'SERVER_PORT must be an integer between 1 and 65535.'
+        }
+        $BackendPort = $parsedBackendPort
+    }
+}
 $BackendDir = Join-Path $Root "后端代码\osLab-backend"
 $BackendJar = Join-Path $BackendDir "target\springboot-init-0.0.1-SNAPSHOT.jar"
 $FrontendDir = Join-Path $Root "前端代码\osLab-frontend"

@@ -25,7 +25,7 @@
 }
 
 #basicLayout .content {
-  /* 视觉基准：暖白/浅灰工作台画布（design/frontend-concepts/2026-09-28） */
+  /* 暖白/浅灰工作台画布，颜色遵循仓库 DESIGN.md。 */
   background: #f5f7fa;
   margin-bottom: 16px;
   padding: 20px;

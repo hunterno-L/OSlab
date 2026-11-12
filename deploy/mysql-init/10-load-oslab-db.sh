@@ -4,7 +4,7 @@ set -eu
 # The supplied dump does not contain USE oslab_db. MySQL's entrypoint creates
 # MYSQL_DATABASE first, then this script imports the dump into that database.
 #
-# 加载顺序（docs/OSLab项目最终检查与收尾执行计划.md §6.1，task C-1 补齐 v4/v5）：
+# 新库加载顺序，详见 数据库文件/README.md：
 #   1. 基础 oslab_db.sql（已内置 uk_userAccount，因此本脚本不执行 v2）
 #   2. oslab_upgrade_v3_learning.sql    学习闭环 6 张 P0 表
 #   3. oslab_upgrade_v4_flow.sql        测评会话 / 作答幂等 / 事件快照

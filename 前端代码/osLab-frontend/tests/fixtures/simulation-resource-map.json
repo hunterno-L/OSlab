@@ -1,0 +1,654 @@
+{
+  "algorithms": [
+    {
+      "algorithmKey": "cpu.fcfs",
+      "resourceCode": "demo.cpu.fcfs",
+      "source": "src/views/unit3/FCFS.vue",
+      "component": "unit3/FCFS",
+      "animationType": "cpu-queue-gantt",
+      "animationDescription": "SpriteJS 绘制进程块沿时间轴推进、就绪队列与运行进程。",
+      "inputFields": [
+        {
+          "name": "processes",
+          "type": "Process[]",
+          "required": true,
+          "fields": [
+            "name",
+            "arrival",
+            "burst",
+            "priority"
+          ]
+        },
+        {
+          "name": "timeSlice",
+          "type": "number",
+          "required": false,
+          "aliases": [
+            "quantum"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "进程名称",
+        "到达时间",
+        "工作时间"
+      ],
+      "constraints": [
+        "当前契约：进程 1–10 个，到达 0–999，运行 1–100，优先级 0–99（数字越小越高）。",
+        "资源页无时间片字段；FCFS 不使用优先级与时间片。",
+        "只读参考：不得嵌入 Vue 2 根应用、Element 样式或旧路由。"
+      ]
+    },
+    {
+      "algorithmKey": "cpu.sjf",
+      "resourceCode": "demo.cpu.sjf",
+      "source": "src/views/unit3/SJF.vue",
+      "component": "unit3/SJF",
+      "animationType": "cpu-queue-gantt",
+      "animationDescription": "SpriteJS 时间轴与就绪队列，按最短运行时间选择下一个进程。",
+      "inputFields": [
+        {
+          "name": "processes",
+          "type": "Process[]",
+          "required": true,
+          "fields": [
+            "name",
+            "arrival",
+            "burst",
+            "priority"
+          ]
+        },
+        {
+          "name": "timeSlice",
+          "type": "number",
+          "required": false,
+          "aliases": [
+            "quantum"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "进程名称",
+        "到达时间",
+        "工作时间"
+      ],
+      "constraints": [
+        "当前契约：非抢占；burst 相同取先到达者，仍相同取输入顺序。",
+        "资源页运行时间下限为 0，当前契约要求 1–100。",
+        "只读参考，不复制 SpriteJS 场景代码。"
+      ]
+    },
+    {
+      "algorithmKey": "cpu.hrrn",
+      "resourceCode": "demo.cpu.hrrn",
+      "source": "src/views/unit3/HighResponse.vue",
+      "component": "unit3/HighResponse",
+      "animationType": "cpu-queue-gantt",
+      "animationDescription": "SpriteJS 高响应比调度时间轴与就绪队列。",
+      "inputFields": [
+        {
+          "name": "processes",
+          "type": "Process[]",
+          "required": true,
+          "fields": [
+            "name",
+            "arrival",
+            "burst",
+            "priority"
+          ]
+        },
+        {
+          "name": "timeSlice",
+          "type": "number",
+          "required": false,
+          "aliases": [
+            "quantum"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "进程名称",
+        "到达时间",
+        "工作时间"
+      ],
+      "constraints": [
+        "当前契约：非抢占；响应比 =（等待 + 服务）/ 服务，并列取先到达/输入序。",
+        "资源页无响应比输入，响应比由算法计算。",
+        "只读参考，不复制样式与页面结构。"
+      ]
+    },
+    {
+      "algorithmKey": "cpu.priority_nonpreemptive",
+      "resourceCode": "demo.cpu.priority_nonpreemptive",
+      "source": "src/views/unit3/HighPrio.vue",
+      "component": "unit3/HighPrio",
+      "animationType": "cpu-queue-gantt",
+      "animationDescription": "SpriteJS 非抢占优先级调度时间轴与就绪队列。",
+      "inputFields": [
+        {
+          "name": "processes",
+          "type": "Process[]",
+          "required": true,
+          "fields": [
+            "name",
+            "arrival",
+            "burst",
+            "priority"
+          ]
+        },
+        {
+          "name": "timeSlice",
+          "type": "number",
+          "required": false,
+          "aliases": [
+            "quantum"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "进程名称",
+        "优先数",
+        "到达时间",
+        "工作时间"
+      ],
+      "constraints": [
+        "当前契约：priority 0–99，数字越小优先级越高；非抢占。",
+        "资源页优先数下限为 1，当前契约允许 0。",
+        "只读参考，不复制 Element 表单。"
+      ]
+    },
+    {
+      "algorithmKey": "cpu.priority_preemptive",
+      "resourceCode": "demo.cpu.priority_preemptive",
+      "source": "src/views/unit3/HighPrio2.vue",
+      "component": "unit3/HighPrio2",
+      "animationType": "cpu-queue-gantt",
+      "animationDescription": "SpriteJS 抢占优先级调度，展示新进程到达后当前进程被切分的时间轴。",
+      "inputFields": [
+        {
+          "name": "processes",
+          "type": "Process[]",
+          "required": true,
+          "fields": [
+            "name",
+            "arrival",
+            "burst",
+            "priority"
+          ]
+        },
+        {
+          "name": "timeSlice",
+          "type": "number",
+          "required": false,
+          "aliases": [
+            "quantum"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "进程名称",
+        "优先数",
+        "到达时间",
+        "工作时间"
+      ],
+      "constraints": [
+        "当前契约：新到进程优先级更高（数字更小）时立即抢占；同优先级不抢占。",
+        "步骤层按连续运行段合并，事件 duration 为段时间。",
+        "只读参考，不复制 SpriteJS 场景。"
+      ]
+    },
+    {
+      "algorithmKey": "cpu.rr",
+      "resourceCode": "demo.cpu.rr",
+      "source": "src/views/unit3/RR.vue",
+      "component": "unit3/RR",
+      "animationType": "cpu-queue-gantt",
+      "animationDescription": "SpriteJS 时间片轮转时间轴，进程块按时间片切分并回到队尾。",
+      "inputFields": [
+        {
+          "name": "processes",
+          "type": "Process[]",
+          "required": true,
+          "fields": [
+            "name",
+            "arrival",
+            "burst",
+            "priority"
+          ]
+        },
+        {
+          "name": "timeSlice",
+          "type": "number",
+          "required": true,
+          "aliases": [
+            "quantum"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "时间片",
+        "进程名称",
+        "到达时间",
+        "工作时间"
+      ],
+      "constraints": [
+        "当前契约时间片 1–20；资源页时间片 1–10。",
+        "当前契约：时间片用尽后先入队当前时刻新到达进程，再重新入队当前进程。",
+        "只读参考，不复制页面外壳。"
+      ]
+    },
+    {
+      "algorithmKey": "cpu.mlfq",
+      "resourceCode": "demo.cpu.mlfq",
+      "source": "src/views/unit3/FeedbackQueue.vue",
+      "component": "unit3/FeedbackQueue",
+      "animationType": "cpu-multilevel-queue",
+      "animationDescription": "SpriteJS 多级反馈队列，展示进程在队列间降级、被抢占与时间轴。",
+      "inputFields": [
+        {
+          "name": "processes",
+          "type": "Process[]",
+          "required": true,
+          "fields": [
+            "name",
+            "arrival",
+            "burst",
+            "priority"
+          ]
+        },
+        {
+          "name": "timeSlice",
+          "type": "number",
+          "required": true,
+          "aliases": [
+            "quantum"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "队列数",
+        "每队列时间片",
+        "进程名称",
+        "到达时间",
+        "工作时间"
+      ],
+      "constraints": [
+        "当前契约固定三级队列，时间片 q / 2q / 4q；基础时间片 1–20。",
+        "资源页队列数 2–6 且可逐队列配置时间片，属于不同参数模型。",
+        "只读参考，不复制其队列配置表单。"
+      ]
+    },
+    {
+      "algorithmKey": "allocation.first_fit",
+      "resourceCode": "demo.allocation.first_fit",
+      "source": "src/views/unit4/PartitionAllocation_FF.vue",
+      "component": "unit4/PartitionAllocation_FF",
+      "animationType": "allocation-blocks",
+      "animationDescription": "SpriteJS 分区块搜索、切分与进程占用动画。",
+      "inputFields": [
+        {
+          "name": "memorySize",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "operations",
+          "type": "Operation[]",
+          "required": true,
+          "fields": [
+            "type",
+            "process",
+            "size"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "分区大小列表",
+        "进程名称",
+        "需要分区大小"
+      ],
+      "constraints": [
+        "当前契约：内存 16–4096，操作最多 30 条，分配大小 1–memorySize。",
+        "资源页输入固定分区列表，不支持 FREE；当前契约使用 ALLOC/FREE 操作序列并合并空闲区。",
+        "只读参考，不复制其固定分区模型。"
+      ]
+    },
+    {
+      "algorithmKey": "allocation.best_fit",
+      "resourceCode": "demo.allocation.best_fit",
+      "source": "src/views/unit4/PartitionAllocation_BF.vue",
+      "component": "unit4/PartitionAllocation_BF",
+      "animationType": "allocation-blocks",
+      "animationDescription": "SpriteJS 分区块搜索与切分，突出最小满足空闲区。",
+      "inputFields": [
+        {
+          "name": "memorySize",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "operations",
+          "type": "Operation[]",
+          "required": true,
+          "fields": [
+            "type",
+            "process",
+            "size"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "分区大小列表",
+        "进程名称",
+        "需要分区大小"
+      ],
+      "constraints": [
+        "当前契约：选择不小于请求的最小空闲区，并列取低地址。",
+        "资源页无回收操作；当前契约支持 FREE 与相邻空闲区合并。",
+        "只读参考。"
+      ]
+    },
+    {
+      "algorithmKey": "allocation.worst_fit",
+      "resourceCode": "demo.allocation.worst_fit",
+      "source": "src/views/unit4/PartitionAllocation_WF.vue",
+      "component": "unit4/PartitionAllocation_WF",
+      "animationType": "allocation-blocks",
+      "animationDescription": "SpriteJS 分区块搜索与切分，突出最大空闲区。",
+      "inputFields": [
+        {
+          "name": "memorySize",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "operations",
+          "type": "Operation[]",
+          "required": true,
+          "fields": [
+            "type",
+            "process",
+            "size"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "分区大小列表",
+        "进程名称",
+        "需要分区大小"
+      ],
+      "constraints": [
+        "当前契约：选择最大空闲区，并列取低地址。",
+        "资源页无回收操作；当前契约支持 FREE 与合并。",
+        "只读参考。"
+      ]
+    },
+    {
+      "algorithmKey": "allocation.next_fit",
+      "resourceCode": "demo.allocation.next_fit",
+      "source": "src/views/unit4/PartitionAllocation_NF.vue",
+      "component": "unit4/PartitionAllocation_NF",
+      "animationType": "allocation-blocks",
+      "animationDescription": "SpriteJS 分区块搜索，展示从上次分配位置继续查找。",
+      "inputFields": [
+        {
+          "name": "memorySize",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "operations",
+          "type": "Operation[]",
+          "required": true,
+          "fields": [
+            "type",
+            "process",
+            "size"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "分区大小列表",
+        "进程名称",
+        "需要分区大小"
+      ],
+      "constraints": [
+        "当前契约：从上次分配结束位置向后循环查找，回收后合并相邻空闲区。",
+        "资源页无显式 pointer 输入；指针由当前算法状态给出。",
+        "只读参考。"
+      ]
+    },
+    {
+      "algorithmKey": "page.fifo",
+      "resourceCode": "demo.page.fifo",
+      "source": "src/views/unit4/Replacement_FF.vue",
+      "component": "unit4/Replacement_FF",
+      "animationType": "page-frames",
+      "animationDescription": "SpriteJS 物理块网格与页面换入换出箭头，FIFO 淘汰队首页。",
+      "inputFields": [
+        {
+          "name": "frames",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "accessSequence",
+          "type": "number[]",
+          "required": true,
+          "aliases": [
+            "sequence"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "物理块数（1–60）",
+        "页号列表（0–100）"
+      ],
+      "constraints": [
+        "当前契约：frames 1–10，序列最多 50 步，页号 0–9999。",
+        "资源页页号上限 100，当前契约允许 0–9999。",
+        "只读参考，不复制其绘图脚本。"
+      ]
+    },
+    {
+      "algorithmKey": "page.lru",
+      "resourceCode": "demo.page.lru",
+      "source": "src/views/unit4/Replacement_LRU.vue",
+      "component": "unit4/Replacement_LRU",
+      "animationType": "page-frames",
+      "animationDescription": "SpriteJS 物理块网格与最近使用顺序调整动画。",
+      "inputFields": [
+        {
+          "name": "frames",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "accessSequence",
+          "type": "number[]",
+          "required": true,
+          "aliases": [
+            "sequence"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "物理块数（1–60）",
+        "页号列表（0–100）"
+      ],
+      "constraints": [
+        "当前契约：命中时把页移到最近使用端，缺页淘汰队首页。",
+        "当前驻留顺序按队首最旧/最久未使用展示，不代表固定物理帧编号。",
+        "只读参考。"
+      ]
+    },
+    {
+      "algorithmKey": "page.opt",
+      "resourceCode": "demo.page.opt",
+      "source": "src/views/unit4/Replacement_OPT.vue",
+      "component": "unit4/Replacement_OPT",
+      "animationType": "page-frames",
+      "animationDescription": "SpriteJS 物理块网格，按未来访问位置淘汰页面。",
+      "inputFields": [
+        {
+          "name": "frames",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "accessSequence",
+          "type": "number[]",
+          "required": true,
+          "aliases": [
+            "sequence"
+          ]
+        }
+      ],
+      "resourceInputFields": [
+        "物理块数（1–60）",
+        "页号列表（0–100）"
+      ],
+      "constraints": [
+        "当前契约：淘汰未来最久不再访问的页，并列取驻留序最靠前者。",
+        "OPT 仅用于对比，不写测评掌握事件。",
+        "只读参考。"
+      ]
+    },
+    {
+      "algorithmKey": "disk.fcfs",
+      "resourceCode": "demo.disk.fcfs",
+      "source": "src/views/unit5/FCFS.vue",
+      "component": "unit5/FCFS",
+      "animationType": "disk-head-track",
+      "animationDescription": "SpriteJS 磁道轴、请求标记与磁头箭头按请求顺序移动。",
+      "inputFields": [
+        {
+          "name": "head",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "requests",
+          "type": "number[]",
+          "required": true
+        },
+        {
+          "name": "direction",
+          "type": "\"UP\" | \"DOWN\"",
+          "required": true
+        }
+      ],
+      "resourceInputFields": [
+        "起始磁道（1–200）",
+        "请求编号列表（1–200）"
+      ],
+      "constraints": [
+        "当前契约：磁头与请求 0–199，最多 20 个请求；FCFS 不使用 direction。",
+        "资源页磁道号 1–200，与当前 0–199 不同。",
+        "只读参考，不复制 SpriteJS 轨道绘制。"
+      ]
+    },
+    {
+      "algorithmKey": "disk.sstf",
+      "resourceCode": "demo.disk.sstf",
+      "source": "src/views/unit5/SSTF.vue",
+      "component": "unit5/SSTF",
+      "animationType": "disk-head-track",
+      "animationDescription": "SpriteJS 磁头每次移动到最近请求的轨道动画。",
+      "inputFields": [
+        {
+          "name": "head",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "requests",
+          "type": "number[]",
+          "required": true
+        },
+        {
+          "name": "direction",
+          "type": "\"UP\" | \"DOWN\"",
+          "required": true
+        }
+      ],
+      "resourceInputFields": [
+        "起始磁道（1–200）",
+        "请求编号列表（1–200）"
+      ],
+      "constraints": [
+        "当前契约：每次选择距磁头最近的请求，并列取较小磁道；SSTF 不使用 direction。",
+        "资源页无 direction 输入。",
+        "只读参考。"
+      ]
+    },
+    {
+      "algorithmKey": "disk.scan",
+      "resourceCode": "demo.disk.scan",
+      "source": "src/views/unit5/SCAN.vue",
+      "component": "unit5/SCAN",
+      "animationType": "disk-head-track",
+      "animationDescription": "SpriteJS 磁头沿当前方向移动到端点后反向的轨道动画。",
+      "inputFields": [
+        {
+          "name": "head",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "requests",
+          "type": "number[]",
+          "required": true
+        },
+        {
+          "name": "direction",
+          "type": "\"UP\" | \"DOWN\"",
+          "required": true
+        }
+      ],
+      "resourceInputFields": [
+        "起始磁道（1–200）",
+        "请求编号列表（1–200）"
+      ],
+      "constraints": [
+        "当前契约：磁道范围固定 0–199；端点移动计入寻道长度。",
+        "资源页未暴露扫描方向输入，方向语义需由当前播放器显式传入。",
+        "只读参考。"
+      ]
+    },
+    {
+      "algorithmKey": "disk.cscan",
+      "resourceCode": "demo.disk.cscan",
+      "source": "src/views/unit5/CSCAN.vue",
+      "component": "unit5/CSCAN",
+      "animationType": "disk-head-track",
+      "animationDescription": "SpriteJS 磁头到端点后回跳到另一端的轨道动画。",
+      "inputFields": [
+        {
+          "name": "head",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "requests",
+          "type": "number[]",
+          "required": true
+        },
+        {
+          "name": "direction",
+          "type": "\"UP\" | \"DOWN\"",
+          "required": true
+        }
+      ],
+      "resourceInputFields": [
+        "起始磁道（1–200）",
+        "请求编号列表（1–200）"
+      ],
+      "constraints": [
+        "当前契约：回跳距离不计入寻道长度；磁道范围 0–199。",
+        "资源页未暴露扫描方向输入。",
+        "只读参考。"
+      ]
+    }
+  ]
+}

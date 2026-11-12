@@ -1,9 +1,0 @@
-{
-  "schemaVersion": "oslab-authoring/1.0",
-  "packageType": "QUESTIONS",
-  "batchCode": "batch.a.process.chapter.001",
-  "contributor": "A",
-  "courseCode": "course.operating-systems",
-  "note": "第二章 进程与线程（2.1—2.5）空模板；正式交付须完成实际内容及自审。",
-  "questions": []
-}

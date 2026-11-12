@@ -1,5 +1,11 @@
 # 容器内初始化脚本必须保持 LF，Windows 检出时不得转成 CRLF
 deploy/mysql-init/*.sh text eol=lf
+deploy/neo4j-init/*.sh text eol=lf
+scripts/*.sh text eol=lf
+**/mvnw text eol=lf
+*.md text eol=lf
+*.ps1 text eol=lf
+*.example text eol=lf
 
 # 部署包内文本固定 LF，保证 SHA256SUMS 在 Windows 检出后仍可校验
 deploy/database-20261028/*.cypher text eol=lf

@@ -1,7 +1,0 @@
-{
-  "schemaVersion": "oslab-experiment-maintenance/1.0",
-  "batchCode": "batch.a.experiments.001",
-  "contributor": "A",
-  "note": "独立实验维护包，与整章题目分开交付；只填本批实际维护范围，不重复全部48项盘点。原资料在reference/experiments，保留原questionId，L负责核对当前库、导入和运行适配。",
-  "experiments": []
-}

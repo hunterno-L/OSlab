@@ -1,9 +1,0 @@
-{
-  "mode" : "--commit-local-drafts",
-  "adminId" : "2104470171261014017",
-  "executionContext" : "L local offline service import; existing admin is the recorded actor, without login or account changes",
-  "database" : "oslab_db",
-  "started" : "2026-10-19T12:54:45.030155600Z",
-  "finished" : "2026-10-19T12:54:56.478854800Z",
-  "protectedDataUnchanged" : true
-}

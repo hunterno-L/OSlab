@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * check-experiment-mappings.mjs —— 一次性校验：41 个实验的 nodes.json / units.json
+ * check-experiment-mappings.mjs —— 离线校验：41 个实验的 nodes.json / units.json
  *
- * 独立于生成器：只读落盘后的 JSON 文件 + 只读 SELECT 导出的 registry.txt / units.txt，
+ * 独立于生成器：只读落盘后的 JSON 文件 + verification/ 中的公共身份与单元快照，
  * 不复用生成器里的任何数据结构，避免「生成器和校验器犯同一个错」。
  *
  * 硬闸门（任一不满足 → 打印全部错误并以退出码 1 结束）：
@@ -25,7 +25,7 @@ import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const REPO = process.cwd();
-const ART = join(REPO, "artifacts", "experiment-judge");
+const FIXTURES = join(REPO, "content", "operating-systems", "wangdao-2025", "verification", "experiment-mappings");
 const EXP_ROOT = join(
   REPO, "content", "operating-systems", "wangdao-2025", "experiments",
 );
@@ -89,8 +89,8 @@ function parseTable(file, keyCol) {
   return m;
 }
 
-const registry = parseTable(join(ART, "registry.txt"), "nodeCode");
-const units = parseTable(join(ART, "units.txt"), "unitCode");
+const registry = parseTable(join(FIXTURES, "registry.txt"), "nodeCode");
+const units = parseTable(join(FIXTURES, "units.txt"), "unitCode");
 if (registry.size !== 199) err(`registry.txt 节点数 ${registry.size} != 199（实测 DB 为 199）`);
 // 实测 DB：courseCode='course.operating-systems' AND isDelete=0 → 104 行，
 // 全部 reviewStatus='PUBLISHED' 且 publishedJson 非 NULL。计划 md 写的 105 比实际多 1。

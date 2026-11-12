@@ -800,7 +800,7 @@ test("every step event matches the truth state consumed by animations", () => {
 test("resource map covers all 18 keys with resource codes and sources", () => {
   const artifactPath = path.join(
     __dirname,
-    "../../../artifacts/feedback-fix-20261020/resource-map.json"
+    "fixtures/simulation-resource-map.json"
   );
   const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
   assert.equal(artifact.algorithms.length, 18);
@@ -818,13 +818,6 @@ test("resource map covers all 18 keys with resource codes and sources", () => {
     assert(entry.animationType, `${definition.key} 缺少 animationType`);
     assert(Array.isArray(entry.inputFields) && entry.inputFields.length > 0);
     assert(Array.isArray(entry.constraints) && entry.constraints.length > 0);
-    if (fs.existsSync(artifact.authorizedRoot)) {
-      const file = path.join(
-        artifact.authorizedRoot,
-        entry.source.replace(/\//g, path.sep)
-      );
-      assert(fs.existsSync(file), `授权资源不存在：${entry.source}`);
-    }
   }
 });
 

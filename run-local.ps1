@@ -20,6 +20,8 @@ $composeFile = Join-Path $deployDirectory "docker-compose.yml"
 $environmentTemplate = Join-Path $deployDirectory ".env.example"
 $environmentFile = Join-Path $deployDirectory ".env"
 $projectName = "oslab"
+$portWasSpecified = $PSBoundParameters.ContainsKey('Port')
+. (Join-Path $workspaceRoot 'scripts/lib/import-env.ps1')
 
 function New-LocalSecret {
     $bytes = New-Object byte[] 32
@@ -68,15 +70,14 @@ function Initialize-EnvironmentFile {
         "REDIS_PASSWORD=replace-with-a-long-unique-redis-password" = "REDIS_PASSWORD=$(New-LocalSecret)"
         "NEO4J_PASSWORD=replace-with-a-long-unique-neo4j-password" = "NEO4J_PASSWORD=$(New-LocalSecret)"
         "SANDBOX_AUTH_SECRET=replace-with-a-long-unique-sandbox-secret" = "SANDBOX_AUTH_SECRET=$(New-LocalSecret)"
+        "OSLAB_AI_MASTER_KEY=replace-with-a-long-unique-ai-master-key" = "OSLAB_AI_MASTER_KEY=$(New-LocalSecret)"
     }
 
     foreach ($source in $replacements.Keys) {
         $content = $content.Replace($source, $replacements[$source])
     }
 
-    $content = $content.TrimEnd() + [Environment]::NewLine +
-        [Environment]::NewLine + "# Local frontend host port. Override with -Port when running this script." +
-        [Environment]::NewLine + "OSLAB_HTTP_PORT=80" + [Environment]::NewLine
+    $content = $content.TrimEnd() + [Environment]::NewLine
     [System.IO.File]::WriteAllText($environmentFile, $content)
     Write-Host "已创建 deploy/.env，并生成仅供本地使用的随机密钥。" -ForegroundColor Green
 }
@@ -130,6 +131,17 @@ function Wait-ForPlatform {
 
 function Start-Platform {
     Initialize-EnvironmentFile
+    if (-not $portWasSpecified) {
+        $fileEnvironment = Read-ProjectEnvironment -Path $environmentFile
+        $configuredPort = if ($env:OSLAB_HTTP_PORT) { $env:OSLAB_HTTP_PORT } else { $fileEnvironment['OSLAB_HTTP_PORT'] }
+        if ($configuredPort) {
+            $parsedPort = 0
+            if (-not [int]::TryParse($configuredPort, [ref]$parsedPort) -or $parsedPort -lt 1 -or $parsedPort -gt 65535) {
+                throw 'OSLAB_HTTP_PORT must be an integer between 1 and 65535.'
+            }
+            $script:Port = $parsedPort
+        }
+    }
     $env:OSLAB_HTTP_PORT = [string]$Port
     $arguments = @("up", "--detach")
     if (-not $NoBuild) {

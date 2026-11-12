@@ -2,6 +2,9 @@
 .DS_Store
 Thumbs.db
 .idea/
+.vscode/
+.zcodeignore
+**/.qoder/
 
 # Local environment and secrets
 .env
@@ -19,6 +22,9 @@ deploy/.env
 
 # Local databases, downloads, and test/runtime artifacts
 tmp/
+artifacts/
+design/
+访问设置.doc
 # Task attachment private storage (oslab.tasks.storage-dir)
 data/task-files/
 后端代码/osLab-backend/data/
@@ -43,3 +49,5 @@ pnpm-debug.log*
 # 旧设计文档仅本地留存，不入库
 旧设（useless）/
 docs/useless/
+docs/design/
+docs/superpowers/

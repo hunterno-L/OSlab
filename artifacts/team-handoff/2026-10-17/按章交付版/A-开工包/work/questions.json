@@ -1,9 +1,0 @@
-{
-  "schemaVersion": "oslab-authoring/1.0",
-  "packageType": "QUESTIONS",
-  "batchCode": "batch.a.overview.chapter.001",
-  "contributor": "A",
-  "courseCode": "course.operating-systems",
-  "note": "待A重新依据教材整理的第一章整章题目包，包含重新整理1.1；旧1.1成果不采用、不复制合并。教材、改编、自编题分别标注来源；实验维护独立交付。空模板不是已完成题库。",
-  "questions": []
-}

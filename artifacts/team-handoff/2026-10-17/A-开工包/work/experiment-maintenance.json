@@ -1,7 +1,0 @@
-{
-  "schemaVersion": "oslab-experiment-maintenance/1.0",
-  "batchCode": "batch.a.experiments.001",
-  "contributor": "A",
-  "note": "只填写本批实际核对或修订的实验。原实验材料在reference/experiments；保留原questionId，L负责比对当前库和导入。",
-  "experiments": []
-}

@@ -5,7 +5,9 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "test:contracts": "node tests/run-contracts.js",
+    "test:legacy": "node tests/integration/legacy-simulation-events.js"
   },
   "dependencies": {
     "@arco-design/web-vue": "^2.56.0",

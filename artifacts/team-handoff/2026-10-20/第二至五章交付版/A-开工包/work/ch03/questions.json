@@ -1,9 +1,0 @@
-{
-  "schemaVersion": "oslab-authoring/1.0",
-  "packageType": "QUESTIONS",
-  "batchCode": "batch.a.memory.chapter.001",
-  "contributor": "A",
-  "courseCode": "course.operating-systems",
-  "note": "第三章 内存管理（3.1—3.3）空模板；正式交付须完成实际内容及自审。",
-  "questions": []
-}
