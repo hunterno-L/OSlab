@@ -150,6 +150,15 @@
           >
             激活
           </a-button>
+          <a-button
+            v-if="!profile.platformDefault"
+            size="small"
+            status="danger"
+            :loading="deletingId === profile.profileId"
+            @click="deleteProfile(profile)"
+          >
+            删除
+          </a-button>
           <span
             v-if="!profile.active && !canActivate(profile)"
             class="model-muted"
@@ -234,6 +243,7 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import {
   createAiModelProfile,
+  deleteAiModelProfile,
   listAiModelProfiles,
   testAiModelProfile,
   updateAiModelProfile,
@@ -254,6 +264,7 @@ const creating = ref(false);
 const formError = ref("");
 const testingId = ref("");
 const activatingId = ref("");
+const deletingId = ref("");
 const testResults = ref<Record<string, AiModelProfileTestVO>>({});
 const form = reactive({
   name: "",
@@ -341,6 +352,27 @@ async function createProfile() {
     formError.value = e instanceof Error ? e.message : "保存候选配置失败";
   } finally {
     creating.value = false;
+  }
+}
+
+async function deleteProfile(profile: AiModelProfileVO) {
+  if (profile.platformDefault) return;
+  if (deletingId.value) return;
+  if (!window.confirm(`删除配置「${profile.name}」？删除后不可恢复。`)) return;
+  deletingId.value = profile.profileId;
+  error.value = "";
+  notice.value = "";
+  try {
+    const response = await deleteAiModelProfile(profile.profileId);
+    if (response.data.code !== 0) {
+      throw new Error(response.data.message || "删除配置失败");
+    }
+    notice.value = `已删除配置「${profile.name}」。`;
+    await loadProfiles();
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : "删除配置失败";
+  } finally {
+    deletingId.value = "";
   }
 }
 

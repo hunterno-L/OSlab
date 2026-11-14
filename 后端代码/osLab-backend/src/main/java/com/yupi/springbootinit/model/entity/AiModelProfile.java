@@ -77,7 +77,9 @@ public class AiModelProfile implements Serializable {
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
-    public boolean isActive() {
+    /** 语义化判断：避免与 Lombok 为 Integer active 生成的 getActive() 形成<br>
+     *  「同名属性两个 getter、返回类型不同」的 MyBatis 反射冲突（Illegal overloaded getter）。 */
+    public boolean isActiveFlag() {
         return active != null && active == 1;
     }
 

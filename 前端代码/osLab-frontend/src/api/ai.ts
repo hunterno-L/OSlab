@@ -565,6 +565,14 @@ export function testAiModelProfile(
   );
 }
 
+export function deleteAiModelProfile(
+  profileId: string
+): Promise<AiApiResponse<string>> {
+  return axios.delete(
+    `${API}/ai/model-profiles/${encodeURIComponent(profileId)}`
+  );
+}
+
 export function updateAiModelProfile(
   profileId: string,
   body: {

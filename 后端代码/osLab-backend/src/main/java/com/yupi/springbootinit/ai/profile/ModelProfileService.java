@@ -83,9 +83,13 @@ public class ModelProfileService {
     public List<ModelProfileVO> list(Long userId) {
         List<AiModelProfile> own = profileMapper.selectList(new LambdaQueryWrapper<AiModelProfile>()
                 .eq(AiModelProfile::getUserId, userId)
+                // 逻辑删除的配置不再出现在列表里（软删标记为 1）
+                .and(w -> w.isNull(AiModelProfile::getIsDelete)
+                        .or()
+                        .ne(AiModelProfile::getIsDelete, 1))
                 .orderByAsc(AiModelProfile::getCreateTime)
                 .orderByAsc(AiModelProfile::getId));
-        boolean hasActivePersonal = own.stream().anyMatch(AiModelProfile::isActive);
+        boolean hasActivePersonal = own.stream().anyMatch(AiModelProfile::isActiveFlag);
         List<ModelProfileVO> out = new ArrayList<>();
         out.add(platformVo(hasActivePersonal));
         for (AiModelProfile profile : own) {
@@ -123,7 +127,7 @@ public class ModelProfileService {
         vo.setBaseUrlMasked(BaseUrlMasker.mask(profile.getBaseUrl()));
         vo.setModel(profile.getModel());
         vo.setPlatformDefault(false);
-        vo.setActive(profile.isActive());
+        vo.setActive(profile.isActiveFlag());
         vo.setStatus(profile.getStatus());
         vo.setTestStatus(profile.getTestStatus());
         vo.setTestedAt(AiJson.iso(profile.getTestedAt()));
@@ -201,7 +205,7 @@ public class ModelProfileService {
         profile.setTestMessage(StringUtils.abbreviate(probe.getError(), 1000));
         profile.setTestedAt(new Date());
         profile.setCapabilitiesJson(AiJson.write(probe.getCapabilities()));
-        if (!probe.isOk() && profile.isActive()) {
+        if (!probe.isOk() && profile.isActiveFlag()) {
             // 原本可用的配置突然测不通：取消激活并退回平台默认，切换必须可见
             profile.setActive(0);
         }
@@ -369,6 +373,27 @@ public class ModelProfileService {
         ModelCapabilities capabilities = AiJson.read(profile.getCapabilitiesJson(), ModelCapabilities.class);
         endpoint.setCapabilities(capabilities == null ? ModelCapabilities.unknown() : capabilities);
         return endpoint;
+    }
+
+    /**
+     * 删除个人模型配置（逻辑删除）。
+     *
+     * <p>平台默认配置由部署环境变量维护，不可删除；只能删自己的配置。
+     * 若删除的是当前激活配置，先取消该用户的激活状态，避免会话继续引用已删配置。
+     */
+    public void delete(Long userId, String profileId) {
+        if (PLATFORM_PROFILE_ID.equals(StringUtils.trimToEmpty(profileId))) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "平台默认配置由部署环境变量维护，不可删除");
+        }
+        AiModelProfile profile = requireOwn(userId, profileId);
+        if (profile.isActiveFlag()) {
+            profileMapper.deactivateAllForUser(userId);
+            profile.setActive(0);
+        }
+        // 全局配置了 logic-delete-field: isDelete，deleteById 会转成
+        // UPDATE ... SET isDelete=1 WHERE id=? AND isDelete=0；
+        // updateById 不会写这个字段，所以这里必须用 deleteById。
+        profileMapper.deleteById(profile.getId());
     }
 
     private AiModelProfile requireOwn(Long userId, String profileId) {

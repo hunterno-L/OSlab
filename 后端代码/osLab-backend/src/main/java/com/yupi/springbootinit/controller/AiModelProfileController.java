@@ -9,6 +9,7 @@ import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.model.vo.ai.ModelProfileVO;
 import com.yupi.springbootinit.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -77,6 +78,15 @@ public class AiModelProfileController {
             data.put("error", probe.getError());
         }
         return ResultUtils.success(data);
+    }
+
+    /** 删除个人配置（逻辑删除）；平台默认配置不可删。 */
+    @DeleteMapping("/{id}")
+    public BaseResponse<String> delete(@PathVariable("id") String id,
+                                       HttpServletRequest request) {
+        User user = userService.getLoginUser(request);
+        modelProfileService.delete(user.getId(), id);
+        return ResultUtils.success("已删除");
     }
 
     /** 更新 / 激活：仅测试通过的候选可激活。 */
