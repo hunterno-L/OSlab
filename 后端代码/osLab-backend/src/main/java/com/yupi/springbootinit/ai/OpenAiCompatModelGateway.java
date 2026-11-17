@@ -56,7 +56,9 @@ public class OpenAiCompatModelGateway implements ModelGateway {
         if (ark == null || StringUtils.isBlank(ark.getApiKey())) {
             return null;
         }
-        return ModelEndpoint.platform(ark.getBaseUrl(), ark.getModel(), ark.getApiKey());
+        ModelEndpoint endpoint = ModelEndpoint.platform(ark.getBaseUrl(), ark.getModel(), ark.getApiKey());
+        endpoint.setReasoningEffort(ark.getReasoningEffort());
+        return endpoint;
     }
 
     @Override
@@ -243,6 +245,9 @@ public class OpenAiCompatModelGateway implements ModelGateway {
         }
         if (request.getTemperature() != null) {
             root.put("temperature", request.getTemperature());
+        }
+        if (StringUtils.isNotBlank(endpoint.getReasoningEffort())) {
+            root.put("reasoning_effort", endpoint.getReasoningEffort());
         }
         if (request.isJsonMode()) {
             root.putObject("response_format").put("type", "json_object");

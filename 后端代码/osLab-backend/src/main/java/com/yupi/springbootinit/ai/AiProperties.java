@@ -50,6 +50,12 @@ public class AiProperties {
         private String embeddingBaseUrl = "";
         /** 独立 embedding 服务的密钥；留空时复用 {@link #apiKey}。 */
         private String embeddingApiKey = "";
+
+        /**
+         * OpenAI 兼容的 reasoning_effort。推理型模型在长回答上可能耗尽 token 或触发网关超时，
+         * 部署方可用 none/low 控制；留空表示不发送该参数。
+         */
+        private String reasoningEffort = "";
     }
 
     /** 导师轮次预算：每轮最多 3 次工具执行、2 次模型调用（计划 §5.3）。 */

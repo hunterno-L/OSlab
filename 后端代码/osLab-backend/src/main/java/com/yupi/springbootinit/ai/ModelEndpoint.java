@@ -34,6 +34,9 @@ public class ModelEndpoint implements Serializable {
     /** 是否为平台默认配置（来自 ai.ark.*）。 */
     private boolean platformDefault;
 
+    /** 平台默认模型的 reasoning_effort；空表示不发送该参数。 */
+    private String reasoningEffort;
+
     public static ModelEndpoint platform(String baseUrl, String model, String apiKey) {
         ModelEndpoint endpoint = new ModelEndpoint();
         endpoint.setPlatformDefault(true);
