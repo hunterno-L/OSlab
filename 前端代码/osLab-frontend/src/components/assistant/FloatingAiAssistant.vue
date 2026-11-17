@@ -16,13 +16,14 @@
         @keydown.enter.prevent="togglePanel"
         @keydown.space.prevent="togglePanel"
       >
-        <picture class="ai-fab-avatar">
-          <source
-            media="(prefers-reduced-motion: reduce)"
-            :srcset="aiAvatarStaticUrl"
+        <picture :key="tutorGender" class="ai-fab-avatar">
+          <source type="image/webp" :srcset="tutorAvatar.webp" />
+          <img
+            :src="tutorAvatar.png"
+            alt=""
+            draggable="false"
+            aria-hidden="true"
           />
-          <source type="image/webp" :srcset="aiAvatarWebpUrl" />
-          <img :src="aiAvatarUrl" alt="" draggable="false" aria-hidden="true" />
         </picture>
       </button>
 
@@ -85,6 +86,7 @@ import ACCESS_ENUM from "@/access/accessEnum";
 import TutorPanel from "./TutorPanel.vue";
 import { pendingTutorLaunch } from "@/composables/useTutorLaunch";
 import { askAiAssistant } from "@/composables/useAiLauncher";
+import { tutorAvatar, tutorGender } from "@/composables/useTutorAvatar";
 
 type PanelMode = "dock" | "float" | "full" | "expanded";
 
@@ -97,9 +99,6 @@ const MAX_TUTOR_WIDTH = 560;
 const DEFAULT_TUTOR_WIDTH = 460;
 const POSITION_PREFIX = "oslab-ai-assistant-position-";
 const WIDTH_PREFIX = "oslab-ai-tutor-width-";
-const aiAvatarUrl = `${process.env.BASE_URL}ai-assistant.gif`;
-const aiAvatarWebpUrl = `${process.env.BASE_URL}ai-assistant.webp`;
-const aiAvatarStaticUrl = `${process.env.BASE_URL}ai-assistant-static.png`;
 
 interface Position {
   x: number;
@@ -612,6 +611,18 @@ onBeforeUnmount(() => {
   object-fit: cover;
   border-radius: 50%;
   -webkit-user-drag: none;
+  animation: ai-avatar-in 220ms var(--oslab-ease);
+}
+
+@keyframes ai-avatar-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .ai-scrim {
@@ -721,6 +732,9 @@ onBeforeUnmount(() => {
   }
   .ai-fab:hover {
     transform: none;
+  }
+  .ai-fab-avatar img {
+    animation: none;
   }
 }
 </style>

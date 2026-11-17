@@ -8,7 +8,24 @@
   >
     <header class="tutor-head">
       <div class="tutor-head-title">
-        <h2 class="tutor-title">AI 导师</h2>
+        <div class="tutor-title-row">
+          <h2 class="tutor-title">AI 导师</h2>
+          <div class="tutor-gender" role="group" aria-label="导师形象性别">
+            <span class="tutor-gender-label">性别</span>
+            <button
+              v-for="gender in TUTOR_GENDERS"
+              :key="gender"
+              type="button"
+              class="tutor-gender-option"
+              :class="{ active: tutorGender === gender }"
+              :aria-pressed="tutorGender === gender"
+              :aria-label="`切换为${TUTOR_GENDER_LABELS[gender]}性导师形象`"
+              @click="setTutorGender(gender)"
+            >
+              {{ TUTOR_GENDER_LABELS[gender] }}
+            </button>
+          </div>
+        </div>
         <p class="tutor-subtitle">
           <span>{{ courseLabel }}</span>
           <span
@@ -500,6 +517,12 @@ import {
   type AiSourceRef,
 } from "@/api/ai";
 import { useAiConversation } from "@/composables/useAiConversation";
+import {
+  TUTOR_GENDER_LABELS,
+  TUTOR_GENDERS,
+  setTutorGender,
+  tutorGender,
+} from "@/composables/useTutorAvatar";
 import {
   currentCourseCode,
   resolveCurrentCourse,
@@ -1196,6 +1219,12 @@ function openModelSettings() {
   flex-direction: column;
   gap: 1px;
 }
+.tutor-title-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
 .tutor-title {
   margin: 0;
   color: var(--oslab-ink);
@@ -1203,6 +1232,50 @@ function openModelSettings() {
   font-size: 16px;
   font-weight: 650;
   line-height: 1.3;
+  white-space: nowrap;
+}
+.tutor-gender {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 3px 2px 7px;
+  border: 1px solid var(--oslab-line);
+  border-radius: var(--oslab-radius-pill);
+  background: var(--oslab-panel-soft);
+}
+.tutor-gender-label {
+  padding-right: 2px;
+  color: var(--oslab-muted);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+.tutor-gender-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--oslab-radius-pill);
+  background: transparent;
+  color: var(--oslab-muted-strong);
+  font: inherit;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+}
+.tutor-gender-option:hover {
+  color: var(--oslab-ink-soft);
+}
+.tutor-gender-option.active {
+  background: var(--oslab-panel);
+  color: var(--oslab-primary);
+  box-shadow: 0 1px 4px rgba(20, 40, 25, 0.12);
+}
+.tutor-gender-option:focus-visible {
+  outline: 2px solid var(--oslab-primary);
+  outline-offset: 1px;
 }
 .tutor-subtitle {
   margin: 0;
@@ -2060,6 +2133,21 @@ function openModelSettings() {
   bottom: 150px;
 }
 
+@media (max-width: 340px) {
+  .tutor-title-row {
+    gap: 6px;
+  }
+  .tutor-gender {
+    padding: 2px;
+  }
+  .tutor-gender-label {
+    display: none;
+  }
+  .tutor-gender-option {
+    padding: 0 7px;
+  }
+}
+
 @media (max-width: 720px) {
   .tutor-head {
     padding: 8px 10px;
@@ -2090,6 +2178,9 @@ function openModelSettings() {
   .tutor-send {
     min-width: 44px;
     height: 44px;
+  }
+  .tutor-gender-option {
+    min-height: 32px;
   }
 }
 
